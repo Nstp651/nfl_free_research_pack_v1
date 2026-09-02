@@ -1,9 +1,14 @@
 name: Test deployed NFL research API
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/live-acceptance.yml'
   workflow_dispatch:
     inputs:
       worker_url:
-        description: 'Dedicated https://nfl-free-research-pack.YOUR-SUBDOMAIN.workers.dev URL'
+        description: 'Dedicated https://nfl-free-research-pack-v1.nickarnott01.workers.dev URL'
+        default: 'https://nfl-free-research-pack-v1.nickarnott01.workers.dev'
         required: true
       season:
         description: NFL season
@@ -23,9 +28,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
-      WORKER_URL: ${{ inputs.worker_url }}
-      SEASON: ${{ inputs.season }}
-      WEEK: ${{ inputs.week }}
+      WORKER_URL: ${{ github.event.inputs.worker_url || 'https://nfl-free-research-pack-v1.nickarnott01.workers.dev' }}
+      SEASON: ${{ github.event.inputs.season || '2026' }}
+      WEEK: ${{ github.event.inputs.week || '1' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -34,7 +39,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, re
-          assert re.fullmatch(r'https://nfl-free-research-pack\.[a-z0-9-]+\.workers\.dev/?', os.environ['WORKER_URL']), 'Use the dedicated research Worker URL'
+          assert os.environ['WORKER_URL'].rstrip('/') == 'https://nfl-free-research-pack-v1.nickarnott01.workers.dev', 'Use the verified dedicated research Worker URL'
           PY
       - name: Test health and every page of two real packs
         run: node nfl_free_research_pack_v1/worker/acceptance.mjs --base-url "$WORKER_URL" --season "$SEASON" --week "$WEEK" --output nfl_free_research_pack_v1/data/live_acceptance.json

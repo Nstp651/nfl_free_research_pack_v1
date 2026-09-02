@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'wrangler.toml'
+      - 'package.json'
       - 'nfl_free_research_pack_v1/worker/**'
       - '.github/workflows/worker-verify.yml'
   workflow_dispatch:

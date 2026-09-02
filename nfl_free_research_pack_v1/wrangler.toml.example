@@ -1,4 +1,4 @@
-name = "nfl-free-research-pack"
+name = "nfl-free-research-pack-v1"
 main = "worker/index.js"
 compatibility_date = "2026-09-02"
 workers_dev = true
