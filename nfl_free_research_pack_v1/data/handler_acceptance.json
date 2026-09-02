@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-02T10:00:13.300Z",
+  "tested_at_utc": "2026-09-02T12:42:37.490Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/baae6c130e9eb7fc1ea48137b5f5d01582f6b537/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/19a771591db0286834fb3a723bfdc8382b50f620/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 1,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "220a4176a0114e30",
+      "pack_revision": "ab5714de8e6260cf",
       "fixture": {
         "game_id": "2026_01_NE_SEA",
         "season": 2026,
@@ -24,47 +24,56 @@
         "surface": "fieldturf",
         "location": "Home"
       },
-      "total_players": 35,
-      "pages": 4,
+      "total_players": 45,
+      "pages": 5,
       "page_sizes": [
         {
-          "chars": 43907,
-          "bytes": 43933
+          "chars": 38923,
+          "bytes": 38947
         },
         {
-          "chars": 43575,
-          "bytes": 43601
+          "chars": 36677,
+          "bytes": 36695
         },
         {
-          "chars": 46250,
-          "bytes": 46280
+          "chars": 42112,
+          "bytes": 42142
         },
         {
-          "chars": 28760,
-          "bytes": 28776
+          "chars": 51052,
+          "bytes": 51084
+        },
+        {
+          "chars": 19662,
+          "bytes": 19672
         }
       ],
       "players_by_team": {
-        "NE": 17,
-        "SEA": 18
+        "NE": 22,
+        "SEA": 23
       },
       "rookies": [
         "Myles Montgomery",
         "Eli Raridon",
         "Tanner Arkin",
+        "Cameron Dorner",
         "Jimmy Kibble",
-        "Jadarian Price"
+        "Kyle Dixon",
+        "Jadarian Price",
+        "Emmanuel Henderson Jr."
       ],
       "transfers": [
         "Corey Kiner",
+        "Hassan Haskins",
         "Reggie Gilliam",
+        "Cameron Latu",
         "Julian Hill",
         "A.J. Brown",
         "Romeo Doubs",
         "Emanuel Wilson"
       ],
-      "missing_prior_ngs": 26,
-      "missing_prior_ftn": 10,
+      "missing_prior_ngs": 36,
+      "missing_prior_ftn": 19,
       "source_receipt": {
         "availability": {
           "player_stats": {
@@ -208,12 +217,12 @@
             }
           },
           "current_roster": {
-            "rows": 2800,
+            "rows": 2902,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 490107,
+            "rows": 492320,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -247,7 +256,7 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "73bd4de37f5db3a8",
+      "pack_revision": "f220ebbfff258422",
       "fixture": {
         "game_id": "2026_01_SF_LA",
         "season": 2026,
@@ -263,43 +272,54 @@
         "surface": "matrixturf",
         "location": "Neutral"
       },
-      "total_players": 32,
-      "pages": 4,
+      "total_players": 42,
+      "pages": 5,
       "page_sizes": [
         {
-          "chars": 49512,
-          "bytes": 49544
+          "chars": 40235,
+          "bytes": 40259
         },
         {
-          "chars": 49561,
-          "bytes": 49595
+          "chars": 51419,
+          "bytes": 51453
         },
         {
-          "chars": 52854,
-          "bytes": 52888
+          "chars": 43554,
+          "bytes": 43584
         },
         {
-          "chars": 19966,
-          "bytes": 19976
+          "chars": 55186,
+          "bytes": 55220
+        },
+        {
+          "chars": 10045,
+          "bytes": 10047
         }
       ],
       "players_by_team": {
-        "SF": 17,
-        "LA": 15
+        "SF": 22,
+        "LA": 20
       },
       "rookies": [
+        "Dean Connors",
+        "Dan Villari",
         "Max Klare",
         "CJ Daniels",
         "Kaelon Black",
-        "De'Zhaun Stribling"
+        "Khalil Dinkins",
+        "De'Zhaun Stribling",
+        "Wesley Grimes",
+        "Will Pauling"
       ],
       "transfers": [
+        "Alex Bachman",
         "Christian Kirk",
         "Deebo Samuel Sr.",
+        "KhaDarel Hodge",
         "Mike Evans"
       ],
-      "missing_prior_ngs": 23,
-      "missing_prior_ftn": 8,
+      "missing_prior_ngs": 33,
+      "missing_prior_ftn": 16,
       "source_receipt": {
         "availability": {
           "player_stats": {
@@ -443,12 +463,12 @@
             }
           },
           "current_roster": {
-            "rows": 2800,
+            "rows": 2902,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 490107,
+            "rows": 492320,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -505,7 +525,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-02T10:00:08.607393+00:00",
+      "last_checked_at_utc": "2026-09-02T12:42:31.210105+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
