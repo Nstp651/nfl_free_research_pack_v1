@@ -1,8 +1,8 @@
 # Research Pack 1.1.1 audit
 
-Status: local regression-tested candidate. Live acceptance pending; see BUILD_STATUS.md.
+Status: real data build, source reconciliation and live-GitHub handler acceptance PASS. Cloudflare deployment and GPT acceptance pending; see BUILD_STATUS.md.
 
-The earlier V1.1 package had not passed a live source pull. This audit supersedes earlier readiness statements.
+The original package had not passed a live source pull. The saved patch has now been published and tested successfully against real data; the deployment boundary remains explicit.
 
 Verified defects corrected:
 1. Workflow commands used the repository root although uploaded files live in nfl_free_research_pack_v1.
@@ -28,4 +28,4 @@ Definitions and constraints:
 - https://developers.openai.com/api/docs/actions/production
 - https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/set-default-values-for-jobs
 
-Validation: 14 Python and 9 JavaScript tests passed with synthetic/in-memory data. Python syntax compilation and git diff whitespace checks passed. No real NFL source data was successfully pulled here. No full historical backtest or live GPT run has occurred. Do not mark season lock complete.
+Validation: 14 Python and 9 JavaScript regression tests pass. The real GitHub build generated all 16 Week 1 packs. Source reconciliation passes for 67 players across two fixtures; the Worker handler retrieved every player across eight pages from the exact published GitHub revision. See data/source_acceptance.json and data/handler_acceptance.json. This handler test is not a Cloudflare deployment test. No full historical backtest or live GPT run has occurred. Season lock remains pending.

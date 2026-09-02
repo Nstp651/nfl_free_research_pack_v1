@@ -1,0 +1,24 @@
+name: Validate dedicated Worker deployment package
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wrangler.toml'
+      - 'nfl_free_research_pack_v1/worker/**'
+      - '.github/workflows/worker-verify.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Validate Worker without deploying or authenticating
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          node --version
+          node --test nfl_free_research_pack_v1/worker/index.test.mjs
+          npx --yes wrangler@4.128.0 deploy --dry-run --outdir /tmp/nfl-worker --config wrangler.toml

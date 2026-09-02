@@ -1,0 +1,9 @@
+# Import this EXISTING repository in Cloudflare Workers with root directory /.
+# Deploy command: npx --yes wrangler@4.128.0 deploy
+name = "nfl-free-research-pack"
+main = "nfl_free_research_pack_v1/worker/index.js"
+compatibility_date = "2026-09-02"
+workers_dev = true
+
+[vars]
+DATA_BASE_URL = "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/nfl_free_research_pack_v1/data"

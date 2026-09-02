@@ -1,6 +1,6 @@
-# NFL Free Research Pack 1.1.1 — implementation candidate
+# NFL Free Research Pack 1.1.1 — data build operational
 
-Automated, pre-market NFL receptions research from nflverse. This package is not yet deployed or season-locked. Read BUILD_STATUS.md for exact completed and pending work.
+Automated, pre-market NFL receptions research from nflverse. The real GitHub data build and source/handler acceptance have passed. Cloudflare deployment, GPT integration and season lock are pending. Read BUILD_STATUS.md for evidence and ../DEPLOYMENT.md for the prepared deployment flow.
 
 ## Repository layout
 
@@ -16,7 +16,7 @@ From the application folder:
 pip install -r requirements.txt
 python -m unittest discover -s tests -v
 node --test worker/index.test.mjs
-python build_pack.py --season 2026 --output data --history-seasons 2
+python build_pack.py --season 2026 --output data --history-seasons 2 --verify-sources
 python validate_pack.py data
 ```
 
@@ -26,7 +26,7 @@ GitHub runs four scheduled refreshes daily and supports manual dispatch. The sch
 
 ## Dedicated research API
 
-Use a NEW Cloudflare Worker called `nfl-free-research-pack`. Do not overwrite any existing betting gateway/tracker Worker. Paste worker/index.js into its editor, or deploy with Wrangler after authentication. The source defaults to this repository's nested data folder; DATA_BASE_URL can override it.
+Use a NEW Cloudflare Worker called `nfl-free-research-pack`. Import this existing repository using the root Wrangler configuration and the settings in ../DEPLOYMENT.md. Do not overwrite any existing betting gateway/tracker Worker. The source defaults to this repository's nested data folder; DATA_BASE_URL can override it.
 
 - GET /health checks real upstream availability and age.
 - GET /v1/packs?season=2026&week=1 resolves fixtures.
@@ -46,4 +46,4 @@ Includes derivatives of the FTN charting subset supplied through nflverse under 
 
 ## Acceptance and season lock
 
-Run the real GitHub build, reconcile two matchup packs, validate the deployed Worker/GPT Action, then run two full pre-market model dry runs. Capture and pin the tested dependency versions and workflow actions. Only then tag `2026-season-lock` and freeze model methodology. Automatic observations can refresh; infrastructure repairs may restore existing behavior.
+Real data generation, two-pack source reconciliation and live-GitHub Worker handler tests pass. Exact Python packages and action revisions are pinned. The handler test runs on GitHub and does not prove Cloudflare deployment. Complete the deployed Worker/GPT Action tests and two full pre-market model dry runs before tagging `2026-season-lock`. Automatic observations can refresh; infrastructure repairs may restore existing behavior.

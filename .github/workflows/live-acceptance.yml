@@ -1,0 +1,57 @@
+name: Test deployed NFL research API
+on:
+  workflow_dispatch:
+    inputs:
+      worker_url:
+        description: 'Dedicated https://nfl-free-research-pack.YOUR-SUBDOMAIN.workers.dev URL'
+        required: true
+      season:
+        description: NFL season
+        default: '2026'
+        required: true
+      week:
+        description: Published week
+        default: '1'
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: nfl-pack-refresh
+  cancel-in-progress: false
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      WORKER_URL: ${{ inputs.worker_url }}
+      SEASON: ${{ inputs.season }}
+      WEEK: ${{ inputs.week }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+      - name: Validate the dedicated Worker URL
+        run: |
+          python3 - <<'PY'
+          import os, re
+          assert re.fullmatch(r'https://nfl-free-research-pack\.[a-z0-9-]+\.workers\.dev/?', os.environ['WORKER_URL']), 'Use the dedicated research Worker URL'
+          PY
+      - name: Test health and every page of two real packs
+        run: node nfl_free_research_pack_v1/worker/acceptance.mjs --base-url "$WORKER_URL" --season "$SEASON" --week "$WEEK" --output nfl_free_research_pack_v1/data/live_acceptance.json
+      - name: Record successful live evidence and configure the Action server
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          p = Path('nfl_free_research_pack_v1/openapi.yaml')
+          text, changed = re.subn(r'(?m)^- url: .*$', '- url: ' + os.environ['WORKER_URL'].rstrip('/'), p.read_text(), count=1)
+          assert changed == 1
+          p.write_text(text)
+          PY
+          git config user.name "nfl-pack-bot"
+          git config user.email "nfl-pack-bot@users.noreply.github.com"
+          git add nfl_free_research_pack_v1/data/live_acceptance.json nfl_free_research_pack_v1/openapi.yaml
+          if ! git diff --cached --quiet; then
+            git commit -m "Record deployed research API acceptance and Action URL"
+            git push
+          fi
