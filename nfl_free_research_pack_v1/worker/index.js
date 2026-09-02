@@ -1,95 +1,115 @@
-/**
- * Cloudflare Worker: NFL Free Research Pack API
- *
- * Required environment variable:
- *   DATA_BASE_URL
- * Example:
- *   https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/nfl-free-research-pack/main/data
- *
- * This Worker never reads sportsbook data.
- */
+/** Read-only NFL research API. No odds provider, model execution or paid services. */
+const DEFAULT_BASE = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/nfl_free_research_pack_v1/data';
+const MAX_RESPONSE_CHARS = 90000;
+const MAX_AGE_HOURS = 36;
 
-const JSON_HEADERS = {
-  "content-type": "application/json; charset=utf-8",
-  "cache-control": "public, max-age=120",
-};
-
-function j(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+function reply(value, status = 200) {
+  return new Response(JSON.stringify(value), {status, headers: {
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': status === 200 ? 'public, max-age=60' : 'no-store',
+    'access-control-allow-origin': '*',
+  }});
 }
-
-function validGameId(id) {
-  return /^[0-9]{4}_[0-9]{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}$/.test(id || "");
+function fail(status, message) { const e = new Error(message); e.status = status; throw e; }
+function integer(value, min, max, fallback) {
+  if (value === null && fallback !== undefined) return fallback;
+  if (!/^\d+$/.test(value || '')) fail(400, 'Invalid integer parameter');
+  const n = Number(value);
+  if (!Number.isSafeInteger(n) || n < min || n > max) fail(400, 'Parameter outside allowed range');
+  return n;
 }
-
-async function fetchJson(url) {
-  const r = await fetch(url, {
-    headers: { "user-agent": "nfl-free-research-pack-worker/1.0" },
-    cf: { cacheTtl: 180, cacheEverything: true },
-  });
-  if (!r.ok) return { ok: false, status: r.status, data: null };
-  return { ok: true, status: r.status, data: await r.json() };
+async function readJson(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  try {
+    const res = await fetch(url, {signal: controller.signal,
+      headers: {'user-agent': 'nfl-free-research-pack/1.1.1'},
+      cf: {cacheTtl: 60, cacheEverything: true}});
+    if (!res.ok) fail(502, `Research source unavailable (${res.status})`);
+    const raw = await res.text();
+    if (raw.length > 5_000_000) fail(502, 'Research source exceeds size limit');
+    try { return JSON.parse(raw); } catch { fail(502, 'Research source returned invalid JSON'); }
+  } finally { clearTimeout(timer); }
+}
+function freshness(manifest) {
+  const checked = manifest.last_checked_at_utc || manifest.generated_at_utc;
+  const ms = Date.parse(checked);
+  if (!Number.isFinite(ms) || ms > Date.now() + 300000) fail(502, 'Invalid research timestamp');
+  const hours = Math.max(0, (Date.now() - ms) / 3600000);
+  return {last_checked_at_utc: checked, age_hours: Math.round(hours * 100) / 100,
+    source_refresh_status: hours > MAX_AGE_HOURS ? 'STALE' : 'RECENT',
+    note: 'Refresh time is not proof that every upstream source has published new data.'};
+}
+function verifyManifest(m) {
+  if (m.schema_version !== '1.1.0' || !Array.isArray(m.games) || !m.games.length ||
+      !['PASS', 'PARTIAL'].includes(m.source_health?.status)) fail(502, 'Invalid research manifest');
+  if (new Set(m.games.map(g => g.game_id)).size !== m.games.length) fail(502, 'Duplicate research fixture IDs');
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env = {}) {
+    if (request.method !== 'GET') return reply({error: 'GET requests only'}, 405);
     try {
       const url = new URL(request.url);
-      const base = (env.DATA_BASE_URL || "").replace(/\/+$/, "");
-      if (!base) return j({ error: "DATA_BASE_URL is not configured" }, 500);
-
-      if (url.pathname === "/health") {
-        return j({
-          ok: true,
-          service: "NFL_FREE_RESEARCH_PACK",
-          market_data: false,
-          version: "1.1.0",
-        });
+      const gameMatch = url.pathname.match(/^\/v1\/packs\/([0-9]{4}_[0-9]{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4})$/);
+      if (!['/health', '/v1/packs'].includes(url.pathname) && !gameMatch) return reply({error: 'Not found'}, 404);
+      let season, week, offset, limit;
+      if (url.pathname === '/v1/packs') {
+        season = integer(url.searchParams.get('season'), 2000, 2100);
+        week = integer(url.searchParams.get('week'), 1, 18);
       }
-
-      if (url.pathname === "/v1/packs") {
-        const season = url.searchParams.get("season");
-        const week = url.searchParams.get("week");
-        const res = await fetchJson(`${base}/manifest.json`);
-        if (!res.ok) return j({ error: "manifest unavailable", upstream_status: res.status }, 502);
-
-        let games = res.data.games || [];
-        if (season) games = games.filter(g => String(g.season) === String(season));
-        if (week) games = games.filter(g => String(g.week) === String(Number(week)));
-
-        return j({
-          schema_version: res.data.schema_version,
-          generated_at_utc: res.data.generated_at_utc,
-          market_data: false,
-          games,
-          source_status: res.data.source_status,
-          attribution: res.data.attribution,
-        });
+      if (gameMatch) {
+        offset = integer(url.searchParams.get('offset'), 0, 10000, 0);
+        limit = integer(url.searchParams.get('limit'), 1, 20, 10);
+        const rev = url.searchParams.get('revision');
+        if (rev !== null && !/^[a-f0-9]{16}$/.test(rev)) fail(400, 'Invalid revision');
       }
-
-      const m = url.pathname.match(/^\/v1\/packs\/([^/]+)$/);
-      if (m) {
-        const gameId = decodeURIComponent(m[1]).toUpperCase();
-        if (!validGameId(gameId)) return j({ error: "invalid game_id format" }, 400);
-        const season = gameId.slice(0, 4);
-        const res = await fetchJson(`${base}/games/${season}/${gameId}.json`);
-        if (!res.ok) {
-          if (res.status === 404) return j({ error: "research pack not found", game_id: gameId }, 404);
-          return j({ error: "research pack upstream unavailable", upstream_status: res.status }, 502);
-        }
-        return j(res.data);
+      const base = (env.DATA_BASE_URL || DEFAULT_BASE).replace(/\/+$/, '');
+      if (!base.startsWith('https://')) fail(500, 'Research source must use HTTPS');
+      const manifest = await readJson(`${base}/manifest.json`);
+      verifyManifest(manifest);
+      const freshnessInfo = freshness(manifest);
+      if (url.pathname === '/health') {
+        const ok = freshnessInfo.source_refresh_status === 'RECENT';
+        return reply({ok, service: 'NFL_FREE_RESEARCH_PACK', version: '1.1.1', market_data: false,
+          fixture_count: manifest.games.length, source_health: manifest.source_health,
+          freshness: freshnessInfo}, ok ? 200 : 503);
       }
-
-      return j({
-        error: "not found",
-        routes: [
-          "GET /health",
-          "GET /v1/packs?season=2026&week=1",
-          "GET /v1/packs/{game_id}"
-        ],
-      }, 404);
-    } catch (err) {
-      return j({ error: "internal error", detail: String(err?.message || err) }, 500);
+      if (url.pathname === '/v1/packs') {
+        const games = manifest.games.filter(g => g.season === season && g.week === week);
+        return reply({schema_version: manifest.schema_version, market_data: false,
+          season, week, games, source_health: manifest.source_health,
+          freshness: freshnessInfo, attribution: manifest.attribution});
+      }
+      const gameId = gameMatch[1];
+      const entry = manifest.games.find(g => g.game_id === gameId);
+      if (!entry) return reply({error: 'Fixture not in the published active-week manifest', game_id: gameId}, 404);
+      const requestedRevision = url.searchParams.get('revision');
+      if (requestedRevision && requestedRevision !== entry.pack_revision)
+        return reply({error: 'Research pack changed; restart at offset 0', game_id: gameId}, 409);
+      const pack = await readJson(`${base}/games/${entry.season}/${gameId}.json`);
+      if (pack.schema_version !== '1.1.0' || pack.game_id !== gameId ||
+          pack.fixture?.home_team !== entry.home_team || pack.fixture?.away_team !== entry.away_team ||
+          pack.fixture?.week !== entry.week || pack.fixture?.season !== entry.season || !Array.isArray(pack.players))
+        fail(502, 'Research fixture or schema mismatch');
+      if (pack.pack_revision !== entry.pack_revision)
+        return reply({error: 'Research snapshot updating; retry from offset 0', game_id: gameId}, 503);
+      if (offset > pack.players.length) fail(400, 'Offset exceeds player count');
+      const {players, ...context} = pack;
+      let count = Math.min(limit, players.length - offset);
+      let result;
+      do {
+        result = {...context, market_data: false, freshness: freshnessInfo,
+          players: players.slice(offset, offset + count),
+          pagination: {offset, returned: count, total_players: players.length,
+            next_offset: offset + count < players.length ? offset + count : null,
+            revision: pack.pack_revision}};
+        if (JSON.stringify(result).length < MAX_RESPONSE_CHARS) return reply(result);
+        count -= 1;
+      } while (count >= 1);
+      fail(502, 'A research record exceeds the Action response limit');
+    } catch (error) {
+      return reply({error: error.status ? error.message : 'Research service temporarily unavailable'}, error.status || 502);
     }
   },
 };

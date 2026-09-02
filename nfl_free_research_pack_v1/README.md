@@ -1,183 +1,49 @@
-# NFL Free Research Pack V1.1 — Audited Production Candidate
+# NFL Free Research Pack 1.1.1 — implementation candidate
 
-A free, automated, **pre-market** structured data layer for an NFL player-receptions model.
+Automated, pre-market NFL receptions research from nflverse. This package is not yet deployed or season-locked. Read BUILD_STATUS.md for exact completed and pending work.
 
-## What this solves
+## Repository layout
 
-It creates active-week matchup research packs without paying for Fantasy Points Data, FTN API access, PFF, or another commercial feed.
+The workflow is at repository-root `.github/workflows/refresh.yml`.
+All application files and generated data are inside `nfl_free_research_pack_v1/`.
+The workflow sets that working directory. Do not move only requirements.txt.
 
-It does **not** try to replace live research.
+## Build
 
-### Free sources
+From the application folder:
 
-- nflverse play-by-play
-- nflverse player/team stats
-- current rosters
-- current depth charts
-- NFL Next Gen Stats via nflverse
-- Pro Football Reference snap counts via nflverse
-- PFR advanced receiving via nflverse
-- free FTN charting subset via nflverse
+```bash
+pip install -r requirements.txt
+python -m unittest discover -s tests -v
+node --test worker/index.test.mjs
+python build_pack.py --season 2026 --output data --history-seasons 2
+python validate_pack.py data
+```
 
-FTN charting is attributed to **FTN Data via nflverse** and is released in nflverse under CC-BY-SA 4.0.
+GitHub runs four scheduled refreshes daily and supports manual dispatch. The schedule is unchanged. Only a successful build and validation on main commits data. A change to workflow/application code on main starts a new run; old job reruns use the old commit.
 
-## What it deliberately does NOT claim
+`--week` is an optional statistical cutoff override. It is not a full historical backtest: roster/depth data are latest available. Missing prior/current core data stops publication. Optional source absence is disclosed.
 
-- no sportsbook data
-- no market consensus
-- no betting projections
-- no current nflverse injury feed
-- no true in-season routes / route participation
-- no automatic preseason route truth
-- no unverified interpretation of FTN `read_thrown` category values
+## Dedicated research API
 
-This is intentional model discipline.
+Use a NEW Cloudflare Worker called `nfl-free-research-pack`. Do not overwrite any existing betting gateway/tracker Worker. Paste worker/index.js into its editor, or deploy with Wrangler after authentication. The source defaults to this repository's nested data folder; DATA_BASE_URL can override it.
 
-## Week 1 usefulness
+- GET /health checks real upstream availability and age.
+- GET /v1/packs?season=2026&week=1 resolves fixtures.
+- GET /v1/packs/{game_id}?offset=0&limit=10&revision={pack_revision} returns players and context.
 
-Yes. Before 2026 Week 1 the pack is useful as a **quantitative prior + current roster/depth translation layer**:
+Fetch every page until pagination.next_offset is null. Hold revision constant. Changed revisions return 409; mismatched publication snapshots return 503. Responses are limited below 90,000 characters. Missing fixtures and invalid upstream data return explicit errors. No odds/model endpoint is implemented.
 
-- 2025 targets / receptions / target share / aDOT / catch rate
-- 2025 FTN catchability and contextual charting
-- 2025 NFL Next Gen receiving metrics
-- 2025 snap-share proxy
-- 2025 team pass environment
-- 2024 stabilization history
-- current 2026 roster/team/depth context
-- automatic flag when a player changed teams
-- rookie flag
+Set the actual deployed HTTPS workers.dev URL in openapi.yaml before importing the Action. Select no authentication for these public, read-only research endpoints. Apply MODEL_INTEGRATION_PATCH.md to the private model only; the complete private model is not included in this public repository.
 
-But before Week 1 it must NOT pretend those are 2026 usage rates. Current role still comes from camp, preseason, coaching, injuries, QB and beat/official research.
+## Interpretation
 
-## Architecture
+Historical statistics are priors; current role and injury truth needs live research. Snap percentages are not routes or TPRR denominators. FTN flags use observed samples and verified read codes. NGS absence is not zero. A recent refresh timestamp is not proof that each provider has published every completed game. Weekly target-share averages are labelled and must not be mistaken for an aggregate season share.
 
-`nflverse -> GitHub Action -> compact JSON packs -> Cloudflare Worker -> GPT Action -> Layer 1`
+## License and attribution
 
-The sportsbook action remains completely separate and post-freeze.
+Includes derivatives of the FTN charting subset supplied through nflverse under CC-BY-SA 4.0. Attribute FTN Data and nflverse and preserve the applicable share-alike license for distributed derivatives. See https://creativecommons.org/licenses/by-sa/4.0/ and the source definitions in AUDIT_REPORT.md. Other source terms continue to apply.
 
-## Accounts / cost
+## Acceptance and season lock
 
-Data-provider signup: **none**.
-
-Recommended infrastructure:
-- GitHub account/repository: free
-- Cloudflare Worker: free tier is more than enough for this use
-
-No FTN account is required for the nflverse FTN subset.
-
-## Setup
-
-### 1. Create a GitHub repo
-
-Create a repo, for example:
-
-`nfl-free-research-pack`
-
-Upload this bundle to the repository root.
-
-A public repo is simplest because the Worker can read generated JSON from `raw.githubusercontent.com` without a GitHub token.
-
-### 2. Run the first build
-
-Go to:
-
-`GitHub -> Actions -> Refresh NFL Free Research Packs -> Run workflow`
-
-Use season `2026`.
-
-The action automatically resolves the earliest unplayed regular-season week and generates:
-
-- `data/manifest.json`
-- `data/games/2026/<active-week-game_id>.json`
-
-and commit the files back to the repo.
-
-### 3. Create / update the Cloudflare Worker
-
-Copy `worker/index.js` into a Worker.
-
-Set environment variable:
-
-`DATA_BASE_URL=https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/data`
-
-Deploy it.
-
-Test:
-
-- `/health`
-- `/v1/packs?season=2026&week=1`
-- `/v1/packs/2026_01_NE_SEA`
-
-### 4. Add the GPT Action
-
-Edit `openapi.yaml` and replace:
-
-`https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev`
-
-with the real Worker base URL.
-
-Add the schema to the NFL receptions GPT.
-
-### 5. Update model instructions
-
-Apply `MODEL_INTEGRATION_PATCH.md`.
-
-The data action must run in Layer 1 before the P_model freeze.
-
-## Automatic refresh
-
-The included workflow runs four times per day, shortly after the nflverse FTN polling windows. It rebuilds only the active week and refuses to replace good data if a required core source is missing.
-
-It also supports `workflow_dispatch`, so you can manually refresh immediately.
-
-## Look-ahead protection
-
-Every game pack is generated using current-season records with:
-
-`source week < target fixture week`
-
-This means a Week 5 pack can use Weeks 1-4 but not Week 5 results.
-
-Historical seasons remain available as priors.
-
-## Important route warning
-
-The free nflverse participation feed is not a current in-season route feed.
-
-The pack therefore exposes:
-
-`offense_snap_pct -> route opportunity PROXY ONLY`
-
-It never converts that field into a fake route-participation number.
-
-## Output design
-
-Each game pack includes:
-
-- fixture metadata
-- data availability state
-- team pass environment
-- current roster/depth context
-- current-season-to-date metrics when available
-- historical receiving metrics
-- FTN charting context
-- Next Gen receiving metrics
-- snap proxy
-- PFR advanced receiving
-- transfer/rookie warnings
-- source receipt and limitations
-
-The GPT still performs the model's full live research layer afterward.
-
-## Next improvement after first successful run
-
-Inspect:
-
-`data/manifest.json -> source_status -> FTN_read_values_observed_by_prior_season`
-
-Once we independently verify the semantics of the observed FTN `read_thrown` values, we can add first-read/designed-read labels safely rather than guessing.
-
-
-## Pre-season production lock
-
-Before declaring the system season-locked, complete the live deployment gates in `AUDIT_REPORT.md`. After the first successful GitHub run, freeze the exact Python environment and tag the repository `2026-season-lock`. Model instructions should then remain unchanged during the regular season.
+Run the real GitHub build, reconcile two matchup packs, validate the deployed Worker/GPT Action, then run two full pre-market model dry runs. Capture and pin the tested dependency versions and workflow actions. Only then tag `2026-season-lock` and freeze model methodology. Automatic observations can refresh; infrastructure repairs may restore existing behavior.

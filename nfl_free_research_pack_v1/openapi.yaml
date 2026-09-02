@@ -1,75 +1,258 @@
 openapi: 3.1.0
 info:
   title: NFL Free Research Pack
-  version: 1.1.0
-  description: >
-    Pre-market NFL receptions research data built from free nflverse sources.
-    Contains no sportsbook prices, lines, implied probabilities, market consensus,
-    betting recommendations, or staking information.
+  version: 1.1.1
+  description: Football research only, before P_model freeze. Fetch all player pages
+    at the same revision. No odds, prices or model predictions.
 servers:
-  - url: https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev
-
+- url: https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev
 paths:
   /health:
     get:
       operationId: healthNflResearchPack
-      summary: Check NFL research-pack service health
+      summary: Check upstream research availability and freshness
       responses:
-        "200":
-          description: Health response
+        '200':
+          description: Research response
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  ok:
+                    type: boolean
+                  freshness: &id004
+                    type: object
+                    properties:
+                      last_checked_at_utc:
+                        type: string
+                        format: date-time
+                      age_hours:
+                        type: number
+                      source_refresh_status:
+                        type: string
+                        enum:
+                        - RECENT
+                        - STALE
+                      note: &id001
+                        type: string
+                    additionalProperties: true
+                  source_health: &id003
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                      failed_required:
+                        type: array
+                        items: *id001
+                    additionalProperties: true
                 additionalProperties: true
-
+        '400': &id005
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404': &id006
+          description: Fixture unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409': &id007
+          description: Pack changed; restart all pages at offset 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502': &id008
+          description: Upstream source or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503': &id009
+          description: Stale service or snapshot updating
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /v1/packs:
     get:
       operationId: listNflResearchPacks
-      summary: List available NFL research packs for a season/week
+      summary: Find exact pre-market research fixtures for a season and week
       parameters:
-        - name: season
-          in: query
-          required: true
-          schema:
-            type: integer
-          description: NFL season starting year, e.g. 2026.
-        - name: week
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 18
-          description: Regular-season week.
+      - name: season
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 2000
+          maximum: 2100
+        description: NFL season starting year
+      - name: week
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 18
+        description: Regular-season week
       responses:
-        "200":
-          description: Available fixtures and research-pack IDs
+        '200':
+          description: Research response
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  games:
+                    type: array
+                    items: &id010
+                      type: object
+                      properties:
+                        game_id: *id001
+                        season: &id002
+                          type: integer
+                        week: *id002
+                        away_team: *id001
+                        home_team: *id001
+                        pack_revision: *id001
+                      additionalProperties: true
+                  source_health: *id003
+                  freshness: *id004
+                  market_data:
+                    type: boolean
                 additionalProperties: true
-
+        '400': *id005
+        '404': *id006
+        '409': *id007
+        '502': *id008
+        '503': *id009
   /v1/packs/{game_id}:
     get:
       operationId: getNflResearchPack
-      summary: Fetch one exact pre-market NFL receptions research pack
+      summary: Fetch one page of players for an exact research fixture
+      description: Start at offset 0. Follow pagination.next_offset until null, passing
+        pagination.revision on every subsequent request. Never combine revisions.
+        On 409 or snapshot mismatch, restart once from the manifest. If incomplete,
+        use live-research fallback.
       parameters:
-        - name: game_id
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^[0-9]{4}_[0-9]{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}$'
-          description: nflverse-style fixture ID, e.g. 2026_01_NE_SEA.
+      - name: game_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[0-9]{4}_[0-9]{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}$
+        description: ID returned by listNflResearchPacks
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: Next player offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 10
+        description: Maximum players per page; service may return fewer to fit response
+          limit
+      - name: revision
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^[a-f0-9]{16}$
+        description: Pack revision returned by the manifest or first page
       responses:
-        "200":
-          description: Exact research pack
+        '200':
+          description: Research response
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  schema_version: *id001
+                  game_id: *id001
+                  pack_revision: *id001
+                  market_data:
+                    type: boolean
+                  fixture: *id010
+                  data_state:
+                    type: object
+                    properties: {}
+                    additionalProperties: true
+                  team_context:
+                    type: object
+                    properties: {}
+                    additionalProperties: true
+                  source_receipt:
+                    type: object
+                    properties: {}
+                    additionalProperties: true
+                  source_health: *id003
+                  freshness: *id004
+                  players:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        player_id:
+                          type:
+                          - string
+                          - 'null'
+                        player_name: *id001
+                        current_team: *id001
+                        position: *id001
+                        rookie_flag:
+                          type:
+                          - boolean
+                          - 'null'
+                        team_change_since_prior_season:
+                          type:
+                          - boolean
+                          - 'null'
+                        historical:
+                          type: object
+                          properties: {}
+                          additionalProperties: true
+                        current_season_to_date:
+                          type: object
+                          properties: {}
+                          additionalProperties: true
+                      additionalProperties: true
+                  pagination:
+                    type: object
+                    properties:
+                      offset: *id002
+                      returned: *id002
+                      total_players: *id002
+                      next_offset:
+                        type:
+                        - integer
+                        - 'null'
+                      revision: *id001
+                    additionalProperties: true
+                  limitations:
+                    type: array
+                    items: *id001
                 additionalProperties: true
-        "404":
-          description: Research pack not found
+        '400': *id005
+        '404': *id006
+        '409': *id007
+        '502': *id008
+        '503': *id009
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: *id001
+        game_id: *id001
+      additionalProperties: true

@@ -38,16 +38,12 @@ from typing import Any, Callable, Iterable
 import numpy as np
 import pandas as pd
 
-try:
-    import nflreadpy as nfl
-except Exception as exc:
-    raise SystemExit(
-        "nflreadpy is required. Install with: pip install -r requirements.txt"
-    ) from exc
-
-
 SKILL_POSITIONS = {"WR", "TE", "RB", "FB"}
 DEFAULT_HISTORY_SEASONS = 2
+BUILD_VERSION = "1.1.1"
+FTN_READ_CODES = {"0": "primary_read", "1": "second_read", "2": "third_or_later",
+                  "CHK": "checkdown", "DES": "designed_read", "SD": "scramble_drill"}
+FTN_DICTIONARY = "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html"
 
 
 def log(msg: str) -> None:
@@ -125,14 +121,24 @@ def first_existing(df: pd.DataFrame, names: Iterable[str]) -> str | None:
 
 
 def bool_series(s: pd.Series) -> pd.Series:
-    if s.dtype == bool:
-        return s.fillna(False)
-    return (
-        s.astype(str)
-        .str.strip()
-        .str.lower()
-        .isin({"1", "true", "t", "yes", "y"})
-    )
+    # Unknown observations must not count as false in charting rates.
+    mapping = {"1": True, "1.0": True, "true": True, "t": True, "yes": True,
+               "y": True, "0": False, "0.0": False, "false": False,
+               "f": False, "no": False, "n": False}
+    return s.astype("string").str.strip().str.lower().map(mapping).astype("boolean")
+
+
+def numeric(df: pd.DataFrame, name: str) -> pd.Series:
+    return pd.to_numeric(df.get(name, pd.Series(np.nan, index=df.index)), errors="coerce")
+
+
+def total(df: pd.DataFrame, name: str) -> float:
+    return numeric(df, name).sum(min_count=1)
+
+
+def ratio(numerator: Any, denominator: Any) -> float | int | None:
+    n, d = safe_num(numerator), safe_num(denominator)
+    return safe_num(n / d) if n is not None and d is not None and d > 0 else None
 
 
 def records_clean(df: pd.DataFrame) -> list[dict[str, Any]]:
@@ -165,9 +171,7 @@ def filter_regular(df: pd.DataFrame) -> pd.DataFrame:
         return df
     for col in ("season_type", "game_type"):
         if col in df.columns:
-            vals = set(df[col].dropna().astype(str).unique())
-            if "REG" in vals:
-                return df[df[col].astype(str) == "REG"].copy()
+            df = df[df[col].astype(str) == "REG"]
     return df.copy()
 
 
@@ -176,6 +180,7 @@ def prior_seasons(season: int, n: int = DEFAULT_HISTORY_SEASONS) -> list[int]:
 
 
 def load_inputs(season: int, history_n: int) -> dict[str, Any]:
+    import nflreadpy as nfl
     years = prior_seasons(season, history_n) + [season]
     d: dict[str, Any] = {"years": years, "season": season}
 
@@ -262,7 +267,8 @@ def roster_skill_players(roster: pd.DataFrame, depth: pd.DataFrame) -> pd.DataFr
     # Current roster may occasionally contain duplicates; prefer one row per GSIS ID/name.
     key = first_existing(r, ["gsis_id", "full_name"])
     if key:
-        r = r.drop_duplicates(subset=[key], keep="last")
+        known = r[r[key].notna()].drop_duplicates(subset=[key], keep="last")
+        r = pd.concat([known, r[r[key].isna()]], ignore_index=True)
 
     d = latest_depth(depth)
     if not d.empty:
@@ -273,15 +279,16 @@ def roster_skill_players(roster: pd.DataFrame, depth: pd.DataFrame) -> pd.DataFr
             d = d.rename(columns={"player_name": "full_name"})
             join_key = "full_name"
 
-        if join_key:
+        if join_key and "team" in r.columns and "team" in d.columns:
+            join_keys = [join_key, "team"]
             keep = [
                 c for c in [
-                    join_key, "pos_grp", "pos_name", "pos_abb", "pos_slot",
+                    join_key, "team", "pos_grp", "pos_name", "pos_abb", "pos_slot",
                     "pos_rank", "dt"
                 ] if c in d.columns
             ]
-            d2 = d[keep].drop_duplicates(subset=[join_key], keep="last")
-            r = r.merge(d2, on=join_key, how="left")
+            d2 = d[keep].dropna(subset=join_keys).drop_duplicates(subset=join_keys, keep="last")
+            r = r.merge(d2, on=join_keys, how="left")
 
     return r
 
@@ -306,11 +313,11 @@ def weighted_mean(values: pd.Series, weights: pd.Series | None = None) -> float 
     if weights is None:
         return safe_num(v[mask].mean())
     w = pd.to_numeric(weights, errors="coerce").fillna(0)
-    mask = mask & w.notna()
+    mask = mask & w.notna() & (w > 0)
     if not mask.any():
         return None
     if float(w[mask].sum()) <= 0:
-        return safe_num(v[mask].mean())
+        return None
     return safe_num(np.average(v[mask], weights=w[mask]))
 
 
@@ -333,14 +340,14 @@ def aggregate_receiver_window(stats: pd.DataFrame, last_n_games: int | None = No
             # so bye weeks do not distort "last 3/5 games".
             g = g.tail(last_n_games)
 
-        targets = pd.to_numeric(g.get("targets", 0), errors="coerce").fillna(0).sum()
-        rec = pd.to_numeric(g.get("receptions", 0), errors="coerce").fillna(0).sum()
+        targets = total(g, "targets")
+        rec = total(g, "receptions")
         games = g["game_id"].nunique() if "game_id" in g.columns else g["week"].nunique()
         games = int(games) if games else int(len(g))
 
-        air = pd.to_numeric(g.get("receiving_air_yards", 0), errors="coerce").fillna(0).sum()
-        rec_yards = pd.to_numeric(g.get("receiving_yards", 0), errors="coerce").fillna(0).sum()
-        yac = pd.to_numeric(g.get("receiving_yards_after_catch", 0), errors="coerce").fillna(0).sum()
+        air = total(g, "receiving_air_yards")
+        rec_yards = total(g, "receiving_yards")
+        yac = total(g, "receiving_yards_after_catch")
 
         if "target_share" in g.columns:
             tshare = weighted_mean(g["target_share"])
@@ -367,6 +374,7 @@ def aggregate_receiver_window(stats: pd.DataFrame, last_n_games: int | None = No
             "receptions_per_game": safe_num(rec / games) if games else None,
             "catch_rate": safe_num(rec / targets) if targets else None,
             "target_share": tshare,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
             "receiving_yards": safe_num(rec_yards),
             "receiving_air_yards": safe_num(air),
             "adot": safe_num(air / targets) if targets else None,
@@ -393,9 +401,9 @@ def aggregate_team_stats(team_stats: pd.DataFrame) -> dict[str, dict]:
     for team, g in team_stats.groupby("team"):
         games = g["game_id"].nunique() if "game_id" in g.columns else g["week"].nunique()
         games = int(games) if games else len(g)
-        attempts = pd.to_numeric(g.get("attempts", 0), errors="coerce").fillna(0).sum()
-        comps = pd.to_numeric(g.get("completions", 0), errors="coerce").fillna(0).sum()
-        sacks = pd.to_numeric(g.get("sacks_suffered", 0), errors="coerce").fillna(0).sum()
+        attempts = total(g, "attempts")
+        comps = total(g, "completions")
+        sacks = total(g, "sacks_suffered")
         out[str(team)] = {
             "games": games,
             "pass_attempts_per_game": safe_num(attempts / games) if games else None,
@@ -411,6 +419,10 @@ def aggregate_team_pbp(pbp: pd.DataFrame) -> dict[str, dict]:
     if pbp.empty or "posteam" not in pbp.columns:
         return {}
     p = pbp.copy()
+    if "no_play" in p.columns:
+        p = p[numeric(p, "no_play") == 0]
+    if "two_point_attempt" in p.columns:
+        p = p[numeric(p, "two_point_attempt") == 0]
     if "play_type" in p.columns:
         plays = p[p["play_type"].isin(["pass", "run"])].copy()
     else:
@@ -441,7 +453,7 @@ def aggregate_team_pbp(pbp: pd.DataFrame) -> dict[str, dict]:
         if "receiver_player_id" in p.columns:
             target_rows = p[(p["posteam"] == team) & p["receiver_player_id"].notna()]
             targetable = len(target_rows)
-            avg_air = safe_num(pd.to_numeric(target_rows.get("air_yards"), errors="coerce").mean()) if len(target_rows) else None
+            avg_air = safe_num(numeric(target_rows, "air_yards").mean()) if len(target_rows) else None
         else:
             targetable = None
             avg_air = None
@@ -501,12 +513,13 @@ def aggregate_snap(snap: pd.DataFrame, pfr_to_gsis: dict[str, str], last_n_games
         if not gsis:
             continue
         games = g["game_id"].nunique() if "game_id" in g.columns else len(g)
-        snaps = pd.to_numeric(g.get("offense_snaps", 0), errors="coerce").fillna(0).sum()
-        pct = weighted_mean(g["offense_pct"], g.get("offense_snaps")) if "offense_pct" in g.columns else None
+        snaps = total(g, "offense_snaps")
+        pct = weighted_mean(g["offense_pct"]) if "offense_pct" in g.columns else None
         out[gsis] = {
             "games": int(games),
             "offense_snaps": safe_num(snaps),
             "offense_snap_pct": pct,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
             "route_opportunity_status": "PROXY ONLY — snap share is not route participation",
         }
     return out
@@ -529,12 +542,21 @@ def ftn_receiver_metrics(ftn: pd.DataFrame, pbp: pd.DataFrame) -> tuple[dict[str
     if join_right_game not in f.columns or join_right_play not in f.columns:
         return {}, []
 
-    merged = pbp[need_pbp].merge(
+    eligible = filter_regular(pbp)
+    for flag in ("no_play", "two_point_attempt"):
+        if flag in eligible.columns:
+            eligible = eligible[numeric(eligible, flag) == 0]
+    if "pass_attempt" in eligible.columns:
+        eligible = eligible[numeric(eligible, "pass_attempt") == 1]
+    if f.duplicated([join_right_game, join_right_play]).any():
+        raise ValueError("Duplicate FTN game/play IDs; refusing a many-to-many charting join")
+    merged = eligible[need_pbp].merge(
         f,
         left_on=["game_id", "play_id"],
         right_on=[join_right_game, join_right_play],
         how="inner",
         suffixes=("", "_ftn"),
+        validate="one_to_one",
     )
     merged = merged[merged["receiver_player_id"].notna()].copy()
     if merged.empty:
@@ -559,13 +581,19 @@ def ftn_receiver_metrics(ftn: pd.DataFrame, pbp: pd.DataFrame) -> tuple[dict[str
         }
         for c in bool_cols:
             if c in g.columns:
-                row[c.replace("is_", "") + "_rate"] = safe_num(bool_series(g[c]).mean())
+                observed = bool_series(g[c])
+                row[c.replace("is_", "") + "_rate"] = safe_num(observed.mean())
+                row[c.replace("is_", "") + "_observed_targets"] = int(observed.notna().sum())
 
         if "is_catchable_ball" in g.columns and "is_drop" in g.columns:
             catchable = bool_series(g["is_catchable_ball"])
             drops = bool_series(g["is_drop"])
-            denom = int(catchable.sum())
+            denom = int((catchable.fillna(False) & drops.notna()).sum())
             row["drop_rate_per_catchable_target"] = safe_num(int((drops & catchable).sum()) / denom) if denom else None
+        if "is_catchable_ball" in g.columns and "complete_pass" in g.columns:
+            catches = numeric(g, "complete_pass")
+            observed = bool_series(g["is_catchable_ball"]).fillna(False) & catches.notna()
+            row["catchable_target_conversion"] = ratio(catches[observed].sum(), observed.sum())
 
         if "read_thrown" in g.columns:
             counts = Counter(str(x) for x in g["read_thrown"].dropna())
@@ -576,9 +604,20 @@ def ftn_receiver_metrics(ftn: pd.DataFrame, pbp: pd.DataFrame) -> tuple[dict[str
                 }
                 for k, v in sorted(counts.items())
             }
-            row["read_thrown_interpretation_status"] = (
-                "RAW FTN CATEGORY VALUES ONLY — do not label primary/secondary until category mapping is independently verified"
-            )
+            codes = g["read_thrown"].astype("string").str.replace(r"\.0$", "", regex=True)
+            row["read_thrown_verified_counts"] = {label: int((codes == code).sum()) for code, label in FTN_READ_CODES.items()}
+            row["read_thrown_unknown_or_missing"] = int((~codes.isin(FTN_READ_CODES)).sum())
+            row["read_thrown_interpretation_status"] = "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown."
+            row["read_thrown_definition_url"] = FTN_DICTIONARY
+            if "posteam" in merged.columns:
+                shares = {}
+                for team, pg in g.groupby("posteam"):
+                    tg = merged[merged["posteam"] == team]
+                    team_codes = tg["read_thrown"].astype("string").str.replace(r"\.0$", "", regex=True)
+                    player_codes = pg["read_thrown"].astype("string").str.replace(r"\.0$", "", regex=True)
+                    shares[str(team)] = {"primary_read_target_share": ratio((player_codes == "0").sum(), (team_codes == "0").sum()),
+                                         "team_charted_primary_read_targets": int((team_codes == "0").sum())}
+                row["primary_read_share_by_source_team"] = shares
 
         out[str(pid)] = row
     return out, read_values
@@ -607,11 +646,11 @@ def aggregate_ngs(ngs: pd.DataFrame, season: int, use_season_aggregate: bool = T
 
     out = {}
     for pid, g in n.groupby(id_col, dropna=True):
-        weights = pd.to_numeric(g.get("targets", 1), errors="coerce").fillna(1)
+        weights = numeric(g, "targets")
         row = {
             "player_name": safe_str(g[name_col].dropna().iloc[-1]) if name_col and g[name_col].notna().any() else None,
-            "targets": safe_num(pd.to_numeric(g.get("targets", 0), errors="coerce").fillna(0).sum()),
-            "receptions": safe_num(pd.to_numeric(g.get("receptions", 0), errors="coerce").fillna(0).sum()),
+            "targets": safe_num(total(g, "targets")),
+            "receptions": safe_num(total(g, "receptions")),
         }
         for c in [
             "avg_cushion", "avg_separation", "avg_air_distance",
@@ -649,7 +688,7 @@ def aggregate_pfr_rec(pfr: pd.DataFrame, pfr_to_gsis: dict[str, str]) -> dict[st
                 if c.endswith("_pct"):
                     row[c] = safe_num(vals.mean())
                 else:
-                    row[c] = safe_num(vals.fillna(0).sum())
+                    row[c] = safe_num(vals.sum(min_count=1))
         if row:
             out[gsis] = row
     return out
@@ -659,9 +698,9 @@ def current_season_cut(df: pd.DataFrame, target_week: int) -> pd.DataFrame:
     if df.empty:
         return df
     if "week" not in df.columns:
-        return df
+        return df.iloc[0:0].copy()
     w = pd.to_numeric(df["week"], errors="coerce")
-    return df[w < target_week].copy()
+    return filter_regular(df[w.between(1, target_week - 1)].copy())
 
 
 def determine_data_state(inputs: dict[str, Any], target_week: int) -> dict[str, Any]:
@@ -690,7 +729,9 @@ def determine_data_state(inputs: dict[str, Any], target_week: int) -> dict[str, 
     return {
         "mode": mode,
         "current_season_data_through_week": max_week,
-        "current_regular_season_weeks_available": current_games,
+        "current_regular_season_weeks_available": len(set().union(*[set(pd.to_numeric(d["week"], errors="coerce").dropna().astype(int)) for d in (stats, pbp) if not d.empty and "week" in d])),
+        "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
+        "historical_backtest_eligible": False,
         "target_week": target_week,
         "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
         "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
@@ -736,7 +777,7 @@ def player_context(
 
     years_exp = safe_num(roster_row.get("years_exp"))
     is_rookie = years_exp == 0 if years_exp is not None else None
-    changed = bool(prior_teams and current_team and current_team not in prior_teams)
+    changed = (current_team not in prior_teams) if prior_teams and current_team else None
 
     out = {
         "player_id": None if pid.startswith("name:") else pid,
@@ -855,11 +896,13 @@ def build_game_pack(
         "nflverse injury data is not relied on; official injury/practice/inactive research remains mandatory.",
         "Preseason role/deployment must be verified through official gamebooks/current reporting; this pack does not claim preseason route truth.",
         "NGS has qualification thresholds; missing NGS rows are not zero values.",
-        "FTN read_thrown is currently exposed as raw category values only until category semantics are independently verified.",
+        "FTN read labels follow the official nflreadr dictionary verified 2026-09-02; missing/unknown reads remain unknown. Primary-read shares use charted team targets only.",
+        "Current roster/depth are latest available snapshots. Regenerating an old week is not a point-in-time historical backtest.",
     ]
 
     return {
         "schema_version": "1.1.0",
+        "build_version": BUILD_VERSION,
         "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
         "generated_at_utc": now_iso(),
         "fixture": fixture_meta,
@@ -867,6 +910,7 @@ def build_game_pack(
         "team_context": team_context,
         "players": players,
         "source_receipt": {
+            "availability": source_availability(inputs, week),
             "nflverse": [
                 "play-by-play",
                 "player stats",
@@ -890,7 +934,7 @@ def build_game_pack(
     }
 
 
-def build_caches(inputs: dict[str, Any], season: int, history_n: int) -> dict[str, Any]:
+def build_caches(inputs: dict[str, Any], season: int, history_n: int, target_weeks: list[int] | None = None) -> dict[str, Any]:
     years = prior_seasons(season, history_n)
     current_roster = inputs["current_roster"]
     skill_roster = roster_skill_players(current_roster, inputs["current_depth"])
@@ -923,6 +967,8 @@ def build_caches(inputs: dict[str, Any], season: int, history_n: int) -> dict[st
     # Build week-specific "data available before target week" caches to prevent look-ahead.
     schedule = fixture_rows(inputs["schedule"], season, None)
     weeks = sorted({int(x) for x in pd.to_numeric(schedule.get("week", pd.Series(dtype=int)), errors="coerce").dropna().unique()})
+    if target_weeks is not None:
+        weeks = sorted(set(target_weeks))
     current_receiver_by_week = {}
     current_snap_by_week = {}
     current_ftn_by_week = {}
@@ -1037,6 +1083,23 @@ def validate_core_sources(inputs: dict[str, Any], season: int, history_n: int) -
         "failed_required": failed,
     }
 
+
+def source_availability(inputs: dict[str, Any], target_week: int) -> dict[str, Any]:
+    out = {}
+    for name in ("player_stats", "team_stats", "pbp", "ftn", "snap", "pfr_rec", "ngs_receiving"):
+        out[name] = {}
+        for season, frame in inputs.get(name, {}).items():
+            df = current_season_cut(frame, target_week) if season == inputs["season"] else filter_regular(frame)
+            weeks = numeric(df, "week")
+            out[name][str(season)] = {"status": "AVAILABLE" if not df.empty else "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+                                     "rows": len(df), "through_week": safe_num(weeks.max()),
+                                     "upstream_publication_time": None}
+    for name in ("current_roster", "current_depth"):
+        df = inputs.get(name, pd.DataFrame())
+        out[name] = {"rows": len(df), "status": "AVAILABLE" if len(df) else "UNAVAILABLE",
+                     "context": "latest available; not a historical point-in-time snapshot"}
+    return out
+
 def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None) -> None:
     inputs = load_inputs(season, history_n)
     health = validate_core_sources(inputs, season, history_n)
@@ -1049,12 +1112,24 @@ def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None)
     if sched.empty:
         raise SystemExit(f"No regular-season fixtures found for {season} week {target_week}")
 
-    caches = build_caches(inputs, season, history_n)
+    # Current-season data becomes essential once regular-season games exist.
+    if target_week > 1:
+        for name in ("player_stats", "pbp"):
+            eligible = current_season_cut(inputs[name].get(season, pd.DataFrame()), target_week)
+            if eligible.empty:
+                raise SystemExit(f"Missing current-season {name} before week {target_week}; keeping last good published pack")
+
+    caches = build_caches(inputs, season, history_n, [target_week])
 
     manifest_games = []
     for _, game in sched.sort_values(["week", "gameday", "gametime"], na_position="last").iterrows():
         pack = build_game_pack(game, inputs, season, history_n, caches)
+        pack["source_health"] = health
         game_id = pack["game_id"]
+        for team in (str(game["away_team"]), str(game["home_team"])):
+            if not any(p["current_team"] == team for p in pack["players"]):
+                raise ValueError(f"No eligible roster players for {team}; refusing publication")
+        pack["pack_revision"] = payload_hash(pack)
         path = out_dir / "games" / str(season) / f"{game_id}.json"
         write_json(path, pack)
         manifest_games.append({
@@ -1067,16 +1142,18 @@ def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None)
             "gametime": safe_str(game.get("gametime")),
             "data_state": pack["data_state"]["mode"],
             "path": f"games/{season}/{game_id}.json",
-            "pack_revision": payload_hash(pack),
+            "pack_revision": pack["pack_revision"],
         })
         log(f"wrote {path}")
 
     manifest_path = out_dir / "manifest.json"
     manifest = {
         "schema_version": "1.1.0",
+        "build_version": BUILD_VERSION,
         "season": season,
         "active_week": target_week,
         "generated_at_utc": now_iso(),
+        "last_checked_at_utc": now_iso(),
         "games": sorted(manifest_games, key=lambda x: (x.get("gameday") or "", x.get("game_id") or "")),
         "source_health": health,
         "source_status": {
@@ -1099,6 +1176,10 @@ def main() -> None:
     p.add_argument("--history-seasons", type=int, default=2)
     p.add_argument("--week", type=int, default=None, help="Optional override. Default automatically resolves the earliest unplayed regular-season week.")
     args = p.parse_args()
+    if not 1 <= args.history_seasons <= 3:
+        p.error("--history-seasons must be between 1 and 3")
+    if args.week is not None and not 1 <= args.week <= 18:
+        p.error("--week must be between 1 and 18")
     build_all(args.season, Path(args.output), args.history_seasons, args.week)
 
 

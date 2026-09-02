@@ -1,6 +1,17 @@
 name: Refresh NFL Free Research Packs
 
+defaults:
+  run:
+    working-directory: nfl_free_research_pack_v1
+
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh.yml'
+      - 'nfl_free_research_pack_v1/**'
+      - '!nfl_free_research_pack_v1/data/**'
+  pull_request:
   workflow_dispatch:
     inputs:
       season:
@@ -20,7 +31,7 @@ permissions:
 
 concurrency:
   group: nfl-pack-refresh
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -33,11 +44,18 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: nfl_free_research_pack_v1/requirements.txt
 
       - name: Install pinned data adapter
         run: pip install -r requirements.txt
 
+      - name: Validate builder and API
+        run: |
+          python -m unittest discover -s tests -v
+          node --test worker/index.test.mjs
+
       - name: Build active-week packs
+        if: github.event_name != 'pull_request'
         env:
           SEASON: ${{ github.event.inputs.season || '2026' }}
           WEEK: ${{ github.event.inputs.week || '' }}
@@ -49,27 +67,11 @@ jobs:
           fi
 
       - name: Validate published manifest
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          p=Path('data/manifest.json')
-          x=json.loads(p.read_text())
-          assert x['schema_version']=='1.1.0'
-          assert x['source_health']['status'] in {'PASS','PARTIAL'}
-          assert x['games'], 'manifest contains no active-week games'
-          for g in x['games']:
-              fp=Path('data')/g['path']
-              assert fp.exists(), f'missing {fp}'
-              pack=json.loads(fp.read_text())
-              assert pack['schema_version']=='1.1.0'
-              assert pack['fixture']['week']==x['active_week']
-              assert pack['source_receipt']
-              assert pack['limitations']
-          print(f"Validated {len(x['games'])} active-week packs for Week {x['active_week']}")
-          PY
+        if: github.event_name != 'pull_request'
+        run: python validate_pack.py data
 
       - name: Commit refreshed data
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: |
           git config user.name "nfl-pack-bot"
           git config user.email "nfl-pack-bot@users.noreply.github.com"
