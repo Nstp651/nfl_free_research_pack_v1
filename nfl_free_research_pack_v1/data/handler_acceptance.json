@@ -1,0 +1,516 @@
+{
+  "tested_at_utc": "2026-09-02T09:40:31.527Z",
+  "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
+  "deployment_verified": false,
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/db5370478db358d19c11b94e5444f0b6ad1ef8ec/nfl_free_research_pack_v1/data",
+  "season": 2026,
+  "week": 1,
+  "games": [
+    {
+      "game_id": "2026_01_NE_SEA",
+      "pack_revision": "220a4176a0114e30",
+      "fixture": {
+        "game_id": "2026_01_NE_SEA",
+        "season": 2026,
+        "week": 1,
+        "game_type": "REG",
+        "gameday": "2026-09-09",
+        "weekday": "Wednesday",
+        "gametime": "20:20",
+        "away_team": "NE",
+        "home_team": "SEA",
+        "stadium": "Lumen Field",
+        "roof": "outdoors",
+        "surface": "fieldturf",
+        "location": "Home"
+      },
+      "total_players": 35,
+      "pages": 4,
+      "page_sizes": [
+        {
+          "chars": 43907,
+          "bytes": 43933
+        },
+        {
+          "chars": 43575,
+          "bytes": 43601
+        },
+        {
+          "chars": 46250,
+          "bytes": 46280
+        },
+        {
+          "chars": 28760,
+          "bytes": 28776
+        }
+      ],
+      "players_by_team": {
+        "NE": 17,
+        "SEA": 18
+      },
+      "rookies": [
+        "Myles Montgomery",
+        "Eli Raridon",
+        "Tanner Arkin",
+        "Jimmy Kibble",
+        "Jadarian Price"
+      ],
+      "transfers": [
+        "Corey Kiner",
+        "Reggie Gilliam",
+        "Julian Hill",
+        "A.J. Brown",
+        "Romeo Doubs",
+        "Emanuel Wilson"
+      ],
+      "missing_prior_ngs": 26,
+      "missing_prior_ftn": 10,
+      "source_receipt": {
+        "availability": {
+          "player_stats": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 18130,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 18540,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "team_stats": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 544,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 544,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "pbp": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 47274,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 46452,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "ftn": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 48031,
+              "through_week": 22,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 47316,
+              "through_week": 22,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "snap": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 25398,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 25395,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "pfr_rec": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 4254,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 4316,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "ngs_receiving": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 1382,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 1333,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "current_roster": {
+            "rows": 2800,
+            "status": "AVAILABLE",
+            "context": "latest available; not a historical point-in-time snapshot"
+          },
+          "current_depth": {
+            "rows": 490107,
+            "status": "AVAILABLE",
+            "context": "latest available; not a historical point-in-time snapshot"
+          }
+        },
+        "nflverse": [
+          "play-by-play",
+          "player stats",
+          "team stats",
+          "rosters",
+          "depth charts",
+          "Next Gen Stats",
+          "PFR snap counts",
+          "PFR advanced receiving",
+          "FTN charting subset via nflverse"
+        ],
+        "ftn_attribution": "FTN Data via nflverse; free subset licensed CC-BY-SA 4.0.",
+        "generated_data_policy": "Pre-market football research only."
+      },
+      "statistical_cutoff": {
+        "mode": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
+        "current_season_data_through_week": null,
+        "current_regular_season_weeks_available": 0,
+        "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
+        "historical_backtest_eligible": false,
+        "target_week": 1,
+        "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
+        "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
+        "injury_feed": "NOT RELIED ON — verify through official/live research",
+        "preseason_usage": "NOT CLAIMED FROM NFLVERSE REGULAR-SEASON PBP; verify via official gamebooks/current reporting"
+      }
+    },
+    {
+      "game_id": "2026_01_SF_LA",
+      "pack_revision": "73bd4de37f5db3a8",
+      "fixture": {
+        "game_id": "2026_01_SF_LA",
+        "season": 2026,
+        "week": 1,
+        "game_type": "REG",
+        "gameday": "2026-09-10",
+        "weekday": "Thursday",
+        "gametime": "20:35",
+        "away_team": "SF",
+        "home_team": "LA",
+        "stadium": "Melbourne Cricket Ground",
+        "roof": "dome",
+        "surface": "matrixturf",
+        "location": "Neutral"
+      },
+      "total_players": 32,
+      "pages": 4,
+      "page_sizes": [
+        {
+          "chars": 49512,
+          "bytes": 49544
+        },
+        {
+          "chars": 49561,
+          "bytes": 49595
+        },
+        {
+          "chars": 52854,
+          "bytes": 52888
+        },
+        {
+          "chars": 19966,
+          "bytes": 19976
+        }
+      ],
+      "players_by_team": {
+        "SF": 17,
+        "LA": 15
+      },
+      "rookies": [
+        "Max Klare",
+        "CJ Daniels",
+        "Kaelon Black",
+        "De'Zhaun Stribling"
+      ],
+      "transfers": [
+        "Christian Kirk",
+        "Deebo Samuel Sr.",
+        "Mike Evans"
+      ],
+      "missing_prior_ngs": 23,
+      "missing_prior_ftn": 8,
+      "source_receipt": {
+        "availability": {
+          "player_stats": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 18130,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 18540,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "team_stats": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 544,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 544,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "pbp": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 47274,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 46452,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "ftn": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 48031,
+              "through_week": 22,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 47316,
+              "through_week": 22,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "snap": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 25398,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 25395,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "pfr_rec": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 4254,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 4316,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "ngs_receiving": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 1382,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 1333,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
+              "rows": 0,
+              "through_week": null,
+              "upstream_publication_time": null
+            }
+          },
+          "current_roster": {
+            "rows": 2800,
+            "status": "AVAILABLE",
+            "context": "latest available; not a historical point-in-time snapshot"
+          },
+          "current_depth": {
+            "rows": 490107,
+            "status": "AVAILABLE",
+            "context": "latest available; not a historical point-in-time snapshot"
+          }
+        },
+        "nflverse": [
+          "play-by-play",
+          "player stats",
+          "team stats",
+          "rosters",
+          "depth charts",
+          "Next Gen Stats",
+          "PFR snap counts",
+          "PFR advanced receiving",
+          "FTN charting subset via nflverse"
+        ],
+        "ftn_attribution": "FTN Data via nflverse; free subset licensed CC-BY-SA 4.0.",
+        "generated_data_policy": "Pre-market football research only."
+      },
+      "statistical_cutoff": {
+        "mode": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
+        "current_season_data_through_week": null,
+        "current_regular_season_weeks_available": 0,
+        "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
+        "historical_backtest_eligible": false,
+        "target_week": 1,
+        "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
+        "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
+        "injury_feed": "NOT RELIED ON — verify through official/live research",
+        "preseason_usage": "NOT CLAIMED FROM NFLVERSE REGULAR-SEASON PBP; verify via official gamebooks/current reporting"
+      }
+    }
+  ],
+  "health": {
+    "ok": true,
+    "service": "NFL_FREE_RESEARCH_PACK",
+    "version": "1.1.1",
+    "market_data": false,
+    "fixture_count": 16,
+    "source_health": {
+      "status": "PASS",
+      "required_checks": {
+        "schedule_current": true,
+        "roster_current": true,
+        "depth_current": true,
+        "player_stats_2025": true,
+        "pbp_2025": true
+      },
+      "optional_checks": {
+        "ftn_2025": true,
+        "ngs_2025": true,
+        "snap_2025": true,
+        "pfr_rec_2025": true
+      },
+      "failed_required": []
+    },
+    "freshness": {
+      "last_checked_at_utc": "2026-09-02T09:40:26.740328+00:00",
+      "age_hours": 0,
+      "source_refresh_status": "RECENT",
+      "note": "Refresh time is not proof that every upstream source has published new data."
+    }
+  },
+  "fixture_count": 16,
+  "result": "PASS"
+}
