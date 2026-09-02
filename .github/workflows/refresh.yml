@@ -1,0 +1,82 @@
+name: Refresh NFL Free Research Packs
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "NFL season"
+        required: true
+        default: "2026"
+      week:
+        description: "Optional week override (leave blank for automatic active week)"
+        required: false
+        default: ""
+  schedule:
+    # Shortly after the nflverse FTN/snap update windows.
+    - cron: "25 0,6,12,18 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nfl-pack-refresh
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install pinned data adapter
+        run: pip install -r requirements.txt
+
+      - name: Build active-week packs
+        env:
+          SEASON: ${{ github.event.inputs.season || '2026' }}
+          WEEK: ${{ github.event.inputs.week || '' }}
+        run: |
+          if [ -n "$WEEK" ]; then
+            python build_pack.py --season "$SEASON" --week "$WEEK" --output data --history-seasons 2
+          else
+            python build_pack.py --season "$SEASON" --output data --history-seasons 2
+          fi
+
+      - name: Validate published manifest
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('data/manifest.json')
+          x=json.loads(p.read_text())
+          assert x['schema_version']=='1.1.0'
+          assert x['source_health']['status'] in {'PASS','PARTIAL'}
+          assert x['games'], 'manifest contains no active-week games'
+          for g in x['games']:
+              fp=Path('data')/g['path']
+              assert fp.exists(), f'missing {fp}'
+              pack=json.loads(fp.read_text())
+              assert pack['schema_version']=='1.1.0'
+              assert pack['fixture']['week']==x['active_week']
+              assert pack['source_receipt']
+              assert pack['limitations']
+          print(f"Validated {len(x['games'])} active-week packs for Week {x['active_week']}")
+          PY
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "nfl-pack-bot"
+          git config user.email "nfl-pack-bot@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No data changes."
+          else
+            git commit -m "Refresh NFL research packs"
+            git push
+          fi
