@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.1.0",
+  "season": 2026,
+  "generated_at_utc": "EXAMPLE",
+  "games": [
+    {
+      "game_id": "2026_01_NE_SEA",
+      "season": 2026,
+      "week": 1,
+      "away_team": "NE",
+      "home_team": "SEA",
+      "data_state": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
+      "path": "games/2026/2026_01_NE_SEA.json"
+    }
+  ],
+  "source_status": {
+    "route_participation": "NOT PROVIDED IN-SEASON",
+    "injuries": "NOT RELIED ON"
+  }
+}

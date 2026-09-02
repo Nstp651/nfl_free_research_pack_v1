@@ -1,0 +1,6 @@
+name = "nfl-free-research-pack"
+main = "worker/index.js"
+compatibility_date = "2026-08-01"
+
+[vars]
+DATA_BASE_URL = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/data"
