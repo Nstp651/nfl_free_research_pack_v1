@@ -34,7 +34,7 @@ def verify(inputs, packs):
     assert len(chosen) >= 2, "Two real fixtures required for acceptance"
     report = {"result": "PASS", "mode": "REAL_SOURCE_RECONCILIATION",
               "tested_at_utc": datetime.now(timezone.utc).isoformat(),
-              "build_commit": os.getenv("GITHUB_SHA"), "python": platform.python_version(),
+              "build_commit": os.getenv("SOURCE_COMMIT", os.getenv("GITHUB_SHA")), "python": platform.python_version(),
               "workflow_run_id": os.getenv("GITHUB_RUN_ID"),
               "deployment_verified": False, "gpt_dry_runs_verified": False,
               "games": [], "ftn_join_counts": {}, "dependencies": {}}

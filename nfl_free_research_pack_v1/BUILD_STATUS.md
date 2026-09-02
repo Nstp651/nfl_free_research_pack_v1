@@ -2,7 +2,7 @@
 
 GitHub data pipeline: OPERATIONAL. Source reconciliation: PASS.
 Worker handler with real GitHub data: PASS.
-Cloudflare deployment: BLOCKED ON ACCOUNT CONNECTION.
+Cloudflare deployment: LIVE. Deployed HTTP acceptance: PASS.
 GPT integration / full pre-market dry runs / season lock: PENDING.
 Added paid services: NONE.
 
@@ -28,9 +28,17 @@ The checks include 285 player-stat assertions and 1,602 FTN field/denominator as
 Reports: `data/source_acceptance.json` and `data/handler_acceptance.json`.
 The latter explicitly says `LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE` and `deployment_verified: false`. It is NOT evidence of a deployed Cloudflare endpoint.
 
-## Ready for the remaining deployment
+## Verified Cloudflare deployment
 
-- Root `wrangler.toml` names only `nfl-free-research-pack` and points at the existing nested Worker source.
+Live service: https://nfl-free-research-pack-v1.nickarnott01.workers.dev
+
+The user deployed the Worker through the Cloudflare Git integration. Its actual name is `nfl-free-research-pack-v1`. Commit `e1fc051fb4814e4ee5af1cf2ac5bb1270b18071f` aligns the Wrangler configuration to that name and pins native deployment tooling with package.json. Cloudflare's GitHub check reports success for this commit.
+
+Live HTTP acceptance: https://github.com/Nstp651/nfl_free_research_pack_v1/actions/runs/33616689903 — PASS. The committed `data/live_acceptance.json` records `mode: DEPLOYED_HTTP_API` and `deployment_verified: true`. All 67 players were retrieved in eight pages; maximum live response 52,891 bytes. The Action schema now has the actual server URL.
+
+## Deployment tooling
+
+- Root `wrangler.toml` names only `nfl-free-research-pack-v1` and points at the existing nested Worker source.
 - `DEPLOYMENT.md` supplies the native Cloudflare import settings without manual code changes.
 - `Validate dedicated Worker deployment package` runs a no-authentication Wrangler dry run.
 - `Test deployed NFL research API` accepts the dedicated workers.dev URL and, only after live success, saves `data/live_acceptance.json` and sets the real Action server URL.
@@ -38,12 +46,12 @@ The latter explicitly says `LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE` and `deployme
 
 ## Exact blockers and remaining gates
 
-This session has authenticated GitHub access. It has no Cloudflare connector, Cloudflare environment credential or Wrangler login. No authenticated GPT editor capability is exposed. No Cloudflare resources or existing betting/tracker Workers were changed. Local dependency installation encountered a cancelled network approval; real source work and tests ran successfully in the authorized GitHub workflow.
+Authenticated GitHub access plus the user-authorized Cloudflare Git integration now deploy this dedicated service. No authenticated GPT editor capability is exposed. Existing betting/tracker Workers were not changed. Local dependency installation encountered a cancelled network approval; real source and live endpoint work ran successfully in GitHub Actions.
 
-Connect this existing repository through Cloudflare on Workers Free, deploy the dedicated Worker, and provide its real URL. Run the prepared HTTP acceptance workflow, then import the configured research Action into the existing NFL GPT while preserving its Odds API Action. Install the separately supplied private candidate. Complete two full pre-market GPT runs before tagging `2026-season-lock`.
+Deployment and HTTP acceptance are complete. Import the configured research Action into the existing NFL GPT while preserving its Odds API Action. Install the separately supplied private candidate. Complete two full pre-market GPT runs before tagging `2026-season-lock`.
 
 No tag has been created. The full private probability model is not in this public repository. Latest roster/depth snapshots do not establish a historical point-in-time backtest. Current role/injury research and market freeze discipline remain mandatory.
 
 ## $0 constraint
 
-Only standard GitHub-hosted runners on this public repository have been used. No paid API, subscription, hosting plan, database or AI calls were added. Cloudflare deployment must use Workers Free without a paid upgrade. The original four daily research refreshes remain in place.
+Only standard GitHub-hosted runners on this public repository have been used. No paid API, subscription, hosting plan, database or AI calls were added. No paid upgrade or billing-setting change was made; the service is designed for Workers Free. The original four daily research refreshes remain in place.

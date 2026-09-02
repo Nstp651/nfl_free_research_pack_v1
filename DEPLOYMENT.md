@@ -1,10 +1,20 @@
-# Deploy the dedicated research Worker at no added cost
+# Dedicated research Worker — deployed and live-tested
 
 The root `wrangler.toml` is ready for Cloudflare's native Git integration.
-This creates only `nfl-free-research-pack`. It has no database, paid data provider,
+This creates only `nfl-free-research-pack-v1`. It has no database, paid data provider,
 AI API, secret requirement, custom domain or scheduled Worker.
 
-## One account connection remains
+## Verified deployment
+
+Live URL: https://nfl-free-research-pack-v1.nickarnott01.workers.dev
+
+Cloudflare deployment and live HTTP acceptance succeeded on 2026-09-02.
+The actual service name has the `-v1` suffix; repository configurations now match it.
+Wrangler is pinned to 4.128.0 in the root package.json.
+
+Live acceptance: https://github.com/Nstp651/nfl_free_research_pack_v1/actions/runs/33616689903
+
+## Reproduction settings (already configured)
 
 1. Open Cloudflare **Workers & Pages → Create application → Import a repository**.
 2. Connect the GitHub account `Nstp651` and select the existing repository
@@ -14,7 +24,7 @@ AI API, secret requirement, custom domain or scheduled Worker.
 
 | Setting | Value |
 | --- | --- |
-| Worker name | `nfl-free-research-pack` |
+| Worker name | `nfl-free-research-pack-v1` |
 | Production branch | `main` |
 | Root directory | `/` |
 | Build command | Leave blank |
@@ -28,9 +38,9 @@ For subsequent automatic deployments, include `wrangler.toml` and
 `nfl_free_research_pack_v1/worker/index.js` in build watch paths. The four daily
 data updates need no Worker redeployment: the Worker reads GitHub directly.
 
-## Live acceptance after deployment
+## Repeat live acceptance when needed
 
-Copy the exact `https://nfl-free-research-pack.<subdomain>.workers.dev` URL.
+Copy the exact `https://nfl-free-research-pack-v1.nickarnott01.workers.dev` URL.
 Run the repository's **Test deployed NFL research API** Actions workflow with that
 URL, season `2026`, and the week in the current data manifest.
 
@@ -42,7 +52,7 @@ It does not edit a GPT or tag the season lock.
 
 ## GPT completion
 
-After the live API passes, import `nfl_free_research_pack_v1/openapi.yaml` as a new
+The live API has passed. Import `nfl_free_research_pack_v1/openapi.yaml` as a new
 read-only research Action using no authentication. Keep the existing Odds API
 Action. Install the full private candidate supplied separately, then test two
 complete pre-market runs in the GPT. Research pages must all arrive before the
@@ -52,7 +62,8 @@ freeze; odds remain post-freeze. Tag `2026-season-lock` only after those tests.
 
 The public repository uses standard GitHub-hosted runners. On Workers Free, the
 request quota is capped; exceeding it does not opt into a paid plan. No paid
-subscription has been enabled by this build.
+subscription has been enabled by this build. Billing settings were not changed.
+For current Free-plan limits, use the official pricing reference below.
 
 References: [Cloudflare Git import](https://developers.cloudflare.com/workers/ci-cd/builds/),
 [build settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/),

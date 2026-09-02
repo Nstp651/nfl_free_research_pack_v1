@@ -39,6 +39,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # tested v4 revision
+        with:
+          # A queued refresh must include commits from completed acceptance runs.
+          ref: ${{ github.event_name == 'pull_request' && github.ref || 'main' }}
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # tested v5 revision
         with:
@@ -60,6 +63,7 @@ jobs:
           SEASON: ${{ github.event.inputs.season || '2026' }}
           WEEK: ${{ github.event.inputs.week || '' }}
         run: |
+          export SOURCE_COMMIT="$(git rev-parse HEAD)"
           if [ -n "$WEEK" ]; then
             python build_pack.py --season "$SEASON" --week "$WEEK" --output data --history-seasons 2 --verify-sources
           else

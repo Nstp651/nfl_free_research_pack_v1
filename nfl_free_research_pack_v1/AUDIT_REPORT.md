@@ -1,6 +1,6 @@
 # Research Pack 1.1.1 audit
 
-Status: real data build, source reconciliation and live-GitHub handler acceptance PASS. Cloudflare deployment and GPT acceptance pending; see BUILD_STATUS.md.
+Status: real data build, source reconciliation and live-GitHub handler acceptance PASS. Cloudflare deployment and live HTTP acceptance PASS; GPT acceptance pending; see BUILD_STATUS.md.
 
 The original package had not passed a live source pull. The saved patch has now been published and tested successfully against real data; the deployment boundary remains explicit.
 
@@ -29,3 +29,5 @@ Definitions and constraints:
 - https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/set-default-values-for-jobs
 
 Validation: 14 Python and 9 JavaScript regression tests pass. The real GitHub build generated all 16 Week 1 packs. Source reconciliation passes for 67 players across two fixtures; the Worker handler retrieved every player across eight pages from the exact published GitHub revision. See data/source_acceptance.json and data/handler_acceptance.json. This handler test is not a Cloudflare deployment test. No full historical backtest or live GPT run has occurred. Season lock remains pending.
+
+Live deployment acceptance passed in run 33616689903: /health, all 16 listed fixtures, eight pages covering 67 players, revision and fixture identity, nullable fields, freshness, Week 1 cutoff and request rejection checks. See data/live_acceptance.json. The actual Worker is nfl-free-research-pack-v1. The configuration name now matches Cloudflare, and native build tooling is pinned through package.json. Queued refreshes check out latest main to retain acceptance commits, and source receipts record that actual checkout revision.

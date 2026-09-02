@@ -1,6 +1,6 @@
 # NFL Free Research Pack 1.1.1 — data build operational
 
-Automated, pre-market NFL receptions research from nflverse. The real GitHub data build and source/handler acceptance have passed. Cloudflare deployment, GPT integration and season lock are pending. Read BUILD_STATUS.md for evidence and ../DEPLOYMENT.md for the prepared deployment flow.
+Automated, pre-market NFL receptions research from nflverse. The real GitHub data build and source/handler acceptance have passed. Cloudflare deployment and live HTTP acceptance also pass. GPT integration and season lock are pending. Read BUILD_STATUS.md for evidence and ../DEPLOYMENT.md for the prepared deployment flow.
 
 ## Repository layout
 
@@ -26,7 +26,7 @@ GitHub runs four scheduled refreshes daily and supports manual dispatch. The sch
 
 ## Dedicated research API
 
-Use a NEW Cloudflare Worker called `nfl-free-research-pack`. Import this existing repository using the root Wrangler configuration and the settings in ../DEPLOYMENT.md. Do not overwrite any existing betting gateway/tracker Worker. The source defaults to this repository's nested data folder; DATA_BASE_URL can override it.
+Use a NEW Cloudflare Worker called `nfl-free-research-pack-v1`. Import this existing repository using the root Wrangler configuration and the settings in ../DEPLOYMENT.md. Do not overwrite any existing betting gateway/tracker Worker. The source defaults to this repository's nested data folder; DATA_BASE_URL can override it.
 
 - GET /health checks real upstream availability and age.
 - GET /v1/packs?season=2026&week=1 resolves fixtures.
@@ -34,7 +34,7 @@ Use a NEW Cloudflare Worker called `nfl-free-research-pack`. Import this existin
 
 Fetch every page until pagination.next_offset is null. Hold revision constant. Changed revisions return 409; mismatched publication snapshots return 503. Responses are limited below 90,000 characters. Missing fixtures and invalid upstream data return explicit errors. No odds/model endpoint is implemented.
 
-Set the actual deployed HTTPS workers.dev URL in openapi.yaml before importing the Action. Select no authentication for these public, read-only research endpoints. Apply MODEL_INTEGRATION_PATCH.md to the private model only; the complete private model is not included in this public repository.
+The verified deployed URL is already set in openapi.yaml. Select no authentication for these public, read-only research endpoints. Apply MODEL_INTEGRATION_PATCH.md to the private model only; the complete private model is not included in this public repository.
 
 ## Interpretation
 
@@ -46,4 +46,4 @@ Includes derivatives of the FTN charting subset supplied through nflverse under 
 
 ## Acceptance and season lock
 
-Real data generation, two-pack source reconciliation and live-GitHub Worker handler tests pass. Exact Python packages and action revisions are pinned. The handler test runs on GitHub and does not prove Cloudflare deployment. Complete the deployed Worker/GPT Action tests and two full pre-market model dry runs before tagging `2026-season-lock`. Automatic observations can refresh; infrastructure repairs may restore existing behavior.
+Real data generation, two-pack source reconciliation and live-GitHub Worker handler tests pass. Exact Python packages and action revisions are pinned. The separate data/live_acceptance.json report verifies the deployed Cloudflare HTTP API. Complete the GPT Action tests and two full pre-market model dry runs before tagging `2026-season-lock`. Automatic observations can refresh; infrastructure repairs may restore existing behavior.
