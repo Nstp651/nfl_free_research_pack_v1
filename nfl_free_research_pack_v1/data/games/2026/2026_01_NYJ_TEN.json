@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-02T09:32:21.727958+00:00",
+  "generated_at_utc": "2026-09-02T12:42:30.777709+00:00",
   "fixture": {
     "game_id": "2026_01_NYJ_TEN",
     "season": 2026,
@@ -106,6 +106,52 @@
   },
   "players": [
     {
+      "player_id": null,
+      "player_name": "Al-Jay Henderson",
+      "current_team": "NYJ",
+      "position": "RB",
+      "roster_status": "DEV",
+      "years_experience": 0,
+      "rookie_flag": true,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "ROOKIE: NFL historical receiving baseline may be absent; current role must be established by draft/camp/preseason/live research.",
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0034959",
       "player_name": "Andrew Beck",
       "current_team": "NYJ",
@@ -118,7 +164,7 @@
         "position": "FB",
         "slot": 12,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -340,7 +386,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 2,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -557,7 +603,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -794,7 +840,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 5,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -832,7 +878,7 @@
       "player_name": "Dominic Richardson",
       "current_team": "NYJ",
       "position": "RB",
-      "roster_status": "W04",
+      "roster_status": "RES",
       "years_experience": 0,
       "rookie_flag": true,
       "current_depth": {
@@ -840,7 +886,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 6,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -886,7 +932,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 3,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1127,7 +1173,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 4,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1275,7 +1321,7 @@
       "player_name": "Chase Curtis",
       "current_team": "NYJ",
       "position": "TE",
-      "roster_status": "W04",
+      "roster_status": "RES",
       "years_experience": 0,
       "rookie_flag": true,
       "current_depth": {
@@ -1283,7 +1329,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 5,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -1321,7 +1367,7 @@
       "player_name": "Connor Hulstein",
       "current_team": "NYJ",
       "position": "TE",
-      "roster_status": "W04",
+      "roster_status": "RES",
       "years_experience": 0,
       "rookie_flag": true,
       "current_depth": {
@@ -1375,7 +1421,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 4,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1505,7 +1551,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 3,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1742,7 +1788,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 2,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -1788,7 +1834,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1943,7 +1989,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 2,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2200,7 +2246,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 6,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2326,6 +2372,51 @@
       ]
     },
     {
+      "player_id": "00-0040324",
+      "player_name": "Cam Camper",
+      "current_team": "NYJ",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 1,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0037740",
       "player_name": "Garrett Wilson",
       "current_team": "NYJ",
@@ -2338,7 +2429,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2597,7 +2688,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 4,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2815,6 +2906,97 @@
       ]
     },
     {
+      "player_id": "00-0040405",
+      "player_name": "Jamaal Pritchett",
+      "current_team": "NYJ",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 1,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
+      "player_id": "00-0041267",
+      "player_name": "Malik McClain",
+      "current_team": "NYJ",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 0,
+      "rookie_flag": true,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "ROOKIE: NFL historical receiving baseline may be absent; current role must be established by draft/camp/preseason/live research.",
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0041511",
       "player_name": "Omar Cooper Jr.",
       "current_team": "NYJ",
@@ -2827,7 +3009,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 3,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -2873,7 +3055,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 5,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -3111,7 +3293,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 4,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3312,6 +3494,301 @@
       ]
     },
     {
+      "player_id": "00-0040205",
+      "player_name": "Kalel Mullings",
+      "current_team": "TEN",
+      "position": "RB",
+      "roster_status": "DEV",
+      "years_experience": 1,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": false,
+      "prior_season_teams": [
+        "TEN"
+      ],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": {
+            "player_id": "00-0040205",
+            "player_name": "Kalel Mullings",
+            "source_teams": [
+              "TEN"
+            ],
+            "positions": [
+              "RB"
+            ],
+            "games": 4,
+            "targets": 0,
+            "receptions": 0,
+            "targets_per_game": 0,
+            "receptions_per_game": 0,
+            "catch_rate": null,
+            "target_share": 0,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
+            "receiving_yards": 0,
+            "receiving_air_yards": 0,
+            "adot": null,
+            "yac_per_reception": null,
+            "receiving_epa_per_target": null,
+            "air_yards_share": 0,
+            "wopr": 0
+          },
+          "snap_proxy": {
+            "games": 9,
+            "offense_snaps": 12,
+            "offense_snap_pct": 0.0211,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
+            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
+          },
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
+      "player_id": "00-0036924",
+      "player_name": "Michael Carter",
+      "current_team": "TEN",
+      "position": "RB",
+      "roster_status": "DEV",
+      "years_experience": 5,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": true,
+      "prior_season_teams": [
+        "ARI"
+      ],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": {
+            "player_id": "00-0036924",
+            "player_name": "Michael Carter",
+            "source_teams": [
+              "ARI"
+            ],
+            "positions": [
+              "RB"
+            ],
+            "games": 13,
+            "targets": 45,
+            "receptions": 33,
+            "targets_per_game": 3.4615,
+            "receptions_per_game": 2.5385,
+            "catch_rate": 0.7333,
+            "target_share": 0.0917,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
+            "receiving_yards": 267,
+            "receiving_air_yards": 75,
+            "adot": 1.6667,
+            "yac_per_reception": 7.7879,
+            "receiving_epa_per_target": 0.0412,
+            "air_yards_share": 0.0154,
+            "wopr": 0.1484
+          },
+          "snap_proxy": {
+            "games": 13,
+            "offense_snaps": 393,
+            "offense_snap_pct": 0.4523,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
+            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
+          },
+          "ftn_charting": {
+            "charted_targets": 45,
+            "attribution": "FTN Data via nflverse (CC-BY-SA 4.0)",
+            "catchable_ball_rate": 0.8,
+            "catchable_ball_observed_targets": 45,
+            "contested_ball_rate": 0.0667,
+            "contested_ball_observed_targets": 45,
+            "created_reception_rate": 0,
+            "created_reception_observed_targets": 45,
+            "drop_rate": 0.0444,
+            "drop_observed_targets": 45,
+            "screen_pass_rate": 0.0222,
+            "screen_pass_observed_targets": 45,
+            "play_action_rate": 0.1556,
+            "play_action_observed_targets": 45,
+            "rpo_rate": 0,
+            "rpo_observed_targets": 45,
+            "motion_rate": 0.3333,
+            "motion_observed_targets": 45,
+            "qb_out_of_pocket_rate": 0.1111,
+            "qb_out_of_pocket_observed_targets": 45,
+            "drop_rate_per_catchable_target": 0.0556,
+            "catchable_target_conversion": 0.9167,
+            "read_thrown_distribution_raw": {
+              "1": {
+                "count": 1,
+                "share_of_charted_targets": 0.0222
+              },
+              "CHK": {
+                "count": 37,
+                "share_of_charted_targets": 0.8222
+              },
+              "DES": {
+                "count": 1,
+                "share_of_charted_targets": 0.0222
+              },
+              "SD": {
+                "count": 6,
+                "share_of_charted_targets": 0.1333
+              }
+            },
+            "read_thrown_verified_counts": {
+              "primary_read": 0,
+              "second_read": 1,
+              "third_or_later": 0,
+              "checkdown": 37,
+              "designed_read": 1,
+              "scramble_drill": 6
+            },
+            "read_thrown_unknown_or_missing": 0,
+            "read_thrown_interpretation_status": "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown.",
+            "read_thrown_definition_url": "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html",
+            "primary_read_share_by_source_team": {
+              "ARI": {
+                "primary_read_target_share": 0,
+                "team_charted_primary_read_targets": 3
+              }
+            }
+          },
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": {
+            "receiving_drop": 2,
+            "receiving_drop_pct": 0.0312
+          }
+        },
+        "2024": {
+          "season_receiving": {
+            "player_id": "00-0036924",
+            "player_name": "Michael Carter",
+            "source_teams": [
+              "ARI"
+            ],
+            "positions": [
+              "RB"
+            ],
+            "games": 3,
+            "targets": 11,
+            "receptions": 11,
+            "targets_per_game": 3.6667,
+            "receptions_per_game": 3.6667,
+            "catch_rate": 1,
+            "target_share": 0.114,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
+            "receiving_yards": 57,
+            "receiving_air_yards": -16,
+            "adot": -1.4545,
+            "yac_per_reception": 6.6364,
+            "receiving_epa_per_target": 0.0871,
+            "air_yards_share": -0.0229,
+            "wopr": 0.1549
+          },
+          "snap_proxy": {
+            "games": 3,
+            "offense_snaps": 132,
+            "offense_snap_pct": 0.6167,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
+            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
+          },
+          "ftn_charting": {
+            "charted_targets": 11,
+            "attribution": "FTN Data via nflverse (CC-BY-SA 4.0)",
+            "catchable_ball_rate": 1,
+            "catchable_ball_observed_targets": 11,
+            "contested_ball_rate": 0,
+            "contested_ball_observed_targets": 11,
+            "created_reception_rate": 0,
+            "created_reception_observed_targets": 11,
+            "drop_rate": 0,
+            "drop_observed_targets": 11,
+            "screen_pass_rate": 0,
+            "screen_pass_observed_targets": 11,
+            "play_action_rate": 0.3636,
+            "play_action_observed_targets": 11,
+            "rpo_rate": 0,
+            "rpo_observed_targets": 11,
+            "motion_rate": 0.3636,
+            "motion_observed_targets": 11,
+            "qb_out_of_pocket_rate": 0.0909,
+            "qb_out_of_pocket_observed_targets": 11,
+            "drop_rate_per_catchable_target": 0,
+            "catchable_target_conversion": 1,
+            "read_thrown_distribution_raw": {
+              "CHK": {
+                "count": 11,
+                "share_of_charted_targets": 1
+              }
+            },
+            "read_thrown_verified_counts": {
+              "primary_read": 0,
+              "second_read": 0,
+              "third_or_later": 0,
+              "checkdown": 11,
+              "designed_read": 0,
+              "scramble_drill": 0
+            },
+            "read_thrown_unknown_or_missing": 0,
+            "read_thrown_interpretation_status": "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown.",
+            "read_thrown_definition_url": "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html",
+            "primary_read_share_by_source_team": {
+              "ARI": {
+                "primary_read_target_share": 0,
+                "team_charted_primary_read_targets": 6
+              }
+            }
+          },
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": {
+            "receiving_drop": 0,
+            "receiving_drop_pct": 0
+          }
+        }
+      },
+      "model_use_notes": [
+        "TRANSFER RISK: prior production/target share came from a different team; do not copy it into the current role without live role translation.",
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0040886",
       "player_name": "Nicholas Singleton",
       "current_team": "TEN",
@@ -3324,7 +3801,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 3,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -3370,7 +3847,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3607,7 +4084,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 2,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3844,7 +4321,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 2,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -4074,7 +4551,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 4,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4291,7 +4768,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4442,7 +4919,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 5,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -4476,6 +4953,51 @@
       ]
     },
     {
+      "player_id": "00-0039023",
+      "player_name": "Joel Wilson",
+      "current_team": "TEN",
+      "position": "TE",
+      "roster_status": "DEV",
+      "years_experience": 3,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0036876",
       "player_name": "Kylen Granson",
       "current_team": "TEN",
@@ -4488,7 +5010,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 3,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -4722,7 +5244,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 3,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4968,7 +5490,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 1,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -5014,7 +5536,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 4,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -5165,7 +5687,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 5,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -5300,6 +5822,239 @@
       ]
     },
     {
+      "player_id": "00-0040912",
+      "player_name": "Hank Beatty",
+      "current_team": "TEN",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 0,
+      "rookie_flag": true,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "ROOKIE: NFL historical receiving baseline may be absent; current role must be established by draft/camp/preseason/live research.",
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
+      "player_id": "00-0036345",
+      "player_name": "K.J. Osborn",
+      "current_team": "TEN",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 6,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": {
+            "player_id": "00-0036345",
+            "player_name": "K.J. Osborn",
+            "source_teams": [
+              "NE",
+              "WAS"
+            ],
+            "positions": [
+              "WR"
+            ],
+            "games": 7,
+            "targets": 18,
+            "receptions": 7,
+            "targets_per_game": 2.5714,
+            "receptions_per_game": 1,
+            "catch_rate": 0.3889,
+            "target_share": 0.0945,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
+            "receiving_yards": 57,
+            "receiving_air_yards": 107,
+            "adot": 5.9444,
+            "yac_per_reception": 2.2857,
+            "receiving_epa_per_target": -0.4059,
+            "air_yards_share": 0.0806,
+            "wopr": 0.1982
+          },
+          "snap_proxy": {
+            "games": 8,
+            "offense_snaps": 251,
+            "offense_snap_pct": 0.495,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
+            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
+          },
+          "ftn_charting": {
+            "charted_targets": 18,
+            "attribution": "FTN Data via nflverse (CC-BY-SA 4.0)",
+            "catchable_ball_rate": 0.5,
+            "catchable_ball_observed_targets": 18,
+            "contested_ball_rate": 0.2222,
+            "contested_ball_observed_targets": 18,
+            "created_reception_rate": 0,
+            "created_reception_observed_targets": 18,
+            "drop_rate": 0.0556,
+            "drop_observed_targets": 18,
+            "screen_pass_rate": 0.0556,
+            "screen_pass_observed_targets": 18,
+            "play_action_rate": 0.1111,
+            "play_action_observed_targets": 18,
+            "rpo_rate": 0,
+            "rpo_observed_targets": 18,
+            "motion_rate": 0.3333,
+            "motion_observed_targets": 18,
+            "qb_out_of_pocket_rate": 0.1667,
+            "qb_out_of_pocket_observed_targets": 18,
+            "drop_rate_per_catchable_target": 0.1111,
+            "catchable_target_conversion": 0.7778,
+            "read_thrown_distribution_raw": {
+              "0": {
+                "count": 1,
+                "share_of_charted_targets": 0.0556
+              },
+              "1": {
+                "count": 8,
+                "share_of_charted_targets": 0.4444
+              },
+              "2": {
+                "count": 7,
+                "share_of_charted_targets": 0.3889
+              },
+              "DES": {
+                "count": 1,
+                "share_of_charted_targets": 0.0556
+              },
+              "SD": {
+                "count": 1,
+                "share_of_charted_targets": 0.0556
+              }
+            },
+            "read_thrown_verified_counts": {
+              "primary_read": 1,
+              "second_read": 8,
+              "third_or_later": 7,
+              "checkdown": 0,
+              "designed_read": 1,
+              "scramble_drill": 1
+            },
+            "read_thrown_unknown_or_missing": 0,
+            "read_thrown_interpretation_status": "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown.",
+            "read_thrown_definition_url": "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html",
+            "primary_read_share_by_source_team": {
+              "NE": {
+                "primary_read_target_share": 0.25,
+                "team_charted_primary_read_targets": 4
+              }
+            }
+          },
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": {
+            "receiving_drop": 1,
+            "receiving_drop_pct": 0.0833
+          }
+        }
+      },
+      "model_use_notes": [
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
+      "player_id": "00-0040919",
+      "player_name": "Tyren Montgomery",
+      "current_team": "TEN",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 0,
+      "rookie_flag": true,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": null,
+      "prior_season_teams": [],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        },
+        "2024": {
+          "season_receiving": null,
+          "snap_proxy": null,
+          "ftn_charting": null,
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": null
+        }
+      },
+      "model_use_notes": [
+        "ROOKIE: NFL historical receiving baseline may be absent; current role must be established by draft/camp/preseason/live research.",
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0038117",
       "player_name": "Wan'Dale Robinson",
       "current_team": "TEN",
@@ -5312,7 +6067,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 2,
-        "depth_timestamp": "2026-09-01T12:20:07Z",
+        "depth_timestamp": "2026-09-02T11:55:28Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -5562,136 +6317,6 @@
         "TRANSFER RISK: prior production/target share came from a different team; do not copy it into the current role without live role translation.",
         "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
       ]
-    },
-    {
-      "player_id": "00-0040522",
-      "player_name": "Xavier Restrepo",
-      "current_team": "TEN",
-      "position": "WR",
-      "roster_status": "ACT",
-      "years_experience": 1,
-      "rookie_flag": false,
-      "current_depth": {
-        "position_group": null,
-        "position": null,
-        "slot": null,
-        "rank": null,
-        "depth_timestamp": null,
-        "warning": "Depth-chart status supports roster context but does not prove routes."
-      },
-      "team_change_since_prior_season": false,
-      "prior_season_teams": [
-        "TEN"
-      ],
-      "current_season_to_date": {
-        "receiving": null,
-        "snap_proxy": null,
-        "ftn_charting": null,
-        "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
-      },
-      "historical": {
-        "2025": {
-          "season_receiving": {
-            "player_id": "00-0040522",
-            "player_name": "Xavier Restrepo",
-            "source_teams": [
-              "TEN"
-            ],
-            "positions": [
-              "WR"
-            ],
-            "games": 2,
-            "targets": 7,
-            "receptions": 3,
-            "targets_per_game": 3.5,
-            "receptions_per_game": 1.5,
-            "catch_rate": 0.4286,
-            "target_share": 0.0932,
-            "target_share_method": "mean of observed weekly shares; not aggregate season share",
-            "receiving_yards": 41,
-            "receiving_air_yards": 77,
-            "adot": 11,
-            "yac_per_reception": 3,
-            "receiving_epa_per_target": 0.435,
-            "air_yards_share": 0.1925,
-            "wopr": 0.2746
-          },
-          "snap_proxy": {
-            "games": 2,
-            "offense_snaps": 30,
-            "offense_snap_pct": 0.22,
-            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
-            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
-          },
-          "ftn_charting": {
-            "charted_targets": 7,
-            "attribution": "FTN Data via nflverse (CC-BY-SA 4.0)",
-            "catchable_ball_rate": 0.4286,
-            "catchable_ball_observed_targets": 7,
-            "contested_ball_rate": 0.2857,
-            "contested_ball_observed_targets": 7,
-            "created_reception_rate": 0,
-            "created_reception_observed_targets": 7,
-            "drop_rate": 0,
-            "drop_observed_targets": 7,
-            "screen_pass_rate": 0,
-            "screen_pass_observed_targets": 7,
-            "play_action_rate": 0,
-            "play_action_observed_targets": 7,
-            "rpo_rate": 0,
-            "rpo_observed_targets": 7,
-            "motion_rate": 0.2857,
-            "motion_observed_targets": 7,
-            "qb_out_of_pocket_rate": 0.2857,
-            "qb_out_of_pocket_observed_targets": 7,
-            "drop_rate_per_catchable_target": 0,
-            "catchable_target_conversion": 1,
-            "read_thrown_distribution_raw": {
-              "1": {
-                "count": 5,
-                "share_of_charted_targets": 0.7143
-              },
-              "SD": {
-                "count": 2,
-                "share_of_charted_targets": 0.2857
-              }
-            },
-            "read_thrown_verified_counts": {
-              "primary_read": 0,
-              "second_read": 5,
-              "third_or_later": 0,
-              "checkdown": 0,
-              "designed_read": 0,
-              "scramble_drill": 2
-            },
-            "read_thrown_unknown_or_missing": 0,
-            "read_thrown_interpretation_status": "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown.",
-            "read_thrown_definition_url": "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html",
-            "primary_read_share_by_source_team": {
-              "TEN": {
-                "primary_read_target_share": 0,
-                "team_charted_primary_read_targets": 2
-              }
-            }
-          },
-          "next_gen_receiving": null,
-          "pfr_advanced_receiving": {
-            "receiving_drop": 0,
-            "receiving_drop_pct": 0
-          }
-        },
-        "2024": {
-          "season_receiving": null,
-          "snap_proxy": null,
-          "ftn_charting": null,
-          "next_gen_receiving": null,
-          "pfr_advanced_receiving": null
-        }
-      },
-      "model_use_notes": [
-        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
-      ]
     }
   ],
   "source_receipt": {
@@ -5837,12 +6462,12 @@
         }
       },
       "current_roster": {
-        "rows": 2800,
+        "rows": 2902,
         "status": "AVAILABLE",
         "context": "latest available; not a historical point-in-time snapshot"
       },
       "current_depth": {
-        "rows": 490107,
+        "rows": 492320,
         "status": "AVAILABLE",
         "context": "latest available; not a historical point-in-time snapshot"
       }
@@ -5889,5 +6514,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "dc4d4613f3183e9c"
+  "pack_revision": "a863067f3fe679b9"
 }

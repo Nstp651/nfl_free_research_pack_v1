@@ -1,17 +1,17 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-02T10:00:08.609581+00:00",
-  "build_commit": "84d23a14f4f603e3ebb89bbc8c642b8147b853f2",
+  "tested_at_utc": "2026-09-02T12:42:31.212703+00:00",
+  "build_commit": "b23f320f0ce75e98494076b673f59d85c764360e",
   "python": "3.12.14",
-  "workflow_run_id": "33617017200",
+  "workflow_run_id": "33631265406",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "220a4176a0114e30",
-      "players": 35,
+      "pack_revision": "ab5714de8e6260cf",
+      "players": 45,
       "teams": {
         "NE": {
           "2024": {
@@ -52,11 +52,23 @@
           "team": "NE"
         },
         {
+          "name": "Cameron Dorner",
+          "team": "NE"
+        },
+        {
           "name": "Jimmy Kibble",
           "team": "NE"
         },
         {
+          "name": "Kyle Dixon",
+          "team": "NE"
+        },
+        {
           "name": "Jadarian Price",
+          "team": "SEA"
+        },
+        {
+          "name": "Emmanuel Henderson Jr.",
           "team": "SEA"
         }
       ],
@@ -69,10 +81,24 @@
           ]
         },
         {
+          "name": "Hassan Haskins",
+          "current_team": "NE",
+          "source_teams": [
+            "LAC"
+          ]
+        },
+        {
           "name": "Reggie Gilliam",
           "current_team": "NE",
           "source_teams": [
             "BUF"
+          ]
+        },
+        {
+          "name": "Cameron Latu",
+          "current_team": "NE",
+          "source_teams": [
+            "PHI"
           ]
         },
         {
@@ -104,8 +130,8 @@
           ]
         }
       ],
-      "player_checks": 135,
-      "ftn_checks": 756,
+      "player_checks": 153,
+      "ftn_checks": 810,
       "ngs_identity_matches": [
         {
           "player_id": "00-0033090",
@@ -153,12 +179,12 @@
           "ngs_name": "Rashid Shaheed"
         }
       ],
-      "missing_prior_ngs": 26
+      "missing_prior_ngs": 36
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "73bd4de37f5db3a8",
-      "players": 32,
+      "pack_revision": "f220ebbfff258422",
+      "players": 42,
       "teams": {
         "SF": {
           "2024": {
@@ -187,6 +213,14 @@
       },
       "rookies": [
         {
+          "name": "Dean Connors",
+          "team": "LA"
+        },
+        {
+          "name": "Dan Villari",
+          "team": "LA"
+        },
+        {
           "name": "Max Klare",
           "team": "LA"
         },
@@ -199,11 +233,30 @@
           "team": "SF"
         },
         {
+          "name": "Khalil Dinkins",
+          "team": "SF"
+        },
+        {
           "name": "De'Zhaun Stribling",
+          "team": "SF"
+        },
+        {
+          "name": "Wesley Grimes",
+          "team": "SF"
+        },
+        {
+          "name": "Will Pauling",
           "team": "SF"
         }
       ],
       "transfers": [
+        {
+          "name": "Alex Bachman",
+          "current_team": "LA",
+          "source_teams": [
+            "LV"
+          ]
+        },
         {
           "name": "Christian Kirk",
           "current_team": "SF",
@@ -219,6 +272,13 @@
           ]
         },
         {
+          "name": "KhaDarel Hodge",
+          "current_team": "SF",
+          "source_teams": [
+            "ATL"
+          ]
+        },
+        {
           "name": "Mike Evans",
           "current_team": "SF",
           "source_teams": [
@@ -226,8 +286,8 @@
           ]
         }
       ],
-      "player_checks": 150,
-      "ftn_checks": 846,
+      "player_checks": 165,
+      "ftn_checks": 936,
       "ngs_identity_matches": [
         {
           "player_id": "00-0036244",
@@ -275,7 +335,7 @@
           "ngs_name": "Ricky Pearsall"
         }
       ],
-      "missing_prior_ngs": 23
+      "missing_prior_ngs": 33
     }
   ],
   "ftn_join_counts": {
