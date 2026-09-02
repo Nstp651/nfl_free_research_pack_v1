@@ -1100,7 +1100,7 @@ def source_availability(inputs: dict[str, Any], target_week: int) -> dict[str, A
                      "context": "latest available; not a historical point-in-time snapshot"}
     return out
 
-def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None) -> None:
+def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None, verify_sources: bool = False) -> None:
     inputs = load_inputs(season, history_n)
     health = validate_core_sources(inputs, season, history_n)
     if health["status"] == "FAIL":
@@ -1122,6 +1122,7 @@ def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None)
     caches = build_caches(inputs, season, history_n, [target_week])
 
     manifest_games = []
+    built_packs = []
     for _, game in sched.sort_values(["week", "gameday", "gametime"], na_position="last").iterrows():
         pack = build_game_pack(game, inputs, season, history_n, caches)
         pack["source_health"] = health
@@ -1130,6 +1131,7 @@ def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None)
             if not any(p["current_team"] == team for p in pack["players"]):
                 raise ValueError(f"No eligible roster players for {team}; refusing publication")
         pack["pack_revision"] = payload_hash(pack)
+        built_packs.append(pack)
         path = out_dir / "games" / str(season) / f"{game_id}.json"
         write_json(path, pack)
         manifest_games.append({
@@ -1165,6 +1167,9 @@ def build_all(season: int, out_dir: Path, history_n: int, only_week: int | None)
         },
         "attribution": "Includes FTN Data via nflverse; FTN subset is CC-BY-SA 4.0.",
     }
+    if verify_sources:
+        from reconcile_sources import verify
+        write_json(out_dir / "source_acceptance.json", verify(inputs, built_packs))
     write_json(manifest_path, manifest)
     log(f"wrote {manifest_path}")
 
@@ -1175,12 +1180,13 @@ def main() -> None:
     p.add_argument("--output", default="data")
     p.add_argument("--history-seasons", type=int, default=2)
     p.add_argument("--week", type=int, default=None, help="Optional override. Default automatically resolves the earliest unplayed regular-season week.")
+    p.add_argument("--verify-sources", action="store_true", help="Reconcile two real packs to the loaded source rows before publication.")
     args = p.parse_args()
     if not 1 <= args.history_seasons <= 3:
         p.error("--history-seasons must be between 1 and 3")
     if args.week is not None and not 1 <= args.week <= 18:
         p.error("--week must be between 1 and 18")
-    build_all(args.season, Path(args.output), args.history_seasons, args.week)
+    build_all(args.season, Path(args.output), args.history_seasons, args.week, args.verify_sources)
 
 
 if __name__ == "__main__":
