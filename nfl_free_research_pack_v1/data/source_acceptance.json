@@ -1,0 +1,304 @@
+{
+  "result": "PASS",
+  "mode": "REAL_SOURCE_RECONCILIATION",
+  "tested_at_utc": "2026-09-02T09:40:26.742971+00:00",
+  "build_commit": "b55a51e5b912858d2234ba3add3120a9ad715eda",
+  "python": "3.12.14",
+  "workflow_run_id": "33615250590",
+  "deployment_verified": false,
+  "gpt_dry_runs_verified": false,
+  "games": [
+    {
+      "game_id": "2026_01_NE_SEA",
+      "pack_revision": "220a4176a0114e30",
+      "players": 35,
+      "teams": {
+        "NE": {
+          "2024": {
+            "games": 17,
+            "attempts": 529,
+            "completions": 342
+          },
+          "2025": {
+            "games": 17,
+            "attempts": 502,
+            "completions": 361
+          }
+        },
+        "SEA": {
+          "2024": {
+            "games": 17,
+            "attempts": 593,
+            "completions": 413
+          },
+          "2025": {
+            "games": 17,
+            "attempts": 481,
+            "completions": 325
+          }
+        }
+      },
+      "rookies": [
+        {
+          "name": "Myles Montgomery",
+          "team": "NE"
+        },
+        {
+          "name": "Eli Raridon",
+          "team": "NE"
+        },
+        {
+          "name": "Tanner Arkin",
+          "team": "NE"
+        },
+        {
+          "name": "Jimmy Kibble",
+          "team": "NE"
+        },
+        {
+          "name": "Jadarian Price",
+          "team": "SEA"
+        }
+      ],
+      "transfers": [
+        {
+          "name": "Corey Kiner",
+          "current_team": "NE",
+          "source_teams": [
+            "ARI"
+          ]
+        },
+        {
+          "name": "Reggie Gilliam",
+          "current_team": "NE",
+          "source_teams": [
+            "BUF"
+          ]
+        },
+        {
+          "name": "Julian Hill",
+          "current_team": "NE",
+          "source_teams": [
+            "MIA"
+          ]
+        },
+        {
+          "name": "A.J. Brown",
+          "current_team": "NE",
+          "source_teams": [
+            "PHI"
+          ]
+        },
+        {
+          "name": "Romeo Doubs",
+          "current_team": "NE",
+          "source_teams": [
+            "GB"
+          ]
+        },
+        {
+          "name": "Emanuel Wilson",
+          "current_team": "SEA",
+          "source_teams": [
+            "GB"
+          ]
+        }
+      ],
+      "player_checks": 135,
+      "ftn_checks": 756,
+      "ngs_identity_matches": [
+        {
+          "player_id": "00-0033090",
+          "roster_name": "Hunter Henry",
+          "ngs_name": "Hunter Henry"
+        },
+        {
+          "player_id": "00-0035676",
+          "roster_name": "A.J. Brown",
+          "ngs_name": "A.J. Brown"
+        },
+        {
+          "player_id": "00-0038621",
+          "roster_name": "DeMario Douglas",
+          "ngs_name": "DeMario Douglas"
+        },
+        {
+          "player_id": "00-0033555",
+          "roster_name": "Mack Hollins",
+          "ngs_name": "Mack Hollins"
+        },
+        {
+          "player_id": "00-0037816",
+          "roster_name": "Romeo Doubs",
+          "ngs_name": "Romeo Doubs"
+        },
+        {
+          "player_id": "00-0039793",
+          "roster_name": "AJ Barner",
+          "ngs_name": "AJ Barner"
+        },
+        {
+          "player_id": "00-0033908",
+          "roster_name": "Cooper Kupp",
+          "ngs_name": "Cooper Kupp"
+        },
+        {
+          "player_id": "00-0038543",
+          "roster_name": "Jaxon Smith-Njigba",
+          "ngs_name": "Jaxon Smith-Njigba"
+        },
+        {
+          "player_id": "00-0037545",
+          "roster_name": "Rashid Shaheed",
+          "ngs_name": "Rashid Shaheed"
+        }
+      ],
+      "missing_prior_ngs": 26
+    },
+    {
+      "game_id": "2026_01_SF_LA",
+      "pack_revision": "73bd4de37f5db3a8",
+      "players": 32,
+      "teams": {
+        "SF": {
+          "2024": {
+            "games": 17,
+            "attempts": 533,
+            "completions": 349
+          },
+          "2025": {
+            "games": 17,
+            "attempts": 574,
+            "completions": 398
+          }
+        },
+        "LA": {
+          "2024": {
+            "games": 17,
+            "attempts": 559,
+            "completions": 367
+          },
+          "2025": {
+            "games": 17,
+            "attempts": 598,
+            "completions": 388
+          }
+        }
+      },
+      "rookies": [
+        {
+          "name": "Max Klare",
+          "team": "LA"
+        },
+        {
+          "name": "CJ Daniels",
+          "team": "LA"
+        },
+        {
+          "name": "Kaelon Black",
+          "team": "SF"
+        },
+        {
+          "name": "De'Zhaun Stribling",
+          "team": "SF"
+        }
+      ],
+      "transfers": [
+        {
+          "name": "Christian Kirk",
+          "current_team": "SF",
+          "source_teams": [
+            "HOU"
+          ]
+        },
+        {
+          "name": "Deebo Samuel Sr.",
+          "current_team": "SF",
+          "source_teams": [
+            "WAS"
+          ]
+        },
+        {
+          "name": "Mike Evans",
+          "current_team": "SF",
+          "source_teams": [
+            "TB"
+          ]
+        }
+      ],
+      "player_checks": 150,
+      "ftn_checks": 846,
+      "ngs_identity_matches": [
+        {
+          "player_id": "00-0036244",
+          "roster_name": "Colby Parkinson",
+          "ngs_name": "Colby Parkinson"
+        },
+        {
+          "player_id": "00-0031381",
+          "roster_name": "Davante Adams",
+          "ngs_name": "Davante Adams"
+        },
+        {
+          "player_id": "00-0039075",
+          "roster_name": "Puka Nacua",
+          "ngs_name": "Puka Nacua"
+        },
+        {
+          "player_id": "00-0033288",
+          "roster_name": "George Kittle",
+          "ngs_name": "George Kittle"
+        },
+        {
+          "player_id": "00-0037112",
+          "roster_name": "Jake Tonges",
+          "ngs_name": "Jake Tonges"
+        },
+        {
+          "player_id": "00-0034775",
+          "roster_name": "Christian Kirk",
+          "ngs_name": "Christian Kirk"
+        },
+        {
+          "player_id": "00-0035719",
+          "roster_name": "Deebo Samuel Sr.",
+          "ngs_name": "Deebo Samuel"
+        },
+        {
+          "player_id": "00-0031408",
+          "roster_name": "Mike Evans",
+          "ngs_name": "Mike Evans"
+        },
+        {
+          "player_id": "00-0039916",
+          "roster_name": "Ricky Pearsall",
+          "ngs_name": "Ricky Pearsall"
+        }
+      ],
+      "missing_prior_ngs": 23
+    }
+  ],
+  "ftn_join_counts": {
+    "2024": {
+      "raw_charting_rows": 48031,
+      "eligible_regular_season_pbp_targets": 17013,
+      "joined_regular_season_targets": 17013,
+      "unmatched_pbp_targets": 0,
+      "note": "Raw charting may include playoffs; joins use regular-season targets only."
+    },
+    "2025": {
+      "raw_charting_rows": 47316,
+      "eligible_regular_season_pbp_targets": 16609,
+      "joined_regular_season_targets": 16609,
+      "unmatched_pbp_targets": 0,
+      "note": "Raw charting may include playoffs; joins use regular-season targets only."
+    }
+  },
+  "dependencies": {
+    "nflreadpy": "0.1.5",
+    "pandas": "3.0.5",
+    "numpy": "2.5.2",
+    "polars": "1.44.1",
+    "pyarrow": "24.0.0"
+  }
+}
