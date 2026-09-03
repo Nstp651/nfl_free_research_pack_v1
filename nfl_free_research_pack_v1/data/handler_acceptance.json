@@ -1,8 +1,8 @@
 {
-  "tested_at_utc": "2026-09-03T00:44:31.731Z",
+  "tested_at_utc": "2026-09-03T06:41:27.332Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/238d82cf84810505cf5f14804855606b2a80d85b/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/6fcaab74664e438e99e866363225abffe5101c3b/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 1,
   "games": [
@@ -525,7 +525,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-03T00:44:26.446729+00:00",
+      "last_checked_at_utc": "2026-09-03T06:41:22.908232+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
