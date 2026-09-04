@@ -1,17 +1,17 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-03T06:41:22.910239+00:00",
-  "build_commit": "e71d7788e446a57d2c53d22689c3ae7725a0cc79",
+  "tested_at_utc": "2026-09-04T12:42:19.590592+00:00",
+  "build_commit": "4b4845539c4b58d3c1041bc3e702e12e640e5e77",
   "python": "3.12.14",
-  "workflow_run_id": "33724273213",
+  "workflow_run_id": "33873974231",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "ab5714de8e6260cf",
-      "players": 45,
+      "pack_revision": "18f502866db8433d",
+      "players": 44,
       "teams": {
         "NE": {
           "2024": {
@@ -53,10 +53,6 @@
         },
         {
           "name": "Cameron Dorner",
-          "team": "NE"
-        },
-        {
-          "name": "Jimmy Kibble",
           "team": "NE"
         },
         {
@@ -109,6 +105,13 @@
           ]
         },
         {
+          "name": "Shane Zylstra",
+          "current_team": "NE",
+          "source_teams": [
+            "DET"
+          ]
+        },
+        {
           "name": "A.J. Brown",
           "current_team": "NE",
           "source_teams": [
@@ -130,8 +133,8 @@
           ]
         }
       ],
-      "player_checks": 153,
-      "ftn_checks": 810,
+      "player_checks": 159,
+      "ftn_checks": 846,
       "ngs_identity_matches": [
         {
           "player_id": "00-0033090",
@@ -179,11 +182,11 @@
           "ngs_name": "Rashid Shaheed"
         }
       ],
-      "missing_prior_ngs": 36
+      "missing_prior_ngs": 35
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "f220ebbfff258422",
+      "pack_revision": "c0c71cf34c3489eb",
       "players": 42,
       "teams": {
         "SF": {
