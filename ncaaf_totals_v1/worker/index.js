@@ -1,5 +1,6 @@
-/** Read-only NCAA totals research API. No odds provider, betting lines or model execution. */
+/** Read-only NCAA totals research/model API. No odds provider, betting lines or market data. */
 const DEFAULT_BASE = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/data';
+const DEFAULT_QBASE_URL = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/model/qbase_v0.1.0.json';
 const MAX_RESPONSE_CHARS = 90000;
 const MAX_AGE_HOURS = 36;
 
@@ -18,17 +19,17 @@ function integer(value, min, max, fallback) {
   if (!Number.isSafeInteger(n) || n < min || n > max) fail(400, 'Parameter outside allowed range');
   return n;
 }
-async function readJson(url) {
+async function readJson(url, label='Research source') {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const res = await fetch(url, {signal: controller.signal,
       headers: {'user-agent': 'ncaaf-totals-research-pack/0.1.0'},
       cf: {cacheTtl: 60, cacheEverything: true}});
-    if (!res.ok) fail(502, `Research source unavailable (${res.status})`);
+    if (!res.ok) fail(502, `${label} unavailable (${res.status})`);
     const raw = await res.text();
-    if (raw.length > 8_000_000) fail(502, 'Research source exceeds size limit');
-    try { return JSON.parse(raw); } catch { fail(502, 'Research source returned invalid JSON'); }
+    if (raw.length > 8_000_000) fail(502, `${label} exceeds size limit`);
+    try { return JSON.parse(raw); } catch { fail(502, `${label} returned invalid JSON`); }
   } finally { clearTimeout(timer); }
 }
 function freshness(manifest) {
@@ -49,6 +50,17 @@ function verifyManifest(m) {
 function verifyNoMarketData(value) {
   if (value?.market_data !== false) fail(502, 'Market boundary violation');
 }
+function verifyQbase(m) {
+  verifyNoMarketData(m);
+  if (m?.model_name !== 'Nick NCAA Totals QBASE' || m?.model_version !== '0.1.0' ||
+      !Array.isArray(m.features) || !Array.isArray(m.coefficients) ||
+      m.features.length !== m.coefficients.length || !Array.isArray(m.imputer_medians) ||
+      !Array.isArray(m.scaler_mean) || !Array.isArray(m.scaler_scale) ||
+      m.features.length !== m.imputer_medians.length || m.features.length !== m.scaler_mean.length ||
+      m.features.length !== m.scaler_scale.length || !m.walk_forward?.residual_distribution?.ALL) {
+    fail(502, 'Invalid QBASE model artifact');
+  }
+}
 
 export default {
   async fetch(request, env = {}) {
@@ -56,7 +68,17 @@ export default {
     try {
       const url = new URL(request.url);
       const slateMatch = url.pathname.match(/^\/v1\/slates\/([0-9]{4}_[0-9]{2})$/);
-      if (!['/health', '/v1/slates'].includes(url.pathname) && !slateMatch) return reply({error: 'Not found'}, 404);
+      const isModel = url.pathname === '/v1/model/qbase';
+      if (!['/health', '/v1/slates'].includes(url.pathname) && !slateMatch && !isModel) return reply({error: 'Not found'}, 404);
+
+      if (isModel) {
+        const modelUrl = env.QBASE_URL || DEFAULT_QBASE_URL;
+        if (!modelUrl.startsWith('https://')) fail(500, 'QBASE source must use HTTPS');
+        const model = await readJson(modelUrl, 'QBASE model source');
+        verifyQbase(model);
+        return reply({...model, served_at_utc: new Date().toISOString()});
+      }
+
       let season, week, offset, limit;
       if (url.pathname === '/v1/slates') {
         season = integer(url.searchParams.get('season'), 2000, 2100);
