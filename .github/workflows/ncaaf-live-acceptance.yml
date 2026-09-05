@@ -45,6 +45,44 @@ jobs:
           cat /tmp/target.env >> "$GITHUB_ENV"
           cat /tmp/target.env
 
+      - name: Wait for Cloudflare research Worker to publish target revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          matched=0
+          for attempt in $(seq 1 30); do
+            curl --fail --silent --show-error "$RESEARCH_URL/v1/slates?season=$SEASON&week=$WEEK" > /tmp/slates.json
+            if python3 - <<'PY'
+          import json, os, sys
+          s=json.load(open('/tmp/slates.json'))
+          slates=s.get('slates',[])
+          ok=(
+              s.get('market_data') is False
+              and s.get('season') == int(os.environ['SEASON'])
+              and s.get('week') == int(os.environ['WEEK'])
+              and len(slates) == 1
+              and slates[0].get('slate_id') == os.environ['SLATE_ID']
+              and slates[0].get('pack_revision') == os.environ['PACK_REVISION']
+              and slates[0].get('game_count') == int(os.environ['GAME_COUNT'])
+          )
+          if not ok:
+              current=slates[0].get('pack_revision') if len(slates)==1 else None
+              print(f"Worker revision not converged yet: current={current} target={os.environ['PACK_REVISION']}")
+              sys.exit(1)
+          print(f"WORKER_REVISION_CONVERGED revision={os.environ['PACK_REVISION']}")
+          PY
+            then
+              matched=1
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "Research Worker did not converge to published revision $PACK_REVISION within 5 minutes" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          test "$matched" -eq 1
+
       - name: Verify research Worker health, manifest entry and QBASE artifact
         shell: bash
         run: |
@@ -78,14 +116,19 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, urllib.parse, urllib.request
+          import json, os, subprocess, urllib.parse
           base=os.environ['RESEARCH_URL'].rstrip('/')
           sid=os.environ['SLATE_ID']; rev=os.environ['PACK_REVISION']; expected=int(os.environ['GAME_COUNT'])
+          def get_json(url):
+              raw=subprocess.check_output(
+                  ['curl','--fail','--silent','--show-error','--max-time','20',url],
+                  text=True,
+              )
+              return json.loads(raw)
           offset=0; ids=[]
           while offset is not None:
               q=urllib.parse.urlencode({'offset':offset,'limit':20,'revision':rev})
-              with urllib.request.urlopen(f'{base}/v1/slates/{sid}?{q}', timeout=20) as r:
-                  page=json.load(r)
+              page=get_json(f'{base}/v1/slates/{sid}?{q}')
               assert page.get('market_data') is False, page
               assert page.get('pack_revision') == rev, page
               assert page.get('slate_id') == sid, page
@@ -103,16 +146,21 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, urllib.parse, urllib.request
+          import json, os, subprocess, urllib.parse
           base=os.environ['RESEARCH_URL'].rstrip('/')
           sid=os.environ['SLATE_ID']; pack_rev=os.environ['PACK_REVISION']; expected=int(os.environ['GAME_COUNT'])
+          def get_json(url):
+              raw=subprocess.check_output(
+                  ['curl','--fail','--silent','--show-error','--max-time','20',url],
+                  text=True,
+              )
+              return json.loads(raw)
           offset=0; qrev=None; ids=[]; integer_rows=half_rows=push_rows=0
           while offset is not None:
               params={'offset':offset,'limit':20}
               if qrev: params['revision']=qrev
               q=urllib.parse.urlencode(params)
-              with urllib.request.urlopen(f'{base}/v1/qbase/{sid}?{q}', timeout=20) as r:
-                  page=json.load(r)
+              page=get_json(f'{base}/v1/qbase/{sid}?{q}')
               assert page.get('market_data') is False, page
               assert page.get('research_pack_revision') == pack_rev, page
               assert page.get('probability_schema_version') == '0.2.0', page
