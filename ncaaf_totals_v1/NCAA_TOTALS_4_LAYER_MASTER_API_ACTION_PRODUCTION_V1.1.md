@@ -5,7 +5,7 @@ This is Nick's production NCAA Football full-game totals methodology. ONE automa
 
 The market may determine value. It may never determine the pre-market probability model. External research is evidence, not a substitute for the methodology. Source failure is never permission to invent data.
 
-V1.1 adds mandatory support for BOTH half-point and integer totals. Integer lines carry explicit push probability and use push-aware fair-price / EV math.
+V1.1 supports BOTH half-point and integer totals. Integer lines carry explicit push probability and use push-aware fair-price / EV math.
 
 ---
 
@@ -42,7 +42,7 @@ If prohibited market information is exposed before freeze, discard affected Laye
 ## 3. Validate target slate independently
 Resolve season/week, every intended FBS-v-FBS fixture, home/away, canonical game ID, UTC + Australia/Sydney kickoff/date, venue/neutral flag, season type and started/completed state. Exclude started/completed games from a NEW betting run.
 
-## 4. Research Worker preflight
+## 4. Research Worker preflight and W-1 leakage gate
 Call `healthNcaafTotalsResearchPack`. Require `market_data=false`, no required-source failures and usable freshness.
 
 `source_health=PARTIAL` is allowed only when required sources remain intact and every limitation is declared.
@@ -51,7 +51,14 @@ Call `listNcaafTotalsResearchSlates(season,week)`, resolve one exact slate, then
 
 On 409/revision mismatch: discard mixed pages, reload manifest and restart once. Never combine revisions.
 
-Verify unique game count, FBS-v-FBS status, team/fixture IDs and `current_season_data_through_week <= target_week-1`. Null means unavailable/unknown, never zero.
+Verify unique game count, FBS-v-FBS status and team/fixture IDs. Evaluate the current-season cutoff only after the complete research slate is loaded:
+
+1. If `current_season_data_through_week` is an integer, require `<= target_week-1`.
+2. If it is `null`, never coerce null to zero and do not fail from the manifest alone. The cutoff may pass only if the fully loaded slate proves every current-season structured summary/ratings payload is unavailable/empty. Record `NO_CURRENT_SEASON_STRUCTURED_DATA_USED`.
+3. If ANY current-season structured summary/ratings payload is non-empty while `current_season_data_through_week=null`, the cutoff is uncertified and the model must fail.
+4. Therefore null means unavailable, not Week 0. It is cutoff-safe only when the payload itself proves that no current-season structured evidence was consumed.
+
+This distinction is especially important in Week 0/1, when the expected valid state is normally no same-season weekly evidence.
 
 ## 5. QBASE receipt
 Call `getNcaafTotalsQbase`; verify model/version, `market_data=false`, vector lengths, training/walk-forward receipt and residual distributions.
@@ -89,13 +96,13 @@ Missing metric != zero. Current-season and prior-season evidence stay distinguis
 
 ## 7. Early-season translation
 ### Week 0/1
-No same-season weekly performance input. Prior-season QBASE evidence is statistical prior only. Rebuild current QB/personnel/coaching/system truth from current reporting.
+No same-season weekly performance input is required. A `null` through-week field is valid only under the no-current-structured-data proof in Section 4. Prior-season QBASE evidence is statistical prior only. Rebuild current QB/personnel/coaching/system truth from current reporting.
 
 ### Weeks 2-4
-Current information exists but is noisy. Use the executed sample-dependent QBASE blend; do not replace it with ad-hoc fixed week weights.
+Current information exists but is noisy. Use the executed sample-dependent QBASE blend; do not replace it with ad-hoc fixed week weights. If current-season structured data are entirely unavailable, retain that as an explicit limitation and increase Fragility rather than inventing observations.
 
 ### Week 5+
-Current-season evidence generally receives greater authority, but material QB/coaching/system changes can make season averages stale.
+Current-season evidence generally receives greater authority, but material QB/coaching/system changes can make season averages stale. Complete absence of current structured evidence is a major limitation, not permission to impute zero.
 
 Translate prior numbers; do not copy old roles blindly.
 
@@ -183,7 +190,7 @@ Never claim simulation/probability PASS without execution.
 ## 15. Pre-freeze gates
 Require:
 - complete eligible-slate fixture reconciliation;
-- W-1 cutoff passed;
+- Section 4 cutoff gate passed using either a certified integer through-week or `NO_CURRENT_SEASON_STRUCTURED_DATA_USED`;
 - no market contamination;
 - research/QBASE revisions aligned;
 - every numerical adjustment ledgered;
@@ -211,7 +218,7 @@ Failure: `MODEL_INTEGRITY_FAILED — MODEL NOT FROZEN`; no market access.
 # FREEZE CONTRACT
 
 ## 16. Frozen fields
-Freeze eligibility/fixture mapping, Information State, QB/personnel/weather/play-calling assumptions, QBASE anchor/version/revision, probability schema, ledger, scenarios/weights, expected total, residual distribution/variance, complete Over/Push/Under grid, Confidence, Fragility and all material assumptions.
+Freeze eligibility/fixture mapping, Information State, QB/personnel/weather/play-calling assumptions, QBASE anchor/version/revision, probability schema, cutoff receipt, ledger, scenarios/weights, expected total, residual distribution/variance, complete Over/Push/Under grid, Confidence, Fragility and all material assumptions.
 
 Price movement never changes P_model.
 
@@ -315,7 +322,7 @@ If no material new football info: preserve frozen P_model/time, do no research, 
 # REQUIRED RECEIPTS / OUTPUT
 
 ## 26. Layer 1 receipt
-Show target season/week/window, eligible count, research revision/pages/cutoff/source health/limitations, QBASE version/hash/revision/probability schema and current-research/deep-trigger completion.
+Show target season/week/window, eligible count, research revision/pages, cutoff mode (`THROUGH_WEEK_n` or `NO_CURRENT_SEASON_STRUCTURED_DATA_USED`), source health/limitations, QBASE version/hash/revision/probability schema and current-research/deep-trigger completion.
 
 ## 27. Layer 2 receipt
 Show QBASE expected total, contextual/scenario shift, final total, residual bucket, Confidence, Fragility, execution/hash/audit receipt and freeze time. Retain complete grids internally.
