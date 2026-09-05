@@ -26,6 +26,7 @@
 - Real market-board acceptance workflow converted to manual-only to protect Odds API quota and freeze discipline.
 - GitHub Worker deployment workflows converted to verification-only so Cloudflare Git is the sole production deploy owner.
 - Season-aware scheduled research refresh: January resolves prior NCAA season; August-December current season; no off-season cron runs.
+- Production promotion / builder changes trigger an immediate active-slate refresh on `main`; generated data commits cannot create refresh loops.
 - Dynamic live acceptance resolves the currently published slate and retrieves every research/QBASE page at one revision.
 - V1.1 authoritative master, sub-8k GPT Instructions and separate research/market Action schemas prepared.
 - Frozen P_model JSON contract schema added.
@@ -46,6 +47,7 @@
 ## Post-merge live acceptance
 
 After merge, Cloudflare Git must deploy the research Worker automatically. Then require:
+- immediate active-slate research refresh succeeds;
 - research `/health` HTTP 200;
 - current published research slate fully paginated at one revision;
 - QBASE artifact valid;
