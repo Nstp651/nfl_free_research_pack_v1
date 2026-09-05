@@ -4,15 +4,27 @@ on:
   workflow_dispatch:
     inputs:
       season:
-        description: NCAA season (blank = current UTC year)
+        description: NCAA season (blank = resolve from UTC calendar)
         required: false
         type: string
       week:
         description: NCAA week (blank = auto-resolve next active week)
         required: false
         type: string
+  # A production promotion/builder change gets an immediate active-slate build.
+  # Generated data commits do not match these paths, preventing refresh loops.
+  push:
+    branches: [main]
+    paths:
+      - 'ncaaf_totals_v1/build_pack.py'
+      - 'ncaaf_totals_v1/build_pack_entry.py'
+      - 'ncaaf_totals_v1/validate_pack.py'
+      - 'ncaaf_totals_v1/requirements.txt'
+      - '.github/workflows/ncaaf-refresh.yml'
+  # NCAA season automation only. January bowls belong to the prior season;
+  # August-December belong to the current calendar-year season.
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 */6 * 1,8-12 *'
 
 permissions:
   contents: write
@@ -45,12 +57,33 @@ jobs:
         id: target
         shell: bash
         run: |
+          set -euo pipefail
           SEASON='${{ inputs.season }}'
           WEEK='${{ inputs.week }}'
-          if [ -z "$SEASON" ]; then SEASON="$(date -u +%Y)"; fi
+          if [ -z "$SEASON" ]; then
+            YEAR="$(date -u +%Y)"
+            MONTH="$(date -u +%m)"
+            if [ "$MONTH" = '01' ]; then
+              SEASON="$((10#$YEAR - 1))"
+            elif [ $((10#$MONTH)) -ge 8 ] && [ $((10#$MONTH)) -le 12 ]; then
+              SEASON="$YEAR"
+            else
+              echo 'Automatic NCAA refresh is outside the configured season window; use workflow_dispatch with an explicit season/week.' >&2
+              exit 2
+            fi
+          fi
+          if ! [[ "$SEASON" =~ ^[0-9]{4}$ ]]; then
+            echo "Invalid NCAA season: $SEASON" >&2
+            exit 2
+          fi
           if [ -z "$WEEK" ]; then WEEK='auto'; fi
+          if [ "$WEEK" != 'auto' ] && ! [[ "$WEEK" =~ ^[0-9]{1,2}$ ]]; then
+            echo "Invalid NCAA week: $WEEK" >&2
+            exit 2
+          fi
           echo "season=$SEASON" >> "$GITHUB_OUTPUT"
           echo "week=$WEEK" >> "$GITHUB_OUTPUT"
+          echo "Resolved NCAA season=$SEASON week=$WEEK"
 
       - name: Build market-blind weekly slate
         working-directory: ncaaf_totals_v1

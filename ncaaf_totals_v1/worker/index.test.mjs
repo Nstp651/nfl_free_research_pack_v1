@@ -6,11 +6,18 @@ const sid = '2026_02';
 const revision = '0123456789abcdef';
 const qrevision = 'fedcba9876543210';
 const games = Array.from({length: 55}, (_,i) => ({game_id: String(1000+i), home_team: `H${i}`, away_team: `A${i}`, note: 'x'.repeat(5000)}));
-const qgames = Array.from({length: 55}, (_,i) => ({game_id:String(1000+i),expected_total_qbase:55+i/10,
-  probability_grid:Array.from({length:56},(_,j)=>({line:30.5+j,over:0.8-j/100,under:0.2+j/100}))}));
+const makeGrid = () => Array.from({length:162},(_,j)=>{
+  const line=20+j/2;
+  const under=0.02+j*0.004;
+  const push=Math.abs(line-Math.round(line))<1e-9 ? 0.002 : 0;
+  const over=1-under-push;
+  return {line,over,push,under};
+});
+const qgames = Array.from({length:55},(_,i)=>({game_id:String(1000+i),expected_total_qbase:55+i/10,probability_grid:makeGrid()}));
 const entry = {slate_id: sid, season: 2026, week: 2, game_count: games.length, pack_revision: revision};
 const pack = {schema_version:'0.1.0', market_data:false, slate_id:sid, season:2026, week:2, pack_revision:revision, games};
-const qslate = {schema_version:'0.1.0',market_data:false,slate_id:sid,season:2026,week:2,
+const qslate = {schema_version:'0.1.0',probability_schema_version:'0.2.0',integer_line_method:'continuity_corrected_discrete_mass',
+  supported_total_grid:{min:20,max:100.5,step:0.5},market_data:false,slate_id:sid,season:2026,week:2,
   research_pack_revision:revision,qbase_model_name:'Nick NCAA Totals QBASE',qbase_model_version:'0.1.0',
   qbase_model_sha256:'a'.repeat(64),qbase_revision:qrevision,games:qgames};
 const manifest = {schema_version:'0.1.0', market_data:false, slates:[entry], fixture_count:games.length,
@@ -56,16 +63,25 @@ test('serves only a validated market-blind QBASE artifact', async()=>{
   assert.equal((await call('/v1/model/qbase',{qbase:{...qbase,coefficients:[1,2]}})).status,502);
 });
 
-test('pages QBASE slate at one qbase revision and response limit', async()=>{
+test('pages V1.1 QBASE slate at one revision and response limit', async()=>{
   const received=[]; let offset=0;
   while(offset!==null){
     const r=await call(`/v1/qbase/${sid}?offset=${offset}&limit=20&revision=${qrevision}`);
     assert.equal(r.status,200); assert.ok(r.chars<90000); assert.equal(r.data.research_pack_revision,revision);
+    assert.equal(r.data.probability_schema_version,'0.2.0');
     received.push(...r.data.games.map(g=>g.game_id)); offset=r.data.pagination.next_offset;
   }
   assert.deepEqual(received,qgames.map(g=>g.game_id));
   assert.equal((await call(`/v1/qbase/${sid}?revision=${revision}`)).status,409);
   assert.equal((await call(`/v1/qbase/${sid}`,{qslate:{...qslate,market_data:true}})).status,502);
+});
+
+test('rejects malformed push probability grids', async()=>{
+  const badHalf=structuredClone(qslate); badHalf.games[0].probability_grid[1].push=0.01; badHalf.games[0].probability_grid[1].over-=0.01;
+  assert.equal((await call(`/v1/qbase/${sid}`,{qslate:badHalf})).status,502);
+  const badPartition=structuredClone(qslate); badPartition.games[0].probability_grid[0].push=0.2;
+  assert.equal((await call(`/v1/qbase/${sid}`,{qslate:badPartition})).status,502);
+  assert.equal((await call(`/v1/qbase/${sid}`,{qslate:{...qslate,probability_schema_version:'0.1.0'}})).status,502);
 });
 
 test('changed revision prevents mixed research slate pages', async()=>{

@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+  title: NCAA Totals Market Gateway
+  version: 1.1.0
+  description: >-
+    POST-FREEZE ONLY. Retrieves current full-game NCAA Football totals from The
+    Odds API Australian region. Integer and half-point totals may both be
+    returned. The model must exact-map only to already-frozen probabilities.
+servers:
+  - url: https://ncaaf-totals-market-v1.nickarnott01.workers.dev
+paths:
+  /health:
+    get:
+      operationId: healthNcaafTotalsMarketGateway
+      summary: Check gateway configuration without retrieving odds
+      responses:
+        '200':
+          description: Configured gateway
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '503':
+          description: Missing gateway configuration
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /v1/totals:
+    get:
+      operationId: getNcaafTotalsBoard
+      summary: Retrieve one page of current Australian NCAA full-game totals
+      description: >-
+        POST-FREEZE ONLY. Start offset 0, follow pagination.next_offset to null,
+        and pass the same revision on subsequent pages. On 409 discard mixed
+        pages and restart once. Requests only region=au and market=totals.
+      parameters:
+        - name: commence_from
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: commence_to
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 25, default: 15 }
+        - name: revision
+          in: query
+          required: false
+          schema: { type: string, pattern: '^[a-f0-9]{16}$' }
+      responses:
+        '200':
+          description: Current market board page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BoardPage' }
+        '400':
+          description: Invalid parameter
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Board changed; restart pagination
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: Upstream market-source failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: Gateway not configured
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        board_revision: { type: string }
+      additionalProperties: true
+    Outcome:
+      type: object
+      required: [name, price, point]
+      properties:
+        name:
+          type: string
+          enum: [Over, Under]
+        price: { type: number }
+        point: { type: number }
+      additionalProperties: false
+    Bookmaker:
+      type: object
+      properties:
+        key: { type: string }
+        title: { type: string }
+        last_update:
+          type: [string, 'null']
+        totals:
+          type: array
+          items: { $ref: '#/components/schemas/Outcome' }
+      additionalProperties: true
+    MarketGame:
+      type: object
+      properties:
+        event_id: { type: string }
+        home_team: { type: string }
+        away_team: { type: string }
+        commence_time: { type: string, format: date-time }
+        bookmakers:
+          type: array
+          items: { $ref: '#/components/schemas/Bookmaker' }
+      additionalProperties: true
+    BoardPage:
+      type: object
+      properties:
+        service: { type: string }
+        version: { type: string }
+        sport_key: { type: string }
+        region: { type: string }
+        market_group: { type: string }
+        market_key: { type: string }
+        retrieved_at: { type: string, format: date-time }
+        board_revision: { type: string }
+        filter: { type: object, additionalProperties: true }
+        quota: { type: object, additionalProperties: true }
+        games:
+          type: array
+          items: { $ref: '#/components/schemas/MarketGame' }
+        pagination:
+          type: object
+          properties:
+            offset: { type: integer }
+            returned: { type: integer }
+            total_games: { type: integer }
+            next_offset:
+              type: [integer, 'null']
+            revision: { type: string }
+          additionalProperties: true
+      additionalProperties: true

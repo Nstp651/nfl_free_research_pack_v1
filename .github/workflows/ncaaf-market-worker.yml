@@ -1,11 +1,14 @@
-name: Verify and deploy NCAA totals market Worker
+name: Verify NCAA totals market Worker source
 
+# Cloudflare native Git integration owns production deployment. The market
+# project's Cloudflare build secret installs ODDS_API_KEY as a runtime Worker
+# secret in its deploy command. GitHub never stores the Odds API key.
 on:
   push:
-    branches: [main, feature/ncaaf-totals-v1]
+    branches: [main, feature/ncaaf-totals-v1, feature/ncaaf-integer-totals-v1.1]
     paths:
       - 'ncaaf_totals_v1/market_worker/**'
-      - 'ncaaf_totals_v1/market_openapi.yaml'
+      - 'ncaaf_totals_v1/market_openapi*.yaml'
       - '.github/workflows/ncaaf-market-worker.yml'
   workflow_dispatch:
 
@@ -13,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ncaaf-market-worker-${{ github.ref }}
+  group: ncaaf-market-worker-verify-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,62 +31,15 @@ jobs:
       - name: Action contract sanity
         shell: bash
         run: |
-          grep -q 'operationId: getNcaafTotalsBoard' ncaaf_totals_v1/market_openapi.yaml
-          grep -q 'ncaaf-totals-market-v1.nickarnott01.workers.dev' ncaaf_totals_v1/market_openapi.yaml
+          grep -q 'operationId: getNcaafTotalsBoard' ncaaf_totals_v1/market_openapi_v1_1.yaml
+          grep -q 'ncaaf-totals-market-v1.nickarnott01.workers.dev' ncaaf_totals_v1/market_openapi_v1_1.yaml
           grep -q "region: 'au'" ncaaf_totals_v1/market_worker/index.js
           grep -q "markets: 'totals'" ncaaf_totals_v1/market_worker/index.js
+          grep -q 'name = "ncaaf-totals-market-v1"' ncaaf_totals_v1/market_worker/wrangler.toml
       - name: Wrangler dry run
         working-directory: ncaaf_totals_v1/market_worker
         env:
           WRANGLER_SEND_METRICS: 'false'
         run: npx --yes wrangler@4.128.0 deploy --dry-run --outdir /tmp/ncaaf-market-worker --config wrangler.toml
-
-  deploy:
-    needs: verify
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
-      WRANGLER_SEND_METRICS: 'false'
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Check deployment secrets
-        id: ready
-        shell: bash
-        run: |
-          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] && [ -n "$ODDS_API_KEY" ]; then
-            echo 'ready=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'ready=false' >> "$GITHUB_OUTPUT"
-            echo 'Market Worker verified, but Cloudflare/Odds API GitHub secrets are incomplete; deploy skipped.' >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Deploy Worker
-        if: steps.ready.outputs.ready == 'true'
-        working-directory: ncaaf_totals_v1/market_worker
-        run: npx --yes wrangler@4.128.0 deploy --config wrangler.toml
-      - name: Install ODDS_API_KEY Worker secret
-        if: steps.ready.outputs.ready == 'true'
-        working-directory: ncaaf_totals_v1/market_worker
-        shell: bash
-        run: printf '%s' "$ODDS_API_KEY" | npx --yes wrangler@4.128.0 secret put ODDS_API_KEY --config wrangler.toml
-      - name: Smoke-test configuration health
-        if: steps.ready.outputs.ready == 'true'
-        shell: bash
-        run: |
-          URL='https://ncaaf-totals-market-v1.nickarnott01.workers.dev/health'
-          for i in 1 2 3 4 5; do
-            if curl --fail --silent --show-error "$URL" > /tmp/market-health.json; then break; fi
-            sleep 5
-          done
-          python - <<'PY'
-          import json
-          h=json.load(open('/tmp/market-health.json'))
-          assert h.get('ok') is True, h
-          assert h.get('sport_key') == 'americanfootball_ncaaf', h
-          assert h.get('region') == 'au', h
-          assert h.get('market_key') == 'totals', h
-          print(json.dumps(h, indent=2))
-          PY
+      - name: Deployment ownership receipt
+        run: echo 'Cloudflare Git integration is the production deployment owner; live board acceptance is manual-only.'

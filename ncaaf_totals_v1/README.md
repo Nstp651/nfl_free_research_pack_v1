@@ -1,115 +1,192 @@
-# NCAA Football Totals Research Pack v0.1
+# NCAA Football Totals V1.1
 
-Status: BUILD / VALIDATION — not production-locked.
+Status: PRODUCTION CANDIDATE — infrastructure live; V1.1 integer-line upgrade under final CI/merge validation.
 
-This directory is the research-infrastructure scaffold for Nick's fully automated NCAA Football game-totals model. It deliberately reuses the proven NFL pack controls (versioned source receipts, immutable revisions, Action-size guards, freshness checks and market separation) while changing the research grain from one NFL player-prop fixture to one full FBS-v-FBS weekly slate.
+This directory contains Nick's fully automated NCAA Football full-game totals stack. It reuses the proven NFL production controls (immutable revisions, source receipts, Action-size guards, freshness checks, actual numerical execution and hard market separation) while operating on one full FBS-v-FBS weekly slate.
 
 ## Non-negotiable boundary
 
-This service is PRE-MARKET RESEARCH ONLY.
+Layers 0-2 are PRE-MARKET ONLY.
 
-- No sportsbook odds, spreads, totals, betting consensus or bookmaker data are downloaded by the builder.
-- Every API response carries `market_data: false`.
-- The source allow-list is explicit. The sportsdataverse `cfb_betting_lines` / betting datasets are not allowed.
-- A week-W model may only consume current-season team snapshots with `through_week <= W-1`.
-- Odds API access belongs after the model distribution is frozen and is outside this service.
+- No sportsbook odds, spreads, totals, betting consensus or bookmaker data enter the research builder or QBASE.
+- Every research/QBASE API response carries `market_data: false`.
+- The source allow-list excludes sportsdataverse betting-line products.
+- A week-W model may consume current-season structured team evidence only through W-1.
+- The Odds API market Worker is separate and `getNcaafTotalsBoard` is POST-FREEZE ONLY.
 
-## Initial universe
+## Universe
 
 - NCAA Football / FBS
-- Regular season
-- FBS vs FBS only
+- FBS vs FBS only for V1 betting selection
 - One research revision covers the entire target week
-- Completed games can remain in the research manifest for auditability; the model run must independently enforce kickoff eligibility.
+- One QBASE revision aligns to exactly one research revision
+- Full-game totals only
+- Both integer and half-point totals are first-class markets in V1.1
 
 ## Structured sources
 
-Free public `sportsdataverse` release assets:
+Free public sportsdataverse/cfbfastR release assets:
 
-1. `cfb_schedules` — fixture IDs, teams, venue, kickoff, FBS flags.
-2. `cfb_team_summaries_weekly` — 384-column as-of team research substrate.
-3. `cfb_ratings_weekly` — a second opponent-adjusted rating system with different filtering.
-4. `cfb_returning_production` — preseason continuity context when available.
-5. `cfb_team_talent` — preseason roster/talent context when available.
+1. `cfb_schedules` — fixtures, IDs, kickoff, home/away, FBS flags.
+2. `cfb_team_summaries_weekly` — core as-of team research substrate.
+3. `cfb_ratings_weekly` — independent adjusted rating family when published.
+4. `cfb_returning_production` — preseason continuity context when published.
+5. `cfb_team_talent` — preseason roster/talent context when published.
 
-The pack keeps current and prior-season evidence separate. It does not silently blend them; the model owns the early-season weighting and must explain it.
+Current-season and prior-season evidence remain separate. Missing optional releases are limitations, never zero-filled facts.
 
 ## As-of / leakage rule
 
-For a target game in week `W`:
+For target week W:
 
 `current structured evidence through_week <= W - 1`
 
-Week 1 therefore has no current-season weekly performance snapshot. The pack exposes prior-season and preseason context rather than treating missing current data as zero.
+Week 1 therefore uses no 2026 weekly performance observations. Prior-season numbers remain statistical priors while current QB/personnel/coaching/system truth is rebuilt from current research.
+
+## Quantitative baseline
+
+`model/qbase_v0.1.0.json` is the selected market-blind Ridge QBASE.
+
+Training / validation receipt:
+- 7,428 FBS-v-FBS games, 2016-2025
+- 5,152 temporal walk-forward scored games
+- OOS MAE 13.03, RMSE 16.45
+- Week 0/1 MAE 13.70
+- Weeks 2-4 MAE 13.24
+- Week 5+ MAE 12.88
+
+Nonlinear challengers were tested and did not beat Ridge out-of-sample, so they were not promoted.
+
+QBASE is an anchor, not automatically the final P_model. Current QB/personnel/weather/system information is translated after QBASE and before freeze.
+
+## Integer + half-point probability grid
+
+V1.1 freezes a 0.5-step grid from 20.0 through 100.5 before market access.
+
+Half-point lines:
+- `P_push = 0`
+- standard Over/Under complement.
+
+Integer line n:
+- `P_under ~= F(n-0.5)`
+- `P_push ~= F(n+0.5)-F(n-0.5)`
+- `P_over ~= 1-F(n+0.5)`
+
+The grid is audited for monotonicity and `Over + Push + Under = 1` at every line.
+
+Push-aware price math is executable in `model/market_math.py` and tested in `tests/test_market_math.py`.
 
 ## Build flow
 
 ```text
-sportsdataverse releases
+sportsdataverse / cfbfastR releases
         |
         v
 build_pack.py
   - source metadata + SHA receipts
-  - FBS-v-FBS weekly schedule
-  - leak-free as-of snapshots
-  - current/prior/preseason team profiles
-  - opponent-adjustment sanity check
+  - FBS-v-FBS weekly slate
+  - W-1 leak-free snapshots
+  - current/prior/preseason profiles
+  - source-quality guards
   - market-field denylist
         |
         v
-data/manifest.json
-+ data/slates/<season>/<slate_id>.json
+data/manifest.json + data/slates/<season>/<slate_id>.json
         |
         v
-Cloudflare Worker
-  /health
-  /v1/slates?season=&week=
-  /v1/slates/{slate_id}?offset=&limit=&revision=
+score_slate.py + QBASE artifact
+  - market-blind expected total
+  - temporal OOS residual calibration
+  - integer/half-point Over/Push/Under grid
         |
         v
-GPT Layer 1 structured research
+Cloudflare research Worker
+        |
+        v
+GPT current-information research + Layer 2 execution
+        |
+        v
+ENTIRE SLATE P_MODEL FREEZE
+        |
+        v
+Cloudflare market Worker -> The Odds API region=au, market=totals
+        |
+        v
+exact frozen mapping + push-aware EV + slate ranking
 ```
 
-The Worker pages by GAME, not player. It dynamically reduces the number of returned games to stay below the Action response limit while preserving one immutable slate revision.
+## Live services
 
-## Why weekly snapshots matter
+Research/model Worker:
+`https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev`
 
-`cfb_team_summaries_weekly` and `cfb_ratings_weekly` are as-of products. The upstream model code explicitly documents that a week-W game must join to information through week W-1. This repository repeats that rule as a hard validation gate so the later NCAA model can be backtested without same-week leakage.
+Market Worker:
+`https://ncaaf-totals-market-v1.nickarnott01.workers.dev`
 
-## Source-quality guard
+Cloudflare native Git integration owns production deployment. GitHub Actions verify/test source; they do not carry Cloudflare deployment credentials.
 
-The upstream project documented a 2026 issue where one earlier opponent-adjusted EPA build was almost identical to raw EPA. The builder therefore calculates a correlation sanity check when enough current rows exist. A suspiciously high adjusted-vs-raw correlation is surfaced as `PARTIAL` source health rather than silently trusted.
+### Cloudflare Git configuration
 
-## Files
+Research Worker:
+- project: `ncaaf-totals-research-pack-v1`
+- repo: `Nstp651/nfl_free_research_pack_v1`
+- production branch: `main`
+- root: `ncaaf_totals_v1`
+- build: blank
+- deploy: `npx wrangler deploy`
 
-- `build_pack.py` — download, validate and build the active weekly research pack.
-- `validate_pack.py` — independent output guard.
-- `worker/index.js` — read-only Cloudflare Worker.
-- `worker/index.test.mjs` — Worker contract tests.
-- `openapi.yaml` — GPT Action schema.
-- `wrangler.toml` — dedicated Worker package.
-- `tests/test_build_pack.py` — market-lock / as-of unit tests.
-- `MODEL_ARCHITECTURE.md` — NCAA totals four-layer architecture derived from the NFL production model.
+Market Worker:
+- project: `ncaaf-totals-market-v1`
+- production branch: `main`
+- root: `ncaaf_totals_v1/market_worker`
+- build: blank
+- deploy: `npx wrangler deploy && printf '%s' "$ODDS_API_KEY" | npx wrangler secret put ODDS_API_KEY`
+- `ODDS_API_KEY` exists only as an encrypted Cloudflare build secret and is installed as a runtime Worker secret during deploy.
 
-## GitHub automation
+## Live acceptance evidence
 
-`.github/workflows/ncaaf-refresh.yml` validates the code and refreshes the active data pack on a schedule. It commits only the generated `ncaaf_totals_v1/data` directory on `main`.
+Live research acceptance passed for 2026 Week 1:
+- 51 FBS-v-FBS games
+- `pack_revision=491a09bd18f8a6ed`
+- research health live / recent
+- QBASE V0.1.0 served successfully
+- no market data in research/QBASE path
 
-`.github/workflows/ncaaf-worker-deploy.yml` dry-runs the Worker on every relevant change. If repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are present, the same workflow deploys the dedicated Worker automatically.
+A controlled AU market-board acceptance also passed. The live board returned 49 NCAA games overall; the first page included Sportsbet, TAB, TABtouch and PlayUp. Both integer and half-point total lines were observed. This acceptance consumed one Odds API request and is now manual-only so normal CI cannot spend market quota.
 
-## Production-lock requirements
+## Core files
 
-Do not call this production-ready until all are observed:
+- `build_pack.py` — source ingestion / weekly research pack
+- `validate_pack.py` — independent pack integrity guard
+- `model/train_qbase.py` — temporal QBASE training
+- `model/score_slate.py` — QBASE slate scoring + integer/half-point probability grid
+- `model/market_math.py` — pure push-aware post-freeze price math
+- `worker/index.js` — read-only research/QBASE Worker
+- `market_worker/index.js` — post-freeze AU totals gateway
+- `openapi_v1_1.yaml` — V1.1 pre-market GPT Action schema
+- `market_openapi_v1_1.yaml` — V1.1 post-freeze GPT Action schema
+- `NCAA_TOTALS_4_LAYER_MASTER_API_ACTION_PRODUCTION_V1.1.md` — authoritative methodology
+- `GPT_INSTRUCTIONS_PRODUCTION_V1.1.md` — production GPT orchestration instructions
+- `DEPLOYMENT.md` — live deployment/runbook
 
-1. Real 2026 release ingestion succeeds.
-2. Target-week FBS-v-FBS fixture reconciliation succeeds.
-3. Every current snapshot satisfies the W-1 rule.
-4. Source hashes / timestamps are recorded.
-5. No market key/source can enter the pack.
-6. Worker pagination retrieves every game at one revision.
-7. Live workers.dev health/list/slate calls pass.
-8. GPT Action import and retrieval pass.
-9. At least two full slates are manually reconciled against the source fixtures.
-10. NCAA scoring-model calibration / backtest is completed separately before betting use.
+## Automation ownership
 
-Zero new paid data/services are required by this research pack.
+- `ncaaf-refresh.yml` refreshes the research pack on schedule.
+- `ncaaf-qbase-score.yml` regenerates QBASE slate outputs after data/model changes.
+- `ncaaf-unit-tests.yml` runs Python + both Worker contract tests.
+- `ncaaf-worker-deploy.yml` is verification-only; Cloudflare Git deploys research Worker.
+- `ncaaf-market-worker.yml` is verification-only; Cloudflare Git deploys market Worker.
+- `ncaaf-live-acceptance.yml` validates live health without consuming odds-board quota.
+- `ncaaf-market-board-acceptance.yml` is manual-only because it consumes one real Odds API board request.
+
+## Remaining production sign-off
+
+Before calling V1.1 fully signed off:
+1. merge the integer-line branch after all CI is green;
+2. confirm live research Worker serves probability schema 0.2.0 with integer push rows;
+3. import V1.1 research + market Action schemas into the custom GPT;
+4. attach V1.1 master and paste V1.1 Instructions;
+5. run one complete market-blind slate dry run through Layer 2 freeze;
+6. run one controlled post-freeze market integration and verify push-aware ranking on an integer line if one is offered.
+
+No new paid data service is required beyond the user's existing The Odds API subscription.
