@@ -1,12 +1,26 @@
 #!/usr/bin/env python3
 """Production entrypoint for the NCAA pack builder.
 
-Keeps the branch runnable while preserving the original builder source for review.
-The only override here fixes pandas-Series truth evaluation in team-name fallback.
+This entrypoint fixes pandas-Series truth evaluation in the base builder and
+extends the compact allow-list with cfbfastR fields verified in its matchup
+model. The upstream base builder stays small/reviewable; production workflows
+invoke this file.
 """
 from __future__ import annotations
 
 import build_pack as bp
+
+# Verified in cfbfastR's higher-model matchup implementation. These are the
+# highest-value totals inputs missing from the first compact allow-list:
+# pass/rush efficiency splits, offensive pass tendency, defensive faced pass
+# tendency, and pace. Duplicates are removed while preserving order.
+VERIFIED_MATCHUP_METRICS = [
+    "EPAplay_off_pass", "EPAplay_def_pass",
+    "EPAplay_off_rush", "EPAplay_def_rush",
+    "passrate_off", "passrate_def",
+    "playsgame_off", "playsgame_def",
+]
+bp.SUMMARY_METRICS = list(dict.fromkeys(bp.SUMMARY_METRICS + VERIFIED_MATCHUP_METRICS))
 
 
 def fixed_profile(team_id, name, current_summary, current_ratings, prior_summary,
