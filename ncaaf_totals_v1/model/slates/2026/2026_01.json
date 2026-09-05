@@ -982,6 +982,7 @@
           "under": 0.99663469
         }
       ],
+      "qbase_anchor_sha256": "8e82a9803c1efc6635552701e031fe5575ca7ceadd134af692b3d39391c7c5a9",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -1967,6 +1968,7 @@
           "under": 0.9941926
         }
       ],
+      "qbase_anchor_sha256": "4e598c085b6b66ed501c1636baa4b1c0e74efe21377b496d9cca2a40eb41943a",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -2952,6 +2954,7 @@
           "under": 0.99520337
         }
       ],
+      "qbase_anchor_sha256": "bf02192ec419ed6a771406f2e24351c0a87943024dac680226262c2f605fc542",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -3937,6 +3940,7 @@
           "under": 0.9948414
         }
       ],
+      "qbase_anchor_sha256": "ae2956fd13f5f82b126c6fe6a2057c5e8f346af0c1aa72817cb4773c083adc44",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -4922,6 +4926,7 @@
           "under": 0.9948414
         }
       ],
+      "qbase_anchor_sha256": "2ab4a98923ba78066628829c55b99dcb3fed71b2de5b42602b59c178c1a7c493",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -5907,6 +5912,7 @@
           "under": 0.99501285
         }
       ],
+      "qbase_anchor_sha256": "685a2cf5d82eb0bdaba20bce54c8c0b7baadfdb80a788a312e46cb0c14274770",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -6892,6 +6898,7 @@
           "under": 0.99658925
         }
       ],
+      "qbase_anchor_sha256": "afa6ed2d2447ee99d3f24909388c037f8dcfae59d6dc280857d3ad0f9582fbbe",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -7877,6 +7884,7 @@
           "under": 0.98857976
         }
       ],
+      "qbase_anchor_sha256": "6adfa9c64fbc14f8e3dc2cd9f00a8cb0a7ca4889ee4368ea5e0af5b63bae737a",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -8862,6 +8870,7 @@
           "under": 0.99554724
         }
       ],
+      "qbase_anchor_sha256": "b3384d2295f31852fd70f05cffb056d58b4c16ee6ee097d3dc6717ce4e7d2027",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -9847,6 +9856,7 @@
           "under": 0.99731779
         }
       ],
+      "qbase_anchor_sha256": "3fe3d902745603b688fe8a2cb5071fbfe42d397517d404d8e6e351760548063e",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -10832,6 +10842,7 @@
           "under": 0.99628961
         }
       ],
+      "qbase_anchor_sha256": "76b8d50a7a6f54271ca43be8554a076c147504f59c8adfb7700fd9ed18425d6c",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -11817,6 +11828,7 @@
           "under": 0.99516133
         }
       ],
+      "qbase_anchor_sha256": "dbcb281156ee5b1840066ca874cc6e475203e068f277698118d96ebfece20d69",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -12802,6 +12814,7 @@
           "under": 0.99327844
         }
       ],
+      "qbase_anchor_sha256": "1118b23fdf5afd545707d49baa80e40aacb589b1da589241d2ad379713077bfb",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -13787,6 +13800,7 @@
           "under": 0.99889484
         }
       ],
+      "qbase_anchor_sha256": "f778279cbf2acdf69e9987aabd64b6713ff0eae65ec4dc6020454c55b3dd066b",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -14772,6 +14786,7 @@
           "under": 0.99797005
         }
       ],
+      "qbase_anchor_sha256": "5f709f4e0f5011cb41d2e4a99b0ae8b33be8de03401b7815658390dffda4383a",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -15757,6 +15772,7 @@
           "under": 0.99798661
         }
       ],
+      "qbase_anchor_sha256": "05f0e21a2f19a9eba4ca9994eb61e3bd89dd5303f20a3f3aa47113ba368fc7ac",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -16742,6 +16758,7 @@
           "under": 0.99813433
         }
       ],
+      "qbase_anchor_sha256": "47b3d71f7e64d1097f637dc49168fc4a7f3d038901abcd565b81c17f7560f194",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -17727,6 +17744,7 @@
           "under": 0.99356025
         }
       ],
+      "qbase_anchor_sha256": "74d424cdbfbfc44a0181a05eb5c9d239cc69ae0df217ee636953b920c24a8549",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -18712,6 +18730,7 @@
           "under": 0.99660537
         }
       ],
+      "qbase_anchor_sha256": "8896cc26730a9e8b9227cd93a7f5655eb66d8bf8da93ab871d3318bb541d4bae",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -19697,6 +19716,7 @@
           "under": 0.99811882
         }
       ],
+      "qbase_anchor_sha256": "06475935e2f46f4f9a9acc3df2d0ece9584b24d23d91edb1499c44c61f4955f5",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -20682,6 +20702,7 @@
           "under": 0.99783482
         }
       ],
+      "qbase_anchor_sha256": "0dfbae7236cf511ecfb36634c9ba100db9a7d936a5b1a17786083b14c5941df5",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -21667,6 +21688,7 @@
           "under": 0.99491462
         }
       ],
+      "qbase_anchor_sha256": "c12e73954c03d1efdd335d583b9e986ed0247df562c5117ceec1bac179afbb86",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -22652,6 +22674,7 @@
           "under": 0.99752355
         }
       ],
+      "qbase_anchor_sha256": "4bc27dd3c7650e140839f40e9d91718293be6f5b43b4d859cfb5c8f1f9f89d89",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -23637,6 +23660,7 @@
           "under": 0.99943698
         }
       ],
+      "qbase_anchor_sha256": "16448aa9ad7cef609ba12c21976eef7955c880e6cf4a0c83b88a17fe920d1313",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -24622,6 +24646,7 @@
           "under": 0.99792477
         }
       ],
+      "qbase_anchor_sha256": "e873a7d36b6626bf031bdcff010641446f2488cf61e0e23b9fc5b3feb777745f",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -25607,6 +25632,7 @@
           "under": 0.99732731
         }
       ],
+      "qbase_anchor_sha256": "582f6352d6022ad897b9369f7d98b17d8a4d9732fd6c79a12e994353b7655c01",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -26592,6 +26618,7 @@
           "under": 0.99364174
         }
       ],
+      "qbase_anchor_sha256": "1050d81e882dd986525190af56ede48317474e9258204ac84e2de1904f6ab9a4",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -27577,6 +27604,7 @@
           "under": 0.99608561
         }
       ],
+      "qbase_anchor_sha256": "85ca72735f3371881343ee63e51bb8d062d6eb4a548b94be47bd0a3972e815ab",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -28562,6 +28590,7 @@
           "under": 0.99171356
         }
       ],
+      "qbase_anchor_sha256": "ceb2da7f6261483ce7ca0c40c3da981342787ea2e6ed8b50737057d42622f7fe",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -29547,6 +29576,7 @@
           "under": 0.99445764
         }
       ],
+      "qbase_anchor_sha256": "b5a61f123d93c81d5b64c1ba6c31db3c0219ec1080194b99bff6d91a1551bc33",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -30532,6 +30562,7 @@
           "under": 0.99391113
         }
       ],
+      "qbase_anchor_sha256": "9919bd7e64b218ddc494f5bdbcbfa84a33e7d0343dc412d9fe2915dbb32af1d8",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -31517,6 +31548,7 @@
           "under": 0.99284648
         }
       ],
+      "qbase_anchor_sha256": "7589fc9390fa532953744dc7530cdb644745c07973f33d5b8f971ff91eaec573",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -32502,6 +32534,7 @@
           "under": 0.99624598
         }
       ],
+      "qbase_anchor_sha256": "08f9f3703df2a67f57ab081652cbd9040992ce5a6af5f7d4e7a70e9cd925fb00",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -33487,6 +33520,7 @@
           "under": 0.99956711
         }
       ],
+      "qbase_anchor_sha256": "56d04edd254e10f40039ecc7c7c1c14d3fee519b5d8707e428cad330daf828ab",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -34472,6 +34506,7 @@
           "under": 0.99717929
         }
       ],
+      "qbase_anchor_sha256": "1bc5023a2e7c5c718cae955ad96b1df172e575c63c3cff6796dfac72446a7a2a",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -35457,6 +35492,7 @@
           "under": 0.99187716
         }
       ],
+      "qbase_anchor_sha256": "508ee2e3633c70a1e15266489815607517652b01357b0db18eda197d774a8225",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -36442,6 +36478,7 @@
           "under": 0.99523615
         }
       ],
+      "qbase_anchor_sha256": "c2e88a84997131c02fd6b9cedacccd9fb97f0cd80b8fa8f454d8dc7a9d6c7a7d",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -37427,6 +37464,7 @@
           "under": 0.99688259
         }
       ],
+      "qbase_anchor_sha256": "40f9a207270db88d78d7a66c1e502744d8a9937cdd8bf220427870f13d45d080",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -38412,6 +38450,7 @@
           "under": 0.99559428
         }
       ],
+      "qbase_anchor_sha256": "5504e1e8a2b9b337b287aeb5ba9e28a670c4213b48a5c39247108ccd5d90fdfc",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -39397,6 +39436,7 @@
           "under": 0.99911113
         }
       ],
+      "qbase_anchor_sha256": "dcc65cc8e67f8fdeed243b9e33e8c7b3287f6522ac0ef58d33f38a95efc58722",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -40382,6 +40422,7 @@
           "under": 0.99501308
         }
       ],
+      "qbase_anchor_sha256": "85b4190a8a553a48a337bc0f4db0ce265b2743673cfc2f484a285a4bc99f1035",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -41367,6 +41408,7 @@
           "under": 0.99832958
         }
       ],
+      "qbase_anchor_sha256": "41bd072158ea59a559784efde25b6d5a01b067bc4708ca4d87316eef589b9088",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -42352,6 +42394,7 @@
           "under": 0.99016534
         }
       ],
+      "qbase_anchor_sha256": "2e78c7eae568fd0e58fd8073549f8047452b44357356dd8ad0f5211ef38077a3",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -43337,6 +43380,7 @@
           "under": 0.98808868
         }
       ],
+      "qbase_anchor_sha256": "493e0d5886ba4a3b1d83ae2f0a51ef9b57dea88f8b26284cbd6b58b78c6aa47a",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -44322,6 +44366,7 @@
           "under": 0.99819685
         }
       ],
+      "qbase_anchor_sha256": "1d8f07542a39ac339f820e63ed6fb02f070c99efd8c9799ef9b63cf936da2cad",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -45307,6 +45352,7 @@
           "under": 0.9974795
         }
       ],
+      "qbase_anchor_sha256": "d4ee182a39ca0af9cc3d2e856b76365d41146b59baa2f2b6e2f9919eb472b3fa",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -46292,6 +46338,7 @@
           "under": 0.99632688
         }
       ],
+      "qbase_anchor_sha256": "f54948b9dc1d2689d38e920c271521b3da4df16ec70ae0fb9d9bca6c2292e624",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -47277,6 +47324,7 @@
           "under": 0.99851606
         }
       ],
+      "qbase_anchor_sha256": "51468c5d2c8058b366f225a37ee1aba9673c70ba0131f97e407fa6b3f06877e0",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -48262,6 +48310,7 @@
           "under": 0.99703082
         }
       ],
+      "qbase_anchor_sha256": "2cd2389c4f8e9bc42bb7eb70438c9b56759ab0f09e9a25ddc684bb2f014b5026",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -49247,6 +49296,7 @@
           "under": 0.99914481
         }
       ],
+      "qbase_anchor_sha256": "b96ab36aa6a027613bf5f46da4708be0df42c1af49a22a2b0ab23bd0ac81d890",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     },
@@ -50232,14 +50282,17 @@
           "under": 0.99107696
         }
       ],
+      "qbase_anchor_sha256": "dc5dfa7bc791991f5d03a0d070efa0b84b7d98f78178af7170012c51fd785065",
       "residual_bucket": "WEEK_0_1",
       "residual_sd": 16.984241
     }
   ],
+  "identity_binding": "exact_game_id_plus_qbase_anchor_sha256",
   "integer_line_method": "continuity_corrected_discrete_mass",
   "market_data": false,
   "notes": [
     "QBASE is pre-market and not final P_model.",
+    "Every QBASE game is bound to its exact game_id/team/anchor/grid via qbase_anchor_sha256.",
     "Current live QB/personnel/weather scenario translation occurs after this baseline and before freeze.",
     "Integer totals include explicit push probability; half-point totals have push=0."
   ],
@@ -50247,7 +50300,7 @@
   "qbase_model_name": "Nick NCAA Totals QBASE",
   "qbase_model_sha256": "ba8fe6dc86252a7fc1b8dd33eb1aaa4acb94d16ccfbced439fa4c3bbf40b42dd",
   "qbase_model_version": "0.1.0",
-  "qbase_revision": "c3e6ff69676afc6a",
+  "qbase_revision": "a7ba54ed9b6c4136",
   "research_pack_revision": "22ecd658b9cca935",
   "schema_version": "0.1.0",
   "season": 2026,
