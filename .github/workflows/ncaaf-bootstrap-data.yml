@@ -4,11 +4,19 @@ on:
   push:
     branches: [feature/ncaaf-totals-v1]
     paths:
+      - 'ncaaf_totals_v1/build_pack.py'
+      - 'ncaaf_totals_v1/build_pack_entry.py'
+      - 'ncaaf_totals_v1/validate_pack.py'
+      - 'ncaaf_totals_v1/requirements.txt'
       - '.github/workflows/ncaaf-bootstrap-data.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: ncaaf-bootstrap-data
+  cancel-in-progress: false
 
 jobs:
   bootstrap:
@@ -37,5 +45,5 @@ jobs:
             echo 'Generated data already current.'
             exit 0
           fi
-          git commit -m 'Bootstrap real NCAA 2026 research pack'
+          git commit -m 'Refresh real NCAA 2026 research pack'
           git push origin 'HEAD:feature/ncaaf-totals-v1'
