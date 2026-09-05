@@ -4,9 +4,10 @@ info:
   version: 0.1.0
   description: >-
     Read-only, pre-market NCAA Football FBS-v-FBS research and calibrated QBASE
-    service. Retrieve the complete target-week slate at one immutable revision
-    and the market-blind QBASE artifact before building P_model. No odds,
-    sportsbook prices, consensus lines or betting data are returned.
+    service. Retrieve the complete target-week slate at one immutable revision,
+    the market-blind QBASE artifact, and aligned QBASE slate outputs before
+    building final P_model. No odds, sportsbook prices, consensus lines or
+    betting data are returned.
 servers:
   - url: https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev
 paths:
@@ -32,10 +33,9 @@ paths:
       operationId: getNcaafTotalsQbase
       summary: Retrieve the calibrated market-blind NCAA totals QBASE artifact
       description: >-
-        Layer 2 input only. Returns the executed walk-forward-calibrated model
+        Layer 2 input only. Returns executed walk-forward-calibrated model
         coefficients, preprocessing values and out-of-sample residual
-        distributions. The artifact contains market_data=false and must be
-        retrieved before sportsbook market access.
+        distributions. market_data is false.
       responses:
         '200':
           description: QBASE model artifact
@@ -45,6 +45,62 @@ paths:
                 $ref: '#/components/schemas/Qbase'
         '502':
           description: QBASE source or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/qbase/{slate_id}:
+    get:
+      operationId: getNcaafTotalsQbaseSlate
+      summary: Fetch one page of aligned market-blind QBASE game outputs
+      description: >-
+        Start at offset 0 and follow pagination.next_offset to null at ONE
+        qbase_revision. Pass that revision on every subsequent request. Verify
+        research_pack_revision matches the research slate loaded for the run.
+        A 409 means QBASE outputs changed; discard mixed pages and restart once.
+      parameters:
+        - name: slate_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9]{4}_[0-9]{2}$'
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 6
+        - name: revision
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-f0-9]{16}$'
+      responses:
+        '200':
+          description: One page of QBASE game outputs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QbaseSlatePage'
+        '409':
+          description: QBASE slate changed; restart retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: QBASE slate source or validation failure
           content:
             application/json:
               schema:
@@ -163,6 +219,7 @@ components:
       properties:
         error: { type: string }
         slate_id: { type: string }
+        qbase_revision: { type: string }
       additionalProperties: true
     Health:
       type: object
@@ -215,6 +272,59 @@ components:
         served_at_utc:
           type: string
           format: date-time
+      additionalProperties: true
+    QbaseGame:
+      type: object
+      properties:
+        game_id: { type: string }
+        home_team: { type: string }
+        away_team: { type: string }
+        expected_total_raw: { type: number }
+        oos_bias_calibration: { type: number }
+        expected_total_qbase: { type: number }
+        residual_bucket: { type: string }
+        residual_sd: { type: number }
+        missing_feature_count_before_imputation: { type: integer }
+        probability_grid:
+          type: array
+          items:
+            type: object
+            properties:
+              line: { type: number }
+              over: { type: number }
+              under: { type: number }
+            additionalProperties: false
+      additionalProperties: true
+    QbaseSlatePage:
+      type: object
+      properties:
+        schema_version: { type: string }
+        market_data: { type: boolean }
+        slate_id: { type: string }
+        season: { type: integer }
+        week: { type: integer }
+        research_pack_revision: { type: string }
+        qbase_model_name: { type: string }
+        qbase_model_version: { type: string }
+        qbase_model_sha256: { type: string }
+        qbase_revision: { type: string }
+        walk_forward_reference:
+          type: object
+          additionalProperties: true
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/QbaseGame'
+        pagination:
+          type: object
+          properties:
+            offset: { type: integer }
+            returned: { type: integer }
+            total_games: { type: integer }
+            next_offset:
+              type: [integer, 'null']
+            revision: { type: string }
+          additionalProperties: true
       additionalProperties: true
     SlateEntry:
       type: object
