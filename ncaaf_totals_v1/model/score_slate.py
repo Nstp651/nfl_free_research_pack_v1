@@ -19,7 +19,10 @@ import numpy as np
 import train_qbase as tq
 
 SCHEMA_VERSION = "0.1.0"
-GRID = [x + 0.5 for x in range(30, 86)]
+# Deliberately wider than normal NCAA market totals so exact post-freeze mapping
+# almost never needs a new threshold. Any line outside this range is a PASS
+# unless the grid was explicitly widened and recomputed before market access.
+GRID = [x + 0.5 for x in range(20, 101)]
 
 
 def finite(v: Any) -> float:
@@ -136,6 +139,7 @@ def score_pack(pack:dict, artifact:dict)->dict:
         'qbase_model_name':artifact['model_name'],'qbase_model_version':artifact['model_version'],
         'qbase_model_sha256':hashlib.sha256(model_bytes).hexdigest(),
         'qbase_revision':hashlib.sha256(material).hexdigest()[:16],
+        'supported_total_grid':{'min':GRID[0],'max':GRID[-1],'step':1.0},
         'walk_forward_reference':artifact['walk_forward']['overall'],
         'games':games,
         'notes':['QBASE is pre-market and not final P_model.','Current live QB/personnel/weather scenario translation occurs after this baseline and before freeze.'],
