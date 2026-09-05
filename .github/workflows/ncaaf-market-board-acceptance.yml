@@ -1,0 +1,64 @@
+name: NCAA live market board acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ncaaf-market-board-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      MARKET_URL: https://ncaaf-totals-market-v1.nickarnott01.workers.dev
+    steps:
+      - name: Retrieve one live AU NCAA totals board
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$MARKET_URL/v1/totals?offset=0&limit=25" > /tmp/board.json
+          python3 - <<'PY'
+          import json, math
+          b=json.load(open('/tmp/board.json'))
+          assert b.get('service') == 'NCAAF_TOTALS_MARKET_GATEWAY', b
+          assert b.get('sport_key') == 'americanfootball_ncaaf', b
+          assert b.get('region') == 'au', b
+          assert b.get('market_group') == 'ncaaf-totals', b
+          assert b.get('market_key') == 'totals', b
+          assert isinstance(b.get('board_revision'), str) and len(b['board_revision']) == 16, b
+          games=b.get('games', [])
+          assert games, 'Live board returned zero games; cannot accept market coverage.'
+          books=set(); lines=[]; outcomes=0
+          for g in games:
+            assert g.get('event_id') and g.get('home_team') and g.get('away_team') and g.get('commence_time'), g
+            for book in g.get('bookmakers', []):
+              if book.get('key'): books.add(book['key'])
+              for o in book.get('totals', []):
+                assert o.get('name') in {'Over','Under'}, o
+                assert isinstance(o.get('price'), (int,float)) and o['price'] > 1, o
+                assert isinstance(o.get('point'), (int,float)), o
+                outcomes += 1
+                lines.append(float(o['point']))
+          assert outcomes > 0, 'No AU totals outcomes returned.'
+          integer_lines=sorted({x for x in lines if abs(x-round(x)) < 1e-9})
+          half_lines=sorted({x for x in lines if abs((x*2)-round(x*2)) < 1e-9 and abs(x-round(x)) >= 1e-9})
+          other_lines=sorted({x for x in lines if x not in integer_lines and x not in half_lines})
+          print('NCAAF_MARKET_BOARD_ACCEPTANCE_PASS')
+          print(json.dumps({
+            'board_revision': b['board_revision'],
+            'retrieved_at': b.get('retrieved_at'),
+            'page_games': len(games),
+            'total_games': b.get('pagination',{}).get('total_games'),
+            'bookmakers': sorted(books),
+            'outcomes': outcomes,
+            'integer_lines': integer_lines,
+            'half_point_lines': half_lines,
+            'other_lines': other_lines,
+            'quota': b.get('quota'),
+          }, indent=2))
+          PY
