@@ -1,0 +1,168 @@
+name: NCAA V1.1.3 one-time live storage acceptance
+
+on:
+  push:
+    branches:
+      - ops/ncaaf-v113-live-acceptance-20260906
+    paths:
+      - '.github/workflows/ncaaf-v113-live-acceptance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Run exactly one market-blind production freeze acceptance
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base = 'https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev';
+          const expectedGameId = '401860878';
+          const expectedHome = 'Colorado State';
+          const expectedAway = 'Wyoming';
+
+          function must(ok, message) { if (!ok) throw new Error(message); }
+          async function call(method, path, body) {
+            const res = await fetch(base + path, {
+              method,
+              headers: body === undefined ? {} : {'content-type': 'application/json'},
+              body: body === undefined ? undefined : JSON.stringify(body),
+              signal: AbortSignal.timeout(30000),
+            });
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch { throw new Error(`${method} ${path} non-JSON ${res.status}: ${text.slice(0,500)}`); }
+            if (!res.ok) throw new Error(`${method} ${path} failed ${res.status}: ${JSON.stringify(data)}`);
+            return data;
+          }
+
+          const health = await call('GET', '/health');
+          must(health.ok === true && health.market_data === false, 'Production research health/market boundary failed');
+          console.log('HEALTH_PASS', JSON.stringify({version:health.version, market_data:health.market_data, fixture_count:health.fixture_count}));
+
+          // Narrow window intentionally isolates one not-yet-started FBS game. This is a
+          // technical production persistence/freeze acceptance, not a wagering slate run.
+          const started = await call('POST', '/v1/freeze-runs', {
+            season: 2026,
+            week: 1,
+            window_start: '2026-09-05T21:59:00Z',
+            window_end: '2026-09-05T22:01:00Z',
+            timing_mode: 'MATCHDAY'
+          });
+          must(started.market_data === false, 'Market boundary failed on start');
+          must(started.status === 'RESEARCH_IN_PROGRESS', 'Run did not initialize research state');
+          must(Array.isArray(started.lock?.eligible_game_ids) && started.lock.eligible_game_ids.length === 1 && started.lock.eligible_game_ids[0] === expectedGameId,
+            `Acceptance window did not isolate expected game: ${JSON.stringify(started.lock?.eligible_game_ids)}`);
+          const runId = started.run_id;
+          must(/^[a-f0-9]{64}$/.test(runId), 'Invalid run_id');
+          console.log('RUN_INITIALIZED', JSON.stringify({run_id:runId, eligibility_at:started.lock.eligibility_at, source_commit:started.lock.source_commit, pack_revision:started.lock.pack_revision, qbase_revision:started.lock.qbase_revision, game_id:expectedGameId}));
+
+          const researchPage = await call('GET', `/v1/freeze-runs/${runId}/research?offset=0`);
+          must(researchPage.market_data === false && researchPage.games?.length === 1, 'Research page boundary/count failed');
+          const rec = researchPage.games[0];
+          must(rec.research?.game_id === expectedGameId, 'Research game_id mismatch');
+          must(rec.research?.fixture?.home_team === expectedHome && rec.research?.fixture?.away_team === expectedAway, 'Fixture team mismatch');
+          must(typeof rec.qbase?.qbase_anchor_sha256 === 'string' && rec.qbase.qbase_anchor_sha256.length === 64, 'Missing QBASE anchor');
+          console.log('RESEARCH_READ_PASS', JSON.stringify({game_id:rec.research.game_id, home:rec.research.fixture.home_team, away:rec.research.fixture.away_team, qbase_anchor_sha256:rec.qbase.qbase_anchor_sha256}));
+
+          const checkedAt = new Date().toISOString();
+          const e = (finding, sources, unresolved=false) => ({finding, checked_at: checkedAt, sources, unresolved});
+          const CSU_GAME = 'https://csurams.com/news/2026/9/5/football-border-war-vs-wyoming';
+          const CSU_PRESSER = 'https://csurams.com/news/2026/8/31/football-monday-presser-ready-to-kick-off-the-season';
+          const CSU_PLAYCALL = 'https://csurams.com/news/2026/9/4/football-setting-the-stage-tracy-has-built-to-this-moment';
+          const CSU_ROSTER = 'https://csurams.com/news/2026/1/29/football-rams-build-roster-for-moras-debut-season';
+          const CSU_OL = 'https://csurams.com/news/2026/8/7/football-further-ahead-but-looking-for-more';
+          const CSU_DEPTH = 'https://csurams.com/news/2026/8/26/football-backs-ready-to-carry-the-load-en-masse';
+          const CSU_TURF = 'https://csurams.com/news/2026/6/25/general-surface-improvements-which-go-well-beyond';
+          const WYO_GAME = 'https://gowyo.com/news/2026/8/31/football-cowboys-head-to-border-war-rival-colorado-state-for-season-opener-on-saturday.aspx';
+          const WYO_QB = 'https://gowyo.com/news/2026/8/24/football-pokes-insider-tyler-hughes-wyoming-offense-make-statement-in-final-scrimmage.aspx';
+          const WYO_OL = 'https://gowyo.com/news/2026/9/1/football-pokes-insider-magic-in-the-middle-of-the-o-line.aspx';
+          const WYO_HEALTH = 'https://gowyo.com/news/2026/8/24/football-cowboys-enter-final-week-of-fall-camp.aspx';
+          const WYO_CAMP = 'https://gowyo.com/news/2026/8/5/football-pokes-insider-camp-opens-with-elevated-energy-expectations.aspx';
+          const WYO_CAMP2 = 'https://gowyo.com/news/2026/8/5/cowboy-football-opens-fall-camp.aspx';
+          const WEATHER = 'https://forecast.weather.gov/MapClick.php?FcstType=digital&lat=40.55&lg=english&lon=-105.07&unit=0';
+
+          const context = {
+            game_id: expectedGameId,
+            contextual_shift: 0,
+            distribution_changed: false,
+            scenarios: [{id:'base', weight:1, shift:0, residual_scale:1, ledger_ids:[]}],
+            confidence: 'C',
+            fragility: 'HIGH',
+            ledger: [],
+            research: {
+              market_data: false,
+              home_team: expectedHome,
+              away_team: expectedAway,
+              home: {
+                qb_backup: e('Colorado State intentionally withheld its starting quarterback before the opener; coach Jim Mora said the starter would not be public until Saturday. The exact starter/backup hierarchy therefore remains unresolved at this checkpoint.', [CSU_PRESSER, CSU_GAME], true),
+                offensive_line: e('Colorado State entered camp installing a new offense under Jim Mora/Pryce Tracy with Christian Pace overseeing the line/run game. Quinton Harris and Toriyan Johnson were among linemen highlighted in camp; no complete same-day public OL availability list was found in the official material checked.', [CSU_OL, CSU_GAME], true),
+                skill_defense_absences: e('Official game-day material identifies a deep running-back group led by transfers including Mel Brown and notes defensive continuity under Tyson Summers, but it does not provide a complete same-day inactive list. Material skill/defensive absence status remains unresolved.', [CSU_GAME, CSU_DEPTH], true),
+                coaching_playcaller: e('Jim Mora begins his first season as Colorado State head coach. Pryce Tracy is the new offensive coordinator and is calling a game for the first time; Tyson Summers remains defensive coordinator.', [CSU_PLAYCALL, CSU_GAME], false),
+                transfers_depth: e('Colorado State has a major roster reset: the official game-day notes state 76 new faces and 41 transfers, including 21 offensive newcomers, with many players following Mora from UConn.', [CSU_GAME, CSU_ROSTER], false),
+                suspensions: e('No Colorado State suspension was disclosed in the official game-day and weekly material checked, but the school did not publish a comprehensive same-day suspension/inactive report in those sources.', [CSU_GAME, CSU_PRESSER], true),
+                rest_travel: e('Colorado State is opening its season at home at Canvas Stadium in Fort Collins, so there is no prior-game short-rest or travel load for the Rams.', [CSU_GAME], false),
+                late_news: e('Colorado State published a same-day game-day page confirming the matchup and kickoff. The starting-quarterback identity remained intentionally undisclosed in the latest official pregame material checked.', [CSU_GAME, CSU_PRESSER], true)
+              },
+              away: {
+                qb_backup: e('Wyoming named William & Mary graduate transfer Tyler Hughes the starting quarterback for the opener. Freshman Taylor Hasselbeck had previously been ruled out for the season with a torn ACL, so depth behind Hughes carries added uncertainty.', [WYO_QB, WYO_CAMP2], true),
+                offensive_line: e('Wyoming named Nebraska transfer Jason Maciejczak the starting center during game week. Earlier camp reporting also noted multiple injured linemen, so the complete game-day OL availability picture remains unresolved.', [WYO_OL, WYO_CAMP], true),
+                skill_defense_absences: e('Wyoming reported itself in a solid health position after its final major scrimmage with only bumps and bruises, but no complete same-day inactive list was available in the official sources checked.', [WYO_HEALTH, WYO_GAME], true),
+                coaching_playcaller: e('Jay Sawvel remains Wyoming head coach, with a new offensive system under coordinator Christian Taylor and Aaron Bohl coordinating the defense.', [WYO_CAMP, WYO_QB], false),
+                transfers_depth: e('Wyoming underwent notable roster turnover and installed transfer Tyler Hughes at quarterback plus Nebraska transfer Jason Maciejczak at center, creating meaningful early-season role translation.', [WYO_CAMP, WYO_QB, WYO_OL], false),
+                suspensions: e('No Wyoming suspension was disclosed in the official game-week material checked, but a comprehensive same-day suspension/inactive report was not available there.', [WYO_GAME, WYO_HEALTH], true),
+                rest_travel: e('Wyoming is also opening its season and travels from Laramie to nearby Fort Collins for the Border War; there is no prior-game short-rest burden.', [WYO_GAME], false),
+                late_news: e('The most recent official Wyoming game-week preview checked confirms the 4 p.m. MT road opener. No newer comprehensive same-day injury/inactive bulletin was found in the official sources used, so late availability remains unresolved.', [WYO_GAME, WYO_OL], true)
+              },
+              game: {
+                schedule_status: e('Colorado State and Wyoming official game-week pages confirm the season-opening Border War at Canvas Stadium in Fort Collins on Saturday, Sept. 5 at 4:00 p.m. MT.', [CSU_GAME, WYO_GAME], false),
+                venue_roof_surface: e('The game is at Canvas Stadium in Fort Collins. Colorado State replaced the stadium field before the 2026 season with FieldTurf Vertex CORE artificial turf; the venue is an outdoor stadium.', [CSU_GAME, CSU_TURF], false),
+                weather: e('The National Weather Service digital forecast for Fort Collins around the 4 p.m. MDT kickoff shows hot conditions near 89-90 F with roughly 7-8 mph surface wind. The extracted forecast used here did not provide a complete same-day precipitation-confidence field, so precipitation detail remains unresolved.', [WEATHER], true)
+              },
+              deep_triggers: [
+                'Colorado State starting quarterback intentionally unannounced before kickoff',
+                'Colorado State major roster and coaching-system reset',
+                'Wyoming new offensive coordinator with transfer starting quarterback and OL turnover'
+              ],
+              deep_evidence: [
+                e('Colorado State coach Jim Mora explicitly said the starting quarterback would not be made public before Saturday, preserving material QB uncertainty.', [CSU_PRESSER], true),
+                e('Colorado State official game notes describe 76 new faces and 41 transfers under first-year head coach Jim Mora, while Pryce Tracy is a first-time game play-caller.', [CSU_GAME, CSU_PLAYCALL], false),
+                e('Wyoming named transfer Tyler Hughes the starter in Christian Taylor’s new offense and named transfer Jason Maciejczak at center during game week.', [WYO_QB, WYO_OL], false)
+              ]
+            },
+            frozen_thesis: 'Market-blind V1.1.3 production storage acceptance for Wyoming at Colorado State. Live football evidence was checkpointed; unresolved Week 1 personnel uncertainty is reflected in C confidence/HIGH fragility. No unsupported mean or variance adjustment is applied, and this narrow run is not a wagering-slate recommendation.'
+          };
+
+          const checkpoint = await call('POST', `/v1/freeze-runs/${runId}/research`, {contexts:[context]});
+          must(checkpoint.market_data === false, 'Market boundary failed on checkpoint');
+          must(checkpoint.completed_game_ids?.includes(expectedGameId) && checkpoint.pending_game_ids?.length === 0, 'Checkpoint did not persist complete research');
+          console.log('CHECKPOINT_PERSISTED', JSON.stringify({run_id:runId, completed_game_ids:checkpoint.completed_game_ids, pending_game_ids:checkpoint.pending_game_ids}));
+
+          const resumed = await call('GET', `/v1/freeze-runs/${runId}`);
+          must(resumed.status === 'RESEARCH_IN_PROGRESS' && resumed.completed_game_ids?.length === 1 && resumed.pending_game_ids?.length === 0, 'Checkpoint recovery read failed');
+          console.log('CHECKPOINT_RECOVERY_PASS', JSON.stringify({run_id:runId, status:resumed.status, completed_game_ids:resumed.completed_game_ids}));
+
+          const frozen = await call('POST', `/v1/freeze-runs/${runId}/compute`, {});
+          must(frozen.market_data === false && frozen.p_model_status === 'FROZEN' && frozen.schema_version === '1.1.3', 'Freeze completion failed');
+          must(frozen.identity_binding_audit === 'PASS' && frozen.probability_audit === 'PASS' && frozen.zero_shift_audit === 'PASS', 'Freeze audit failed');
+          must(frozen.games?.length === 1 && frozen.games[0].game_id === expectedGameId, 'Frozen game set mismatch');
+          must(frozen.games[0].qbase_probability_grid_sha256 === frozen.games[0].frozen_probability_grid_sha256, 'Zero-shift grid hash mismatch');
+          const firstFrozenAt = frozen.frozen_at;
+          const firstReceipt = frozen.freeze_receipt_sha256;
+          console.log('FREEZE_PASS', JSON.stringify({run_id:runId, frozen_at:firstFrozenAt, freeze_receipt_sha256:firstReceipt, identity_receipt_sha256:frozen.identity_receipt_sha256, input_sha256:frozen.input_sha256, numerical_output_sha256:frozen.numerical_output_sha256, verified_anchor_count:frozen.verified_anchor_count, identity_binding_audit:frozen.identity_binding_audit, probability_audit:frozen.probability_audit, zero_shift_audit:frozen.zero_shift_audit}));
+
+          const persistedGame = await call('GET', `/v1/freeze-runs/${runId}/games/${expectedGameId}`);
+          must(persistedGame.freeze_receipt_sha256 === firstReceipt && persistedGame.frozen_at === firstFrozenAt, 'Persisted game receipt/time mismatch');
+          must(persistedGame.game?.qbase_probability_grid_sha256 === persistedGame.game?.frozen_probability_grid_sha256, 'Persisted zero-shift grid mismatch');
+          console.log('PERSISTED_GAME_READ_PASS', JSON.stringify({game_id:expectedGameId, frozen_at:persistedGame.frozen_at, freeze_receipt_sha256:persistedGame.freeze_receipt_sha256, frozen_probability_grid_sha256:persistedGame.game.frozen_probability_grid_sha256}));
+
+          // Idempotent retry must return the original immutable freeze, not create a new one.
+          const retry = await call('POST', `/v1/freeze-runs/${runId}/compute`, {});
+          must(retry.frozen_at === firstFrozenAt && retry.freeze_receipt_sha256 === firstReceipt, 'Idempotent compute retry changed immutable freeze');
+          console.log('IMMUTABLE_RETRY_PASS', JSON.stringify({run_id:runId, frozen_at:retry.frozen_at, freeze_receipt_sha256:retry.freeze_receipt_sha256}));
+          console.log('MARKET_BOARD_CALLS=0');
+          console.log('NCAAF_V1_1_3_LIVE_STORAGE_ACCEPTANCE=PASS');
+          NODE
