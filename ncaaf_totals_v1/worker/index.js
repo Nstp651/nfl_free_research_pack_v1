@@ -1,3 +1,5 @@
+import {routeFreeze} from './freeze_run.js';
+export {NcaafFreezeRun} from './freeze_run.js';
 /** Read-only NCAA totals research/model API. No odds provider, betting lines or market data. */
 const DEFAULT_BASE = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/data';
 const DEFAULT_QBASE_URL = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/model/qbase_v0.1.0.json';
@@ -107,6 +109,8 @@ function verifyQbaseSlate(m, slateId) {
 
 export default {
   async fetch(request, env = {}) {
+    const freezeResponse = await routeFreeze(request, env);
+    if (freezeResponse) return freezeResponse;
     if (request.method !== 'GET') return reply({error: 'GET requests only'}, 405);
     try {
       const url = new URL(request.url);

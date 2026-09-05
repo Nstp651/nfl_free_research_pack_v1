@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from market_math import evaluate_price, side_probabilities
+from freeze_receipt import validate_receipt
 
 FROZEN_SCHEMA_VERSION = "1.1.0"
 
@@ -56,8 +57,10 @@ def fixture_key(home: str, away: str, commence_time: str) -> tuple[str, str, str
 
 
 def validate_frozen(frozen: dict) -> None:
-    if frozen.get("schema_version") != FROZEN_SCHEMA_VERSION:
+    if frozen.get("schema_version") not in {FROZEN_SCHEMA_VERSION, "1.1.2", "1.1.3"}:
         raise ValueError("unsupported frozen P_model schema")
+    if frozen.get("schema_version") == "1.1.3":
+        validate_receipt(frozen)
     if frozen.get("p_model_status") != "FROZEN":
         raise ValueError("P_model is not frozen")
     if parse_time(frozen.get("frozen_at")) is None:
@@ -132,6 +135,8 @@ def candidate_sort_key(c: dict) -> tuple:
 def integrate(frozen: dict, board: dict) -> dict:
     validate_frozen(frozen)
     validate_board(board)
+    if parse_time(board["retrieved_at"]) < parse_time(frozen["frozen_at"]):
+        raise ValueError("Market board predates freeze")
 
     market_by_fixture: dict[tuple[str, str, str], dict] = {}
     for g in board["games"]:
