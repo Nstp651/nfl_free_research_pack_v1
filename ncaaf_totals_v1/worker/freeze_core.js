@@ -95,6 +95,9 @@ export async function verifySources(pack, qbase, lock) {
   const receipts=[];
   for (const gid of [...rmap.keys()].sort()) {
     const r=rmap.get(gid), q=qmap.get(gid);
+    const fx=r.fixture;
+    requireThat(fx && fx.fbs_game===true && typeof fx.completed==='boolean' && typeof fx.neutral_site==='boolean' && fx.season===lock.season && fx.week===lock.week, 'Invalid fixture scope/status: '+gid);
+    requireThat([fx.home_team,fx.away_team,fx.venue].every(x=>typeof x==='string' && x.trim()) && fx.home_team!==fx.away_team && Number.isFinite(Date.parse(fx.start_utc)) && Date.parse(fx.start_australia_sydney)===Date.parse(fx.start_utc), 'Invalid fixture identity/time: '+gid);
     requireThat(q && q.home_team===r.fixture?.home_team && q.away_team===r.fixture?.away_team, 'Missing game/team mismatch: '+gid);
     auditGrid(q.probability_grid);
     const anchor=await anchorHash(q);

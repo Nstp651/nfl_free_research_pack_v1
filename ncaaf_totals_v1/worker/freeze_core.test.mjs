@@ -25,6 +25,8 @@ test('all 51 real source anchors verify; order-independent full eligible freeze;
  } finally { globalThis.fetch=old; }
 });
 for(const [label,mutate] of [
+ ['unknown fixture status',(p)=>delete p.games[0].fixture.completed],
+ ['inconsistent fixture time',(p)=>p.games[0].fixture.start_australia_sydney='2000-01-01T00:00:00+10:00'],
  ['duplicate research', (p,q,l,c)=>p.games.push(p.games[0])],
  ['duplicate QBASE',(p,q)=>q.games.push(q.games[0])],
  ['missing eligible',(p,q)=>q.games=q.games.filter(g=>g.game_id!==ids[0])],
