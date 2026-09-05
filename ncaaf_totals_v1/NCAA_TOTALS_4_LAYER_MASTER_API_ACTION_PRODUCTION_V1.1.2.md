@@ -66,10 +66,16 @@ Rules:
 - QBASE home/away must exactly equal research fixture home/away;
 - every contextual model starts from `qbase_by_game_id[game_id]`.
 
-Canonical QBASE anchor material is:
+QBASE anchor material is:
 `game_id, home_team, away_team, expected_total_qbase, residual_bucket, residual_sd, probability_grid`.
 
-Recompute canonical JSON SHA-256 for that material and require it equals the supplied `qbase_anchor_sha256`. Also hash the QBASE probability grid separately.
+The hash MUST be transport-canonical so equivalent JSON numbers cannot change identity when moving through Python, JavaScript, Worker or Action serialization. Before compact sorted UTF-8 JSON SHA-256, normalize:
+- `expected_total_qbase` -> fixed 6-decimal string;
+- `residual_sd` -> fixed 6-decimal string;
+- each grid `line` -> fixed 1-decimal string;
+- each grid `over`, `push`, `under` -> fixed 8-decimal strings.
+
+Keep game IDs and team names as exact strings. Recompute SHA-256 from this normalized material and require it equals supplied `qbase_anchor_sha256`. Hash the probability grid separately using the same normalized line/probability representation. Therefore values such as JSON `20.0` versus `20`, or `0.0` versus `0`, MUST produce identical identity hashes.
 
 Any identity/hash failure:
 `MODEL_INTEGRITY_FAILED — MODEL NOT FROZEN`
