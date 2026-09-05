@@ -3,9 +3,10 @@ info:
   title: NCAA Totals Research Pack
   version: 0.1.0
   description: >-
-    Read-only, pre-market NCAA Football FBS-v-FBS research service. Retrieve the
-    complete target-week slate at one immutable revision before building P_model.
-    No odds, sportsbook prices, consensus lines or betting data are returned.
+    Read-only, pre-market NCAA Football FBS-v-FBS research and calibrated QBASE
+    service. Retrieve the complete target-week slate at one immutable revision
+    and the market-blind QBASE artifact before building P_model. No odds,
+    sportsbook prices, consensus lines or betting data are returned.
 servers:
   - url: https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev
 paths:
@@ -22,6 +23,28 @@ paths:
                 $ref: '#/components/schemas/Health'
         '503':
           description: Stale or incomplete research service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/model/qbase:
+    get:
+      operationId: getNcaafTotalsQbase
+      summary: Retrieve the calibrated market-blind NCAA totals QBASE artifact
+      description: >-
+        Layer 2 input only. Returns the executed walk-forward-calibrated model
+        coefficients, preprocessing values and out-of-sample residual
+        distributions. The artifact contains market_data=false and must be
+        retrieved before sportsbook market access.
+      responses:
+        '200':
+          description: QBASE model artifact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Qbase'
+        '502':
+          description: QBASE source or validation failure
           content:
             application/json:
               schema:
@@ -156,6 +179,42 @@ components:
         freshness:
           type: object
           additionalProperties: true
+      additionalProperties: true
+    Qbase:
+      type: object
+      properties:
+        model_name: { type: string }
+        model_version: { type: string }
+        feature_schema: { type: string }
+        market_data: { type: boolean }
+        selected_family: { type: string }
+        alpha: { type: number }
+        training_games: { type: integer }
+        training_seasons:
+          type: array
+          items: { type: integer }
+        features:
+          type: array
+          items: { type: string }
+        imputer_medians:
+          type: array
+          items: { type: number }
+        scaler_mean:
+          type: array
+          items: { type: number }
+        scaler_scale:
+          type: array
+          items: { type: number }
+        coefficients:
+          type: array
+          items: { type: number }
+        intercept: { type: number }
+        walk_forward:
+          type: object
+          additionalProperties: true
+        served_at_utc:
+          type: string
+          format: date-time
       additionalProperties: true
     SlateEntry:
       type: object
