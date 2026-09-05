@@ -6,7 +6,7 @@ const API='https://api.github.com/repos/Nstp651/nfl_free_research_pack_v1/commit
 export const response=(x,status=200)=>new Response(JSON.stringify(x),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 async function readSource(url) {
   requireThat(url===API || /^https:\/\/raw\.githubusercontent\.com\/Nstp651\/nfl_free_research_pack_v1\/[a-f0-9]{40}\/ncaaf_totals_v1\/(data\/slates|model\/slates)\/\d{4}\/\d{4}_\d{2}\.json$/.test(url),'Source URL not allowed');
-  const res=await fetch(url,{headers:{'user-agent':'ncaaf-freeze/1.1.3'},signal:AbortSignal.timeout(12000)});
+  const res=await fetch(url,{headers:{'user-agent':'ncaaf-freeze/1.1.3.1'},signal:AbortSignal.timeout(12000)});
   requireThat(res.ok,'Research source unavailable: '+res.status);
   const raw=await res.text(); requireThat(raw.length<8000000,'Source too large'); return JSON.parse(raw);
 }
@@ -25,6 +25,11 @@ export async function loadSources(input) {
 export function compact(snapshot) {
   const {games,...receipt}=snapshot;
   return {...receipt,games:games.map(({probability_grid,context,...g})=>g),grid_retrieval:'GET /v1/freeze-runs/{run_id}/games/{game_id}; exact persisted grid only'};
+}
+async function pendingIds(storage,meta) {
+  const out=[];
+  for(const id of meta.lock.eligible_game_ids) if(!await storage.get('c:'+id)) out.push(id);
+  return out;
 }
 export class NcaafFreezeRun {
   constructor(state,env) { this.state=state; this.storage=state.storage; }
@@ -65,19 +70,21 @@ export class NcaafFreezeRun {
       return response({market_data:false,freeze_receipt_sha256:meta.receipt.freeze_receipt_sha256,frozen_at:meta.receipt.frozen_at,game:g});
     }
     if(request.method==='GET' && action[0]==='research' && action.length===1) {
-      const offset=Number(url.searchParams.get('offset') || 0);
-      requireThat(Number.isInteger(offset) && offset>=0 && offset<meta.lock.eligible_game_ids.length,'Invalid offset');
-      const ids=meta.lock.eligible_game_ids.slice(offset,offset+5),games=[];
-      for(const id of ids) { const q=await this.storage.get('q:'+id); const {probability_grid,...anchor}=q; games.push({research:await this.storage.get('r:'+id),qbase:anchor,checkpoint:await this.storage.get('c:'+id) || null}); }
-      return response({market_data:false,lock:meta.lock,games,next_offset:offset+5<meta.lock.eligible_game_ids.length?offset+5:null});
+      requireThat(meta.status!=='FROZEN','Run already frozen');
+      requireThat(url.searchParams.size===0,'Research queue does not accept pagination; checkpoint current batch first');
+      const pending=await pendingIds(this.storage,meta);
+      const ids=pending.slice(0,2),games=[];
+      for(const id of ids) { const q=await this.storage.get('q:'+id); const {probability_grid,...anchor}=q; games.push({research:await this.storage.get('r:'+id),qbase:anchor,checkpoint:null}); }
+      return response({market_data:false,lock:meta.lock,status:meta.status,games,batch_game_ids:ids,pending_game_ids:pending,next_batch_after_checkpoint:pending.length>ids.length});
     }
     if(request.method==='POST' && action[0]==='research' && action.length===1) {
       requireThat(meta.status!=='FROZEN','Frozen run is immutable');
       const body=await request.json(); exactKeys(body,['contexts']);
-      requireThat(Array.isArray(body.contexts) && body.contexts.length>=1 && body.contexts.length<=5,'Submit 1–5 complete game receipts');
+      requireThat(Array.isArray(body.contexts) && body.contexts.length>=1 && body.contexts.length<=2,'Submit 1–2 complete game receipts');
+      const pending=await pendingIds(this.storage,meta), queueHead=new Set(pending.slice(0,2));
       const seen=new Set();
       for(const c of body.contexts) {
-        requireThat(meta.lock.eligible_game_ids.includes(c.game_id) && !seen.has(c.game_id),'Unknown/duplicate context game'); seen.add(c.game_id);
+        requireThat(queueHead.has(c.game_id) && !seen.has(c.game_id),'Context is not in current pending research batch or is duplicate'); seen.add(c.game_id);
         const r=await this.storage.get('r:'+c.game_id); validateContext(c,r.fixture,Date.now());
         requireThat(JSON.stringify(c).length<60000,'Research receipt too large');
       }
