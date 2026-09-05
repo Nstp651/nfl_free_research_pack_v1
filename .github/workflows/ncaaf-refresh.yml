@@ -11,8 +11,8 @@ on:
         description: NCAA week (blank = auto-resolve next active week)
         required: false
         type: string
-  # A production promotion/builder change gets an immediate active-slate build.
-  # Generated data commits do not match these paths, preventing refresh loops.
+  # A production promotion/builder/QBASE change gets an immediate active-slate build.
+  # Generated data/model-slate commits do not match these paths, preventing refresh loops.
   push:
     branches: [main]
     paths:
@@ -20,6 +20,9 @@ on:
       - 'ncaaf_totals_v1/build_pack_entry.py'
       - 'ncaaf_totals_v1/validate_pack.py'
       - 'ncaaf_totals_v1/requirements.txt'
+      - 'ncaaf_totals_v1/model/score_slate.py'
+      - 'ncaaf_totals_v1/model/qbase_v0.1.0.json'
+      - 'ncaaf_totals_v1/model/requirements.txt'
       - '.github/workflows/ncaaf-refresh.yml'
   # NCAA season automation only. January bowls belong to the prior season;
   # August-December belong to the current calendar-year season.
@@ -48,10 +51,12 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: ncaaf_totals_v1/requirements.txt
+          cache-dependency-path: |
+            ncaaf_totals_v1/requirements.txt
+            ncaaf_totals_v1/model/requirements.txt
 
-      - name: Install builder dependencies
-        run: python -m pip install -r ncaaf_totals_v1/requirements.txt
+      - name: Install builder and QBASE dependencies
+        run: python -m pip install -r ncaaf_totals_v1/model/requirements.txt
 
       - name: Resolve requested season/week
         id: target
@@ -95,8 +100,52 @@ jobs:
             --week '${{ steps.target.outputs.week }}' \
             --output data
 
-      - name: Validate generated pack
+      - name: Validate generated research pack
         run: python ncaaf_totals_v1/validate_pack.py --data ncaaf_totals_v1/data
+
+      - name: Score generated slate with frozen QBASE artifact
+        working-directory: ncaaf_totals_v1
+        run: |
+          python model/score_slate.py \
+            --data data \
+            --artifact model/qbase_v0.1.0.json \
+            --output-root model/slates
+
+      - name: Validate research-to-QBASE revision lock
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest=json.loads(Path('ncaaf_totals_v1/data/manifest.json').read_text())
+          entries=manifest.get('slates',[])
+          assert len(entries)==1, entries
+          s=entries[0]
+          qpath=Path('ncaaf_totals_v1/model/slates') / str(s['season']) / f"{s['slate_id']}.json"
+          assert qpath.exists(), qpath
+          q=json.loads(qpath.read_text())
+          assert q.get('market_data') is False, q
+          assert q.get('slate_id') == s['slate_id'], (q.get('slate_id'),s['slate_id'])
+          assert q.get('research_pack_revision') == s['pack_revision'], (q.get('research_pack_revision'),s['pack_revision'])
+          assert len(q.get('games',[])) == int(s['game_count']), (len(q.get('games',[])),s['game_count'])
+          assert q.get('probability_schema_version') == '0.2.0', q.get('probability_schema_version')
+          assert q.get('integer_line_method') == 'continuity_corrected_discrete_mass', q.get('integer_line_method')
+          meta=q.get('supported_total_grid',{})
+          assert float(meta.get('min')) <= 20.0
+          assert float(meta.get('max')) >= 100.5
+          assert abs(float(meta.get('step'))-0.5) < 1e-12
+          for g in q['games']:
+              grid=g.get('probability_grid',[])
+              assert grid
+              assert all(abs(float(r['over'])+float(r['push'])+float(r['under'])-1.0) < 3e-8 for r in grid)
+              integers=[r for r in grid if abs(float(r['line'])-round(float(r['line']))) < 1e-9]
+              halves=[r for r in grid if abs(float(r['line'])-round(float(r['line']))) >= 1e-9]
+              assert integers and halves
+              assert any(float(r['push']) > 0 for r in integers)
+              assert all(abs(float(r['push'])) < 1e-12 for r in halves)
+          print(f"RESEARCH_QBASE_REVISION_LOCK_PASS pack={s['pack_revision']} qbase={q['qbase_revision']} games={len(q['games'])}")
+          PY
 
       - name: Record build summary
         shell: bash
@@ -106,26 +155,30 @@ jobs:
           from pathlib import Path
           m=json.loads(Path('ncaaf_totals_v1/data/manifest.json').read_text())
           s=m['slates'][0]
-          print('## NCAA totals research pack')
+          qpath=Path('ncaaf_totals_v1/model/slates') / str(s['season']) / f"{s['slate_id']}.json"
+          q=json.loads(qpath.read_text())
+          print('## NCAA totals research + QBASE pack')
           print(f"- Slate: `{s['slate_id']}`")
-          print(f"- Revision: `{s['pack_revision']}`")
+          print(f"- Research revision: `{s['pack_revision']}`")
+          print(f"- QBASE revision: `{q['qbase_revision']}`")
+          print(f"- QBASE research lock: `{q['research_pack_revision']}`")
           print(f"- FBS-v-FBS games: **{s['game_count']}**")
           print(f"- Current data through week: `{s.get('current_season_data_through_week')}`")
           print(f"- Source health: `{m['source_health']['status']}`")
           print('- Market data: **false**')
           PY
 
-      - name: Commit changed research pack
+      - name: Commit changed research and QBASE packs
         shell: bash
         run: |
-          if git diff --quiet -- ncaaf_totals_v1/data; then
-            echo 'No NCAA research-pack change.'
+          if git diff --quiet -- ncaaf_totals_v1/data ncaaf_totals_v1/model/slates; then
+            echo 'No NCAA research/QBASE pack change.'
             exit 0
           fi
           git config user.name 'ncaaf-pack-bot'
           git config user.email 'ncaaf-pack-bot@users.noreply.github.com'
-          git add ncaaf_totals_v1/data
-          git commit -m "Refresh NCAA totals research pack"
+          git add ncaaf_totals_v1/data ncaaf_totals_v1/model/slates
+          git commit -m "Refresh NCAA totals research and QBASE packs"
           git fetch origin "$GITHUB_REF_NAME"
           git rebase "origin/$GITHUB_REF_NAME"
           git push origin "HEAD:${GITHUB_REF_NAME}"
