@@ -6,3 +6,11 @@ workers_dev = true
 
 [vars]
 DATA_BASE_URL = "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/data"
+
+[[durable_objects.bindings]]
+name = "FREEZE_RUNS"
+class_name = "NcaafFreezeRun"
+
+[[migrations]]
+tag = "ncaaf-freeze-v1-1-3"
+new_sqlite_classes = ["NcaafFreezeRun"]

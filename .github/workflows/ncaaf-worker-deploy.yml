@@ -28,9 +28,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: python -m pip install -r ncaaf_totals_v1/model/requirements.txt
       - name: Worker unit tests
         working-directory: ncaaf_totals_v1
-        run: node --test worker/index.test.mjs
+        run: node --test worker/index.test.mjs worker/freeze_core.test.mjs worker/freeze_run.test.mjs
       - name: Wrangler dry run
         working-directory: ncaaf_totals_v1
         env:
