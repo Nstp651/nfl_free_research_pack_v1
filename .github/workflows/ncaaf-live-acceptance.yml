@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/ncaaf-live-acceptance.yml'
+      - 'ncaaf_totals_v1/worker/**'
+      - 'ncaaf_totals_v1/wrangler.toml'
+      - 'ncaaf_totals_v1/market_worker/**'
   workflow_dispatch:
 
 permissions:
