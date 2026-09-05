@@ -14,10 +14,13 @@ const board = Array.from({length: 35}, (_, i) => ({
   }]}, {key:'wrong', title:'Wrong', markets:[{key:'h2h', outcomes:[]}]}],
 }));
 
-async function call(path, {data=board, status=200, env={ODDS_API_KEY:'secret'}, method='GET'}={}) {
-  globalThis.fetch = async () => new Response(JSON.stringify(data), {status, headers:{
-    'x-requests-remaining':'999', 'x-requests-used':'1', 'x-requests-last':'1'
-  }});
+async function call(path, {data=board, status=200, env={ODDS_API_KEY:'secret'}, method='GET', onFetch=null}={}) {
+  globalThis.fetch = async (url) => {
+    if (onFetch) onFetch(String(url));
+    return new Response(JSON.stringify(data), {status, headers:{
+      'x-requests-remaining':'999', 'x-requests-used':'1', 'x-requests-last':'1'
+    }});
+  };
   try {
     const res = await worker.fetch(new Request('https://test.invalid'+path, {method}), env);
     const raw = await res.text();
@@ -32,6 +35,8 @@ test('health is no-market-call and requires configured key', async () => {
     const good = await worker.fetch(new Request('https://test.invalid/health'), {ODDS_API_KEY:'x'});
     assert.equal(good.status, 200);
     assert.equal(called, false);
+    const body = await good.json();
+    assert.equal(body.version, '0.1.1');
     const bad = await worker.fetch(new Request('https://test.invalid/health'), {});
     assert.equal(bad.status, 503);
     assert.equal(called, false);
@@ -54,6 +59,25 @@ test('board is totals-only, AU-labelled and paginates at one revision', async ()
   assert.equal(first.data.games.length + second.data.games.length, 35);
 });
 
+test('commence window is validated at gateway and filtered locally, not sent upstream', async () => {
+  let upstreamUrl = null;
+  const r = await call(
+    '/v1/totals?commence_from=2026-09-06T02:00:00Z&commence_to=2026-09-06T05:00:00Z',
+    {onFetch: url => { upstreamUrl = url; }}
+  );
+  assert.equal(r.status, 200);
+  assert.equal(r.data.games.length, 4);
+  assert.deepEqual(r.data.games.map(g => g.commence_time), [
+    '2026-09-06T02:00:00Z', '2026-09-06T03:00:00Z',
+    '2026-09-06T04:00:00Z', '2026-09-06T05:00:00Z'
+  ]);
+  assert.ok(upstreamUrl);
+  assert.equal(upstreamUrl.includes('commenceTimeFrom'), false);
+  assert.equal(upstreamUrl.includes('commenceTimeTo'), false);
+  assert.equal(r.data.filter.commence_from, '2026-09-06T02:00:00.000Z');
+  assert.equal(r.data.filter.commence_to, '2026-09-06T05:00:00.000Z');
+});
+
 test('changed board revision prevents mixed market pages', async () => {
   const first = await call('/v1/totals?limit=10');
   const changed = structuredClone(board);
@@ -73,6 +97,10 @@ test('filters and parameters are validated', async () => {
 test('upstream failures and malformed boards fail visibly', async () => {
   assert.equal((await call('/v1/totals', {status:500})).status, 502);
   assert.equal((await call('/v1/totals', {status:429})).status, 429);
+  const upstream422 = await call('/v1/totals', {status:422, data:{error_code:'INVALID_COMMENCE_TIME_FROM', message:'bad time'}});
+  assert.equal(upstream422.status, 502);
+  assert.equal(upstream422.data.upstream_status, 422);
+  assert.equal(upstream422.data.upstream_code, 'INVALID_COMMENCE_TIME_FROM');
   assert.equal((await call('/v1/totals', {data:{oops:true}})).status, 502);
 });
 
