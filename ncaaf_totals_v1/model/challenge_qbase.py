@@ -4,6 +4,7 @@
 This does NOT touch production selection. It measures whether a nonlinear model
 materially improves the transparent Ridge baseline on exactly the same leak-free
 training frame. Results are written for audit before architecture is changed.
+The audit is deliberately market-blind and is a required promotion gate.
 """
 from __future__ import annotations
 
