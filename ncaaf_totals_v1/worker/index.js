@@ -25,7 +25,7 @@ async function readJson(url, label='Research source') {
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const res = await fetch(url, {signal: controller.signal,
-      headers: {'user-agent': 'ncaaf-totals-research-pack/0.1.0'},
+      headers: {'user-agent': 'ncaaf-totals-research-pack/0.2.0'},
       cf: {cacheTtl: 60, cacheEverything: true}});
     if (!res.ok) fail(502, `${label} unavailable (${res.status})`);
     const raw = await res.text();
@@ -62,14 +62,47 @@ function verifyQbase(m) {
     fail(502, 'Invalid QBASE model artifact');
   }
 }
+function finiteProb(v) {
+  return typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
+}
+function verifyProbabilityGrid(grid) {
+  if (!Array.isArray(grid) || !grid.length) fail(502, 'Invalid QBASE probability grid');
+  const lines = new Set();
+  let prevLine = -Infinity, prevOver = Infinity, prevUnder = -Infinity;
+  let sawInteger = false, sawHalf = false;
+  for (const row of grid) {
+    if (typeof row?.line !== 'number' || !Number.isFinite(row.line) ||
+        !finiteProb(row.over) || !finiteProb(row.push) || !finiteProb(row.under)) {
+      fail(502, 'Invalid QBASE probability row');
+    }
+    if (lines.has(row.line) || row.line <= prevLine) fail(502, 'Invalid QBASE probability line ordering');
+    lines.add(row.line);
+    if (row.over > prevOver + 1e-10 || row.under < prevUnder - 1e-10)
+      fail(502, 'Non-monotonic QBASE probability grid');
+    if (Math.abs(row.over + row.push + row.under - 1) > 3e-8)
+      fail(502, 'QBASE probability partition mismatch');
+    const isInteger = Math.abs(row.line - Math.round(row.line)) < 1e-9;
+    if (isInteger) sawInteger = true;
+    else {
+      sawHalf = true;
+      if (Math.abs(row.push) > 1e-12) fail(502, 'Half-point QBASE line has push probability');
+    }
+    prevLine = row.line; prevOver = row.over; prevUnder = row.under;
+  }
+  if (!sawInteger || !sawHalf) fail(502, 'QBASE grid must contain integer and half-point lines');
+}
 function verifyQbaseSlate(m, slateId) {
   verifyNoMarketData(m);
-  if (m?.schema_version !== '0.1.0' || m?.slate_id !== slateId ||
+  if (m?.schema_version !== '0.1.0' || m?.probability_schema_version !== '0.2.0' ||
+      m?.integer_line_method !== 'continuity_corrected_discrete_mass' || m?.slate_id !== slateId ||
       !/^[a-f0-9]{16}$/.test(m?.qbase_revision || '') ||
       !/^[a-f0-9]{16}$/.test(m?.research_pack_revision || '') ||
-      !Array.isArray(m.games) || !m.games.length || m?.qbase_model_version !== '0.1.0') {
+      !Array.isArray(m.games) || !m.games.length || m?.qbase_model_version !== '0.1.0' ||
+      Number(m?.supported_total_grid?.step) !== 0.5 || Number(m?.supported_total_grid?.min) > 20 ||
+      Number(m?.supported_total_grid?.max) < 100.5) {
     fail(502, 'Invalid QBASE slate artifact');
   }
+  for (const game of m.games) verifyProbabilityGrid(game?.probability_grid);
 }
 
 export default {
@@ -138,7 +171,7 @@ export default {
 
       if (url.pathname === '/health') {
         const ok = freshnessInfo.source_refresh_status === 'RECENT' && manifest.source_health?.failed_required?.length === 0;
-        return reply({ok, service: 'NCAAF_TOTALS_RESEARCH_PACK', version: '0.1.0', market_data: false,
+        return reply({ok, service: 'NCAAF_TOTALS_RESEARCH_PACK', version: '0.2.0', market_data: false,
           slate_count: manifest.slates.length, fixture_count: manifest.fixture_count,
           source_health: manifest.source_health, freshness: freshnessInfo}, ok ? 200 : 503);
       }
