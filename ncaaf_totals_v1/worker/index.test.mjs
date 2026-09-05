@@ -9,13 +9,18 @@ const entry = {slate_id: sid, season: 2026, week: 2, game_count: games.length, p
 const pack = {schema_version:'0.1.0', market_data:false, slate_id:sid, season:2026, week:2, pack_revision:revision, games};
 const manifest = {schema_version:'0.1.0', market_data:false, slates:[entry], fixture_count:games.length,
   source_health:{status:'PASS', failed_required:[]}, last_checked_at_utc:new Date().toISOString()};
+const qbase = {model_name:'Nick NCAA Totals QBASE',model_version:'0.1.0',market_data:false,
+  features:['x'],coefficients:[1],imputer_medians:[0],scaler_mean:[0],scaler_scale:[1],
+  walk_forward:{residual_distribution:{ALL:{n:100,residual_sd:16,quantile_levels:[0.01,0.99],residual_quantiles:[-40,40]}}}};
 const originalFetch = globalThis.fetch;
 
 async function call(path, changes = {}, method = 'GET') {
   globalThis.fetch = async url => {
     if (changes.error) return new Response('upstream failed', {status:500});
     if (changes.invalidJson) return new Response('<html>');
-    const value = String(url).endsWith('manifest.json') ? (changes.manifest || manifest) : (changes.pack || pack);
+    const u=String(url);
+    const value = u.includes('qbase_v0.1.0.json') ? (changes.qbase || qbase) :
+      (u.endsWith('manifest.json') ? (changes.manifest || manifest) : (changes.pack || pack));
     return new Response(JSON.stringify(value));
   };
   try {
@@ -34,6 +39,14 @@ test('pages retrieve entire slate at one revision below Action limit', async () 
     offset=res.data.pagination.next_offset;
   }
   assert.deepEqual(received,games.map(g=>g.game_id));
+});
+
+test('serves only a validated market-blind QBASE artifact', async()=>{
+  const r=await call('/v1/model/qbase');
+  assert.equal(r.status,200); assert.equal(r.data.market_data,false); assert.equal(r.data.model_version,'0.1.0');
+  assert.ok(r.data.served_at_utc);
+  assert.equal((await call('/v1/model/qbase',{qbase:{...qbase,market_data:true}})).status,502);
+  assert.equal((await call('/v1/model/qbase',{qbase:{...qbase,coefficients:[1,2]}})).status,502);
 });
 
 test('changed revision prevents mixed slate pages', async()=>{
