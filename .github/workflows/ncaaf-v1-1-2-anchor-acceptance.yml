@@ -1,0 +1,135 @@
+name: NCAA V1.1.2 live anchor acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ncaaf-v1-1-2-anchor-acceptance.yml'
+      - 'ncaaf_totals_v1/model/slates/**'
+      - 'ncaaf_totals_v1/worker/**'
+      - 'ncaaf_totals_v1/wrangler.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  anchor-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      RESEARCH_URL: https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev
+      MARKET_URL: https://ncaaf-totals-market-v1.nickarnott01.workers.dev
+      MANIFEST_URL: https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/data/manifest.json
+    steps:
+      - name: Resolve current published slate
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$MANIFEST_URL" > /tmp/manifest.json
+          python3 - <<'PY' > /tmp/target.env
+          import json
+          m=json.load(open('/tmp/manifest.json'))
+          assert m.get('market_data') is False
+          slates=m.get('slates',[]); assert len(slates)==1, slates
+          s=slates[0]
+          print(f"SLATE_ID={s['slate_id']}")
+          print(f"PACK_REVISION={s['pack_revision']}")
+          print(f"GAME_COUNT={int(s['game_count'])}")
+          PY
+          cat /tmp/target.env >> "$GITHUB_ENV"
+          cat /tmp/target.env
+
+      - name: Wait for live QBASE V1.1.2 identity artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error "$RESEARCH_URL/v1/qbase/$SLATE_ID?offset=0&limit=1" > /tmp/qbase-first.json && python3 - <<'PY'
+          import json, os, sys
+          x=json.load(open('/tmp/qbase-first.json'))
+          games=x.get('games',[])
+          ok=(
+            x.get('market_data') is False
+            and x.get('research_pack_revision') == os.environ['PACK_REVISION']
+            and x.get('probability_schema_version') == '0.2.0'
+            and x.get('identity_binding') == 'exact_game_id_plus_qbase_anchor_sha256'
+            and len(games)==1
+            and isinstance(games[0].get('qbase_anchor_sha256'),str)
+            and len(games[0]['qbase_anchor_sha256'])==64
+          )
+          if not ok:
+            print('Live QBASE has not converged to V1.1.2 identity artifact yet')
+            sys.exit(1)
+          print('LIVE_QBASE_V1_1_2_CONVERGED')
+          PY
+            then break; fi
+            if [ "$attempt" -eq 30 ]; then
+              echo 'Live research Worker did not converge to V1.1.2 QBASE identity artifact within 5 minutes' >&2
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Retrieve every live QBASE page and verify anchor hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess, urllib.parse
+          base=os.environ['RESEARCH_URL'].rstrip('/')
+          sid=os.environ['SLATE_ID']; pack=os.environ['PACK_REVISION']; expected=int(os.environ['GAME_COUNT'])
+          def get_json(url):
+              raw=subprocess.check_output(['curl','--fail','--silent','--show-error','--max-time','20',url],text=True)
+              return json.loads(raw)
+          def sha(value):
+              raw=json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+              return hashlib.sha256(raw).hexdigest()
+          offset=0; qrev=None; ids=[]; hashes=[]
+          while offset is not None:
+              params={'offset':offset,'limit':20}
+              if qrev: params['revision']=qrev
+              page=get_json(f"{base}/v1/qbase/{sid}?{urllib.parse.urlencode(params)}")
+              assert page.get('market_data') is False
+              assert page.get('research_pack_revision') == pack
+              assert page.get('identity_binding') == 'exact_game_id_plus_qbase_anchor_sha256'
+              assert page.get('probability_schema_version') == '0.2.0'
+              current=page.get('qbase_revision'); assert current and len(current)==16
+              if qrev is None: qrev=current
+              assert current==qrev
+              for g in page.get('games',[]):
+                  gid=str(g['game_id']); ids.append(gid)
+                  material={
+                    'game_id':gid,
+                    'home_team':g.get('home_team'),
+                    'away_team':g.get('away_team'),
+                    'expected_total_qbase':g.get('expected_total_qbase'),
+                    'residual_bucket':g.get('residual_bucket'),
+                    'residual_sd':g.get('residual_sd'),
+                    'probability_grid':g.get('probability_grid'),
+                  }
+                  actual=sha(material); declared=g.get('qbase_anchor_sha256')
+                  assert declared==actual, (gid,declared,actual)
+                  hashes.append(declared)
+              p=page.get('pagination',{}); assert p.get('revision')==qrev
+              offset=p.get('next_offset')
+          assert len(ids)==expected and len(set(ids))==expected
+          assert len(hashes)==expected and all(len(h)==64 for h in hashes)
+          print(f'LIVE_QBASE_V1_1_2_ANCHOR_ACCEPTANCE=PASS games={len(ids)} revision={qrev}')
+          PY
+
+      - name: Verify market gateway health without odds request
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$MARKET_URL/health" > /tmp/market-health.json
+          python3 - <<'PY'
+          import json
+          h=json.load(open('/tmp/market-health.json'))
+          assert h.get('ok') is True and h.get('configured') is True, h
+          assert h.get('region')=='au' and h.get('market_key')=='totals', h
+          print('MARKET_HEALTH_ONLY=PASS')
+          PY
+
+      - name: Confirm freeze boundary
+        run: echo 'No market board request was made. Live V1.1.2 anchor acceptance is market-blind.'
