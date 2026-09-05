@@ -1,6 +1,6 @@
 # NCAA Totals QBASE — Nonlinear Challenger Audit
 
-Frame: **7,428** FBS-v-FBS games, 2016-2025; temporal walk-forward with **5,152** scored games.
+Frame: **7428** FBS-v-FBS games, 2016-2025; temporal walk-forward.
 
 | Model | N | MAE | RMSE | Bias | Residual SD | MAE Δ vs Ridge |
 |---|---:|---:|---:|---:|---:|---:|
@@ -10,6 +10,6 @@ Frame: **7,428** FBS-v-FBS games, 2016-2025; temporal walk-forward with **5,152*
 | hgb_15 | 5152 | 13.457 | 16.929 | 1.112 | 16.894 | +0.424 |
 | hgb_31 | 5152 | 13.619 | 17.148 | 0.968 | 17.122 | +0.586 |
 
-Best challenger: **ridge_full_100 remains the winner**.
+Best challenger: **ridge_full_100**.
 
-The nonlinear models were scored on the same market-blind, leak-free temporal frame. None improved MAE or RMSE, so V1 keeps the transparent Ridge QBASE rather than adding complexity without out-of-sample benefit.
+This report is market-blind and does not automatically promote a challenger. Promotion requires a material, stable temporal gain and a reproducible production scorer.
