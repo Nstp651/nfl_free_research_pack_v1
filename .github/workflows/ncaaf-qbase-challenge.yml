@@ -5,11 +5,17 @@ on:
     branches: [feature/ncaaf-totals-v1]
     paths:
       - 'ncaaf_totals_v1/model/challenge_qbase.py'
+      - 'ncaaf_totals_v1/model/train_qbase.py'
+      - 'ncaaf_totals_v1/model/requirements.txt'
       - '.github/workflows/ncaaf-qbase-challenge.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: ncaaf-qbase-challenge
+  cancel-in-progress: false
 
 jobs:
   challenge:
@@ -28,6 +34,10 @@ jobs:
       - name: Run nonlinear temporal challengers
         working-directory: ncaaf_totals_v1/model
         run: python challenge_qbase.py --start 2016 --end 2025 --cache /tmp/ncaaf-qbase-cache --output QBASE_CHALLENGERS.md
+      - name: Verify challenger report was produced
+        run: |
+          test -s ncaaf_totals_v1/model/QBASE_CHALLENGERS.md
+          grep -q 'ridge_full_100' ncaaf_totals_v1/model/QBASE_CHALLENGERS.md
       - name: Commit challenger audit
         shell: bash
         run: |
