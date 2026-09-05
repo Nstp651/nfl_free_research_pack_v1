@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ncaaf/frozen-pmodel-v1.1.json",
+  "title": "Nick NCAA Totals Frozen P_model V1.1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "p_model_status",
+    "frozen_at",
+    "season",
+    "week",
+    "research_pack_revision",
+    "qbase_revision",
+    "qbase_model_version",
+    "probability_schema_version",
+    "games"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.1.0"},
+    "p_model_status": {"const": "FROZEN"},
+    "frozen_at": {"type": "string", "format": "date-time"},
+    "season": {"type": "integer", "minimum": 2000, "maximum": 2100},
+    "week": {"type": "integer", "minimum": 0, "maximum": 30},
+    "research_pack_revision": {"type": "string", "pattern": "^[a-f0-9]{16}$"},
+    "qbase_revision": {"type": "string", "pattern": "^[a-f0-9]{16}$"},
+    "qbase_model_version": {"type": "string"},
+    "probability_schema_version": {"const": "0.2.0"},
+    "games": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "game_id",
+          "home_team",
+          "away_team",
+          "commence_time",
+          "expected_total_final",
+          "confidence",
+          "fragility",
+          "probability_grid"
+        ],
+        "properties": {
+          "game_id": {"type": "string", "minLength": 1},
+          "home_team": {"type": "string", "minLength": 1},
+          "away_team": {"type": "string", "minLength": 1},
+          "commence_time": {"type": "string", "format": "date-time"},
+          "expected_total_qbase": {"type": "number"},
+          "expected_total_final": {"type": "number"},
+          "confidence": {"type": "string", "minLength": 1},
+          "fragility": {"type": "string", "minLength": 1},
+          "frozen_thesis": {"type": "string"},
+          "probability_grid": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["line", "over", "push", "under"],
+              "properties": {
+                "line": {"type": "number"},
+                "over": {"type": "number", "minimum": 0, "maximum": 1},
+                "push": {"type": "number", "minimum": 0, "maximum": 1},
+                "under": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
