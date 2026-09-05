@@ -4,6 +4,11 @@
 This module exists to make positional/index pairing impossible. Research, QBASE
 and frozen game records are reconciled only by exact game_id, with team identity
 and per-game QBASE anchor hashes checked before a slate can be certified frozen.
+
+Hash material is deliberately transport-canonical: JSON runtimes may serialize
+20.0 as 20 and 0.0 as 0. Numeric fields are normalized to fixed decimal strings
+before hashing so the same logical artifact hashes identically before and after
+Worker / Action JSON serialization.
 """
 from __future__ import annotations
 
@@ -20,15 +25,35 @@ def canonical_sha256(value: Any) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def _fixed(value: Any, places: int) -> str:
+    x = float(value)
+    if not math.isfinite(x):
+        raise ValueError("Non-finite numeric value in identity hash material")
+    return f"{x:.{places}f}"
+
+
+def canonical_probability_grid(grid: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Normalize a probability grid independently of JSON number spelling."""
+    out: list[dict[str, str]] = []
+    for row in grid or []:
+        out.append({
+            "line": _fixed(row["line"], 1),
+            "over": _fixed(row["over"], 8),
+            "push": _fixed(row["push"], 8),
+            "under": _fixed(row["under"], 8),
+        })
+    return out
+
+
 def qbase_anchor_material(game: dict[str, Any]) -> dict[str, Any]:
     return {
         "game_id": str(game["game_id"]),
         "home_team": game.get("home_team"),
         "away_team": game.get("away_team"),
-        "expected_total_qbase": game.get("expected_total_qbase"),
+        "expected_total_qbase": _fixed(game.get("expected_total_qbase"), 6),
         "residual_bucket": game.get("residual_bucket"),
-        "residual_sd": game.get("residual_sd"),
-        "probability_grid": game.get("probability_grid"),
+        "residual_sd": _fixed(game.get("residual_sd"), 6),
+        "probability_grid": canonical_probability_grid(game.get("probability_grid", [])),
     }
 
 
@@ -37,7 +62,7 @@ def qbase_anchor_sha256(game: dict[str, Any]) -> str:
 
 
 def grid_sha256(grid: list[dict[str, Any]]) -> str:
-    return canonical_sha256(grid)
+    return canonical_sha256(canonical_probability_grid(grid))
 
 
 def _index_unique(items: list[dict[str, Any]], label: str) -> dict[str, dict[str, Any]]:

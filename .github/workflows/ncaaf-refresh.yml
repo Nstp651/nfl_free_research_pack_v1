@@ -21,6 +21,7 @@ on:
       - 'ncaaf_totals_v1/validate_pack.py'
       - 'ncaaf_totals_v1/requirements.txt'
       - 'ncaaf_totals_v1/model/score_slate.py'
+      - 'ncaaf_totals_v1/model/freeze_identity.py'
       - 'ncaaf_totals_v1/model/qbase_v0.1.0.json'
       - 'ncaaf_totals_v1/model/requirements.txt'
       - '.github/workflows/ncaaf-refresh.yml'
@@ -111,12 +112,14 @@ jobs:
             --artifact model/qbase_v0.1.0.json \
             --output-root model/slates
 
-      - name: Validate research-to-QBASE revision lock
+      - name: Validate research-to-QBASE revision and identity lock
         shell: bash
         run: |
           python - <<'PY'
-          import json
+          import json, sys
           from pathlib import Path
+          sys.path.insert(0, 'ncaaf_totals_v1/model')
+          from freeze_identity import qbase_anchor_sha256
 
           manifest=json.loads(Path('ncaaf_totals_v1/data/manifest.json').read_text())
           entries=manifest.get('slates',[])
@@ -131,11 +134,15 @@ jobs:
           assert len(q.get('games',[])) == int(s['game_count']), (len(q.get('games',[])),s['game_count'])
           assert q.get('probability_schema_version') == '0.2.0', q.get('probability_schema_version')
           assert q.get('integer_line_method') == 'continuity_corrected_discrete_mass', q.get('integer_line_method')
+          assert q.get('identity_binding') == 'exact_game_id_plus_qbase_anchor_sha256'
           meta=q.get('supported_total_grid',{})
           assert float(meta.get('min')) <= 20.0
           assert float(meta.get('max')) >= 100.5
           assert abs(float(meta.get('step'))-0.5) < 1e-12
+          ids=[]
           for g in q['games']:
+              ids.append(str(g['game_id']))
+              assert g.get('qbase_anchor_sha256') == qbase_anchor_sha256(g), g.get('game_id')
               grid=g.get('probability_grid',[])
               assert grid
               assert all(abs(float(r['over'])+float(r['push'])+float(r['under'])-1.0) < 3e-8 for r in grid)
@@ -144,7 +151,8 @@ jobs:
               assert integers and halves
               assert any(float(r['push']) > 0 for r in integers)
               assert all(abs(float(r['push'])) < 1e-12 for r in halves)
-          print(f"RESEARCH_QBASE_REVISION_LOCK_PASS pack={s['pack_revision']} qbase={q['qbase_revision']} games={len(q['games'])}")
+          assert len(ids)==len(set(ids))==int(s['game_count'])
+          print(f"RESEARCH_QBASE_IDENTITY_LOCK_PASS pack={s['pack_revision']} qbase={q['qbase_revision']} games={len(q['games'])}")
           PY
 
       - name: Record build summary
@@ -165,6 +173,7 @@ jobs:
           print(f"- FBS-v-FBS games: **{s['game_count']}**")
           print(f"- Current data through week: `{s.get('current_season_data_through_week')}`")
           print(f"- Source health: `{m['source_health']['status']}`")
+          print('- QBASE identity hashes: **transport-canonical PASS**')
           print('- Market data: **false**')
           PY
 

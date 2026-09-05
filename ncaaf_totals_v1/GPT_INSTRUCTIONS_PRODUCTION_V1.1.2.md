@@ -25,7 +25,7 @@ Actual code MUST:
 - reject missing/duplicate game_id in research/QBASE;
 - for every eligible ID require exact entry in both maps;
 - require QBASE home/away exactly match research fixture;
-- recompute canonical SHA-256 of QBASE anchor material: game_id, home_team, away_team, expected_total_qbase, residual_bucket, residual_sd, probability_grid;
+- recompute QBASE anchor SHA-256 from game_id, teams, expected_total_qbase, residual_bucket, residual_sd, probability_grid using sorted compact UTF-8 JSON AFTER transport-canonical numeric normalization: total/SD -> 6dp strings; grid line -> 1dp string; over/push/under -> 8dp strings;
 - require recomputed hash = supplied `qbase_anchor_sha256`;
 - retain keyed anchor total/hash/grid hash in frozen receipt.
 
