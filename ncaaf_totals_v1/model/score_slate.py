@@ -5,7 +5,7 @@ This is NOT final P_model. It is the reproducible quantitative baseline used by
 Layer 1 triage and Layer 2 before current QB/personnel/weather scenario
 translation. No sportsbook data is read.
 
-V0.2 QBASE-slate output supports both integer and half-point totals. NCAA
+Probability-grid V0.2 supports both integer and half-point totals. NCAA
 bookmakers commonly post whole-number totals; those require an explicit push
 probability and push-aware fair-price/EV math after freeze.
 """
@@ -22,7 +22,9 @@ import numpy as np
 
 import train_qbase as tq
 
-SCHEMA_VERSION = "0.2.0"
+# Keep the established QBASE slate envelope compatible with the Worker.
+SCHEMA_VERSION = "0.1.0"
+PROBABILITY_SCHEMA_VERSION = "0.2.0"
 # Deliberately wider than normal NCAA market totals so exact post-freeze mapping
 # almost never needs a new threshold. Includes BOTH integer and half-point lines.
 GRID = [x / 2.0 for x in range(40, 202)]  # 20.0 through 100.5, step 0.5
@@ -129,7 +131,6 @@ def line_probabilities(mu: float, line: float, dist: dict) -> dict[str, float]:
         under = max(0.0, min(1.0, residual_cdf(line - mu, dist)))
         push = 0.0
         over = max(0.0, min(1.0, 1.0 - under))
-    # Round only after the exact components have been constructed.
     return {
         "line": float(line),
         "over": round(over, 8),
@@ -140,17 +141,11 @@ def line_probabilities(mu: float, line: float, dist: dict) -> dict[str, float]:
 
 def probabilities(mu: float, dist: dict) -> list[dict[str, float]]:
     out = [line_probabilities(mu, line, dist) for line in GRID]
-
-    # Integrity: as the line rises, Over cannot rise and Under cannot fall.
     for a, b in zip(out, out[1:]):
         if b["over"] > a["over"] + 1e-10 or b["under"] < a["under"] - 1e-10:
             raise ValueError("Probability grid is non-monotonic")
-
-    # Every line partitions the integer-valued total into Over/Push/Under.
     if any(abs(x["over"] + x["push"] + x["under"] - 1.0) > 3e-8 for x in out):
         raise ValueError("Probability partition audit failed")
-
-    # Half-point lines cannot push; integer lines must never carry negative mass.
     for x in out:
         if abs(x["line"] - round(x["line"])) >= 1e-9 and abs(x["push"]) > 1e-12:
             raise ValueError("Half-point line has non-zero push probability")
@@ -196,7 +191,7 @@ def score_pack(pack: dict, artifact: dict) -> dict:
         {
             "pack_revision": pack["pack_revision"],
             "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
-            "probability_schema": SCHEMA_VERSION,
+            "probability_schema_version": PROBABILITY_SCHEMA_VERSION,
             "games": games,
         },
         sort_keys=True,
@@ -204,6 +199,7 @@ def score_pack(pack: dict, artifact: dict) -> dict:
     ).encode()
     return {
         "schema_version": SCHEMA_VERSION,
+        "probability_schema_version": PROBABILITY_SCHEMA_VERSION,
         "market_data": False,
         "slate_id": pack["slate_id"],
         "season": pack["season"],
