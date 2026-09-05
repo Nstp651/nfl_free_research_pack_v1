@@ -11,17 +11,72 @@ paths:
       operationId: healthNcaafTotalsResearchPack
       summary: Check research-pack freshness and source health
       responses:
-        '200': {description: Health response, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
-        '503': {description: Unhealthy service}
+        '200':
+          description: Health response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: {type: boolean}
+                  service: {type: string}
+                  version: {type: string}
+                  market_data: {type: boolean}
+                  slate_count: {type: integer}
+                  fixture_count: {type: integer}
+                  source_health:
+                    type: object
+                    properties:
+                      status: {type: string}
+                    additionalProperties: true
+                  freshness:
+                    type: object
+                    properties:
+                      status: {type: string}
+                    additionalProperties: true
+                additionalProperties: true
+        '503':
+          description: Unhealthy service
   /v1/slates:
     get:
       operationId: listNcaafTotalsResearchSlates
       summary: Resolve published NCAA research slate metadata
       parameters:
-        - {name: season, in: query, required: true, schema: {type: integer, minimum: 2000, maximum: 2100}}
-        - {name: week, in: query, required: true, schema: {type: integer, minimum: 0, maximum: 30}}
+        - name: season
+          in: query
+          required: true
+          schema: {type: integer, minimum: 2000, maximum: 2100}
+        - name: week
+          in: query
+          required: true
+          schema: {type: integer, minimum: 0, maximum: 30}
       responses:
-        '200': {description: Slate metadata, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
+        '200':
+          description: Slate metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schema_version: {type: string}
+                  market_data: {type: boolean}
+                  season: {type: integer}
+                  week: {type: integer}
+                  slates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        slate_id: {type: string}
+                        pack_revision: {type: string}
+                        game_count: {type: integer}
+                        current_season_data_through_week:
+                          type: [integer, 'null']
+                      additionalProperties: true
+                  limitations:
+                    type: array
+                    items: {type: string}
+                additionalProperties: true
   /v1/freeze-runs:
     post:
       operationId: startNcaafTotalsFreezeRun
@@ -42,34 +97,55 @@ paths:
                 window_end: {type: string, format: date-time}
                 timing_mode: {type: string, enum: [NIGHT-BEFORE, MATCHDAY]}
       responses:
-        '200': {description: Run lock/status, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
-        '422': {description: Integrity/research failure}
+        '200':
+          description: Run lock and status
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RunStatus'}
+        '422': {description: Integrity or research failure}
         '503': {description: Service unavailable}
   /v1/freeze-runs/{run_id}:
     get:
       operationId: getNcaafTotalsFreezeRun
       summary: Recover run status, completed IDs, pending IDs and immutable freeze receipt
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       responses:
-        '200': {description: Run status, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
-        '422': {description: Unknown/invalid run}
+        '200':
+          description: Run status
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RunStatus'}
+        '422': {description: Unknown or invalid run}
   /v1/freeze-runs/{run_id}/research:
     get:
       operationId: getNcaafTotalsFreezeResearch
       summary: Read only the next server-bounded batch of at most two pending games
-      description: Repeated reads before checkpoint return the same current queue head. Do not preload later games. Market-blind.
+      description: Repeated reads before checkpoint return the same queue head. Do not preload later games. Market-blind.
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       responses:
-        '200': {description: Current pending batch, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
-        '422': {description: Invalid/frozen run}
+        '200':
+          description: Current pending batch
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ResearchBatch'}
+        '422': {description: Invalid or frozen run}
     post:
       operationId: checkpointNcaafTotalsResearch
       summary: Persist one or two complete research/context receipts from the current queue head; never freezes
       x-openai-isConsequential: false
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       requestBody:
         required: true
         content:
@@ -85,7 +161,11 @@ paths:
                   maxItems: 2
                   items: {$ref: '#/components/schemas/FreezeContext'}
       responses:
-        '200': {description: Updated completion/pending status, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
+        '200':
+          description: Updated completion and pending status
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RunStatus'}
         '422': {description: Invalid, duplicate, stale or out-of-queue context}
   /v1/freeze-runs/{run_id}/compute:
     post:
@@ -93,35 +173,138 @@ paths:
       summary: Execute all-game audits and atomically persist whole-slate freeze; idempotent after success
       x-openai-isConsequential: false
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       requestBody:
         required: true
         content:
           application/json:
-            schema: {type: object, additionalProperties: false}
+            schema:
+              type: object
+              properties: {}
+              additionalProperties: false
       responses:
-        '200': {description: Immutable freeze receipt, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
+        '200':
+          description: Immutable freeze receipt
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/FreezeReceipt'}
         '422': {description: Incomplete research or integrity failure}
   /v1/freeze-runs/{run_id}/games/{game_id}:
     get:
       operationId: getNcaafTotalsFrozenGame
       summary: Read exact persisted frozen game and full probability grid; never recompute
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
-        - {name: game_id, in: path, required: true, schema: {type: string}}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
+        - name: game_id
+          in: path
+          required: true
+          schema: {type: string}
       responses:
-        '200': {description: Persisted frozen game, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
+        '200':
+          description: Persisted frozen game
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/FrozenGameResponse'}
         '422': {description: Run not frozen or game not found}
 components:
-  parameters:
-    RunId:
-      name: run_id
-      in: path
-      required: true
-      schema: {type: string, pattern: '^[a-f0-9]{64}$'}
   schemas:
-    Generic:
+    RunLock:
       type: object
+      properties:
+        season: {type: integer}
+        week: {type: integer}
+        window_start: {type: string, format: date-time}
+        window_end: {type: string, format: date-time}
+        timing_mode: {type: string}
+        source_commit: {type: string}
+        slate_id: {type: string}
+        pack_revision: {type: string}
+        qbase_revision: {type: string}
+        eligibility_at: {type: string, format: date-time}
+        eligible_game_ids:
+          type: array
+          items: {type: string}
+      additionalProperties: true
+    RunStatus:
+      type: object
+      properties:
+        run_id: {type: string}
+        market_data: {type: boolean}
+        status: {type: string}
+        p_model_status: {type: string}
+        cutoff_status: {type: string}
+        lock: {$ref: '#/components/schemas/RunLock'}
+        completed_game_ids:
+          type: array
+          items: {type: string}
+        pending_game_ids:
+          type: array
+          items: {type: string}
+        freeze:
+          type: [object, 'null']
+          properties:
+            frozen_at: {type: string, format: date-time}
+            freeze_receipt_sha256: {type: string}
+          additionalProperties: true
+        error: {type: string}
+      additionalProperties: true
+    ResearchBatch:
+      type: object
+      properties:
+        run_id: {type: string}
+        market_data: {type: boolean}
+        status: {type: string}
+        lock: {$ref: '#/components/schemas/RunLock'}
+        batch_game_ids:
+          type: array
+          maxItems: 2
+          items: {type: string}
+        pending_game_ids:
+          type: array
+          items: {type: string}
+        next_batch_after_checkpoint: {type: boolean}
+        games:
+          type: array
+          maxItems: 2
+          items:
+            type: object
+            properties:
+              research:
+                type: object
+                properties:
+                  game_id: {type: string}
+                  fixture:
+                    type: object
+                    properties:
+                      home_team: {type: string}
+                      away_team: {type: string}
+                      venue: {type: string}
+                      start_utc: {type: string, format: date-time}
+                    additionalProperties: true
+                additionalProperties: true
+              qbase:
+                type: object
+                properties:
+                  game_id: {type: string}
+                  home_team: {type: string}
+                  away_team: {type: string}
+                  expected_total_qbase: {type: number}
+                  residual_bucket: {type: string}
+                  residual_sd: {type: number}
+                  qbase_anchor_sha256: {type: string}
+                additionalProperties: true
+              checkpoint:
+                type: [object, 'null']
+                properties:
+                  game_id: {type: string}
+                additionalProperties: true
+            additionalProperties: true
       additionalProperties: true
     Evidence:
       type: object
@@ -130,8 +313,32 @@ components:
       properties:
         finding: {type: string}
         checked_at: {type: string, format: date-time}
-        sources: {type: array, minItems: 1, items: {type: string, format: uri}}
+        sources:
+          type: array
+          minItems: 1
+          items: {type: string, format: uri}
         unresolved: {type: boolean}
+    TeamResearch:
+      type: object
+      additionalProperties: false
+      required: [qb_backup, offensive_line, skill_defense_absences, coaching_playcaller, transfers_depth, suspensions, rest_travel, late_news]
+      properties:
+        qb_backup: {$ref: '#/components/schemas/Evidence'}
+        offensive_line: {$ref: '#/components/schemas/Evidence'}
+        skill_defense_absences: {$ref: '#/components/schemas/Evidence'}
+        coaching_playcaller: {$ref: '#/components/schemas/Evidence'}
+        transfers_depth: {$ref: '#/components/schemas/Evidence'}
+        suspensions: {$ref: '#/components/schemas/Evidence'}
+        rest_travel: {$ref: '#/components/schemas/Evidence'}
+        late_news: {$ref: '#/components/schemas/Evidence'}
+    GameResearch:
+      type: object
+      additionalProperties: false
+      required: [schedule_status, venue_roof_surface, weather]
+      properties:
+        schedule_status: {$ref: '#/components/schemas/Evidence'}
+        venue_roof_surface: {$ref: '#/components/schemas/Evidence'}
+        weather: {$ref: '#/components/schemas/Evidence'}
     Scenario:
       type: object
       additionalProperties: false
@@ -141,7 +348,9 @@ components:
         weight: {type: number, exclusiveMinimum: 0, maximum: 1}
         shift: {type: number}
         residual_scale: {type: number, exclusiveMinimum: 0}
-        ledger_ids: {type: array, items: {type: string}}
+        ledger_ids:
+          type: array
+          items: {type: string}
     LedgerItem:
       type: object
       additionalProperties: false
@@ -154,17 +363,21 @@ components:
         quantified_basis: {type: string}
     ResearchReceipt:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       required: [market_data, home_team, away_team, home, away, game, deep_triggers, deep_evidence]
       properties:
-        market_data: {type: boolean, const: false}
+        market_data: {type: boolean, enum: [false]}
         home_team: {type: string}
         away_team: {type: string}
-        home: {type: object, additionalProperties: {$ref: '#/components/schemas/Evidence'}}
-        away: {type: object, additionalProperties: {$ref: '#/components/schemas/Evidence'}}
-        game: {type: object, additionalProperties: {$ref: '#/components/schemas/Evidence'}}
-        deep_triggers: {type: array, items: {type: string}}
-        deep_evidence: {type: array, items: {$ref: '#/components/schemas/Evidence'}}
+        home: {$ref: '#/components/schemas/TeamResearch'}
+        away: {$ref: '#/components/schemas/TeamResearch'}
+        game: {$ref: '#/components/schemas/GameResearch'}
+        deep_triggers:
+          type: array
+          items: {type: string}
+        deep_evidence:
+          type: array
+          items: {$ref: '#/components/schemas/Evidence'}
     FreezeContext:
       type: object
       additionalProperties: false
@@ -173,9 +386,81 @@ components:
         game_id: {type: string}
         contextual_shift: {type: number}
         distribution_changed: {type: boolean}
-        scenarios: {type: array, minItems: 1, maxItems: 8, items: {$ref: '#/components/schemas/Scenario'}}
+        scenarios:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items: {$ref: '#/components/schemas/Scenario'}
         confidence: {type: string, enum: [A, A-, B+, B, B-, C+, C, D]}
         fragility: {type: string, enum: [LOW, MEDIUM, HIGH]}
-        ledger: {type: array, items: {$ref: '#/components/schemas/LedgerItem'}}
+        ledger:
+          type: array
+          items: {$ref: '#/components/schemas/LedgerItem'}
         research: {$ref: '#/components/schemas/ResearchReceipt'}
         frozen_thesis: {type: string}
+    FreezeReceipt:
+      type: object
+      properties:
+        run_id: {type: string}
+        market_data: {type: boolean}
+        schema_version: {type: string}
+        p_model_status: {type: string}
+        frozen_at: {type: string, format: date-time}
+        freeze_receipt_sha256: {type: string}
+        identity_receipt_sha256: {type: string}
+        input_sha256: {type: string}
+        numerical_output_sha256: {type: string}
+        verified_anchor_count: {type: integer}
+        identity_binding_audit: {type: string}
+        probability_audit: {type: string}
+        zero_shift_audit: {type: string}
+        games:
+          type: array
+          items:
+            type: object
+            properties:
+              game_id: {type: string}
+              home_team: {type: string}
+              away_team: {type: string}
+              expected_total_qbase: {type: number}
+              contextual_shift: {type: number}
+              expected_total_final: {type: number}
+              residual_bucket: {type: string}
+              confidence: {type: string}
+              fragility: {type: string}
+            additionalProperties: true
+        grid_retrieval: {type: string}
+      additionalProperties: true
+    FrozenGameResponse:
+      type: object
+      properties:
+        run_id: {type: string}
+        market_data: {type: boolean}
+        freeze_receipt_sha256: {type: string}
+        frozen_at: {type: string, format: date-time}
+        game:
+          type: object
+          properties:
+            game_id: {type: string}
+            home_team: {type: string}
+            away_team: {type: string}
+            expected_total_qbase: {type: number}
+            contextual_shift: {type: number}
+            expected_total_final: {type: number}
+            qbase_anchor_sha256: {type: string}
+            qbase_probability_grid_sha256: {type: string}
+            frozen_probability_grid_sha256: {type: string}
+            confidence: {type: string}
+            fragility: {type: string}
+            probability_grid:
+              type: array
+              items:
+                type: object
+                properties:
+                  line: {type: number}
+                  over: {type: number}
+                  push: {type: number}
+                  under: {type: number}
+                additionalProperties: false
+          additionalProperties: true
+      additionalProperties: true
