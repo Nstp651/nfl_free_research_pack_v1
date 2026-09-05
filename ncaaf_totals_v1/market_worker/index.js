@@ -2,12 +2,17 @@
  * NCAA Football full-game totals market gateway.
  * POST-FREEZE ONLY. Australian region, totals market only.
  * One upstream sport-board call covers the whole NCAAF slate (1 region x 1 market).
+ *
+ * V0.1.1 intentionally applies commence-time bounds LOCALLY after retrieving the
+ * current NCAAF board. This avoids upstream 4xx failures caused by time-filter
+ * parameters while preserving the exact frozen-slate window at the Worker edge.
  */
 const SPORT = 'americanfootball_ncaaf';
 const ODDS_HOST = 'https://api.the-odds-api.com';
 const MAX_RESPONSE_CHARS = 90000;
 const MAX_UPSTREAM_CHARS = 8_000_000;
 const CACHE_TTL_SECONDS = 45;
+const VERSION = '0.1.1';
 
 function reply(value, status = 200) {
   return new Response(JSON.stringify(value), {status, headers: {
@@ -16,7 +21,12 @@ function reply(value, status = 200) {
     'access-control-allow-origin': '*',
   }});
 }
-function fail(status, message) { const e = new Error(message); e.status = status; throw e; }
+function fail(status, message, details = {}) {
+  const e = new Error(message);
+  e.status = status;
+  Object.assign(e, details);
+  throw e;
+}
 function integer(value, min, max, fallback) {
   if (value === null && fallback !== undefined) return fallback;
   if (!/^\d+$/.test(value || '')) fail(400, 'Invalid integer parameter');
@@ -31,7 +41,6 @@ function iso(value, field) {
   return new Date(ms).toISOString();
 }
 function fnv16(text) {
-  // Two independent FNV-1a passes -> deterministic 16-hex board revision.
   let a = 0x811c9dc5, b = 0x9e3779b9;
   for (let i = 0; i < text.length; i++) {
     const c = text.charCodeAt(i);
@@ -70,28 +79,61 @@ function normalizeBoard(raw) {
   games.sort((a,b) => a.commence_time.localeCompare(b.commence_time) || a.event_id.localeCompare(b.event_id));
   return games;
 }
+function filterWindow(games, from, to) {
+  const fromMs = from ? Date.parse(from) : null;
+  const toMs = to ? Date.parse(to) : null;
+  return games.filter(g => {
+    const ms = Date.parse(g.commence_time);
+    if (!Number.isFinite(ms)) return false;
+    if (fromMs !== null && ms < fromMs) return false;
+    if (toMs !== null && ms > toMs) return false;
+    return true;
+  });
+}
+function parseUpstreamError(rawText) {
+  try {
+    const value = JSON.parse(rawText);
+    return {
+      code: typeof value?.error_code === 'string' ? value.error_code : null,
+      message: typeof value?.message === 'string' ? value.message : null,
+    };
+  } catch {
+    return {code: null, message: null};
+  }
+}
 async function fetchBoard(env, from, to) {
   if (!env.ODDS_API_KEY) fail(503, 'ODDS_API_KEY is not configured');
+
+  // Deliberately do NOT send commenceTimeFrom/commenceTimeTo upstream.
+  // The upstream current-board endpoint already returns current/live/upcoming
+  // NCAAF events. We filter the exact frozen window locally after normalization.
   const q = new URLSearchParams({
     apiKey: env.ODDS_API_KEY,
     regions: 'au', markets: 'totals', oddsFormat: 'decimal', dateFormat: 'iso',
   });
-  if (from) q.set('commenceTimeFrom', from);
-  if (to) q.set('commenceTimeTo', to);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const res = await fetch(`${ODDS_HOST}/v4/sports/${SPORT}/odds?${q}`, {
       signal: controller.signal,
-      headers: {'user-agent': 'nick-ncaaf-totals-market/0.1.0'},
+      headers: {'user-agent': `nick-ncaaf-totals-market/${VERSION}`},
       cf: {cacheTtl: CACHE_TTL_SECONDS, cacheEverything: true},
     });
     const rawText = await res.text();
-    if (!res.ok) fail(res.status === 429 ? 429 : 502, `Odds source unavailable (${res.status})`);
+    if (!res.ok) {
+      const upstream = parseUpstreamError(rawText);
+      const status = res.status === 429 ? 429 : 502;
+      fail(status, `Odds source unavailable (${res.status})`, {
+        upstream_status: res.status,
+        upstream_code: upstream.code,
+        upstream_message: upstream.message,
+      });
+    }
     if (rawText.length > MAX_UPSTREAM_CHARS) fail(502, 'Odds source response exceeds size limit');
     let raw;
     try { raw = JSON.parse(rawText); } catch { fail(502, 'Odds source returned invalid JSON'); }
-    const games = normalizeBoard(raw);
+    const allGames = normalizeBoard(raw);
+    const games = filterWindow(allGames, from, to);
     const canonical = JSON.stringify(games);
     return {
       games,
@@ -114,7 +156,7 @@ export default {
       if (!['/health', '/v1/totals'].includes(url.pathname)) return reply({error: 'Not found'}, 404);
       if (url.pathname === '/health') {
         return reply({
-          ok: Boolean(env.ODDS_API_KEY), service: 'NCAAF_TOTALS_MARKET_GATEWAY', version: '0.1.0',
+          ok: Boolean(env.ODDS_API_KEY), service: 'NCAAF_TOTALS_MARKET_GATEWAY', version: VERSION,
           sport_key: SPORT, region: 'au', market_group: 'ncaaf-totals', market_key: 'totals',
           configured: Boolean(env.ODDS_API_KEY),
           note: 'Health performs no Odds API market request and consumes no market-board credit.',
@@ -138,7 +180,7 @@ export default {
       let result;
       do {
         result = {
-          service: 'NCAAF_TOTALS_MARKET_GATEWAY', version: '0.1.0',
+          service: 'NCAAF_TOTALS_MARKET_GATEWAY', version: VERSION,
           sport_key: SPORT, region: 'au', market_group: 'ncaaf-totals', market_key: 'totals',
           retrieved_at: board.retrieved_at, board_revision: board.board_revision,
           filter: {commence_from: from, commence_to: to}, quota: board.quota,
@@ -155,7 +197,11 @@ export default {
       fail(502, 'A market game record exceeds the Action response limit');
     } catch (error) {
       const status = error.status || (error?.name === 'AbortError' ? 504 : 502);
-      return reply({error: error.status ? error.message : (status === 504 ? 'Odds source timed out' : 'Market service temporarily unavailable')}, status);
+      const body = {error: error.status ? error.message : (status === 504 ? 'Odds source timed out' : 'Market service temporarily unavailable')};
+      if (error.upstream_status) body.upstream_status = error.upstream_status;
+      if (error.upstream_code) body.upstream_code = error.upstream_code;
+      if (error.upstream_message) body.upstream_message = error.upstream_message;
+      return reply(body, status);
     }
   },
 };
