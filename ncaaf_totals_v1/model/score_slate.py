@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""Score published NCAA research slates with the calibrated market-blind QBASE.
+
+This is NOT final P_model. It is the reproducible quantitative baseline used by
+Layer 1 triage and Layer 2 before current QB/personnel/weather scenario
+translation. No sportsbook data is read.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+import train_qbase as tq
+
+SCHEMA_VERSION = "0.1.0"
+GRID = [x + 0.5 for x in range(30, 86)]
+
+
+def finite(v: Any) -> float:
+    try:
+        x=float(v); return x if math.isfinite(x) else math.nan
+    except (TypeError,ValueError):
+        return math.nan
+
+
+def profile_summary(profile: dict, state: str) -> dict | None:
+    obj=profile.get(state, {}) if isinstance(profile,dict) else {}
+    if not obj.get('available', False):
+        return None
+    s=obj.get('summary', {})
+    return s if isinstance(s,dict) and s else None
+
+
+def feature_row(game: dict, week: int) -> dict[str,float]:
+    hp=game.get('home_profile',{}); ap=game.get('away_profile',{})
+    ch=profile_summary(hp,'current'); ca=profile_summary(ap,'current')
+    ph=profile_summary(hp,'prior_season'); pa=profile_summary(ap,'prior_season')
+    fx=game.get('fixture',{})
+    st=str(fx.get('season_type','regular')).lower()
+    return tq.build_features(ch,ca,ph,pa,week,bool(fx.get('neutral_site',False)),'postseason' in st)
+
+
+def raw_predict(features: dict[str,float], artifact: dict) -> float:
+    names=artifact['features']; med=artifact['imputer_medians']; mean=artifact['scaler_mean']; scale=artifact['scaler_scale']; coef=artifact['coefficients']
+    if not (len(names)==len(med)==len(mean)==len(scale)==len(coef)):
+        raise ValueError('QBASE artifact vector-length mismatch')
+    total=float(artifact['intercept'])
+    for i,name in enumerate(names):
+        x=finite(features.get(name))
+        if not math.isfinite(x): x=float(med[i])
+        sc=float(scale[i]) or 1.0
+        z=(x-float(mean[i]))/sc
+        total += float(coef[i])*z
+    return total
+
+
+def bucket(week:int)->str:
+    return tq.week_bucket(week)
+
+
+def normal_cdf(x:float)->float:
+    return 0.5*(1.0+math.erf(x/math.sqrt(2.0)))
+
+
+def residual_cdf(r:float, dist:dict)->float:
+    levels=[float(x) for x in dist['quantile_levels']]
+    bias=float(dist.get('bias_actual_minus_pred',0.0))
+    qs=[float(x)-bias for x in dist['residual_quantiles']]
+    sd=max(1e-6,float(dist['residual_sd']))
+    if r <= qs[0]:
+        denom=max(1e-9,normal_cdf(qs[0]/sd))
+        p=levels[0]*normal_cdf(r/sd)/denom
+        return max(1e-6,min(levels[0],p))
+    if r >= qs[-1]:
+        denom=max(1e-9,1.0-normal_cdf(qs[-1]/sd))
+        tail=(1.0-levels[-1])*(1.0-normal_cdf(r/sd))/denom
+        return max(levels[-1],min(1.0-1e-6,1.0-tail))
+    return float(np.interp(r,qs,levels))
+
+
+def probabilities(mu:float, dist:dict)->list[dict[str,float]]:
+    out=[]
+    for line in GRID:
+        under=residual_cdf(line-mu,dist)
+        over=1.0-under
+        out.append({'line':line,'over':round(over,8),'under':round(under,8)})
+    # Integrity: Over falls, Under rises, complements equal one.
+    for a,b in zip(out,out[1:]):
+        if b['over'] > a['over'] + 1e-10 or b['under'] < a['under'] - 1e-10:
+            raise ValueError('Probability grid is non-monotonic')
+    if any(abs(x['over']+x['under']-1.0)>2e-8 for x in out):
+        raise ValueError('Probability complement audit failed')
+    return out
+
+
+def score_pack(pack:dict, artifact:dict)->dict:
+    if pack.get('market_data') is not False or artifact.get('market_data') is not False:
+        raise ValueError('Market boundary violation')
+    if artifact.get('feature_schema') != tq.TRAINING_FEATURE_SCHEMA:
+        raise ValueError('QBASE feature schema mismatch')
+    week=int(pack['week'])
+    all_dist=artifact['walk_forward']['residual_distribution']
+    key=bucket(week); dist=all_dist.get(key) or all_dist['ALL']
+    bias=float(dist.get('bias_actual_minus_pred',0.0))
+    games=[]
+    for game in pack.get('games',[]):
+        feats=feature_row(game,week)
+        raw=raw_predict(feats,artifact)
+        mu=raw+bias
+        missing=sum(1 for n in artifact['features'] if not math.isfinite(finite(feats.get(n))))
+        games.append({
+            'game_id':str(game['game_id']),
+            'home_team':game.get('fixture',{}).get('home_team'),
+            'away_team':game.get('fixture',{}).get('away_team'),
+            'expected_total_raw':round(raw,6),
+            'oos_bias_calibration':round(bias,6),
+            'expected_total_qbase':round(mu,6),
+            'residual_bucket':key if key in all_dist else 'ALL',
+            'residual_sd':round(float(dist['residual_sd']),6),
+            'missing_feature_count_before_imputation':missing,
+            'probability_grid':probabilities(mu,dist),
+        })
+    model_bytes=json.dumps(artifact,sort_keys=True,separators=(',',':')).encode()
+    material=json.dumps({'pack_revision':pack['pack_revision'],'model_sha256':hashlib.sha256(model_bytes).hexdigest(),'games':games},sort_keys=True,separators=(',',':')).encode()
+    return {
+        'schema_version':SCHEMA_VERSION,
+        'market_data':False,
+        'slate_id':pack['slate_id'],'season':pack['season'],'week':week,
+        'research_pack_revision':pack['pack_revision'],
+        'qbase_model_name':artifact['model_name'],'qbase_model_version':artifact['model_version'],
+        'qbase_model_sha256':hashlib.sha256(model_bytes).hexdigest(),
+        'qbase_revision':hashlib.sha256(material).hexdigest()[:16],
+        'walk_forward_reference':artifact['walk_forward']['overall'],
+        'games':games,
+        'notes':['QBASE is pre-market and not final P_model.','Current live QB/personnel/weather scenario translation occurs after this baseline and before freeze.'],
+    }
+
+
+def main()->int:
+    ap=argparse.ArgumentParser()
+    ap.add_argument('--data',default='data')
+    ap.add_argument('--artifact',default='model/qbase_v0.1.0.json')
+    ap.add_argument('--output-root',default='model/slates')
+    args=ap.parse_args()
+    root=Path(args.data); artifact=json.loads(Path(args.artifact).read_text()); manifest=json.loads((root/'manifest.json').read_text())
+    if artifact.get('market_data') is not False: raise SystemExit('QBASE market boundary violation')
+    for entry in manifest['slates']:
+        p=root/'slates'/str(entry['season'])/f"{entry['slate_id']}.json"
+        pack=json.loads(p.read_text())
+        scored=score_pack(pack,artifact)
+        out=Path(args.output_root)/str(entry['season'])/f"{entry['slate_id']}.json"
+        out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps(scored,indent=2,sort_keys=True))
+        print(f"QBASE_SCORE slate={entry['slate_id']} games={len(scored['games'])} revision={scored['qbase_revision']}")
+    return 0
+
+if __name__=='__main__':
+    raise SystemExit(main())
