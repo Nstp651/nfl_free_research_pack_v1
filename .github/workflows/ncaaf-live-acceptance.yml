@@ -1,0 +1,68 @@
+name: NCAA live Worker acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ncaaf-live-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      RESEARCH_URL: https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev
+      MARKET_URL: https://ncaaf-totals-market-v1.nickarnott01.workers.dev
+    steps:
+      - name: Verify research Worker health, slate, and QBASE
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$RESEARCH_URL/health" > /tmp/research-health.json
+          curl --fail --silent --show-error "$RESEARCH_URL/v1/slates?season=2026&week=1" > /tmp/slates.json
+          curl --fail --silent --show-error "$RESEARCH_URL/v1/model/qbase" > /tmp/qbase.json
+          python3 - <<'PY'
+          import json
+          h=json.load(open('/tmp/research-health.json'))
+          s=json.load(open('/tmp/slates.json'))
+          q=json.load(open('/tmp/qbase.json'))
+          assert h.get('ok') is True, h
+          assert h.get('service') == 'NCAAF_TOTALS_RESEARCH_PACK', h
+          assert h.get('market_data') is False, h
+          assert s.get('market_data') is False, s
+          assert s.get('season') == 2026 and s.get('week') == 1, s
+          assert len(s.get('slates', [])) == 1, s
+          slate=s['slates'][0]
+          assert slate.get('slate_id') == '2026_01', slate
+          assert q.get('market_data') is False, q
+          assert q.get('model_name') == 'Nick NCAA Totals QBASE', q
+          assert q.get('model_version') == '0.1.0', q
+          print('RESEARCH_ACCEPTANCE_PASS')
+          print(json.dumps({'health':h,'slate':slate,'qbase_model_version':q.get('model_version')}, indent=2))
+          PY
+
+      - name: Verify market Worker secret/configuration health only
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$MARKET_URL/health" > /tmp/market-health.json
+          python3 - <<'PY'
+          import json
+          h=json.load(open('/tmp/market-health.json'))
+          assert h.get('ok') is True, h
+          assert h.get('configured') is True, h
+          assert h.get('service') == 'NCAAF_TOTALS_MARKET_GATEWAY', h
+          assert h.get('sport_key') == 'americanfootball_ncaaf', h
+          assert h.get('region') == 'au', h
+          assert h.get('market_group') == 'ncaaf-totals', h
+          assert h.get('market_key') == 'totals', h
+          print('MARKET_HEALTH_ACCEPTANCE_PASS')
+          print(json.dumps(h, indent=2))
+          PY
+
+      - name: Confirm no market board was requested
+        run: echo 'Acceptance intentionally stops at market /health. No Odds API board call was made before a controlled post-freeze test.'
