@@ -25,6 +25,13 @@ jobs:
       - name: Contract tests
         working-directory: ncaaf_totals_v1/market_worker
         run: node --test index.test.mjs
+      - name: Action contract sanity
+        shell: bash
+        run: |
+          grep -q 'operationId: getNcaafTotalsBoard' ncaaf_totals_v1/market_openapi.yaml
+          grep -q 'ncaaf-totals-market-v1.nickarnott01.workers.dev' ncaaf_totals_v1/market_openapi.yaml
+          grep -q "region: 'au'" ncaaf_totals_v1/market_worker/index.js
+          grep -q "markets: 'totals'" ncaaf_totals_v1/market_worker/index.js
       - name: Wrangler dry run
         working-directory: ncaaf_totals_v1/market_worker
         env:
