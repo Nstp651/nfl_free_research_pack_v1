@@ -7,7 +7,7 @@ on:
       - 'ncaaf_totals_v1/**'
       - '.github/workflows/ncaaf-*.yml'
   push:
-    branches: [feature/ncaaf-totals-v1]
+    branches: [feature/ncaaf-totals-v1, feature/ncaaf-integer-totals-v1.1]
     paths:
       - 'ncaaf_totals_v1/**'
       - '.github/workflows/ncaaf-production-gate.yml'
@@ -56,29 +56,45 @@ jobs:
           files=list(Path('/tmp/ncaaf-gate-qbase').glob('*/*.json'))
           assert len(files)==1, files
           x=json.loads(files[0].read_text())
+          assert x['schema_version'] == '0.1.0'
+          assert x['probability_schema_version'] == '0.2.0'
+          assert x['integer_line_method'] == 'continuity_corrected_discrete_mass'
           assert x['market_data'] is False
           assert len(x['games']) > 0
           assert len(x['research_pack_revision']) == 16
           assert len(x['qbase_revision']) == 16
+          meta=x['supported_total_grid']
+          assert meta['min'] <= 20.0 and meta['max'] >= 100.5 and abs(meta['step']-0.5)<1e-12
           for g in x['games']:
-              grid=g['probability_grid']
-              assert grid
-              assert all(0 <= r['over'] <= 1 and 0 <= r['under'] <= 1 for r in grid)
-              assert all(abs(r['over'] + r['under'] - 1) < 2e-8 for r in grid)
+              grid=g['probability_grid']; assert grid
+              assert all(0 <= r['over'] <= 1 and 0 <= r['push'] <= 1 and 0 <= r['under'] <= 1 for r in grid)
+              assert all(abs(r['over'] + r['push'] + r['under'] - 1) < 3e-8 for r in grid)
               assert all(grid[i+1]['over'] <= grid[i]['over'] + 1e-10 for i in range(len(grid)-1))
+              assert all(grid[i+1]['under'] >= grid[i]['under'] - 1e-10 for i in range(len(grid)-1))
+              integers=[r for r in grid if abs(r['line']-round(r['line']))<1e-9]
+              halves=[r for r in grid if abs(r['line']-round(r['line']))>=1e-9]
+              assert integers and halves
+              assert any(r['push'] > 0 for r in integers)
+              assert all(abs(r['push']) < 1e-12 for r in halves)
           print('QBASE_REAL_SLATE_ACCEPTANCE=PASS', files[0])
           PY
 
-      - name: Market-boundary and custom-GPT instruction gates
+      - name: Market-boundary and V1.1 custom-GPT gates
         run: |
           python - <<'PY'
           import json, re
           from pathlib import Path
-          inst=Path('ncaaf_totals_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.0.md').read_text()
+          inst=Path('ncaaf_totals_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.1.md').read_text()
+          master=Path('ncaaf_totals_v1/NCAA_TOTALS_4_LAYER_MASTER_API_ACTION_PRODUCTION_V1.1.md').read_text()
+          research_schema=Path('ncaaf_totals_v1/openapi_v1_1.yaml').read_text()
+          market_schema=Path('ncaaf_totals_v1/market_openapi_v1_1.yaml').read_text()
           assert len(inst) < 8000, len(inst)
-          assert 'P_MODEL_STATUS: FROZEN' in inst
-          assert 'getNcaafTotalsBoard' in inst
-          assert 'POST-FREEZE ONLY' in inst
+          for token in ('P_MODEL_STATUS: FROZEN','getNcaafTotalsBoard','POST-FREEZE ONLY','P_push','Expected ROI'):
+              assert token in inst, token
+          for token in ('P_push','continuity-corrected','Expected ROI','integer'):
+              assert token in master, token
+          assert 'push:' in research_schema
+          assert 'operationId: getNcaafTotalsBoard' in market_schema
           m=json.loads(Path('/tmp/ncaaf-gate-data/manifest.json').read_text())
           assert m['market_data'] is False
           slate=next(Path('/tmp/ncaaf-gate-data/slates').glob('*/*.json'))
@@ -107,5 +123,5 @@ jobs:
 
       - name: Gate summary
         run: |
-          echo 'NCAAF_PRODUCTION_CODE_GATE=PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'This gate validates code/data contracts only; live Cloudflare acceptance remains a separate post-merge deployment gate.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'NCAAF_V1_1_PRODUCTION_CODE_GATE=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Cloudflare native Git owns deployment; live health acceptance is separate and market-board acceptance is manual-only.' >> "$GITHUB_STEP_SUMMARY"
