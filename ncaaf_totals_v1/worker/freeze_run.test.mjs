@@ -9,7 +9,7 @@ class Storage {
  async put(k,v){this.data.set(k,structuredClone(v));}
  async transaction(fn){const saved=structuredClone(this.data);try{return await fn(this);}catch(e){this.data=saved;throw e;}}
 }
-test('checkpoint restart, atomic failure, immutable idempotent freeze and Python market handoff',async()=>{
+test('bounded queue, checkpoint restart, atomic failure, immutable idempotent freeze and Python market handoff',async()=>{
  const storage=new Storage(),state={storage,blockConcurrencyWhile:fn=>fn()};
  let run=new NcaafFreezeRun(state,{});
  const realFetch=globalThis.fetch,realNow=Date.now; let calls=[];
@@ -32,10 +32,27 @@ test('checkpoint restart, atomic failure, immutable idempotent freeze and Python
   assert.ok(ids.length>30); assert.equal(calls.length,3);
   assert.equal((await call('/compute',{})).status,422);
   assert.equal((await call('/games/'+ids[0])).status,422);
+
+  const page1=await call('/research');
+  assert.equal(page1.status,200);
+  assert.deepEqual(page1.data.batch_game_ids,ids.slice(0,2));
+  assert.equal(page1.data.games.length,2);
+  const page1Repeat=await call('/research');
+  assert.deepEqual(page1Repeat.data.batch_game_ids,ids.slice(0,2),'read before checkpoint must return same queue head');
+  assert.equal((await call('/research?offset=2')).status,422,'pagination cannot bypass checkpoint gate');
+  assert.equal((await call('/research',{contexts:ids.slice(0,3).map(context)})).status,422,'more than two contexts rejected');
+  assert.equal((await call('/research',{contexts:[context(ids[2])]})).status,422,'cannot skip queue head');
+
   const first=context(ids[0]); assert.equal((await call('/research',{contexts:[first]})).status,200);
   run=new NcaafFreezeRun(state,{}); // object eviction/restart must retain progress
   assert.deepEqual((await call('')).data.completed_game_ids,[ids[0]]);
-  for(let i=1;i<ids.length;i+=5) assert.equal((await call('/research',{contexts:ids.slice(i,i+5).map(context)})).status,200);
+  const resumedPage=await call('/research');
+  assert.deepEqual(resumedPage.data.batch_game_ids,[ids[1],ids[2]],'resume continues from first pending IDs');
+
+  for(let i=1;i<ids.length;i+=2) assert.equal((await call('/research',{contexts:ids.slice(i,i+2).map(context)})).status,200);
+  assert.equal((await call('')).data.pending_game_ids.length,0);
+  assert.equal((await call('/research')).data.games.length,0,'empty queue once all checkpoints persisted');
+
   r=await call('/compute',{}); assert.equal(r.status,200,JSON.stringify(r.data));
   const original=structuredClone(r.data);
   assert.equal(r.data.p_model_status,'FROZEN'); assert.ok(JSON.stringify(r.data).length<90000);
