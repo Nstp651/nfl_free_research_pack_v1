@@ -1,0 +1,34 @@
+{
+  "attribution": {
+    "provider": "sportsdataverse / cfbfastR public release data",
+    "purpose": "pre-market NCAA football research only",
+    "repository": "https://github.com/sportsdataverse/sportsdataverse-data"
+  },
+  "fixture_count": 51,
+  "generated_at_utc": "2026-09-05T08:07:41.928526+00:00",
+  "last_checked_at_utc": "2026-09-05T08:07:41.928526+00:00",
+  "limitations": [
+    "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
+    "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
+  ],
+  "market_data": false,
+  "schema_version": "0.1.0",
+  "slates": [
+    {
+      "current_season_data_through_week": null,
+      "game_count": 51,
+      "pack_revision": "491a09bd18f8a6ed",
+      "season": 2026,
+      "slate_id": "2026_01",
+      "week": 1
+    }
+  ],
+  "source_health": {
+    "failed_required": [],
+    "quality": {
+      "status": "NOT_TESTED",
+      "tests": []
+    },
+    "status": "PARTIAL"
+  }
+}

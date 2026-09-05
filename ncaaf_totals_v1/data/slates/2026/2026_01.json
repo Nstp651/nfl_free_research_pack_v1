@@ -1,0 +1,5183 @@
+{
+  "data_state": {
+    "current_season_data_through_week": null,
+    "prior_ratings_final_through_week": 16,
+    "prior_season": 2025,
+    "prior_summary_final_through_week": 16,
+    "required_max_through_week": 0
+  },
+  "games": [
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0009167921418076,
+            "adj_net": -0.0866347912039778,
+            "adj_off_epa": -0.0875515833457855,
+            "adj_st_epa": 0.004315588402567,
+            "fei_def": 0.8049708811483447,
+            "fei_net": -0.7420093535672292,
+            "fei_off": 0.0629615275811154
+          },
+          "summary": {
+            "EPAplay_def": 0.0789459864722519,
+            "EPAplay_off": -0.001668776017897,
+            "adj_def_epa": -0.003351030294368,
+            "adj_off_epa": -0.0737457487425248,
+            "explosive_def": 0.08130081300813,
+            "explosive_off": 0.0733229329173166,
+            "havoc_def": 0.1151761517615176,
+            "havoc_off": 0.1372854914196568,
+            "net_adj_epa": -0.0703947184481568,
+            "playsgame_def": 67.0909090909091,
+            "playsgame_off": 58.27272727272727,
+            "success_def": 0.4552845528455284,
+            "success_off": 0.422776911076443,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "153",
+        "team_name": "North Carolina"
+      },
+      "fixture": {
+        "away_id": "153",
+        "away_team": "North Carolina",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "2628",
+        "home_team": "TCU",
+        "neutral_site": true,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T02:00:00+10:00",
+        "start_utc": "2026-08-29T16:00:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Aviva Stadium",
+        "week": 1
+      },
+      "game_id": "401856766",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.113277348194749,
+            "adj_net": 0.1933647224901961,
+            "adj_off_epa": 0.0800873742954471,
+            "adj_st_epa": -0.0516640501050958,
+            "fei_def": -0.1317344265935152,
+            "fei_net": 0.7410083020985669,
+            "fei_off": 0.6092738755050517
+          },
+          "summary": {
+            "EPAplay_def": 0.0508219145565057,
+            "EPAplay_off": 0.0998229517972151,
+            "adj_def_epa": -0.1076917688708325,
+            "adj_off_epa": 0.0733714205390952,
+            "explosive_def": 0.0932835820895522,
+            "explosive_off": 0.0752427184466019,
+            "havoc_def": 0.1256218905472637,
+            "havoc_off": 0.1298543689320388,
+            "net_adj_epa": 0.1810631894099278,
+            "playsgame_def": 67.0,
+            "playsgame_off": 68.66666666666667,
+            "success_def": 0.4278606965174129,
+            "success_off": 0.4660194174757281,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2628",
+        "team_name": "TCU"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1173829064678621,
+            "adj_net": -0.1737446911678177,
+            "adj_off_epa": -0.0563617846999556,
+            "adj_st_epa": -1.0492570605181883,
+            "fei_def": 1.043413011018806,
+            "fei_net": -0.9978277963668954,
+            "fei_off": 0.0455852146519105
+          },
+          "summary": {
+            "EPAplay_def": 0.1458795969196356,
+            "EPAplay_off": -0.0043285872886578,
+            "adj_def_epa": 0.1353613894697585,
+            "adj_off_epa": -0.071211647951824,
+            "explosive_def": 0.0765027322404371,
+            "explosive_off": 0.064,
+            "havoc_def": 0.0956284153005464,
+            "havoc_off": 0.1173333333333333,
+            "net_adj_epa": -0.2065730374215826,
+            "playsgame_def": 66.54545454545455,
+            "playsgame_off": 68.18181818181819,
+            "success_def": 0.4521857923497268,
+            "success_off": 0.4466666666666666,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "23",
+        "team_name": "San Jos\u00e9 State"
+      },
+      "fixture": {
+        "away_id": "23",
+        "away_team": "San Jos\u00e9 State",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "30",
+        "home_team": "USC",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T05:00:00+10:00",
+        "start_utc": "2026-08-29T19:00:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Los Angeles Memorial Coliseum",
+        "week": 1
+      },
+      "game_id": "401864494",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0847117953645358,
+            "adj_net": 0.3345986896781954,
+            "adj_off_epa": 0.2498868943136596,
+            "adj_st_epa": -0.7864116866604307,
+            "fei_def": 0.0584810349019169,
+            "fei_net": 1.86795503128982,
+            "fei_off": 1.9264360661917368
+          },
+          "summary": {
+            "EPAplay_def": 0.054115648687202,
+            "EPAplay_off": 0.2618259439567247,
+            "adj_def_epa": -0.0799658202955033,
+            "adj_off_epa": 0.2429305456647598,
+            "explosive_def": 0.0724094881398252,
+            "explosive_off": 0.0997596153846153,
+            "havoc_def": 0.1173533083645443,
+            "havoc_off": 0.1009615384615384,
+            "net_adj_epa": 0.3228963659602631,
+            "playsgame_def": 61.61538461538461,
+            "playsgame_off": 64.0,
+            "success_def": 0.4781523096129838,
+            "success_off": 0.5144230769230769,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "30",
+        "team_name": "USC"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0070715566366928,
+            "adj_net": 0.1562349279010253,
+            "adj_off_epa": 0.1491633712643325,
+            "adj_st_epa": -0.6983590524404895,
+            "fei_def": 0.7786740998194461,
+            "fei_net": 0.1784434871621427,
+            "fei_off": 0.9571175869815888
+          },
+          "summary": {
+            "EPAplay_def": 0.1372720811365943,
+            "EPAplay_off": 0.115329507572483,
+            "adj_def_epa": -0.0458446032457564,
+            "adj_off_epa": 0.1335643342453355,
+            "explosive_def": 0.072039072039072,
+            "explosive_off": 0.0883905013192612,
+            "havoc_def": 0.1172161172161172,
+            "havoc_off": 0.1332453825857519,
+            "net_adj_epa": 0.179408937491092,
+            "playsgame_def": 68.25,
+            "playsgame_off": 63.16666666666666,
+            "success_def": 0.4566544566544566,
+            "success_off": 0.4432717678100263,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "152",
+        "team_name": "NC State"
+      },
+      "fixture": {
+        "away_id": "152",
+        "away_team": "NC State",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "258",
+        "home_team": "Virginia",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T05:30:00+10:00",
+        "start_utc": "2026-08-29T19:30:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Scott Stadium",
+        "week": 1
+      },
+      "game_id": "401858202",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.108354071319958,
+            "adj_net": 0.1370567135135619,
+            "adj_off_epa": 0.0287026421936038,
+            "adj_st_epa": -0.0272762555754828,
+            "fei_def": 0.0128803758551009,
+            "fei_net": 0.5228393325441639,
+            "fei_off": 0.5357197083992649
+          },
+          "summary": {
+            "EPAplay_def": -0.0033368910339293,
+            "EPAplay_off": 0.0933945088737434,
+            "adj_def_epa": -0.1331443101131657,
+            "adj_off_epa": 0.0502853466323428,
+            "explosive_def": 0.0732009925558312,
+            "explosive_off": 0.0763440860215053,
+            "havoc_def": 0.1364764267990074,
+            "havoc_off": 0.1172043010752688,
+            "net_adj_epa": 0.1834296567455086,
+            "playsgame_def": 62.0,
+            "playsgame_off": 71.53846153846153,
+            "success_def": 0.4205955334987593,
+            "success_off": 0.443010752688172,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "258",
+        "team_name": "Virginia"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.076723535189028,
+            "adj_net": -0.147572642301151,
+            "adj_off_epa": -0.0708491071121229,
+            "adj_st_epa": -0.2152574280128191,
+            "fei_def": 0.9602699561070271,
+            "fei_net": -0.8520350071222342,
+            "fei_off": 0.108234948984793
+          },
+          "summary": {
+            "EPAplay_def": 0.0634982912094944,
+            "EPAplay_off": 0.0841157390599364,
+            "adj_def_epa": 0.0683710904967822,
+            "adj_off_epa": -0.0852561328929849,
+            "explosive_def": 0.0724971231300345,
+            "explosive_off": 0.0830489192263936,
+            "havoc_def": 0.1415420023014959,
+            "havoc_off": 0.1217292377701934,
+            "net_adj_epa": -0.1536272233897671,
+            "playsgame_def": 66.84615384615384,
+            "playsgame_off": 67.61538461538461,
+            "success_def": 0.4591484464902186,
+            "success_off": 0.4584755403868031,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "55",
+        "team_name": "Jacksonville State"
+      },
+      "fixture": {
+        "away_id": "55",
+        "away_team": "Jacksonville State",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "2449",
+        "home_team": "North Dakota State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T07:30:00+10:00",
+        "start_utc": "2026-08-29T21:30:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Fargodome",
+        "week": 1
+      },
+      "game_id": "401864577",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "team_id": "2449",
+        "team_name": "North Dakota State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "team_id": "16",
+        "team_name": "Sacramento State"
+      },
+      "fixture": {
+        "away_id": "16",
+        "away_team": "Sacramento State",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "2199",
+        "home_team": "Eastern Michigan",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T08:30:00+10:00",
+        "start_utc": "2026-08-29T22:30:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Rynearson Stadium",
+        "week": 1
+      },
+      "game_id": "401866408",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.208413074336861,
+            "adj_net": -0.185497758178283,
+            "adj_off_epa": 0.0229153161585779,
+            "adj_st_epa": -0.2396242529755472,
+            "fei_def": 1.6261827125676305,
+            "fei_net": -1.236409119263067,
+            "fei_off": 0.3897735933045632
+          },
+          "summary": {
+            "EPAplay_def": 0.1638644187452188,
+            "EPAplay_off": 0.1361615110809604,
+            "adj_def_epa": 0.2209392573634755,
+            "adj_off_epa": 0.029464575597587,
+            "explosive_def": 0.0828651685393258,
+            "explosive_off": 0.0805555555555555,
+            "havoc_def": 0.0828651685393258,
+            "havoc_off": 0.0944444444444444,
+            "net_adj_epa": -0.1914746817658884,
+            "playsgame_def": 64.72727272727273,
+            "playsgame_off": 65.45454545454545,
+            "success_def": 0.4845505617977528,
+            "success_off": 0.4583333333333333,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2199",
+        "team_name": "Eastern Michigan"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0177082325580814,
+            "adj_net": -0.2275932144582722,
+            "adj_off_epa": -0.2098849819001907,
+            "adj_st_epa": 0.2314171509804388,
+            "fei_def": 0.3701836394896906,
+            "fei_net": -0.963604851572774,
+            "fei_off": -0.5934212120830834
+          },
+          "summary": {
+            "EPAplay_def": 0.0419773869192438,
+            "EPAplay_off": -0.0613148125823582,
+            "adj_def_epa": 0.0331141717877311,
+            "adj_off_epa": -0.2204982323847216,
+            "explosive_def": 0.0644329896907216,
+            "explosive_off": 0.0652463382157123,
+            "havoc_def": 0.1314432989690721,
+            "havoc_off": 0.1651131824234354,
+            "net_adj_epa": -0.2536124041724528,
+            "playsgame_def": 70.54545454545455,
+            "playsgame_off": 68.27272727272727,
+            "success_def": 0.4652061855670103,
+            "success_off": 0.4194407456724368,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "166",
+        "team_name": "New Mexico State"
+      },
+      "fixture": {
+        "away_id": "166",
+        "away_team": "New Mexico State",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "52",
+        "home_team": "Florida State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T09:00:00+10:00",
+        "start_utc": "2026-08-29T23:00:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Doak Campbell Stadium",
+        "week": 1
+      },
+      "game_id": "401864570",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0689029828972543,
+            "adj_net": 0.2576780669458421,
+            "adj_off_epa": 0.1887750840485877,
+            "adj_st_epa": -0.291817189816061,
+            "fei_def": 0.5148601571736466,
+            "fei_net": 0.8747615271564149,
+            "fei_off": 1.3896216843300615
+          },
+          "summary": {
+            "EPAplay_def": 0.0725111999137941,
+            "EPAplay_off": 0.1871623231674005,
+            "adj_def_epa": -0.0635545189089908,
+            "adj_off_epa": 0.202267984084439,
+            "explosive_def": 0.079608938547486,
+            "explosive_off": 0.0973684210526315,
+            "havoc_def": 0.1173184357541899,
+            "havoc_off": 0.1144736842105263,
+            "net_adj_epa": 0.2658225029934299,
+            "playsgame_def": 65.0909090909091,
+            "playsgame_off": 69.0909090909091,
+            "success_def": 0.4399441340782123,
+            "success_off": 0.4828947368421052,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "52",
+        "team_name": "Florida State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0304137681511132,
+            "adj_net": -0.072475390286566,
+            "adj_off_epa": -0.0420616221354527,
+            "adj_st_epa": 0.855637676340258,
+            "fei_def": 0.2763003205760777,
+            "fei_net": 0.3381657148783049,
+            "fei_off": 0.6144660354543826
+          },
+          "summary": {
+            "EPAplay_def": 0.0710226125083863,
+            "EPAplay_off": 0.0994767679836287,
+            "adj_def_epa": 0.0629563943134615,
+            "adj_off_epa": -0.0347284692646244,
+            "explosive_def": 0.0833333333333333,
+            "explosive_off": 0.0757020757020757,
+            "havoc_def": 0.1270491803278688,
+            "havoc_off": 0.0952380952380952,
+            "net_adj_epa": -0.0976848635780859,
+            "playsgame_def": 61.0,
+            "playsgame_off": 68.25,
+            "success_def": 0.4576502732240437,
+            "success_off": 0.4615384615384615,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "62",
+        "team_name": "Hawai'i"
+      },
+      "fixture": {
+        "away_id": "62",
+        "away_team": "Hawai'i",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "24",
+        "home_team": "Stanford",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T09:00:00+10:00",
+        "start_utc": "2026-08-29T23:00:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Stanford Stadium",
+        "week": 1
+      },
+      "game_id": "401858201",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0682687318344116,
+            "adj_net": 0.0131523245431272,
+            "adj_off_epa": -0.0551164072912843,
+            "adj_st_epa": -0.2289105783039355,
+            "fei_def": 0.0834265288940425,
+            "fei_net": -0.0847893905842998,
+            "fei_off": -0.0013628616902573
+          },
+          "summary": {
+            "EPAplay_def": 0.1194296685951243,
+            "EPAplay_off": -0.05918611088343,
+            "adj_def_epa": -0.0683667530574083,
+            "adj_off_epa": -0.0546996565633836,
+            "explosive_def": 0.0726600985221674,
+            "explosive_off": 0.0595854922279792,
+            "havoc_def": 0.1034482758620689,
+            "havoc_off": 0.1463730569948186,
+            "net_adj_epa": 0.0136670964940247,
+            "playsgame_def": 67.66666666666667,
+            "playsgame_off": 64.33333333333333,
+            "success_def": 0.458128078817734,
+            "success_off": 0.4028497409326425,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "24",
+        "team_name": "Stanford"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0717587229317558,
+            "adj_net": 0.162838294049111,
+            "adj_off_epa": 0.0910795711173551,
+            "adj_st_epa": 0.8948639591992487,
+            "fei_def": 0.269485053553826,
+            "fei_net": 0.8247382397708152,
+            "fei_off": 1.0942232933246412
+          },
+          "summary": {
+            "EPAplay_def": 0.0529915544649829,
+            "EPAplay_off": 0.1467846039558756,
+            "adj_def_epa": -0.078260595868596,
+            "adj_off_epa": 0.055056342797477,
+            "explosive_def": 0.0690537084398976,
+            "explosive_off": 0.0899014778325123,
+            "havoc_def": 0.1342710997442455,
+            "havoc_off": 0.1268472906403941,
+            "net_adj_epa": 0.1333169386660731,
+            "playsgame_def": 65.16666666666667,
+            "playsgame_off": 67.66666666666667,
+            "success_def": 0.4296675191815857,
+            "success_off": 0.4827586206896552,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "235",
+        "team_name": "Memphis"
+      },
+      "fixture": {
+        "away_id": "235",
+        "away_team": "Memphis",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "2439",
+        "home_team": "UNLV",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-08-30T12:00:00+10:00",
+        "start_utc": "2026-08-30T02:00:00+00:00",
+        "sydney_date": "2026-08-30",
+        "venue": "Allegiant Stadium",
+        "week": 1
+      },
+      "game_id": "401862693",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1066634128723229,
+            "adj_net": 0.0484121902047142,
+            "adj_off_epa": 0.1550756030770372,
+            "adj_st_epa": 0.1824445840763316,
+            "fei_def": 0.6844301455470815,
+            "fei_net": 0.6015146113538662,
+            "fei_off": 1.2859447569009477
+          },
+          "summary": {
+            "EPAplay_def": 0.1249484290973105,
+            "EPAplay_off": 0.2156285729872275,
+            "adj_def_epa": 0.1274090400071203,
+            "adj_off_epa": 0.1174620959613433,
+            "explosive_def": 0.0880952380952381,
+            "explosive_off": 0.1162255466052934,
+            "havoc_def": 0.1119047619047619,
+            "havoc_off": 0.1288837744533947,
+            "net_adj_epa": -0.0099469440457769,
+            "playsgame_def": 64.61538461538461,
+            "playsgame_off": 66.84615384615384,
+            "success_def": 0.4654761904761905,
+            "success_off": 0.4902186421173763,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "2439",
+        "team_name": "UNLV"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.2376292163334841,
+            "adj_net": -0.5377104970734156,
+            "adj_off_epa": -0.3000812807399314,
+            "adj_st_epa": 0.2234523875863962,
+            "fei_def": 1.7937063601803978,
+            "fei_net": -2.920549092448684,
+            "fei_off": -1.1268427322682864
+          },
+          "summary": {
+            "EPAplay_def": 0.2228228681733211,
+            "EPAplay_off": -0.1892861159076925,
+            "adj_def_epa": 0.249020096601014,
+            "adj_off_epa": -0.2951404914724956,
+            "explosive_def": 0.08,
+            "explosive_off": 0.0433526011560693,
+            "havoc_def": 0.0826666666666666,
+            "havoc_off": 0.1632947976878612,
+            "net_adj_epa": -0.5441605880735096,
+            "playsgame_def": 68.18181818181819,
+            "playsgame_off": 62.90909090909091,
+            "success_def": 0.516,
+            "success_off": 0.3482658959537572,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "113",
+        "team_name": "Massachusetts"
+      },
+      "fixture": {
+        "away_id": "113",
+        "away_team": "Massachusetts",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "164",
+        "home_team": "Rutgers",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-04T08:00:00+10:00",
+        "start_utc": "2026-09-03T22:00:00+00:00",
+        "sydney_date": "2026-09-04",
+        "venue": "SHI Stadium",
+        "week": 1
+      },
+      "game_id": "401858423",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1925103322763859,
+            "adj_net": -0.0413128042897228,
+            "adj_off_epa": 0.151197527986663,
+            "adj_st_epa": -0.5433686824245392,
+            "fei_def": 1.4876072898143404,
+            "fei_net": -0.2259860888803828,
+            "fei_off": 1.2616212009339576
+          },
+          "summary": {
+            "EPAplay_def": 0.3237604029488525,
+            "EPAplay_off": 0.1375542549571029,
+            "adj_def_epa": 0.1876163851549459,
+            "adj_off_epa": 0.1688289074070077,
+            "explosive_def": 0.1036682615629984,
+            "explosive_off": 0.0685111989459815,
+            "havoc_def": 0.1036682615629984,
+            "havoc_off": 0.1370223978919631,
+            "net_adj_epa": -0.0187874777479381,
+            "playsgame_def": 57.0,
+            "playsgame_off": 69.0,
+            "success_def": 0.5167464114832536,
+            "success_off": 0.4795783926218709,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "164",
+        "team_name": "Rutgers"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1677866646310309,
+            "adj_net": -0.3597731157647504,
+            "adj_off_epa": -0.1919864511337195,
+            "adj_st_epa": -0.875623118073609,
+            "fei_def": 1.2636252217934902,
+            "fei_net": -1.8196384305950937,
+            "fei_off": -0.5560132088016033
+          },
+          "summary": {
+            "EPAplay_def": 0.0846821809491367,
+            "EPAplay_off": -0.0259177803564717,
+            "adj_def_epa": 0.175850689570222,
+            "adj_off_epa": -0.201420410522179,
+            "explosive_def": 0.0709219858156028,
+            "explosive_off": 0.0611702127659574,
+            "havoc_def": 0.1375886524822695,
+            "havoc_off": 0.151595744680851,
+            "net_adj_epa": -0.377271100092401,
+            "playsgame_def": 64.0909090909091,
+            "playsgame_off": 68.36363636363636,
+            "success_def": 0.4581560283687943,
+            "success_off": 0.4175531914893617,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2006",
+        "team_name": "Akron"
+      },
+      "fixture": {
+        "away_id": "2006",
+        "away_team": "Akron",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "154",
+        "home_team": "Wake Forest",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-04T09:00:00+10:00",
+        "start_utc": "2026-09-03T23:00:00+00:00",
+        "sydney_date": "2026-09-04",
+        "venue": "Allegacy Federal Credit Union Stadium",
+        "week": 1
+      },
+      "game_id": "401858204",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1769712491623049,
+            "adj_net": 0.1423023576702759,
+            "adj_off_epa": -0.034668891492029,
+            "adj_st_epa": 0.3685356585449122,
+            "fei_def": -0.4187060767380514,
+            "fei_net": 0.2532813368082875,
+            "fei_off": -0.1654247399297638
+          },
+          "summary": {
+            "EPAplay_def": -0.0401743967805939,
+            "EPAplay_off": 0.0680779080274839,
+            "adj_def_epa": -0.179213698664761,
+            "adj_off_epa": -0.0001605926089089,
+            "explosive_def": 0.0785024154589372,
+            "explosive_off": 0.0723514211886304,
+            "havoc_def": 0.143719806763285,
+            "havoc_off": 0.1046511627906976,
+            "net_adj_epa": 0.179053106055852,
+            "playsgame_def": 69.0,
+            "playsgame_off": 64.5,
+            "success_def": 0.393719806763285,
+            "success_off": 0.4121447028423772,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "154",
+        "team_name": "Wake Forest"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0365938075513436,
+            "adj_net": 0.0195705387419315,
+            "adj_off_epa": -0.0170232688094121,
+            "adj_st_epa": -0.0747837203630619,
+            "fei_def": 0.4215589826466376,
+            "fei_net": 0.0807719872561847,
+            "fei_off": 0.5023309699028223
+          },
+          "summary": {
+            "EPAplay_def": 0.1197605207746184,
+            "EPAplay_off": -0.0380978361109045,
+            "adj_def_epa": -0.0193937916922328,
+            "adj_off_epa": -0.0360248646534955,
+            "explosive_def": 0.0875462392108508,
+            "explosive_off": 0.0633074935400516,
+            "havoc_def": 0.1134401972872996,
+            "havoc_off": 0.1614987080103359,
+            "net_adj_epa": -0.0166310729612626,
+            "playsgame_def": 67.58333333333333,
+            "playsgame_off": 64.5,
+            "success_def": 0.4525277435265105,
+            "success_off": 0.3940568475452196,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "38",
+        "team_name": "Colorado"
+      },
+      "fixture": {
+        "away_id": "38",
+        "away_team": "Colorado",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "59",
+        "home_team": "Georgia Tech",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-04T10:00:00+10:00",
+        "start_utc": "2026-09-04T00:00:00+00:00",
+        "sydney_date": "2026-09-04",
+        "venue": "Bobby Dodd Stadium",
+        "week": 1
+      },
+      "game_id": "401856776",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0390909591139158,
+            "adj_net": 0.1376593282903504,
+            "adj_off_epa": 0.1767502874042663,
+            "adj_st_epa": 0.7011461979529483,
+            "fei_def": 0.8197580305477081,
+            "fei_net": 0.7492347116387714,
+            "fei_off": 1.5689927421864795
+          },
+          "summary": {
+            "EPAplay_def": 0.1768072638015907,
+            "EPAplay_off": 0.2267514232417304,
+            "adj_def_epa": 0.0316031267388035,
+            "adj_off_epa": 0.1947693405336076,
+            "explosive_def": 0.0717948717948717,
+            "explosive_off": 0.0729833546734955,
+            "havoc_def": 0.0923076923076923,
+            "havoc_off": 0.0921895006402048,
+            "net_adj_epa": 0.1631662137948041,
+            "playsgame_def": 65.0,
+            "playsgame_off": 65.08333333333333,
+            "success_def": 0.4846153846153846,
+            "success_off": 0.5275288092189501,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "59",
+        "team_name": "Georgia Tech"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0858941667036926,
+            "adj_net": -0.0578877942882707,
+            "adj_off_epa": 0.0280063724154218,
+            "adj_st_epa": 0.3634726531305203,
+            "fei_def": 1.2637753534085283,
+            "fei_net": -0.582828194592266,
+            "fei_off": 0.6809471588162626
+          },
+          "summary": {
+            "EPAplay_def": 0.2310336903705225,
+            "EPAplay_off": 0.1269040587611724,
+            "adj_def_epa": 0.102934449501397,
+            "adj_off_epa": 0.0254235229777227,
+            "explosive_def": 0.0851370851370851,
+            "explosive_off": 0.0889774236387782,
+            "havoc_def": 0.0836940836940837,
+            "havoc_off": 0.1274900398406374,
+            "net_adj_epa": -0.0775109265236743,
+            "playsgame_def": 63.0,
+            "playsgame_off": 68.45454545454545,
+            "success_def": 0.5093795093795094,
+            "success_off": 0.4780876494023904,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "5",
+        "team_name": "UAB"
+      },
+      "fixture": {
+        "away_id": "5",
+        "away_team": "UAB",
+        "completed": true,
+        "fbs_game": true,
+        "home_id": "356",
+        "home_team": "Illinois",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-04T11:00:00+10:00",
+        "start_utc": "2026-09-04T01:00:00+00:00",
+        "sydney_date": "2026-09-04",
+        "venue": "Memorial Stadium (Champaign, IL)",
+        "week": 1
+      },
+      "game_id": "401858424",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0376249878426158,
+            "adj_net": 0.146115212831654,
+            "adj_off_epa": 0.1084902249890382,
+            "adj_st_epa": 0.6609591744021679,
+            "fei_def": 0.5183830117975241,
+            "fei_net": 0.7900766508163424,
+            "fei_off": 1.3084596626138665
+          },
+          "summary": {
+            "EPAplay_def": 0.1438590468010436,
+            "EPAplay_off": 0.1301844198774817,
+            "adj_def_epa": -0.0478613882990202,
+            "adj_off_epa": 0.1303196648140289,
+            "explosive_def": 0.0732647814910025,
+            "explosive_off": 0.071523178807947,
+            "havoc_def": 0.1233933161953727,
+            "havoc_off": 0.1403973509933775,
+            "net_adj_epa": 0.1781810531130492,
+            "playsgame_def": 64.83333333333333,
+            "playsgame_off": 62.91666666666666,
+            "success_def": 0.4948586118251928,
+            "success_off": 0.5099337748344371,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "356",
+        "team_name": "Illinois"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1173829064678621,
+            "adj_net": -0.1737446911678177,
+            "adj_off_epa": -0.0563617846999556,
+            "adj_st_epa": -1.0492570605181883,
+            "fei_def": 1.043413011018806,
+            "fei_net": -0.9978277963668954,
+            "fei_off": 0.0455852146519105
+          },
+          "summary": {
+            "EPAplay_def": 0.1458795969196356,
+            "EPAplay_off": -0.0043285872886578,
+            "adj_def_epa": 0.1353613894697585,
+            "adj_off_epa": -0.071211647951824,
+            "explosive_def": 0.0765027322404371,
+            "explosive_off": 0.064,
+            "havoc_def": 0.0956284153005464,
+            "havoc_off": 0.1173333333333333,
+            "net_adj_epa": -0.2065730374215826,
+            "playsgame_def": 66.54545454545455,
+            "playsgame_off": 68.18181818181819,
+            "success_def": 0.4521857923497268,
+            "success_off": 0.4466666666666666,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "23",
+        "team_name": "San Jos\u00e9 State"
+      },
+      "fixture": {
+        "away_id": "23",
+        "away_team": "San Jos\u00e9 State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2199",
+        "home_team": "Eastern Michigan",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-05T08:30:00+10:00",
+        "start_utc": "2026-09-04T22:30:00+00:00",
+        "sydney_date": "2026-09-05",
+        "venue": "Rynearson Stadium",
+        "week": 1
+      },
+      "game_id": "401864495",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.208413074336861,
+            "adj_net": -0.185497758178283,
+            "adj_off_epa": 0.0229153161585779,
+            "adj_st_epa": -0.2396242529755472,
+            "fei_def": 1.6261827125676305,
+            "fei_net": -1.236409119263067,
+            "fei_off": 0.3897735933045632
+          },
+          "summary": {
+            "EPAplay_def": 0.1638644187452188,
+            "EPAplay_off": 0.1361615110809604,
+            "adj_def_epa": 0.2209392573634755,
+            "adj_off_epa": 0.029464575597587,
+            "explosive_def": 0.0828651685393258,
+            "explosive_off": 0.0805555555555555,
+            "havoc_def": 0.0828651685393258,
+            "havoc_off": 0.0944444444444444,
+            "net_adj_epa": -0.1914746817658884,
+            "playsgame_def": 64.72727272727273,
+            "playsgame_off": 65.45454545454545,
+            "success_def": 0.4845505617977528,
+            "success_off": 0.4583333333333333,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2199",
+        "team_name": "Eastern Michigan"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0206476574649235,
+            "adj_net": -0.2462185654383119,
+            "adj_off_epa": -0.2255709079733883,
+            "adj_st_epa": -0.6667674156072021,
+            "fei_def": 0.5877493477426892,
+            "fei_net": -1.51786510446304,
+            "fei_off": -0.930115756720351
+          },
+          "summary": {
+            "EPAplay_def": 0.0361518617170873,
+            "EPAplay_off": -0.102439567667049,
+            "adj_def_epa": 0.0340047708538664,
+            "adj_off_epa": -0.231636803264188,
+            "explosive_def": 0.0601792573623559,
+            "explosive_off": 0.0784044016506189,
+            "havoc_def": 0.1434058898847631,
+            "havoc_off": 0.1485557083906465,
+            "net_adj_epa": -0.2656415741180545,
+            "playsgame_def": 71.0,
+            "playsgame_off": 66.0909090909091,
+            "success_def": 0.4263764404609475,
+            "success_off": 0.3631361760660248,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2638",
+        "team_name": "UTEP"
+      },
+      "fixture": {
+        "away_id": "2638",
+        "away_team": "UTEP",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "201",
+        "home_team": "Oklahoma",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-05T10:00:00+10:00",
+        "start_utc": "2026-09-05T00:00:00+00:00",
+        "sydney_date": "2026-09-05",
+        "venue": "Memorial Stadium (Norman, OK)",
+        "week": 1
+      },
+      "game_id": "401856664",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.3781307970699298,
+            "adj_net": 0.3844180200468082,
+            "adj_off_epa": 0.0062872229768783,
+            "adj_st_epa": 1.1409031300981822,
+            "fei_def": -1.1657319977785932,
+            "fei_net": 1.5735488948774847,
+            "fei_off": 0.4078168970988915
+          },
+          "summary": {
+            "EPAplay_def": -0.1619416731282894,
+            "EPAplay_off": -0.0237644101673586,
+            "adj_def_epa": -0.3537998877319486,
+            "adj_off_epa": -0.0137522356879844,
+            "explosive_def": 0.0674448767833981,
+            "explosive_off": 0.0513478818998716,
+            "havoc_def": 0.185473411154345,
+            "havoc_off": 0.1296534017971758,
+            "net_adj_epa": 0.3400476520439642,
+            "playsgame_def": 64.25,
+            "playsgame_off": 64.91666666666667,
+            "success_def": 0.3424124513618677,
+            "success_off": 0.4261874197689345,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "201",
+        "team_name": "Oklahoma"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.118569692173651,
+            "adj_net": 0.0992351756729846,
+            "adj_off_epa": -0.0193345165006664,
+            "adj_st_epa": -0.1521966769103555,
+            "fei_def": -0.0561341346438092,
+            "fei_net": 0.1887781812947148,
+            "fei_off": 0.1326440466509056
+          },
+          "summary": {
+            "EPAplay_def": -0.1531422214940289,
+            "EPAplay_off": 0.0975507691088114,
+            "adj_def_epa": -0.0984479228973361,
+            "adj_off_epa": 0.0033360511964759,
+            "explosive_def": 0.0596026490066225,
+            "explosive_off": 0.0646830530401035,
+            "havoc_def": 0.166887417218543,
+            "havoc_off": 0.1047865459249676,
+            "net_adj_epa": 0.101783974093812,
+            "playsgame_def": 62.91666666666666,
+            "playsgame_off": 64.41666666666667,
+            "success_def": 0.3774834437086092,
+            "success_off": 0.4592496765847348,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2649",
+        "team_name": "Toledo"
+      },
+      "fixture": {
+        "away_id": "2649",
+        "away_team": "Toledo",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "127",
+        "home_team": "Michigan State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-05T10:00:00+10:00",
+        "start_utc": "2026-09-05T00:00:00+00:00",
+        "sydney_date": "2026-09-05",
+        "venue": "Spartan Stadium",
+        "week": 1
+      },
+      "game_id": "401858429",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0076527970059178,
+            "adj_net": 0.024982849562131,
+            "adj_off_epa": 0.0326356465680489,
+            "adj_st_epa": -0.8253370907778527,
+            "fei_def": 0.3884297520095451,
+            "fei_net": -0.0413233422740141,
+            "fei_off": 0.3471064097355309
+          },
+          "summary": {
+            "EPAplay_def": 0.1637057006197131,
+            "EPAplay_off": 0.037855160493441,
+            "adj_def_epa": 0.0047721436190538,
+            "adj_off_epa": 0.0406576676587879,
+            "explosive_def": 0.0913043478260869,
+            "explosive_off": 0.073170731707317,
+            "havoc_def": 0.1115942028985507,
+            "havoc_off": 0.1721664275466284,
+            "net_adj_epa": 0.0358855240397341,
+            "playsgame_def": 62.72727272727273,
+            "playsgame_off": 63.36363636363637,
+            "success_def": 0.4739130434782608,
+            "success_off": 0.4591104734576757,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "127",
+        "team_name": "Michigan State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2687718672725557,
+            "adj_net": 0.4643366271474191,
+            "adj_off_epa": 0.1955647598748633,
+            "adj_st_epa": 0.5761242358724453,
+            "fei_def": -0.7265833788444863,
+            "fei_net": 1.917366599667067,
+            "fei_off": 1.1907832208225808
+          },
+          "summary": {
+            "EPAplay_def": -0.0753925174588795,
+            "EPAplay_off": 0.1600672537002895,
+            "adj_def_epa": -0.2971252668818704,
+            "adj_off_epa": 0.2178998435367974,
+            "explosive_def": 0.0791974656810982,
+            "explosive_off": 0.0655737704918032,
+            "havoc_def": 0.1678986272439282,
+            "havoc_off": 0.1116803278688524,
+            "net_adj_epa": 0.5150251104186678,
+            "playsgame_def": 63.13333333333333,
+            "playsgame_off": 65.06666666666666,
+            "success_def": 0.4076029567053854,
+            "success_off": 0.4795081967213114,
+            "valid_games": 15.0
+          }
+        },
+        "team_id": "2390",
+        "team_name": "Miami"
+      },
+      "fixture": {
+        "away_id": "2390",
+        "away_team": "Miami",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "24",
+        "home_team": "Stanford",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-05T11:00:00+10:00",
+        "start_utc": "2026-09-05T01:00:00+00:00",
+        "sydney_date": "2026-09-05",
+        "venue": "Stanford Stadium",
+        "week": 1
+      },
+      "game_id": "401858206",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0682687318344116,
+            "adj_net": 0.0131523245431272,
+            "adj_off_epa": -0.0551164072912843,
+            "adj_st_epa": -0.2289105783039355,
+            "fei_def": 0.0834265288940425,
+            "fei_net": -0.0847893905842998,
+            "fei_off": -0.0013628616902573
+          },
+          "summary": {
+            "EPAplay_def": 0.1194296685951243,
+            "EPAplay_off": -0.05918611088343,
+            "adj_def_epa": -0.0683667530574083,
+            "adj_off_epa": -0.0546996565633836,
+            "explosive_def": 0.0726600985221674,
+            "explosive_off": 0.0595854922279792,
+            "havoc_def": 0.1034482758620689,
+            "havoc_off": 0.1463730569948186,
+            "net_adj_epa": 0.0136670964940247,
+            "playsgame_def": 67.66666666666667,
+            "playsgame_off": 64.33333333333333,
+            "success_def": 0.458128078817734,
+            "success_off": 0.4028497409326425,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "24",
+        "team_name": "Stanford"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1422093833358967,
+            "adj_net": -0.015109013111595,
+            "adj_off_epa": -0.1573183964474917,
+            "adj_st_epa": -0.1139274321037676,
+            "fei_def": -0.662064935343056,
+            "fei_net": 0.0707899006564707,
+            "fei_off": -0.5912750346865853
+          },
+          "summary": {
+            "EPAplay_def": -0.1160519323455122,
+            "EPAplay_off": -0.048656102569764,
+            "adj_def_epa": -0.1332933773301797,
+            "adj_off_epa": -0.1597237747759312,
+            "explosive_def": 0.0602409638554216,
+            "explosive_off": 0.06282722513089,
+            "havoc_def": 0.1499330655957162,
+            "havoc_off": 0.1374345549738219,
+            "net_adj_epa": -0.0264303974457515,
+            "playsgame_def": 62.25,
+            "playsgame_off": 63.66666666666666,
+            "success_def": 0.4082998661311914,
+            "success_off": 0.4149214659685863,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "278",
+        "team_name": "Fresno State"
+      },
+      "fixture": {
+        "away_id": "278",
+        "away_team": "Fresno State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "30",
+        "home_team": "USC",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-05T11:00:00+10:00",
+        "start_utc": "2026-09-05T01:00:00+00:00",
+        "sydney_date": "2026-09-05",
+        "venue": "Los Angeles Memorial Coliseum",
+        "week": 1
+      },
+      "game_id": "401858436",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0847117953645358,
+            "adj_net": 0.3345986896781954,
+            "adj_off_epa": 0.2498868943136596,
+            "adj_st_epa": -0.7864116866604307,
+            "fei_def": 0.0584810349019169,
+            "fei_net": 1.86795503128982,
+            "fei_off": 1.9264360661917368
+          },
+          "summary": {
+            "EPAplay_def": 0.054115648687202,
+            "EPAplay_off": 0.2618259439567247,
+            "adj_def_epa": -0.0799658202955033,
+            "adj_off_epa": 0.2429305456647598,
+            "explosive_def": 0.0724094881398252,
+            "explosive_off": 0.0997596153846153,
+            "havoc_def": 0.1173533083645443,
+            "havoc_off": 0.1009615384615384,
+            "net_adj_epa": 0.3228963659602631,
+            "playsgame_def": 61.61538461538461,
+            "playsgame_off": 64.0,
+            "success_def": 0.4781523096129838,
+            "success_off": 0.5144230769230769,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "30",
+        "team_name": "USC"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0048883970522488,
+            "adj_net": 0.2497566503061598,
+            "adj_off_epa": 0.244868253253911,
+            "adj_st_epa": -0.0535641869509648,
+            "fei_def": 0.6939637000260725,
+            "fei_net": 1.016646897072665,
+            "fei_off": 1.7106105970987375
+          },
+          "summary": {
+            "EPAplay_def": 0.1251748794555859,
+            "EPAplay_off": 0.3062995507485336,
+            "adj_def_epa": 0.0239159011757753,
+            "adj_off_epa": 0.2509949642540777,
+            "explosive_def": 0.088235294117647,
+            "explosive_off": 0.0911111111111111,
+            "havoc_def": 0.1100217864923747,
+            "havoc_off": 0.0811111111111111,
+            "net_adj_epa": 0.2270790630783023,
+            "playsgame_def": 70.61538461538461,
+            "playsgame_off": 69.23076923076923,
+            "success_def": 0.4651416122004357,
+            "success_off": 0.5333333333333333,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "249",
+        "team_name": "North Texas"
+      },
+      "fixture": {
+        "away_id": "249",
+        "away_team": "North Texas",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "84",
+        "home_team": "Indiana",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:00:00+10:00",
+        "start_utc": "2026-09-05T16:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Memorial Stadium (Bloomington, IN)",
+        "week": 1
+      },
+      "game_id": "401858425",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2153482259403906,
+            "adj_net": 0.4770437838130935,
+            "adj_off_epa": 0.2616955578727029,
+            "adj_st_epa": 0.0251112113483785,
+            "fei_def": -0.8406989968091262,
+            "fei_net": 2.887156593456062,
+            "fei_off": 2.046457596646936
+          },
+          "summary": {
+            "EPAplay_def": -0.0924889922780777,
+            "EPAplay_off": 0.2434779058893521,
+            "adj_def_epa": -0.2309954506449563,
+            "adj_off_epa": 0.3151739266901002,
+            "explosive_def": 0.065947242206235,
+            "explosive_off": 0.0851282051282051,
+            "havoc_def": 0.1858513189448441,
+            "havoc_off": 0.0953846153846153,
+            "net_adj_epa": 0.5461693773350567,
+            "playsgame_def": 55.6,
+            "playsgame_off": 65.0,
+            "success_def": 0.3788968824940047,
+            "success_off": 0.5230769230769231,
+            "valid_games": 15.0
+          }
+        },
+        "team_id": "84",
+        "team_name": "Indiana"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1857903180566126,
+            "adj_net": -0.2180801221823448,
+            "adj_off_epa": -0.0322898041257321,
+            "adj_st_epa": -0.4712837429653425,
+            "fei_def": 1.387602558823727,
+            "fei_net": -0.9088332980650504,
+            "fei_off": 0.4787692607586766
+          },
+          "summary": {
+            "EPAplay_def": 0.1784788141027093,
+            "EPAplay_off": 0.0876625213204833,
+            "adj_def_epa": 0.2014448123374237,
+            "adj_off_epa": -0.0318286801240958,
+            "explosive_def": 0.0916666666666666,
+            "explosive_off": 0.0617283950617283,
+            "havoc_def": 0.1055555555555555,
+            "havoc_off": 0.1289437585733882,
+            "net_adj_epa": -0.2332734924615195,
+            "playsgame_def": 65.45454545454545,
+            "playsgame_off": 66.27272727272727,
+            "success_def": 0.4722222222222222,
+            "success_off": 0.4595336076817558,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2335",
+        "team_name": "Liberty"
+      },
+      "fixture": {
+        "away_id": "2335",
+        "away_team": "Liberty",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "256",
+        "home_team": "James Madison",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:00:00+10:00",
+        "start_utc": "2026-09-05T16:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Bridgeforth Stadium",
+        "week": 1
+      },
+      "game_id": "401869960",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2294852348555495,
+            "adj_net": 0.2435647575894436,
+            "adj_off_epa": 0.014079522733894,
+            "adj_st_epa": -0.1028306163200822,
+            "fei_def": -0.4422097474392179,
+            "fei_net": 0.8950349530460395,
+            "fei_off": 0.4528252056068216
+          },
+          "summary": {
+            "EPAplay_def": -0.1361083376856947,
+            "EPAplay_off": 0.1797013295486184,
+            "adj_def_epa": -0.1954875825518927,
+            "adj_off_epa": 0.073565347168153,
+            "explosive_def": 0.0717029449423815,
+            "explosive_off": 0.0830527497194163,
+            "havoc_def": 0.1702944942381562,
+            "havoc_off": 0.1122334455667789,
+            "net_adj_epa": 0.2690529297200458,
+            "playsgame_def": 60.07692307692308,
+            "playsgame_off": 68.53846153846153,
+            "success_def": 0.3431498079385403,
+            "success_off": 0.4736251402918069,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "256",
+        "team_name": "James Madison"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0700215449859997,
+            "adj_net": -0.093211058200942,
+            "adj_off_epa": -0.0231895132149422,
+            "adj_st_epa": -1.2356546741756798,
+            "fei_def": 0.2837335462331648,
+            "fei_net": -0.0099550388073931,
+            "fei_off": 0.2737785074257717
+          },
+          "summary": {
+            "EPAplay_def": 0.0106801455632351,
+            "EPAplay_off": 0.1360282616759142,
+            "adj_def_epa": 0.0433113082522525,
+            "adj_off_epa": -0.028966739607398,
+            "explosive_def": 0.0810055865921787,
+            "explosive_off": 0.0808729139922978,
+            "havoc_def": 0.1284916201117318,
+            "havoc_off": 0.0962772785622593,
+            "net_adj_epa": -0.0722780478596506,
+            "playsgame_def": 59.66666666666666,
+            "playsgame_off": 64.91666666666667,
+            "success_def": 0.4301675977653631,
+            "success_off": 0.4749679075738126,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "195",
+        "team_name": "Ohio"
+      },
+      "fixture": {
+        "away_id": "195",
+        "away_team": "Ohio",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "158",
+        "home_team": "Nebraska",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:00:00+10:00",
+        "start_utc": "2026-09-05T16:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Memorial Stadium (Lincoln, NE)",
+        "week": 1
+      },
+      "game_id": "401858430",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0239150278937564,
+            "adj_net": 0.0520361708749188,
+            "adj_off_epa": 0.0281211429811623,
+            "adj_st_epa": -0.0417099004605048,
+            "fei_def": 0.284032911839548,
+            "fei_net": 0.4624817735268327,
+            "fei_off": 0.7465146853663808
+          },
+          "summary": {
+            "EPAplay_def": 0.1271402267270914,
+            "EPAplay_off": 0.096480337368185,
+            "adj_def_epa": -0.0149327702169489,
+            "adj_off_epa": 0.0418749091431472,
+            "explosive_def": 0.0782122905027933,
+            "explosive_off": 0.0585034013605442,
+            "havoc_def": 0.1019553072625698,
+            "havoc_off": 0.1034013605442176,
+            "net_adj_epa": 0.0568076793600961,
+            "playsgame_def": 59.66666666666666,
+            "playsgame_off": 61.25,
+            "success_def": 0.4720670391061452,
+            "success_off": 0.491156462585034,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "158",
+        "team_name": "Nebraska"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1880764040753361,
+            "adj_net": 0.1791707544124329,
+            "adj_off_epa": -0.0089056496629032,
+            "adj_st_epa": 0.3149360812857779,
+            "fei_def": -0.1246384795529742,
+            "fei_net": 0.7297835574371916,
+            "fei_off": 0.6051450778842173
+          },
+          "summary": {
+            "EPAplay_def": -0.0617685532563478,
+            "EPAplay_off": 0.1092458796929259,
+            "adj_def_epa": -0.1842855918119148,
+            "adj_off_epa": -0.0014815101075377,
+            "explosive_def": 0.0638820638820638,
+            "explosive_off": 0.0685082872928176,
+            "havoc_def": 0.1535626535626535,
+            "havoc_off": 0.1038674033149171,
+            "net_adj_epa": 0.1828040817043771,
+            "playsgame_def": 67.83333333333333,
+            "playsgame_off": 75.41666666666667,
+            "success_def": 0.4164619164619164,
+            "success_off": 0.4685082872928177,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "151",
+        "team_name": "East Carolina"
+      },
+      "fixture": {
+        "away_id": "151",
+        "away_team": "East Carolina",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "333",
+        "home_team": "Alabama",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:00:00+10:00",
+        "start_utc": "2026-09-05T16:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Bryant-Denny Stadium",
+        "week": 1
+      },
+      "game_id": "401856634",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2072917503757664,
+            "adj_net": 0.3627292391430982,
+            "adj_off_epa": 0.1554374887673317,
+            "adj_st_epa": -0.2222528276594445,
+            "fei_def": -0.2405989443730846,
+            "fei_net": 1.5034164128055028,
+            "fei_off": 1.262817468432418
+          },
+          "summary": {
+            "EPAplay_def": 0.0009474304490432,
+            "EPAplay_off": 0.0843167569712802,
+            "adj_def_epa": -0.1773049942316764,
+            "adj_off_epa": 0.1354821102616784,
+            "explosive_def": 0.0694935217903415,
+            "explosive_off": 0.0792410714285714,
+            "havoc_def": 0.1448763250883392,
+            "havoc_off": 0.1060267857142857,
+            "net_adj_epa": 0.3127871044933549,
+            "playsgame_def": 60.642857142857146,
+            "playsgame_off": 64.0,
+            "success_def": 0.4346289752650176,
+            "success_off": 0.4397321428571428,
+            "valid_games": 14.0
+          }
+        },
+        "team_id": "333",
+        "team_name": "Alabama"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0680627946865206,
+            "adj_net": -0.2079183586924856,
+            "adj_off_epa": -0.1398555640059649,
+            "adj_st_epa": -0.1276344834818147,
+            "fei_def": 0.5059174865278149,
+            "fei_net": -1.067061869582035,
+            "fei_off": -0.5611443830542201
+          },
+          "summary": {
+            "EPAplay_def": 0.106609157180269,
+            "EPAplay_off": -0.0701454938250447,
+            "adj_def_epa": 0.0459295327442978,
+            "adj_off_epa": -0.1489980231105381,
+            "explosive_def": 0.0753424657534246,
+            "explosive_off": 0.0856031128404669,
+            "havoc_def": 0.1027397260273972,
+            "havoc_off": 0.1348897535667963,
+            "net_adj_epa": -0.194927555854836,
+            "playsgame_def": 73.0,
+            "playsgame_off": 64.25,
+            "success_def": 0.454337899543379,
+            "success_off": 0.3800259403372243,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "324",
+        "team_name": "Coastal Carolina"
+      },
+      "fixture": {
+        "away_id": "324",
+        "away_team": "Coastal Carolina",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "277",
+        "home_team": "West Virginia",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:00:00+10:00",
+        "start_utc": "2026-09-05T16:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Milan Puskar Stadium",
+        "week": 1
+      },
+      "game_id": "401856780",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0983621639263905,
+            "adj_net": 0.0441713448663673,
+            "adj_off_epa": -0.0541908190600232,
+            "adj_st_epa": 0.4159516622601225,
+            "fei_def": 0.2367568277727151,
+            "fei_net": 0.0264628881618279,
+            "fei_off": 0.263219715934543
+          },
+          "summary": {
+            "EPAplay_def": 0.0926943388957606,
+            "EPAplay_off": -0.0878486298962144,
+            "adj_def_epa": -0.0759834464395432,
+            "adj_off_epa": -0.071566411473924,
+            "explosive_def": 0.0790816326530612,
+            "explosive_off": 0.0701986754966887,
+            "havoc_def": 0.1390306122448979,
+            "havoc_off": 0.1205298013245033,
+            "net_adj_epa": 0.0044170349656192,
+            "playsgame_def": 71.27272727272727,
+            "playsgame_off": 68.63636363636364,
+            "success_def": 0.4489795918367347,
+            "success_off": 0.3735099337748344,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "277",
+        "team_name": "West Virginia"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.010481782663992,
+            "adj_net": -0.073151129703808,
+            "adj_off_epa": -0.062669347039816,
+            "adj_st_epa": -2.021628852895807,
+            "fei_def": 0.5267889116304836,
+            "fei_net": -0.6975553388706099,
+            "fei_off": -0.1707664272401263
+          },
+          "summary": {
+            "EPAplay_def": 0.0758290561953944,
+            "EPAplay_off": -0.0745019338379694,
+            "adj_def_epa": 0.0118015706983832,
+            "adj_off_epa": -0.0605619772969827,
+            "explosive_def": 0.0817236255572065,
+            "explosive_off": 0.0472440944881889,
+            "havoc_def": 0.1322436849925705,
+            "havoc_off": 0.1220472440944882,
+            "net_adj_epa": -0.0723635479953659,
+            "playsgame_def": 61.18181818181818,
+            "playsgame_off": 69.27272727272727,
+            "success_def": 0.4205052005943536,
+            "success_off": 0.4225721784776903,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "204",
+        "team_name": "Oregon State"
+      },
+      "fixture": {
+        "away_id": "204",
+        "away_team": "Oregon State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "248",
+        "home_team": "Houston",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:00:00+10:00",
+        "start_utc": "2026-09-05T16:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "TDECU Stadium",
+        "week": 1
+      },
+      "game_id": "401856778",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0868854946188665,
+            "adj_net": 0.1377595113962481,
+            "adj_off_epa": 0.0508740167773816,
+            "adj_st_epa": -0.1491153811061074,
+            "fei_def": -0.0136310154802161,
+            "fei_net": 0.7985194091943237,
+            "fei_off": 0.7848883937141076
+          },
+          "summary": {
+            "EPAplay_def": 0.0095115766156143,
+            "EPAplay_off": 0.0855846604478331,
+            "adj_def_epa": -0.0397543421793182,
+            "adj_off_epa": 0.0673423266957178,
+            "explosive_def": 0.0672588832487309,
+            "explosive_off": 0.0760095011876484,
+            "havoc_def": 0.1446700507614213,
+            "havoc_off": 0.1294536817102137,
+            "net_adj_epa": 0.1070966688750361,
+            "playsgame_def": 65.66666666666667,
+            "playsgame_off": 70.16666666666667,
+            "success_def": 0.4606598984771574,
+            "success_off": 0.4619952494061757,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "248",
+        "team_name": "Houston"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1264395560987745,
+            "adj_net": -0.4270658539459262,
+            "adj_off_epa": -0.3006262978471516,
+            "adj_st_epa": -0.8093807862335394,
+            "fei_def": 1.0987983304599356,
+            "fei_net": -2.198331714513732,
+            "fei_off": -1.0995333840537969
+          },
+          "summary": {
+            "EPAplay_def": 0.1397523715960007,
+            "EPAplay_off": -0.179172264858188,
+            "adj_def_epa": 0.1328156859132522,
+            "adj_off_epa": -0.3081002037145608,
+            "explosive_def": 0.0780141843971631,
+            "explosive_off": 0.061377245508982,
+            "havoc_def": 0.102127659574468,
+            "havoc_off": 0.1766467065868263,
+            "net_adj_epa": -0.440915889627813,
+            "playsgame_def": 64.0909090909091,
+            "playsgame_off": 60.72727272727273,
+            "success_def": 0.4836879432624113,
+            "success_off": 0.3398203592814371,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2050",
+        "team_name": "Ball State"
+      },
+      "fixture": {
+        "away_id": "2050",
+        "away_team": "Ball State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "194",
+        "home_team": "Ohio State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:30:00+10:00",
+        "start_utc": "2026-09-05T16:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Ohio Stadium",
+        "week": 1
+      },
+      "game_id": "401858432",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.3107509800773939,
+            "adj_net": 0.561584538106978,
+            "adj_off_epa": 0.250833558029584,
+            "adj_st_epa": -0.6147379424638465,
+            "fei_def": -1.3959282892404294,
+            "fei_net": 3.356963607294895,
+            "fei_off": 1.9610353180544655
+          },
+          "summary": {
+            "EPAplay_def": -0.1342222422403707,
+            "EPAplay_off": 0.2412713377510097,
+            "adj_def_epa": -0.3045956827690844,
+            "adj_off_epa": 0.2625407803692559,
+            "explosive_def": 0.049715909090909,
+            "explosive_off": 0.0726817042606516,
+            "havoc_def": 0.1321022727272727,
+            "havoc_off": 0.0964912280701754,
+            "net_adj_epa": 0.5671364631383404,
+            "playsgame_def": 54.15384615384615,
+            "playsgame_off": 61.38461538461539,
+            "success_def": 0.3792613636363636,
+            "success_off": 0.5388471177944862,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "194",
+        "team_name": "Ohio State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.03814190557609,
+            "adj_net": -0.1593448261428193,
+            "adj_off_epa": -0.1212029205667292,
+            "adj_st_epa": 0.9655689133055904,
+            "fei_def": 0.656617175288245,
+            "fei_net": -0.5809036799675104,
+            "fei_off": 0.0757134953207346
+          },
+          "summary": {
+            "EPAplay_def": 0.0407333152943709,
+            "EPAplay_off": -0.0077201176810172,
+            "adj_def_epa": 0.0506233664471177,
+            "adj_off_epa": -0.134817084470861,
+            "explosive_def": 0.0727069351230425,
+            "explosive_off": 0.0581395348837209,
+            "havoc_def": 0.1219239373601789,
+            "havoc_off": 0.1188630490956072,
+            "net_adj_epa": -0.1854404509179788,
+            "playsgame_def": 68.76923076923077,
+            "playsgame_off": 59.53846153846154,
+            "success_def": 0.4351230425055928,
+            "success_off": 0.4289405684754522,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "193",
+        "team_name": "Miami (OH)"
+      },
+      "fixture": {
+        "away_id": "193",
+        "away_team": "Miami (OH)",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "221",
+        "home_team": "Pittsburgh",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:30:00+10:00",
+        "start_utc": "2026-09-05T16:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Acrisure Stadium",
+        "week": 1
+      },
+      "game_id": "401858207",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1871592249539903,
+            "adj_net": 0.215552975424887,
+            "adj_off_epa": 0.0283937504708966,
+            "adj_st_epa": -0.0425966205970401,
+            "fei_def": -0.5647624597306568,
+            "fei_net": 1.133987430594473,
+            "fei_off": 0.5692249708638163
+          },
+          "summary": {
+            "EPAplay_def": -0.0563901295271486,
+            "EPAplay_off": 0.0573848245335636,
+            "adj_def_epa": -0.1974333507590815,
+            "adj_off_epa": 0.044375059284055,
+            "explosive_def": 0.0731102850061957,
+            "explosive_off": 0.0760598503740648,
+            "havoc_def": 0.1586121437422552,
+            "havoc_off": 0.1446384039900249,
+            "net_adj_epa": 0.2418084100431366,
+            "playsgame_def": 67.25,
+            "playsgame_off": 66.83333333333333,
+            "success_def": 0.4002478314745972,
+            "success_off": 0.4401496259351621,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "221",
+        "team_name": "Pittsburgh"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.2134504742046548,
+            "adj_net": -0.2983154959074624,
+            "adj_off_epa": -0.0848650217028076,
+            "adj_st_epa": -0.1494617328666394,
+            "fei_def": 1.532888135871545,
+            "fei_net": -1.7169855741298714,
+            "fei_off": -0.1840974382583265
+          },
+          "summary": {
+            "EPAplay_def": 0.1598874696033004,
+            "EPAplay_off": -0.0256152593233229,
+            "adj_def_epa": 0.2304092130881,
+            "adj_off_epa": -0.0946029386196646,
+            "explosive_def": 0.0669144981412639,
+            "explosive_off": 0.0850722311396468,
+            "havoc_def": 0.1226765799256505,
+            "havoc_off": 0.1589085072231139,
+            "net_adj_epa": -0.3250121517077646,
+            "playsgame_def": 73.36363636363636,
+            "playsgame_off": 56.63636363636363,
+            "success_def": 0.4969021065675341,
+            "success_off": 0.3852327447833066,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2309",
+        "team_name": "Kent State"
+      },
+      "fixture": {
+        "away_id": "2309",
+        "away_team": "Kent State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2579",
+        "home_team": "South Carolina",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T02:45:00+10:00",
+        "start_utc": "2026-09-05T16:45:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Williams-Brice Stadium",
+        "week": 1
+      },
+      "game_id": "401856665",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.146793051143498,
+            "adj_net": 0.151658609928583,
+            "adj_off_epa": 0.0048655587850849,
+            "adj_st_epa": 0.4639708546476139,
+            "fei_def": -0.3245961177140485,
+            "fei_net": 0.7243793389815315,
+            "fei_off": 0.399783221267483
+          },
+          "summary": {
+            "EPAplay_def": 0.0467315466761919,
+            "EPAplay_off": -0.0427601944254494,
+            "adj_def_epa": -0.114794304369555,
+            "adj_off_epa": -0.0020183355029635,
+            "explosive_def": 0.0721220527045769,
+            "explosive_off": 0.068313953488372,
+            "havoc_def": 0.1137309292649098,
+            "havoc_off": 0.1656976744186046,
+            "net_adj_epa": 0.1127759688665915,
+            "playsgame_def": 65.54545454545455,
+            "playsgame_off": 62.54545454545455,
+            "success_def": 0.4549237170596394,
+            "success_off": 0.4142441860465116,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2579",
+        "team_name": "South Carolina"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1076272045652135,
+            "adj_net": 0.1213297536759348,
+            "adj_off_epa": 0.0137025491107212,
+            "adj_st_epa": 0.4346708177178269,
+            "fei_def": 0.2790072486442586,
+            "fei_net": 0.3293325285887022,
+            "fei_off": 0.6083397772329608
+          },
+          "summary": {
+            "EPAplay_def": 0.0556909203265794,
+            "EPAplay_off": 0.1143296747163393,
+            "adj_def_epa": -0.1089119325511943,
+            "adj_off_epa": 0.016058569373652,
+            "explosive_def": 0.0696937697993664,
+            "explosive_off": 0.0633187772925764,
+            "havoc_def": 0.1309398099260823,
+            "havoc_off": 0.1004366812227074,
+            "net_adj_epa": 0.1249705019248464,
+            "playsgame_def": 67.64285714285714,
+            "playsgame_off": 65.42857142857143,
+            "success_def": 0.4751847940865892,
+            "success_off": 0.4759825327510917,
+            "valid_games": 14.0
+          }
+        },
+        "team_id": "2655",
+        "team_name": "Tulane"
+      },
+      "fixture": {
+        "away_id": "2655",
+        "away_team": "Tulane",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "150",
+        "home_team": "Duke",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:30:00+10:00",
+        "start_utc": "2026-09-05T19:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Wallace Wade Stadium",
+        "week": 1
+      },
+      "game_id": "401858209",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.037030156488625,
+            "adj_net": 0.1222245962069905,
+            "adj_off_epa": 0.1592547526956155,
+            "adj_st_epa": 0.3023328569281563,
+            "fei_def": 1.014587823900787,
+            "fei_net": 0.3789737306980771,
+            "fei_off": 1.3935615545988642
+          },
+          "summary": {
+            "EPAplay_def": 0.1754428716033079,
+            "EPAplay_off": 0.2047626083529009,
+            "adj_def_epa": 0.0225321551794886,
+            "adj_off_epa": 0.1877775932209071,
+            "explosive_def": 0.0933179723502304,
+            "explosive_off": 0.0985277463193658,
+            "havoc_def": 0.1543778801843318,
+            "havoc_off": 0.1291053227633069,
+            "net_adj_epa": 0.1652454380414184,
+            "playsgame_def": 66.76923076923077,
+            "playsgame_off": 67.92307692307692,
+            "success_def": 0.4723502304147465,
+            "success_off": 0.4847112117780294,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "150",
+        "team_name": "Duke"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0147401223521339,
+            "adj_net": 0.1286085216162387,
+            "adj_off_epa": 0.1138683992641047,
+            "adj_st_epa": 1.0248130812826637,
+            "fei_def": 0.5660851082583321,
+            "fei_net": 0.8006108392944303,
+            "fei_off": 1.3666959475527625
+          },
+          "summary": {
+            "EPAplay_def": 0.1667167763929784,
+            "EPAplay_off": 0.0962089301054382,
+            "adj_def_epa": 0.0049529401199956,
+            "adj_off_epa": 0.0918295433131925,
+            "explosive_def": 0.0716180371352785,
+            "explosive_off": 0.0868516284680337,
+            "havoc_def": 0.0928381962864721,
+            "havoc_off": 0.1314837153196622,
+            "net_adj_epa": 0.0868766031931968,
+            "playsgame_def": 68.54545454545455,
+            "playsgame_off": 75.36363636363636,
+            "success_def": 0.4787798408488063,
+            "success_off": 0.459589867310012,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "239",
+        "team_name": "Baylor"
+      },
+      "fixture": {
+        "away_id": "239",
+        "away_team": "Baylor",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2",
+        "home_team": "Auburn",
+        "neutral_site": true,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:30:00+10:00",
+        "start_utc": "2026-09-05T19:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Mercedes-Benz Stadium",
+        "week": 1
+      },
+      "game_id": "401856636",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1959406946555273,
+            "adj_net": 0.2718245519926925,
+            "adj_off_epa": 0.0758838573371652,
+            "adj_st_epa": 0.2402386271761018,
+            "fei_def": 0.0744192470190852,
+            "fei_net": 0.6653976781888886,
+            "fei_off": 0.7398169252079738
+          },
+          "summary": {
+            "EPAplay_def": -1.08825293838e-05,
+            "EPAplay_off": 0.0779878363534007,
+            "adj_def_epa": -0.1610254830453859,
+            "adj_off_epa": 0.0644261578616265,
+            "explosive_def": 0.0836879432624113,
+            "explosive_off": 0.0564516129032258,
+            "havoc_def": 0.1446808510638297,
+            "havoc_off": 0.1330645161290322,
+            "net_adj_epa": 0.2254516409070124,
+            "playsgame_def": 64.0909090909091,
+            "playsgame_off": 67.63636363636364,
+            "success_def": 0.4028368794326241,
+            "success_off": 0.461021505376344,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2",
+        "team_name": "Auburn"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1296173080414219,
+            "adj_net": -0.1219762668308147,
+            "adj_off_epa": 0.0076410412106071,
+            "adj_st_epa": 0.6753434330740862,
+            "fei_def": 0.5322547497623343,
+            "fei_net": 0.0,
+            "fei_off": 0.5322547497623343
+          },
+          "summary": {
+            "EPAplay_def": 0.2770407527870657,
+            "EPAplay_off": 0.0357544888381396,
+            "adj_def_epa": 0.1255853045306355,
+            "adj_off_epa": 0.0091655234151061,
+            "explosive_def": 0.0926694329183955,
+            "explosive_off": 0.0679094540612516,
+            "havoc_def": 0.1092669432918395,
+            "havoc_off": 0.151797603195739,
+            "net_adj_epa": -0.1164197811155293,
+            "playsgame_def": 65.72727272727273,
+            "playsgame_off": 68.27272727272727,
+            "success_def": 0.4799446749654218,
+            "success_off": 0.440745672436751,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "103",
+        "team_name": "Boston College"
+      },
+      "fixture": {
+        "away_id": "103",
+        "away_team": "Boston College",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2132",
+        "home_team": "Cincinnati",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:30:00+10:00",
+        "start_utc": "2026-09-05T19:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Nippert Stadium",
+        "week": 1
+      },
+      "game_id": "401856777",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0210147581985608,
+            "adj_net": 0.1869141165906606,
+            "adj_off_epa": 0.2079288747892214,
+            "adj_st_epa": 0.0177370446722009,
+            "fei_def": 0.7989203557469229,
+            "fei_net": 0.8409250831767578,
+            "fei_off": 1.6398454389236807
+          },
+          "summary": {
+            "EPAplay_def": 0.1504420770476826,
+            "EPAplay_off": 0.2225428585681306,
+            "adj_def_epa": 0.0279784298645444,
+            "adj_off_epa": 0.153997310317544,
+            "explosive_def": 0.0730011587485515,
+            "explosive_off": 0.0918079096045197,
+            "havoc_def": 0.0984936268829664,
+            "havoc_off": 0.096045197740113,
+            "net_adj_epa": 0.1260188804529995,
+            "playsgame_def": 71.91666666666667,
+            "playsgame_off": 59.0,
+            "success_def": 0.4901506373117034,
+            "success_off": 0.480225988700565,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2132",
+        "team_name": "Cincinnati"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0904728757260702,
+            "adj_net": 0.1008595441366387,
+            "adj_off_epa": 0.0103866684105684,
+            "adj_st_epa": -0.2075267365070117,
+            "fei_def": -0.1914199987887145,
+            "fei_net": 0.6269696288035785,
+            "fei_off": 0.435549630014864
+          },
+          "summary": {
+            "EPAplay_def": 0.0143984370077069,
+            "EPAplay_off": 0.0434316035714179,
+            "adj_def_epa": -0.0733104971996018,
+            "adj_off_epa": -0.0314247313585404,
+            "explosive_def": 0.0937098844672657,
+            "explosive_off": 0.0745473908413205,
+            "havoc_def": 0.1412066752246469,
+            "havoc_off": 0.1139510117145899,
+            "net_adj_epa": 0.0418857658410614,
+            "playsgame_def": 59.92307692307692,
+            "playsgame_off": 72.23076923076923,
+            "success_def": 0.3902439024390244,
+            "success_off": 0.4408945686900958,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "68",
+        "team_name": "Boise State"
+      },
+      "fixture": {
+        "away_id": "68",
+        "away_team": "Boise State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2483",
+        "home_team": "Oregon",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:30:00+10:00",
+        "start_utc": "2026-09-05T19:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Autzen Stadium",
+        "week": 1
+      },
+      "game_id": "401858433",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.232442903393138,
+            "adj_net": 0.4111897223866237,
+            "adj_off_epa": 0.1787468189934857,
+            "adj_st_epa": 0.4018346708434308,
+            "fei_def": -0.8943669922754974,
+            "fei_net": 2.4506181847530994,
+            "fei_off": 1.556251192477602
+          },
+          "summary": {
+            "EPAplay_def": -0.044757243636461,
+            "EPAplay_off": 0.144619638364402,
+            "adj_def_epa": -0.2100960313453155,
+            "adj_off_epa": 0.227558686578866,
+            "explosive_def": 0.0783664459161147,
+            "explosive_off": 0.0850840336134453,
+            "havoc_def": 0.1401766004415011,
+            "havoc_off": 0.0924369747899159,
+            "net_adj_epa": 0.4376547179241815,
+            "playsgame_def": 64.71428571428571,
+            "playsgame_off": 68.0,
+            "success_def": 0.3918322295805739,
+            "success_off": 0.4936974789915966,
+            "valid_games": 14.0
+          }
+        },
+        "team_id": "2483",
+        "team_name": "Oregon"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.072071814151985,
+            "adj_net": -0.1273093067994907,
+            "adj_off_epa": -0.0552374926475057,
+            "adj_st_epa": 0.0156641753926032,
+            "fei_def": 0.9286305811808604,
+            "fei_net": -0.7698788743589002,
+            "fei_off": 0.1587517068219601
+          },
+          "summary": {
+            "EPAplay_def": 0.1498997882609405,
+            "EPAplay_off": 0.0917998823656964,
+            "adj_def_epa": 0.0839311510364281,
+            "adj_off_epa": -0.0489856959760745,
+            "explosive_def": 0.1008064516129032,
+            "explosive_off": 0.0705563093622795,
+            "havoc_def": 0.1303763440860215,
+            "havoc_off": 0.1194029850746268,
+            "net_adj_epa": -0.1329168470125026,
+            "playsgame_def": 67.63636363636364,
+            "playsgame_off": 67.0,
+            "success_def": 0.4475806451612903,
+            "success_off": 0.4654002713704206,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "276",
+        "team_name": "Marshall"
+      },
+      "fixture": {
+        "away_id": "276",
+        "away_team": "Marshall",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "213",
+        "home_team": "Penn State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:30:00+10:00",
+        "start_utc": "2026-09-05T19:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Beaver Stadium",
+        "week": 1
+      },
+      "game_id": "401858434",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0906196925973489,
+            "adj_net": 0.2350756399288195,
+            "adj_off_epa": 0.1444559473314706,
+            "adj_st_epa": 0.463091331488867,
+            "fei_def": -0.3013323727097984,
+            "fei_net": 1.4482579233583674,
+            "fei_off": 1.146925550648569
+          },
+          "summary": {
+            "EPAplay_def": 0.0208408878533386,
+            "EPAplay_off": 0.1070017147904787,
+            "adj_def_epa": -0.1109371174227075,
+            "adj_off_epa": 0.1412142557229057,
+            "explosive_def": 0.0822085889570552,
+            "explosive_off": 0.082051282051282,
+            "havoc_def": 0.1288343558282208,
+            "havoc_off": 0.1115384615384615,
+            "net_adj_epa": 0.2521513731456132,
+            "playsgame_def": 67.91666666666667,
+            "playsgame_off": 65.0,
+            "success_def": 0.452760736196319,
+            "success_off": 0.4743589743589743,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "213",
+        "team_name": "Penn State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1700402604659446,
+            "adj_net": -0.0654797765159951,
+            "adj_off_epa": 0.1045604839499495,
+            "adj_st_epa": 0.3467351522871091,
+            "fei_def": 1.6718281925813834,
+            "fei_net": -0.6745073683513882,
+            "fei_off": 0.9973208242299952
+          },
+          "summary": {
+            "EPAplay_def": 0.1547786967516529,
+            "EPAplay_off": 0.1955326616809908,
+            "adj_def_epa": 0.140493562036033,
+            "adj_off_epa": 0.0932679169007601,
+            "explosive_def": 0.0917992656058751,
+            "explosive_off": 0.0936374549819928,
+            "havoc_def": 0.1419828641370869,
+            "havoc_off": 0.112845138055222,
+            "net_adj_epa": -0.0472256451352729,
+            "playsgame_def": 68.08333333333333,
+            "playsgame_off": 69.41666666666667,
+            "success_def": 0.449204406364749,
+            "success_off": 0.4813925570228091,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "326",
+        "team_name": "Texas State"
+      },
+      "fixture": {
+        "away_id": "326",
+        "away_team": "Texas State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "251",
+        "home_team": "Texas",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:30:00+10:00",
+        "start_utc": "2026-09-05T19:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "DKR-Texas Memorial Stadium",
+        "week": 1
+      },
+      "game_id": "401856667",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2290805001390441,
+            "adj_net": 0.3451792185750902,
+            "adj_off_epa": 0.116098718436046,
+            "adj_st_epa": 0.2127610709053504,
+            "fei_def": -0.4790371372466501,
+            "fei_net": 1.179269371815495,
+            "fei_off": 0.7002322345688448
+          },
+          "summary": {
+            "EPAplay_def": -0.0508892100156415,
+            "EPAplay_off": 0.1339532115257404,
+            "adj_def_epa": -0.2089560446941406,
+            "adj_off_epa": 0.1206748680462821,
+            "explosive_def": 0.0598194130925507,
+            "explosive_off": 0.0820265379975874,
+            "havoc_def": 0.1399548532731377,
+            "havoc_off": 0.1326899879372738,
+            "net_adj_epa": 0.3296309127404228,
+            "playsgame_def": 68.15384615384616,
+            "playsgame_off": 63.76923076923077,
+            "success_def": 0.4209932279909706,
+            "success_off": 0.4414957780458383,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "251",
+        "team_name": "Texas"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0089181805241395,
+            "adj_net": -0.1468944945965663,
+            "adj_off_epa": -0.1379763140724268,
+            "adj_st_epa": 0.0267273284213129,
+            "fei_def": 0.5901330062819888,
+            "fei_net": -0.85866556581468,
+            "fei_off": -0.2685325595326912
+          },
+          "summary": {
+            "EPAplay_def": 0.1766044430355018,
+            "EPAplay_off": -0.1541059798328206,
+            "adj_def_epa": 0.0307620313972625,
+            "adj_off_epa": -0.1537921758645333,
+            "explosive_def": 0.0855614973262032,
+            "explosive_off": 0.0553977272727272,
+            "havoc_def": 0.1430481283422459,
+            "havoc_off": 0.1732954545454545,
+            "net_adj_epa": -0.1845542072617959,
+            "playsgame_def": 68.0,
+            "playsgame_off": 64.0,
+            "success_def": 0.4625668449197861,
+            "success_off": 0.3792613636363636,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "197",
+        "team_name": "Oklahoma State"
+      },
+      "fixture": {
+        "away_id": "197",
+        "away_team": "Oklahoma State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "202",
+        "home_team": "Tulsa",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T05:45:00+10:00",
+        "start_utc": "2026-09-05T19:45:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Chapman Stadium",
+        "week": 1
+      },
+      "game_id": "401856772",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0006825499513022,
+            "adj_net": -0.1133189474351633,
+            "adj_off_epa": -0.1140014973864656,
+            "adj_st_epa": 0.2024774567626877,
+            "fei_def": 0.6336253553676117,
+            "fei_net": -0.7959444854521964,
+            "fei_off": -0.1623191300845847
+          },
+          "summary": {
+            "EPAplay_def": 0.1000821280014242,
+            "EPAplay_off": -0.0062854829783745,
+            "adj_def_epa": 0.0107103872643987,
+            "adj_off_epa": -0.1109432029144207,
+            "explosive_def": 0.0850253807106599,
+            "explosive_off": 0.068069306930693,
+            "havoc_def": 0.1078680203045685,
+            "havoc_off": 0.1448019801980198,
+            "net_adj_epa": -0.1216535901788195,
+            "playsgame_def": 71.63636363636364,
+            "playsgame_off": 73.45454545454545,
+            "success_def": 0.4530456852791878,
+            "success_off": 0.4368811881188119,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "202",
+        "team_name": "Tulsa"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1159222881284413,
+            "adj_net": -0.3046565592629573,
+            "adj_off_epa": -0.188734271134516,
+            "adj_st_epa": -0.0006436647828187,
+            "fei_def": 1.2273802318146747,
+            "fei_net": -1.7152745799399116,
+            "fei_off": -0.4878943481252368
+          },
+          "summary": {
+            "EPAplay_def": 0.0993046419682174,
+            "EPAplay_off": -0.0678922150261371,
+            "adj_def_epa": 0.1210077512979789,
+            "adj_off_epa": -0.1972337413225634,
+            "explosive_def": 0.0620689655172413,
+            "explosive_off": 0.0806697108066971,
+            "havoc_def": 0.0813793103448275,
+            "havoc_off": 0.1156773211567732,
+            "net_adj_epa": -0.3182414926205424,
+            "playsgame_def": 65.9090909090909,
+            "playsgame_off": 59.72727272727273,
+            "success_def": 0.4786206896551724,
+            "success_off": 0.3820395738203957,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2459",
+        "team_name": "Northern Illinois"
+      },
+      "fixture": {
+        "away_id": "2459",
+        "away_team": "Northern Illinois",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2294",
+        "home_team": "Iowa",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T06:15:00+10:00",
+        "start_utc": "2026-09-05T20:15:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Kinnick Stadium",
+        "week": 1
+      },
+      "game_id": "401858426",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2305977043458857,
+            "adj_net": 0.2505549688058311,
+            "adj_off_epa": 0.0199572644599454,
+            "adj_st_epa": 0.3957579288146859,
+            "fei_def": -0.9626297478786238,
+            "fei_net": 1.8116973040567943,
+            "fei_off": 0.8490675561781706
+          },
+          "summary": {
+            "EPAplay_def": -0.0597189009293809,
+            "EPAplay_off": 0.0744376310865869,
+            "adj_def_epa": -0.2292302816028648,
+            "adj_off_epa": 0.0355769702551602,
+            "explosive_def": 0.0405594405594405,
+            "explosive_off": 0.0606488011283497,
+            "havoc_def": 0.1216783216783216,
+            "havoc_off": 0.0930888575458392,
+            "net_adj_epa": 0.264807251858025,
+            "playsgame_def": 59.583333333333336,
+            "playsgame_off": 59.083333333333336,
+            "success_def": 0.4363636363636363,
+            "success_off": 0.4569816643159379,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2294",
+        "team_name": "Iowa"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0587582895655637,
+            "adj_net": -0.1435800971037467,
+            "adj_off_epa": -0.2023383866693105,
+            "adj_st_epa": -1.127645935982457,
+            "fei_def": -0.1864768379152122,
+            "fei_net": -0.4039696225278565,
+            "fei_off": -0.5904464604430687
+          },
+          "summary": {
+            "EPAplay_def": 0.0040385255893972,
+            "EPAplay_off": -0.0820138844830865,
+            "adj_def_epa": -0.0424925059191384,
+            "adj_off_epa": -0.2235563525069151,
+            "explosive_def": 0.0689170182841068,
+            "explosive_off": 0.0648801128349788,
+            "havoc_def": 0.1237693389592123,
+            "havoc_off": 0.155148095909732,
+            "net_adj_epa": -0.1810638465877767,
+            "playsgame_def": 64.63636363636364,
+            "playsgame_off": 64.45454545454545,
+            "success_def": 0.4092827004219409,
+            "success_off": 0.3935119887165021,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2751",
+        "team_name": "Wyoming"
+      },
+      "fixture": {
+        "away_id": "2751",
+        "away_team": "Wyoming",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "36",
+        "home_team": "Colorado State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T08:00:00+10:00",
+        "start_utc": "2026-09-05T22:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Canvas Stadium",
+        "week": 1
+      },
+      "game_id": "401860878",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1136398244412886,
+            "adj_net": -0.1677312256782366,
+            "adj_off_epa": -0.0540914012369479,
+            "adj_st_epa": -0.7275931693059725,
+            "fei_def": 1.111607813362434,
+            "fei_net": -0.9639038149251364,
+            "fei_off": 0.1477039984372977
+          },
+          "summary": {
+            "EPAplay_def": 0.2027097665832016,
+            "EPAplay_off": -0.0136876875534653,
+            "adj_def_epa": 0.1286247897693529,
+            "adj_off_epa": -0.0585162661763051,
+            "explosive_def": 0.087431693989071,
+            "explosive_off": 0.0823529411764705,
+            "havoc_def": 0.0778688524590164,
+            "havoc_off": 0.1426470588235294,
+            "net_adj_epa": -0.187141055945658,
+            "playsgame_def": 66.54545454545455,
+            "playsgame_off": 61.81818181818182,
+            "success_def": 0.4822404371584699,
+            "success_off": 0.4191176470588235,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "36",
+        "team_name": "Colorado State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.010806509647819,
+            "adj_net": -0.108048490325979,
+            "adj_off_epa": -0.09724198067816,
+            "adj_st_epa": -0.2136944788559543,
+            "fei_def": 0.1717319588674932,
+            "fei_net": -0.3068865206610742,
+            "fei_off": -0.1351545617935809
+          },
+          "summary": {
+            "EPAplay_def": 0.082026600728408,
+            "EPAplay_off": 0.0463816716348101,
+            "adj_def_epa": 0.0414086090735556,
+            "adj_off_epa": -0.1150614858337202,
+            "explosive_def": 0.0782396088019559,
+            "explosive_off": 0.0737605804111245,
+            "havoc_def": 0.1246943765281173,
+            "havoc_off": 0.1438935912938331,
+            "net_adj_epa": -0.1564700949072758,
+            "playsgame_def": 68.16666666666667,
+            "playsgame_off": 68.91666666666667,
+            "success_def": 0.4547677261613692,
+            "success_off": 0.4389359129383313,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2229",
+        "team_name": "Florida International"
+      },
+      "fixture": {
+        "away_id": "2229",
+        "away_team": "Florida International",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "58",
+        "home_team": "South Florida",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:00:00+10:00",
+        "start_utc": "2026-09-05T23:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Raymond James Stadium",
+        "week": 1
+      },
+      "game_id": "401862699",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1049346537355201,
+            "adj_net": 0.2246845326547738,
+            "adj_off_epa": 0.1197498789192536,
+            "adj_st_epa": 0.4588007302390613,
+            "fei_def": 0.2140685484061685,
+            "fei_net": 0.9685030468907256,
+            "fei_off": 1.1825715952968945
+          },
+          "summary": {
+            "EPAplay_def": 0.0157605492023765,
+            "EPAplay_off": 0.1647398785701224,
+            "adj_def_epa": -0.1046690481923562,
+            "adj_off_epa": 0.1020472206706652,
+            "explosive_def": 0.0800450958286358,
+            "explosive_off": 0.0900473933649289,
+            "havoc_def": 0.1285231116121758,
+            "havoc_off": 0.1161137440758293,
+            "net_adj_epa": 0.2067162688630215,
+            "playsgame_def": 73.91666666666667,
+            "playsgame_off": 70.33333333333333,
+            "success_def": 0.4227733934611049,
+            "success_off": 0.4881516587677725,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "58",
+        "team_name": "South Florida"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0294783309546075,
+            "adj_net": -0.1420633242191871,
+            "adj_off_epa": -0.1125849932645795,
+            "adj_st_epa": 0.0014579979141865,
+            "fei_def": 0.5935777788261616,
+            "fei_net": -1.0209883500195402,
+            "fei_off": -0.4274105711933786
+          },
+          "summary": {
+            "EPAplay_def": 0.1014938874501271,
+            "EPAplay_off": 0.0381226824336425,
+            "adj_def_epa": 0.053090620563419,
+            "adj_off_epa": -0.1216208412169562,
+            "explosive_def": 0.0834340991535671,
+            "explosive_off": 0.0596846846846846,
+            "havoc_def": 0.1680773881499395,
+            "havoc_off": 0.1801801801801801,
+            "net_adj_epa": -0.1747114617803752,
+            "playsgame_def": 68.91666666666667,
+            "playsgame_off": 74.0,
+            "success_def": 0.467956469165659,
+            "success_off": 0.4617117117117117,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2032",
+        "team_name": "Arkansas State"
+      },
+      "fixture": {
+        "away_id": "2032",
+        "away_team": "Arkansas State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "235",
+        "home_team": "Memphis",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:00:00+10:00",
+        "start_utc": "2026-09-05T23:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Simmons Bank Liberty Stadium",
+        "week": 1
+      },
+      "game_id": "401862695",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0717587229317558,
+            "adj_net": 0.162838294049111,
+            "adj_off_epa": 0.0910795711173551,
+            "adj_st_epa": 0.8948639591992487,
+            "fei_def": 0.269485053553826,
+            "fei_net": 0.8247382397708152,
+            "fei_off": 1.0942232933246412
+          },
+          "summary": {
+            "EPAplay_def": 0.0529915544649829,
+            "EPAplay_off": 0.1467846039558756,
+            "adj_def_epa": -0.078260595868596,
+            "adj_off_epa": 0.055056342797477,
+            "explosive_def": 0.0690537084398976,
+            "explosive_off": 0.0899014778325123,
+            "havoc_def": 0.1342710997442455,
+            "havoc_off": 0.1268472906403941,
+            "net_adj_epa": 0.1333169386660731,
+            "playsgame_def": 65.16666666666667,
+            "playsgame_off": 67.66666666666667,
+            "success_def": 0.4296675191815857,
+            "success_off": 0.4827586206896552,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "235",
+        "team_name": "Memphis"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1805091164733369,
+            "adj_net": -0.4522722464622452,
+            "adj_off_epa": -0.2717631299889082,
+            "adj_st_epa": -0.7673525660729699,
+            "fei_def": 1.0935530403999318,
+            "fei_net": -1.9350280773566213,
+            "fei_off": -0.8414750369566896
+          },
+          "summary": {
+            "EPAplay_def": 0.1733639684304976,
+            "EPAplay_off": -0.1311298617031339,
+            "adj_def_epa": 0.1973579658448217,
+            "adj_off_epa": -0.2787839488199366,
+            "explosive_def": 0.0876979293544458,
+            "explosive_off": 0.0669291338582677,
+            "havoc_def": 0.1181485992691839,
+            "havoc_off": 0.1863517060367454,
+            "net_adj_epa": -0.4761419146647583,
+            "playsgame_def": 68.41666666666667,
+            "playsgame_off": 63.5,
+            "success_def": 0.4981729598051157,
+            "success_off": 0.3818897637795275,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2534",
+        "team_name": "Sam Houston"
+      },
+      "fixture": {
+        "away_id": "2534",
+        "away_team": "Sam Houston",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2653",
+        "home_team": "Troy",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:00:00+10:00",
+        "start_utc": "2026-09-05T23:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Veterans Memorial Stadium (AL)",
+        "week": 1
+      },
+      "game_id": "401870763",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0364747667001884,
+            "adj_net": -0.1461946166458626,
+            "adj_off_epa": -0.182669383346051,
+            "adj_st_epa": -0.3964109211907038,
+            "fei_def": 0.2578279723914961,
+            "fei_net": -0.6285357871687033,
+            "fei_off": -0.3707078147772071
+          },
+          "summary": {
+            "EPAplay_def": 0.01015734558223,
+            "EPAplay_off": -0.0717490546405315,
+            "adj_def_epa": -0.0313348318250586,
+            "adj_off_epa": -0.1985751576016979,
+            "explosive_def": 0.0816802800466744,
+            "explosive_off": 0.0714285714285714,
+            "havoc_def": 0.1271878646441073,
+            "havoc_off": 0.1857142857142857,
+            "net_adj_epa": -0.1672403257766392,
+            "playsgame_def": 65.92307692307692,
+            "playsgame_off": 64.61538461538461,
+            "success_def": 0.4212368728121353,
+            "success_off": 0.3833333333333333,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "2653",
+        "team_name": "Troy"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0865125509404953,
+            "adj_net": -0.1532811043942656,
+            "adj_off_epa": -0.0667685534537703,
+            "adj_st_epa": -1.0964888247452234,
+            "fei_def": 0.656757437287401,
+            "fei_net": -0.6537809492019719,
+            "fei_off": 0.002976488085429
+          },
+          "summary": {
+            "EPAplay_def": 0.1224315620323371,
+            "EPAplay_off": 0.081608080846513,
+            "adj_def_epa": 0.0934941224618476,
+            "adj_off_epa": -0.0615782246293451,
+            "explosive_def": 0.0716145833333333,
+            "explosive_off": 0.0780234070221066,
+            "havoc_def": 0.1302083333333333,
+            "havoc_off": 0.2080624187256176,
+            "net_adj_epa": -0.1550723470911927,
+            "playsgame_def": 64.0,
+            "playsgame_off": 64.08333333333333,
+            "success_def": 0.4622395833333333,
+            "success_off": 0.4226267880364109,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2623",
+        "team_name": "Missouri State"
+      },
+      "fixture": {
+        "away_id": "2623",
+        "away_team": "Missouri State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "245",
+        "home_team": "Texas A&M",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:00:00+10:00",
+        "start_utc": "2026-09-05T23:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Kyle Field",
+        "week": 1
+      },
+      "game_id": "401856668",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.195126773620934,
+            "adj_net": 0.4610735905069349,
+            "adj_off_epa": 0.2659468168860009,
+            "adj_st_epa": -0.4252650629274983,
+            "fei_def": -0.0634186128366366,
+            "fei_net": 1.3917101610119524,
+            "fei_off": 1.3282915481753157
+          },
+          "summary": {
+            "EPAplay_def": -0.0262866546663473,
+            "EPAplay_off": 0.1758802468184291,
+            "adj_def_epa": -0.2100906171204135,
+            "adj_off_epa": 0.2223183440635578,
+            "explosive_def": 0.0849056603773584,
+            "explosive_off": 0.0817073170731707,
+            "havoc_def": 0.1886792452830188,
+            "havoc_off": 0.098780487804878,
+            "net_adj_epa": 0.4324089611839714,
+            "playsgame_def": 61.833333333333336,
+            "playsgame_off": 68.33333333333333,
+            "success_def": 0.3719676549865229,
+            "success_off": 0.4902439024390244,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "245",
+        "team_name": "Texas A&M"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0535635943048049,
+            "adj_net": -0.0518604640492563,
+            "adj_off_epa": -0.1054240583540612,
+            "adj_st_epa": -0.400127411442868,
+            "fei_def": 0.1977811482663681,
+            "fei_net": -0.2847391373609357,
+            "fei_off": -0.0869579890945675
+          },
+          "summary": {
+            "EPAplay_def": -0.0572247243619055,
+            "EPAplay_off": 0.0251339742052425,
+            "adj_def_epa": -0.0653946016012,
+            "adj_off_epa": -0.1054791638338798,
+            "explosive_def": 0.0680958385876418,
+            "explosive_off": 0.0532687651331719,
+            "havoc_def": 0.1361916771752837,
+            "havoc_off": 0.099273607748184,
+            "net_adj_epa": -0.0400845622326798,
+            "playsgame_def": 61.0,
+            "playsgame_off": 63.53846153846154,
+            "success_def": 0.4110970996216898,
+            "success_off": 0.4455205811138014,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "2711",
+        "team_name": "Western Michigan"
+      },
+      "fixture": {
+        "away_id": "2711",
+        "away_team": "Western Michigan",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "130",
+        "home_team": "Michigan",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:30:00+10:00",
+        "start_utc": "2026-09-05T23:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Michigan Stadium",
+        "week": 1
+      },
+      "game_id": "401858428",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.144030746452426,
+            "adj_net": 0.2824914364962669,
+            "adj_off_epa": 0.1384606900438409,
+            "adj_st_epa": -0.1418982912568926,
+            "fei_def": -0.1956540417990208,
+            "fei_net": 1.5008901632065244,
+            "fei_off": 1.3052361214075034
+          },
+          "summary": {
+            "EPAplay_def": 0.0117483209845022,
+            "EPAplay_off": 0.145639143675964,
+            "adj_def_epa": -0.1134062704095269,
+            "adj_off_epa": 0.1348485810995449,
+            "explosive_def": 0.0697399527186761,
+            "explosive_off": 0.06318347509113,
+            "havoc_def": 0.1288416075650118,
+            "havoc_off": 0.0959902794653706,
+            "net_adj_epa": 0.2482548515090718,
+            "playsgame_def": 65.07692307692308,
+            "playsgame_off": 63.30769230769231,
+            "success_def": 0.4314420803782506,
+            "success_off": 0.5042527339003645,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "130",
+        "team_name": "Michigan"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0993858022262659,
+            "adj_net": -0.2662009125957802,
+            "adj_off_epa": -0.1668151103695143,
+            "adj_st_epa": -2.157792664379188,
+            "fei_def": 1.1531247855726656,
+            "fei_net": -1.7654221884331158,
+            "fei_off": -0.6122974028604501
+          },
+          "summary": {
+            "EPAplay_def": 0.1329004000553343,
+            "EPAplay_off": -0.052316483901956,
+            "adj_def_epa": 0.1159155441371982,
+            "adj_off_epa": -0.1538737959997843,
+            "explosive_def": 0.075098814229249,
+            "explosive_off": 0.073394495412844,
+            "havoc_def": 0.1304347826086956,
+            "havoc_off": 0.1819571865443425,
+            "net_adj_epa": -0.2697893401369825,
+            "playsgame_def": 69.0,
+            "playsgame_off": 59.45454545454545,
+            "success_def": 0.4268774703557312,
+            "success_off": 0.4036697247706422,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2433",
+        "team_name": "UL Monroe"
+      },
+      "fixture": {
+        "away_id": "2433",
+        "away_team": "UL Monroe",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "344",
+        "home_team": "Mississippi State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:30:00+10:00",
+        "start_utc": "2026-09-05T23:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Davis Wade Stadium",
+        "week": 1
+      },
+      "game_id": "401856662",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0617211913602096,
+            "adj_net": 0.1421817384358749,
+            "adj_off_epa": 0.0804605470756653,
+            "adj_st_epa": 0.5508457389479338,
+            "fei_def": 0.4094418049141669,
+            "fei_net": 0.0773609283522309,
+            "fei_off": 0.4868027332663978
+          },
+          "summary": {
+            "EPAplay_def": 0.1505871944745817,
+            "EPAplay_off": 0.0480431648489032,
+            "adj_def_epa": -0.013804704055494,
+            "adj_off_epa": 0.0726682037497238,
+            "explosive_def": 0.0863746958637469,
+            "explosive_off": 0.0795847750865051,
+            "havoc_def": 0.1009732360097323,
+            "havoc_off": 0.1476355247981545,
+            "net_adj_epa": 0.0864729078052179,
+            "playsgame_def": 68.5,
+            "playsgame_off": 72.25,
+            "success_def": 0.4793187347931874,
+            "success_off": 0.4429065743944637,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "344",
+        "team_name": "Mississippi State"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0867973485670272,
+            "adj_net": 0.1337711715099851,
+            "adj_off_epa": 0.0469738229429578,
+            "adj_st_epa": 0.31784293560013,
+            "fei_def": 0.1181140915053802,
+            "fei_net": 0.5888844575658605,
+            "fei_off": 0.7069985490712408
+          },
+          "summary": {
+            "EPAplay_def": 0.0221012146762433,
+            "EPAplay_off": 0.0684887045005589,
+            "adj_def_epa": -0.0947173610024427,
+            "adj_off_epa": 0.026026789044657,
+            "explosive_def": 0.0597204574332909,
+            "explosive_off": 0.0679012345679012,
+            "havoc_def": 0.1499364675984752,
+            "havoc_off": 0.1074074074074074,
+            "net_adj_epa": 0.1207441500470997,
+            "playsgame_def": 65.58333333333333,
+            "playsgame_off": 67.5,
+            "success_def": 0.420584498094028,
+            "success_off": 0.4629629629629629,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "228",
+        "team_name": "Clemson"
+      },
+      "fixture": {
+        "away_id": "228",
+        "away_team": "Clemson",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "99",
+        "home_team": "LSU",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:30:00+10:00",
+        "start_utc": "2026-09-05T23:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Tiger Stadium (LA)",
+        "week": 1
+      },
+      "game_id": "401856660",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2828503678745871,
+            "adj_net": 0.2521407052568293,
+            "adj_off_epa": -0.0307096626177577,
+            "adj_st_epa": 0.1071693759999011,
+            "fei_def": -0.9535588959484654,
+            "fei_net": 0.9176946547332578,
+            "fei_off": -0.0358642412152075
+          },
+          "summary": {
+            "EPAplay_def": -0.032363536885415,
+            "EPAplay_off": -0.0235940483036554,
+            "adj_def_epa": -0.2156825868529021,
+            "adj_off_epa": -0.01753197035983,
+            "explosive_def": 0.0689655172413793,
+            "explosive_off": 0.0722222222222222,
+            "havoc_def": 0.1315453384418901,
+            "havoc_off": 0.1472222222222222,
+            "net_adj_epa": 0.198150616493072,
+            "playsgame_def": 65.25,
+            "playsgame_off": 60.0,
+            "success_def": 0.421455938697318,
+            "success_off": 0.3986111111111111,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "99",
+        "team_name": "LSU"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0612409523838948,
+            "adj_net": -0.0315848069124137,
+            "adj_off_epa": 0.029656145471481,
+            "adj_st_epa": 0.2644209308211803,
+            "fei_def": 0.9774552105340292,
+            "fei_net": -0.4760833698714422,
+            "fei_off": 0.5013718406625871
+          },
+          "summary": {
+            "EPAplay_def": 0.1952050383016467,
+            "EPAplay_off": 0.0826687012465757,
+            "adj_def_epa": 0.0819758430596949,
+            "adj_off_epa": 0.0241755944060686,
+            "explosive_def": 0.09375,
+            "explosive_off": 0.0986920332936979,
+            "havoc_def": 0.105,
+            "havoc_off": 0.1307966706302021,
+            "net_adj_epa": -0.0578002486536263,
+            "playsgame_def": 72.72727272727273,
+            "playsgame_off": 76.45454545454545,
+            "success_def": 0.485,
+            "success_off": 0.4280618311533888,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2226",
+        "team_name": "Florida Atlantic"
+      },
+      "fixture": {
+        "away_id": "2226",
+        "away_team": "Florida Atlantic",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "57",
+        "home_team": "Florida",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T09:45:00+10:00",
+        "start_utc": "2026-09-05T23:45:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Ben Hill Griffin Stadium",
+        "week": 1
+      },
+      "game_id": "401856637",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1147206112515264,
+            "adj_net": 0.1608272753114528,
+            "adj_off_epa": 0.0461066640599264,
+            "adj_st_epa": 1.0912201567414632,
+            "fei_def": 0.187743260596201,
+            "fei_net": 0.1061021985355331,
+            "fei_off": 0.2938454591317342
+          },
+          "summary": {
+            "EPAplay_def": 0.12936949277347,
+            "EPAplay_off": -0.0398705088545805,
+            "adj_def_epa": -0.091420762263527,
+            "adj_off_epa": 0.0357033818121742,
+            "explosive_def": 0.0756756756756756,
+            "explosive_off": 0.0544918998527245,
+            "havoc_def": 0.1,
+            "havoc_off": 0.1251840942562592,
+            "net_adj_epa": 0.1271241440757012,
+            "playsgame_def": 67.27272727272727,
+            "playsgame_off": 61.72727272727273,
+            "success_def": 0.4716216216216216,
+            "success_off": 0.4506627393225331,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "57",
+        "team_name": "Florida"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.1066634128723229,
+            "adj_net": 0.0484121902047142,
+            "adj_off_epa": 0.1550756030770372,
+            "adj_st_epa": 0.1824445840763316,
+            "fei_def": 0.6844301455470815,
+            "fei_net": 0.6015146113538662,
+            "fei_off": 1.2859447569009477
+          },
+          "summary": {
+            "EPAplay_def": 0.1249484290973105,
+            "EPAplay_off": 0.2156285729872275,
+            "adj_def_epa": 0.1274090400071203,
+            "adj_off_epa": 0.1174620959613433,
+            "explosive_def": 0.0880952380952381,
+            "explosive_off": 0.1162255466052934,
+            "havoc_def": 0.1119047619047619,
+            "havoc_off": 0.1288837744533947,
+            "net_adj_epa": -0.0099469440457769,
+            "playsgame_def": 64.61538461538461,
+            "playsgame_off": 66.84615384615384,
+            "success_def": 0.4654761904761905,
+            "success_off": 0.4902186421173763,
+            "valid_games": 13.0
+          }
+        },
+        "team_id": "2439",
+        "team_name": "UNLV"
+      },
+      "fixture": {
+        "away_id": "2439",
+        "away_team": "UNLV",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "62",
+        "home_team": "Hawai'i",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T12:00:00+10:00",
+        "start_utc": "2026-09-06T02:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Clarence T.C. Ching Athletics Complex",
+        "week": 1
+      },
+      "game_id": "401864497",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0304137681511132,
+            "adj_net": -0.072475390286566,
+            "adj_off_epa": -0.0420616221354527,
+            "adj_st_epa": 0.855637676340258,
+            "fei_def": 0.2763003205760777,
+            "fei_net": 0.3381657148783049,
+            "fei_off": 0.6144660354543826
+          },
+          "summary": {
+            "EPAplay_def": 0.0710226125083863,
+            "EPAplay_off": 0.0994767679836287,
+            "adj_def_epa": 0.0629563943134615,
+            "adj_off_epa": -0.0347284692646244,
+            "explosive_def": 0.0833333333333333,
+            "explosive_off": 0.0757020757020757,
+            "havoc_def": 0.1270491803278688,
+            "havoc_off": 0.0952380952380952,
+            "net_adj_epa": -0.0976848635780859,
+            "playsgame_def": 61.0,
+            "playsgame_off": 68.25,
+            "success_def": 0.4576502732240437,
+            "success_off": 0.4615384615384615,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "62",
+        "team_name": "Hawai'i"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0486338171219819,
+            "adj_net": -0.1682065963064587,
+            "adj_off_epa": -0.1195727791844767,
+            "adj_st_epa": -0.108148148514174,
+            "fei_def": 0.6342467545075821,
+            "fei_net": -0.8777714479119308,
+            "fei_off": -0.2435246934043488
+          },
+          "summary": {
+            "EPAplay_def": 0.0349223595827131,
+            "EPAplay_off": 0.0061753830901012,
+            "adj_def_epa": 0.0335432941805832,
+            "adj_off_epa": -0.1380940892242206,
+            "explosive_def": 0.0690537084398976,
+            "explosive_off": 0.0654596100278551,
+            "havoc_def": 0.1381074168797953,
+            "havoc_off": 0.1323119777158774,
+            "net_adj_epa": -0.1716373834048038,
+            "playsgame_def": 65.16666666666667,
+            "playsgame_off": 59.833333333333336,
+            "success_def": 0.4654731457800511,
+            "success_off": 0.4373259052924791,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2117",
+        "team_name": "Central Michigan"
+      },
+      "fixture": {
+        "away_id": "2117",
+        "away_team": "Central Michigan",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "167",
+        "home_team": "New Mexico",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T12:00:00+10:00",
+        "start_utc": "2026-09-06T02:00:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "University Stadium (NM)",
+        "week": 1
+      },
+      "game_id": "401864498",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0100432710769262,
+            "adj_net": 0.0122853281428507,
+            "adj_off_epa": 0.022328599219777,
+            "adj_st_epa": 0.7887255682385095,
+            "fei_def": 0.4157345772959448,
+            "fei_net": 0.3154458856515663,
+            "fei_off": 0.7311804629475112
+          },
+          "summary": {
+            "EPAplay_def": 0.066523509280764,
+            "EPAplay_off": 0.1255996430552501,
+            "adj_def_epa": 0.0319744512360177,
+            "adj_off_epa": 0.0023806194016483,
+            "explosive_def": 0.0670470756062767,
+            "explosive_off": 0.0949554896142433,
+            "havoc_def": 0.122681883024251,
+            "havoc_off": 0.1053412462908011,
+            "net_adj_epa": -0.0295938318343694,
+            "playsgame_def": 63.72727272727273,
+            "playsgame_off": 61.27272727272727,
+            "success_def": 0.4393723252496433,
+            "success_off": 0.4495548961424332,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "167",
+        "team_name": "New Mexico"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0652285917348915,
+            "adj_net": -0.0865630682746482,
+            "adj_off_epa": -0.0213344765397567,
+            "adj_st_epa": 0.2274556646524906,
+            "fei_def": 0.7082151890140821,
+            "fei_net": -0.3466594902034794,
+            "fei_off": 0.3615556988106026
+          },
+          "summary": {
+            "EPAplay_def": 0.0124931710360701,
+            "EPAplay_off": 0.0676919512106264,
+            "adj_def_epa": 0.0637327789228508,
+            "adj_off_epa": -0.0410162486682934,
+            "explosive_def": 0.0662790697674418,
+            "explosive_off": 0.0644768856447688,
+            "havoc_def": 0.1337209302325581,
+            "havoc_off": 0.1240875912408759,
+            "net_adj_epa": -0.1047490275911442,
+            "playsgame_def": 71.66666666666667,
+            "playsgame_off": 68.5,
+            "success_def": 0.4116279069767442,
+            "success_off": 0.4525547445255474,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "98",
+        "team_name": "Western Kentucky"
+      },
+      "fixture": {
+        "away_id": "98",
+        "away_team": "Western Kentucky",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "2440",
+        "home_team": "Nevada",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T12:30:00+10:00",
+        "start_utc": "2026-09-06T02:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "Mackay Stadium",
+        "week": 1
+      },
+      "game_id": "401864432",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0020934188628793,
+            "adj_net": -0.1882010035576273,
+            "adj_off_epa": -0.1861075846947479,
+            "adj_st_epa": 0.0034918821022071,
+            "fei_def": 0.6434935559445427,
+            "fei_net": -0.7393537598498644,
+            "fei_off": -0.0958602039053216
+          },
+          "summary": {
+            "EPAplay_def": 0.0686791789147161,
+            "EPAplay_off": -0.0889499024934951,
+            "adj_def_epa": 0.0275980555527192,
+            "adj_off_epa": -0.1966136332800155,
+            "explosive_def": 0.0785413744740533,
+            "explosive_off": 0.0650154798761609,
+            "havoc_def": 0.1122019635343618,
+            "havoc_off": 0.1455108359133126,
+            "net_adj_epa": -0.2242116888327347,
+            "playsgame_def": 64.81818181818181,
+            "playsgame_off": 58.72727272727273,
+            "success_def": 0.4712482468443197,
+            "success_off": 0.3978328173374613,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "2440",
+        "team_name": "Nevada"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0049795510492501,
+            "adj_net": 0.0185597271652494,
+            "adj_off_epa": 0.0135801761159992,
+            "adj_st_epa": 0.534659892048452,
+            "fei_def": 0.7481128018626593,
+            "fei_net": -0.1393880079663076,
+            "fei_off": 0.6087247938963516
+          },
+          "summary": {
+            "EPAplay_def": 0.2006749934657216,
+            "EPAplay_off": 0.0392910627479817,
+            "adj_def_epa": 0.0022040507456542,
+            "adj_off_epa": 0.0184945404260559,
+            "explosive_def": 0.0773263433813892,
+            "explosive_off": 0.0701754385964912,
+            "havoc_def": 0.1166448230668414,
+            "havoc_off": 0.1484480431848853,
+            "net_adj_epa": 0.0162904896804016,
+            "playsgame_def": 63.583333333333336,
+            "playsgame_off": 61.75,
+            "success_def": 0.5176933158584535,
+            "success_off": 0.4399460188933873,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "26",
+        "team_name": "UCLA"
+      },
+      "fixture": {
+        "away_id": "26",
+        "away_team": "UCLA",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "25",
+        "home_team": "California",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-06T12:30:00+10:00",
+        "start_utc": "2026-09-06T02:30:00+00:00",
+        "sydney_date": "2026-09-06",
+        "venue": "California Memorial Stadium",
+        "week": 1
+      },
+      "game_id": "401858210",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": 0.0309660819286372,
+            "adj_net": -0.0296531384370536,
+            "adj_off_epa": 0.0013129434915836,
+            "adj_st_epa": -0.213818742015353,
+            "fei_def": 0.6003027328594653,
+            "fei_net": -0.5225422626667695,
+            "fei_off": 0.0777604701926957
+          },
+          "summary": {
+            "EPAplay_def": 0.1421319369899711,
+            "EPAplay_off": 0.0601994567584874,
+            "adj_def_epa": 0.0441140086389119,
+            "adj_off_epa": 0.0233828549552215,
+            "explosive_def": 0.0776081424936386,
+            "explosive_off": 0.0684596577017114,
+            "havoc_def": 0.1348600508905852,
+            "havoc_off": 0.147921760391198,
+            "net_adj_epa": -0.0207311536836903,
+            "playsgame_def": 65.5,
+            "playsgame_off": 68.16666666666667,
+            "success_def": 0.4732824427480916,
+            "success_off": 0.4462102689486552,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "25",
+        "team_name": "California"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0915805423205892,
+            "adj_net": 0.0833092324023492,
+            "adj_off_epa": -0.0082713099182399,
+            "adj_st_epa": 0.3038972327804371,
+            "fei_def": -0.1367605469491344,
+            "fei_net": 0.3236617454198301,
+            "fei_off": 0.1869011984706957
+          },
+          "summary": {
+            "EPAplay_def": -0.0279248022548431,
+            "EPAplay_off": 0.0191643724456811,
+            "adj_def_epa": -0.1068972196302446,
+            "adj_off_epa": 0.0064095425949205,
+            "explosive_def": 0.0539772727272727,
+            "explosive_off": 0.0679487179487179,
+            "havoc_def": 0.1264204545454545,
+            "havoc_off": 0.123076923076923,
+            "net_adj_epa": 0.1133067622251651,
+            "playsgame_def": 58.66666666666666,
+            "playsgame_off": 65.0,
+            "success_def": 0.4573863636363636,
+            "success_off": 0.4333333333333333,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "265",
+        "team_name": "Washington State"
+      },
+      "fixture": {
+        "away_id": "265",
+        "away_team": "Washington State",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "264",
+        "home_team": "Washington",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-07T06:00:00+10:00",
+        "start_utc": "2026-09-06T20:00:00+00:00",
+        "sydney_date": "2026-09-07",
+        "venue": "Husky Stadium",
+        "week": 1
+      },
+      "game_id": "401858437",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1002137719693831,
+            "adj_net": 0.3146390602178555,
+            "adj_off_epa": 0.2144252882484723,
+            "adj_st_epa": -0.0448633992819375,
+            "fei_def": 0.0739703354069685,
+            "fei_net": 1.3679141131473045,
+            "fei_off": 1.441884448554273
+          },
+          "summary": {
+            "EPAplay_def": -0.0383492272538252,
+            "EPAplay_off": 0.1979697959780853,
+            "adj_def_epa": -0.1367597932969917,
+            "adj_off_epa": 0.2099243003744944,
+            "explosive_def": 0.0692307692307692,
+            "explosive_off": 0.0807537012113055,
+            "havoc_def": 0.1153846153846153,
+            "havoc_off": 0.1197846567967698,
+            "net_adj_epa": 0.3466840936714861,
+            "playsgame_def": 65.0,
+            "playsgame_off": 61.91666666666666,
+            "success_def": 0.432051282051282,
+            "success_off": 0.5100942126514132,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "264",
+        "team_name": "Washington"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1635417419528858,
+            "adj_net": 0.2351688051440063,
+            "adj_off_epa": 0.0716270631911205,
+            "adj_st_epa": 0.1102550201423362,
+            "fei_def": -0.5137304577560547,
+            "fei_net": 0.9339356342748346,
+            "fei_off": 0.4202051765187798
+          },
+          "summary": {
+            "EPAplay_def": -0.024677168266658,
+            "EPAplay_off": 0.0730527779880039,
+            "adj_def_epa": -0.1415299216347032,
+            "adj_off_epa": 0.1055478519475627,
+            "explosive_def": 0.0652741514360313,
+            "explosive_off": 0.0691489361702127,
+            "havoc_def": 0.1409921671018277,
+            "havoc_off": 0.1356382978723404,
+            "net_adj_epa": 0.2470777735822659,
+            "playsgame_def": 63.833333333333336,
+            "playsgame_off": 62.66666666666666,
+            "success_def": 0.4190600522193211,
+            "success_off": 0.4720744680851064,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "97",
+        "team_name": "Louisville"
+      },
+      "fixture": {
+        "away_id": "97",
+        "away_team": "Louisville",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "145",
+        "home_team": "Ole Miss",
+        "neutral_site": true,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-07T09:30:00+10:00",
+        "start_utc": "2026-09-06T23:30:00+00:00",
+        "sydney_date": "2026-09-07",
+        "venue": "Nissan Stadium",
+        "week": 1
+      },
+      "game_id": "401856661",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1255782361928543,
+            "adj_net": 0.3645956235398295,
+            "adj_off_epa": 0.2390173873469751,
+            "adj_st_epa": 0.6187021132022726,
+            "fei_def": 0.5359652357902251,
+            "fei_net": 1.3447714503181207,
+            "fei_off": 1.8807366861083457
+          },
+          "summary": {
+            "EPAplay_def": 0.0456493822687678,
+            "EPAplay_off": 0.201814855441451,
+            "adj_def_epa": -0.1390991415104264,
+            "adj_off_epa": 0.2464377138799781,
+            "explosive_def": 0.0687432867883995,
+            "explosive_off": 0.09,
+            "havoc_def": 0.117078410311493,
+            "havoc_off": 0.105,
+            "net_adj_epa": 0.3855368553904045,
+            "playsgame_def": 66.5,
+            "playsgame_off": 71.42857142857143,
+            "success_def": 0.4425349087003222,
+            "success_off": 0.495,
+            "valid_games": 14.0
+          }
+        },
+        "team_id": "145",
+        "team_name": "Ole Miss"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.1266859365216475,
+            "adj_net": 0.0544672804824649,
+            "adj_off_epa": -0.0722186560391826,
+            "adj_st_epa": -0.3316136696587683,
+            "fei_def": -0.2140781443776577,
+            "fei_net": 0.0745772837906898,
+            "fei_off": -0.1395008605869678
+          },
+          "summary": {
+            "EPAplay_def": 0.0537376010901907,
+            "EPAplay_off": -0.121001059834095,
+            "adj_def_epa": -0.1296194605481644,
+            "adj_off_epa": -0.0676785246932401,
+            "explosive_def": 0.0698005698005698,
+            "explosive_off": 0.0603829160530191,
+            "havoc_def": 0.1096866096866096,
+            "havoc_off": 0.1384388807069219,
+            "net_adj_epa": 0.0619409358549243,
+            "playsgame_def": 58.5,
+            "playsgame_off": 56.583333333333336,
+            "success_def": 0.4743589743589743,
+            "success_off": 0.3946980854197349,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "275",
+        "team_name": "Wisconsin"
+      },
+      "fixture": {
+        "away_id": "275",
+        "away_team": "Wisconsin",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "87",
+        "home_team": "Notre Dame",
+        "neutral_site": true,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-07T09:30:00+10:00",
+        "start_utc": "2026-09-06T23:30:00+00:00",
+        "sydney_date": "2026-09-07",
+        "venue": "Lambeau Field",
+        "week": 1
+      },
+      "game_id": "401858438",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.2618205342246454,
+            "adj_net": 0.5410108527606659,
+            "adj_off_epa": 0.2791903185360204,
+            "adj_st_epa": -0.3701423499078249,
+            "fei_def": -0.5921406971886148,
+            "fei_net": 2.395045568008495,
+            "fei_off": 1.80290487081988
+          },
+          "summary": {
+            "EPAplay_def": -0.0828298227664846,
+            "EPAplay_off": 0.2891969647059225,
+            "adj_def_epa": -0.2419954724066954,
+            "adj_off_epa": 0.2933143150443865,
+            "explosive_def": 0.0546583850931677,
+            "explosive_off": 0.1056241426611797,
+            "havoc_def": 0.1540372670807453,
+            "havoc_off": 0.1138545953360768,
+            "net_adj_epa": 0.5353097874510819,
+            "playsgame_def": 67.08333333333333,
+            "playsgame_off": 60.75,
+            "success_def": 0.3962732919254658,
+            "success_off": 0.51440329218107,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "87",
+        "team_name": "Notre Dame"
+      }
+    },
+    {
+      "away_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0988291260174111,
+            "adj_net": 0.2391733893356002,
+            "adj_off_epa": 0.140344263318189,
+            "adj_st_epa": -0.3013717836924108,
+            "fei_def": 0.079326472103953,
+            "fei_net": 1.015621375482944,
+            "fei_off": 1.094947847586897
+          },
+          "summary": {
+            "EPAplay_def": 0.0153911827844604,
+            "EPAplay_off": 0.1485420254321816,
+            "adj_def_epa": -0.0968335362719104,
+            "adj_off_epa": 0.140302445940128,
+            "explosive_def": 0.0715096481271282,
+            "explosive_off": 0.0807692307692307,
+            "havoc_def": 0.1259931895573212,
+            "havoc_off": 0.123076923076923,
+            "net_adj_epa": 0.2371359822120385,
+            "playsgame_def": 73.41666666666667,
+            "playsgame_off": 65.0,
+            "success_def": 0.4472190692395005,
+            "success_off": 0.4615384615384615,
+            "valid_games": 12.0
+          }
+        },
+        "team_id": "2567",
+        "team_name": "SMU"
+      },
+      "fixture": {
+        "away_id": "2567",
+        "away_team": "SMU",
+        "completed": false,
+        "fbs_game": true,
+        "home_id": "52",
+        "home_team": "Florida State",
+        "neutral_site": false,
+        "season": 2026,
+        "season_type": "regular",
+        "start_australia_sydney": "2026-09-08T09:30:00+10:00",
+        "start_utc": "2026-09-07T23:30:00+00:00",
+        "sydney_date": "2026-09-08",
+        "venue": "Doak Campbell Stadium",
+        "week": 1
+      },
+      "game_id": "401858212",
+      "home_profile": {
+        "current": {
+          "available": false,
+          "ratings": {},
+          "summary": {}
+        },
+        "preseason": {
+          "returning_production": {},
+          "talent": {}
+        },
+        "prior_season": {
+          "available": true,
+          "ratings": {
+            "adj_def_epa": -0.0689029828972543,
+            "adj_net": 0.2576780669458421,
+            "adj_off_epa": 0.1887750840485877,
+            "adj_st_epa": -0.291817189816061,
+            "fei_def": 0.5148601571736466,
+            "fei_net": 0.8747615271564149,
+            "fei_off": 1.3896216843300615
+          },
+          "summary": {
+            "EPAplay_def": 0.0725111999137941,
+            "EPAplay_off": 0.1871623231674005,
+            "adj_def_epa": -0.0635545189089908,
+            "adj_off_epa": 0.202267984084439,
+            "explosive_def": 0.079608938547486,
+            "explosive_off": 0.0973684210526315,
+            "havoc_def": 0.1173184357541899,
+            "havoc_off": 0.1144736842105263,
+            "net_adj_epa": 0.2658225029934299,
+            "playsgame_def": 65.0909090909091,
+            "playsgame_off": 69.0909090909091,
+            "success_def": 0.4399441340782123,
+            "success_off": 0.4828947368421052,
+            "valid_games": 11.0
+          }
+        },
+        "team_id": "52",
+        "team_name": "Florida State"
+      }
+    }
+  ],
+  "generated_at_utc": "2026-09-05T08:07:41.928526+00:00",
+  "last_checked_at_utc": "2026-09-05T08:07:41.928526+00:00",
+  "limitations": [
+    "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
+    "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
+  ],
+  "market_data": false,
+  "pack_revision": "491a09bd18f8a6ed",
+  "schema_version": "0.1.0",
+  "season": 2026,
+  "slate_id": "2026_01",
+  "source_health": {
+    "failed_required": [],
+    "quality": {
+      "status": "NOT_TESTED",
+      "tests": []
+    },
+    "status": "PARTIAL"
+  },
+  "source_receipt": {
+    "prior_ratings": {
+      "asset": "cfb_ratings_weekly_2025.csv",
+      "asset_updated_at": "2026-09-01T09:30:19Z",
+      "bytes": 408427,
+      "release_updated_at": "2026-09-04T14:54:39Z",
+      "sha256": "2fa3e33f2c6d20e47c436816adbbf79a8cd1246b5e2a7da391150f6ea5cefeed",
+      "tag": "cfb_ratings_weekly",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2025.csv"
+    },
+    "prior_weekly": {
+      "asset": "cfb_team_summaries_weekly_2025.csv",
+      "asset_updated_at": "2026-09-01T09:31:28Z",
+      "bytes": 8569035,
+      "release_updated_at": "2026-09-04T14:55:05Z",
+      "sha256": "1605f8281b5e3a817f1909d673a81ddf9e504c3077b322bd3b49f941fbb3b9ed",
+      "tag": "cfb_team_summaries_weekly",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2025.csv"
+    },
+    "ratings": {
+      "asset": "cfb_ratings_weekly_2026.csv",
+      "asset_updated_at": "2026-09-04T14:54:36Z",
+      "bytes": 61334,
+      "release_updated_at": "2026-09-04T14:54:39Z",
+      "sha256": "3c45419581bd66d2156d3ff7f9f3f495b60ba000b638e940975b3dc5976e12e2",
+      "tag": "cfb_ratings_weekly",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2026.csv"
+    },
+    "schedule": {
+      "asset": "cfb_schedules_2026.csv.gz",
+      "asset_updated_at": "2026-09-04T14:52:45Z",
+      "bytes": 67390,
+      "release_updated_at": "2026-09-04T14:52:48Z",
+      "sha256": "0c4006ca71c55d233806b3672ff85e7654683292b6eea222cd7ffcd86c66e518",
+      "tag": "cfb_schedules",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_schedules/cfb_schedules_2026.csv.gz"
+    },
+    "weekly": {
+      "asset": "cfb_team_summaries_weekly_2026.csv",
+      "asset_updated_at": "2026-09-04T14:55:02Z",
+      "bytes": 1209385,
+      "release_updated_at": "2026-09-04T14:55:05Z",
+      "sha256": "44f2554419b0e02bc64d5196915045aa34c8bb3d7c2e426d360142b215edd401",
+      "tag": "cfb_team_summaries_weekly",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2026.csv"
+    }
+  },
+  "week": 1
+}
