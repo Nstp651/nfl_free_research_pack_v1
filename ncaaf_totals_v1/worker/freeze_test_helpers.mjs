@@ -4,6 +4,9 @@ const root=new URL('../',import.meta.url);
 export const pack=JSON.parse(readFileSync(new URL('data/slates/2026/2026_01.json',root)));
 export const qbase=JSON.parse(readFileSync(new URL('model/slates/2026/2026_01.json',root)));
 export const now=Date.parse('2026-09-05T10:00:00Z');
+// Replay fixture completion at the fixed test timestamp; production refreshes
+// may later mark these games completed. QBASE anchors remain untouched.
+for (const g of pack.games) g.fixture.completed=Date.parse(g.fixture.start_utc)<=now;
 export const ids=pack.games.filter(g=>!g.fixture.completed && Date.parse(g.fixture.start_utc)>now).map(g=>g.game_id).sort();
 export const lock={season:2026,week:1,slate_id:'2026_01',pack_revision:pack.pack_revision,qbase_revision:qbase.qbase_revision,eligible_game_ids:ids};
 export function context(gid) {

@@ -57,7 +57,7 @@ def fixture_key(home: str, away: str, commence_time: str) -> tuple[str, str, str
 
 
 def validate_frozen(frozen: dict) -> None:
-    if frozen.get("schema_version") not in {FROZEN_SCHEMA_VERSION, "1.1.2", "1.1.3"}:
+    if frozen.get("schema_version") not in {FROZEN_SCHEMA_VERSION, "1.1.3"}:
         raise ValueError("unsupported frozen P_model schema")
     if frozen.get("schema_version") == "1.1.3":
         validate_receipt(frozen)
