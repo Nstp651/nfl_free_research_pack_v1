@@ -1,331 +1,153 @@
-# Nick NCAA Football Totals Model — V1 Architecture
+# Nick NCAA Football Totals Model — V1.1 Architecture
 
-Status: DESIGN / BUILD. This document defines the target production architecture. Calibration and live acceptance are separate gates.
+Status: PRODUCTION CANDIDATE. Authoritative betting methodology lives in `NCAA_TOTALS_4_LAYER_MASTER_API_ACTION_PRODUCTION_V1.1.md`; this document describes system architecture.
 
-## Purpose
+## Objective
+Build a fully automated FBS-v-FBS full-game totals model that scales across an NCAA slate while preserving the same market-blind freeze discipline and auditability as the NFL production system.
 
-Build a fully automated, full-slate NCAA Football FBS-v-FBS game totals model with the same market-blind freeze discipline and auditability as the NFL Receptions production model, but with an NCAA-specific quantitative research and scoring engine.
-
-The model estimates true game-total probabilities first. The market determines value second.
+`football evidence -> probability model -> ENTIRE SLATE FREEZE -> AU market -> exact mapping -> push-aware EV -> ranking`
 
 ## Scope
+- FBS vs FBS only for V1 betting selection.
+- Full-game totals only.
+- Over and Under modelled objectively.
+- Both integer and half-point totals supported.
+- No H2H/spreads/team totals/periods/live/player props/multis.
+- AU sportsbook data enters only after entire slate freeze.
 
-Supported initial market:
-- full-game game totals (`totals`) only
-- Over and Under both modelled mathematically
-- AU bookmaker prices retrieved only after the entire slate P_model is frozen
+## Layer 0 — slate validation
+Validate season/week, canonical game ID, teams/home-away, UTC + Australia/Sydney kickoff, venue/neutral flag, season type and FBS-v-FBS eligibility. NEW runs exclude games already started/completed.
 
-Initial eligibility:
-- FBS vs FBS only
-- regular-season and postseason can be supported, but postseason is separately tagged
-- exclude FBS-v-FCS from V1 betting selection
-- no live/in-game totals
-- no first-half/quarter totals
-- no player props
+## Layer 1 — scalable research funnel
+### 1A Structured data — every game
+Research pack retains current and prior evidence separately, including where available:
+- play volume / pace;
+- EPA offense/defense and pass/rush splits;
+- success rate;
+- explosiveness;
+- havoc;
+- pass tendency;
+- opponent-adjusted metrics;
+- independent ratings;
+- games/sample size;
+- preseason talent / returning production when published.
 
-## Core architecture
+### 1B Current-information scan — every game
+Market-blind live research verifies QB, meaningful backup risk, material OL/skill/defensive absences, coaching/play-caller/system changes, transfers/depth-chart shifts, suspensions, venue/surface, weather/wind and unusual rest/travel.
 
-Layer 0 — Slate / fixture validation and eligibility
-Layer 1 — Verified NCAA Full-Slate Research Pack
-Layer 2 — Market-Blind Scoring / Total Probability Engine
-`COMPLETE_MODEL_INTEGRITY_CONFIRMED`
-`P_MODEL_STATUS: FROZEN`
-Layer 3 — Australian totals market integration
-Layer 4 — Full-slate single-play ranking
+### 1C Deep-research trigger — only where needed
+Escalate QB uncertainty/change, new system, roster reset, low sample, current/prior conflict, important missing data, injury clusters, extreme weather, unusual pace/style, rating disagreement or high sensitivity.
 
-## Layer 0 — Slate validation
+This is the scale solution: structured work for 50+ games, lightweight current scan for all, expensive deep research only where it can materially change P_model.
 
-Inputs:
-- season
-- target NCAA week
-- Australia/Sydney run date
+## Anti-leakage contract
+For target week W:
 
-Validate from schedule data:
-- canonical game_id
-- home/away
-- kickoff UTC
-- Australia/Sydney kickoff
-- venue / neutral site
-- season type
-- FBS-v-FBS eligibility
+`current_season_data_through_week <= W-1`
 
-The research service may expose all target-week FBS-v-FBS games. The model independently excludes already-started games and any fixture outside the intended run window.
+Week 1 current performance is unavailable, not zero. Prior-season evidence is a statistical prior only; current personnel/system truth must be rebuilt.
 
-## Layer 1 — research stack
+No sportsbook line/price/consensus or betting-derived feature is allowed in Layers 0-2.
 
-### 1A. Structured quantitative pack — every game
+## QBASE
+The selected market-blind baseline is Ridge QBASE V0.1.0.
 
-For each team, retain current as-of and prior evidence separately.
+Training receipt:
+- 7,428 FBS-v-FBS games, 2016-2025;
+- 5,152 temporal walk-forward scored games;
+- OOS MAE 13.03, RMSE 16.45;
+- Week 0/1 MAE 13.70;
+- Weeks 2-4 MAE 13.24;
+- Week 5+ MAE 12.88.
 
-Core current-season families where available:
-- plays/game and offensive play volume
-- drives/game / points per drive / drive efficiency
-- EPA/play offense and defense
-- pass/rush EPA
-- success rate offense and defense
-- pass/rush success rate
-- explosive-play creation/prevention
-- havoc / sack / pressure proxies where definitions are usable
-- finishing-drive / red-zone proxies where available
-- turnover rates, but treated carefully because turnover conversion is noisy
-- pass/rush tendency
-- special-teams efficiency where the source definition is stable
-- opponent-adjusted offensive / defensive strength
-- alternative ratings system for cross-checking
-- games played / sample size
+Nonlinear challengers did not improve OOS error and were not promoted.
 
-Early-season priors:
-- previous-season efficiency, separated from current data
-- team talent composite / blue-chip ratio when available
-- returning production when available
-- preseason rating context when available
-- coach/QB/system changes are NOT inferred from last-season numbers; live research handles structural translation
+QBASE supplies an expected-total anchor and temporal OOS residual distribution. It is not automatically final P_model; current football context can alter scenario mean/variance before freeze only when supported and ledgered.
 
-### 1B. Matchup construction — every game
+## Layer 2 — final total distribution
+For each fixture:
+1. start from aligned QBASE;
+2. translate current football context via the smallest justified scenario set;
+3. use calibrated temporal OOS residual distribution;
+4. compute final expected total / uncertainty;
+5. freeze exact probabilities across a broad grid from 20.0 through 100.5 in 0.5 increments.
 
-Translate team profiles into football pathways rather than add arbitrary bonuses:
-- expected offensive play volume / possessions
-- offense vs opposing defense efficiency interaction
-- pass/rush style interaction
-- explosiveness creation vs prevention
-- havoc/protection interaction
-- finishing-drive interaction
-- neutral-site / home context
-- rest / bye context
+### Half-point line n+0.5
+- Push = 0.
+- Over/Under partition the outcome.
 
-Do not call a raw difference a causal adjustment. Preserve component receipts and denominators.
+### Integer line n
+Football final totals are integers, so whole-number markets need push probability:
+- Under n ~= F(n-0.5)
+- Push n ~= F(n+0.5)-F(n-0.5)
+- Over n ~= 1-F(n+0.5)
 
-### 1C. Current-information scan — every game
+Audits require probabilities in [0,1], Over monotonic down, Under monotonic up and Over+Push+Under=1 at every line. Half-point push must equal zero.
 
-Current web research is required for information structured data cannot reliably know:
-- starting QB identity / status
-- significant backup-QB risk
-- major offensive-line absences
-- meaningful skill-player losses only when they change team efficiency/pace/scoring pathways
-- major defensive personnel losses
-- coordinator / play-caller / head-coach changes
-- suspensions
-- current depth-chart / transfer-role changes early season
-- weather / roof / surface
-- unusual travel/rest/context
-
-No sportsbook lines, bookmaker previews, consensus totals or betting percentages may enter Layer 1.
-
-### 1D. Deep-research trigger — targeted only
-
-A matchup receives an intensified second pass when any applies:
-- QB uncertainty
-- new coach/coordinator/system
-- low current-season sample
-- current/prior statistical conflict
-- large transfer/roster reset
-- material OL/defensive injury cluster
-- extreme weather
-- extreme pace/style interaction
-- model input missingness
-- high sensitivity to one assumption
-- cross-rating disagreement beyond a validated threshold
-
-This is how the model scales to a large NCAA slate without pretending every game needs the same browsing depth.
-
-## As-of / anti-leakage contract
-
-For a target game in week W:
-
-`current_season_data_through_week <= W - 1`
-
-Never use results from the target week itself to model a target-week game. A regenerated pack is not automatically a historical point-in-time backtest unless its source snapshot is also as-of the simulated run date.
-
-Week 1:
-- current-season performance is unavailable, not zero
-- use translated prior-season efficiency + preseason structural context + current personnel research
-
-Weeks 2–4:
-- current data receives meaningful but limited authority
-- current role/QB/system truth can override stale prior structure
-- rate estimates remain shrunken / uncertainty widened
-
-Later season:
-- current-season evidence progressively dominates when sample and structural continuity support it
-
-No fixed week weights are hard-coded until validated walk-forward.
-
-## Source quality and contradiction rules
-
-- Missing metric != zero.
-- Current structural truth outranks stale historical averages.
-- A source timestamp is not proof every underlying metric is fresh.
-- Two differently constructed rating systems are cross-checks, not duplicate votes.
-- Opponent-adjusted fields must pass source-quality checks; a failed adjustment cannot be silently relabelled as adjusted.
-- Betting-line fields in an upstream dataset are prohibited pre-freeze even if convenient.
-
-## Layer 2 — total probability engine
-
-Layer 2 uses ONLY the closed Layer 1 snapshot.
-
-Preferred V1 modelling chain:
-
-`EXPECTED POSSESSIONS / PLAYS`
-→ `TEAM OFFENSIVE EFFICIENCY vs OPPOSING DEFENSE`
-→ `TEAM SCORING MEAN / DISTRIBUTION`
-→ `HOME + AWAY JOINT TOTAL DISTRIBUTION`
-→ `P(total > line)` / `P(total < line)` for a precomputed threshold grid
-
-The final production engine must be chosen by walk-forward validation, not by narrative preference.
-
-Candidate families to compare:
-1. predictive regression / gradient boosting on leak-free as-of team features with residual-distribution calibration
-2. drive-level scoring model
-3. hierarchical simulation using possessions × scoring efficiency
-4. ensemble only if it improves temporal out-of-sample calibration and error
-
-The upstream cfbfastR pregame work may be used as a benchmark, not automatically adopted as Nick's model.
-
-### Threshold grid
-
-Before any market access generate a broad full-game total grid sufficient to map common sportsbook lines exactly, e.g. half-points from 30.5 through 85.5 where the predictive distribution has practical support.
-
-Exact grid/range is validated from market history and can be widened. No missing threshold may be inferred post-freeze.
-
-### Required outputs per fixture
-
-- expected home points
-- expected away points
-- expected total
-- total variance / distribution method
-- key scenario assumptions
-- exact probabilities for each supported total threshold, both Over and Under as complements where the same continuous/discrete settlement convention applies
-- Confidence
-- Fragility
-- source/revision hashes
-
-### Numerical execution
-
-Actual code execution is mandatory for every slate.
-
-Record:
-- parameter/input object
-- model version
-- distribution method
-- random seed/draw count if simulated
-- output object
-- input/result SHA-256 hashes
-- numerical audit results
-
-Do not claim simulation, calibration or PASS without execution evidence.
-
-## Pre-freeze integrity audits
-
-At minimum:
-- every fixture unique and canonical
-- every current-season team input respects W-1 cutoff
-- home/away IDs and profile IDs reconcile
-- no market/betting field present in Layer 1/2
-- no NaN/inf model parameter silently coerced to zero
-- current/prior evidence kept distinguishable
-- expected total in plausible support
-- probability grid bounded [0,1]
-- Over probability is monotonic decreasing as threshold rises
-- Under probability is monotonic increasing as threshold rises
-- Over/Under complement convention reconciles exactly for each non-push half-point
-- scenario weights sum to 100% when scenarios exist
-- sensitivity/fragility completed
-
-Only then print:
+Actual numerical execution, hashes and audit receipts are mandatory. Only then:
 
 `COMPLETE_MODEL_INTEGRITY_CONFIRMED`
 `P_MODEL_STATUS: FROZEN`
 
-Freeze the entire slate at one timestamp/research revision before any price access.
+The entire slate freezes together.
 
-## Layer 3 — market integration
+## Freeze contract
+Frozen fields include fixture mapping, Information State, QB/personnel/weather/play-calling assumptions, QBASE version/revision, adjustment ledger, scenarios/weights, final mean/distribution, complete Over/Push/Under grid, Confidence and Fragility.
 
-Post-freeze only.
+Price movement never changes P_model. Material post-freeze football information invalidates the run.
 
-Target production sequence:
-1. list NCAA events through the existing betting gateway / Odds API adapter
-2. resolve exact fixture by both teams + Australia/Sydney date + commence time
-3. retrieve full-game `totals` for AU books
-4. verify fixture and market family
-5. map exact total threshold to exact frozen P_model
-6. select best current price deterministically
+## Layer 3 — post-freeze market integration
+The market Worker makes one NCAA sport-board request using:
+- sport `americanfootball_ncaaf`
+- region `au`
+- market `totals`
 
-For each side:
-- P_break_even = 1 / decimal_odds
-- Fair Price = 1 / P_model
-- Price Edge = P_model - P_break_even
-- Expected ROI = P_model * decimal_odds - 1
+GPT retrieves all pages at one immutable `board_revision` after freeze only. Fixture matching requires both teams + kickoff. Line mapping is exact; no post-market interpolation.
 
-No P_model value may change after market access.
+Duplicate identical side+line: highest decimal price, then newest `last_update`, then bookmaker key alphabetical.
+
+### Push-aware market math
+For offered side:
+- P_win = frozen Over or Under probability
+- P_push = frozen push
+- P_loss = 1-P_win-P_push
+
+Half-point:
+- break-even = 1/odds
+- Fair Price = 1/P_win
+- ROI = P_win*odds-1
+
+Integer:
+- break-even win probability = (1-P_push)/odds
+- Fair Price = (1-P_push)/P_win
+- ROI = P_win*odds + P_push - 1
+
+`model/market_math.py` executes these formulas. `model/integrate_market.py` provides deterministic exact mapping, best-price selection, freshness and ranking for a complete frozen artifact + complete post-freeze board snapshot.
 
 ## Layer 4 — ranking
+Only exact-mapped positive push-aware ROI selections with acceptable freshness and intact freeze path are eligible. Rank primarily by ROI, Price Edge, Fragility, data/research quality, freshness and Confidence as tie-breaker. Never force a bet.
 
-Rank every positive-edge eligible full-game total on the weekly slate.
+## Infrastructure
+### GitHub
+- source-controlled ETL/model/tests/schemas;
+- scheduled research refresh;
+- generated immutable research/QBASE artifacts;
+- verification CI.
 
-Primary ordering:
-1. expected ROI
-2. price edge
-3. frozen fragility / sensitivity
-4. research/data quality
-5. price freshness
-6. Confidence as tie-breaker
+### Cloudflare native Git deployment
+Research Worker:
+- root `ncaaf_totals_v1`
+- serves research + QBASE only.
 
-Do not force a bet.
+Market Worker:
+- root `ncaaf_totals_v1/market_worker`
+- serves POST-FREEZE AU totals only;
+- Odds API key remains an encrypted Cloudflare secret.
 
-Output target:
-- BEST SINGLE
-- Top 10 positive-edge NCAA totals
-- other meaningful positives
-- passed/tight core games
-- coverage / freshness warnings
+GitHub Actions do not deploy Workers; Cloudflare Git integration is the sole production deploy owner.
 
-The model can mathematically rank Unders even if the user's execution preference later favors Overs. User preference must not alter the pre-market probability model.
+## Live acceptance state
+Research and market-health Workers are live. Controlled AU board acceptance confirmed live NCAA totals from Sportsbet, TAB, TABtouch and PlayUp, with both integer and half-point lines present. Real-board acceptance is manual-only because it consumes Odds API quota.
 
-## Full-slate scale design
-
-The critical design difference from NFL Receptions is grain:
-
-NFL: one fixture + paginated players.
-NCAA: one weekly slate + paginated games.
-
-The research Worker returns a compact game record with both team profiles and receipts. GPT consumes all pages at ONE slate revision. Team profiles may repeat across neither side of a game; one game contains exactly two canonical team states.
-
-The live-research layer is a funnel:
-- every game: structured pack
-- every game: lightweight current-info scan
-- triggered games: deep research
-
-This prevents a 50+ game Saturday from becoming 50 independent long-form research jobs.
-
-## Infrastructure target
-
-GitHub:
-- source-controlled builder / schema / tests
-- scheduled pack refresh
-- generated current data
-- Worker source
-- Cloudflare dry-run/deploy workflow
-
-Cloudflare Worker:
-- read-only research API
-- no odds data
-- immutable revision checks
-- freshness / source health
-- Action-safe pagination
-
-Cloudflare storage is not required for V1 if GitHub-generated JSON remains comfortably within source and request limits. Add KV/R2/D1 only when an observed scaling need justifies it; do not add infrastructure complexity by default.
-
-## Production validation / governance
-
-Before betting use:
-- backtest totals prediction walk-forward by season/week
-- MAE/RMSE of expected total
-- log loss/Brier by threshold
-- calibration by probability bucket
-- calibration by total range
-- performance early vs late season
-- ablation: prior carryover, talent, returning production, pace, opponent-adjustment, weather, QB change, rest
-- compare against a simple benchmark and cfbfastR's published pregame baseline
-- never train/tune on sportsbook current prices
-
-Betting performance (ROI/CLV) is evaluated only after the predictive model is frozen and historically joined to as-of market snapshots.
+## Governance
+Predictive changes require temporal OOS evidence, not narrative preference. Continue tracking MAE/RMSE, threshold calibration/Brier/log loss, early-vs-late season performance and ablations. Betting ROI/CLV is assessed separately after frozen historical P_models are joined to as-of market snapshots.
