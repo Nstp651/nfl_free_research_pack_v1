@@ -1,0 +1,8 @@
+# Dedicated NCAA totals research Worker. Keep separate from the existing NFL Worker.
+name = "ncaaf-totals-research-pack-v1"
+main = "worker/index.js"
+compatibility_date = "2026-09-05"
+workers_dev = true
+
+[vars]
+DATA_BASE_URL = "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/data"

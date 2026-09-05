@@ -1,0 +1,7 @@
+name = "ncaaf-totals-market-v1"
+main = "index.js"
+compatibility_date = "2026-09-05"
+workers_dev = true
+
+# Secret required in Cloudflare (never commit the value):
+#   npx wrangler secret put ODDS_API_KEY
