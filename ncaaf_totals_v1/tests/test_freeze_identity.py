@@ -70,6 +70,17 @@ def test_shuffled_qbase_order_maps_by_game_id():
     assert [x["expected_total_qbase"] for x in receipts] == [41.1, 52.2, 63.3]
 
 
+def test_transport_number_spelling_does_not_change_hash():
+    original = qbase("9", "Away", "Home", 50.0)
+    transported = copy.deepcopy(original)
+    # JavaScript JSON.stringify emits integer-valued numbers without '.0'.
+    transported["expected_total_qbase"] = 50
+    transported["probability_grid"][0]["line"] = 50
+    transported["probability_grid"][1]["push"] = 0
+    assert qbase_anchor_sha256(transported) == original["qbase_anchor_sha256"]
+    assert grid_sha256(transported["probability_grid"]) == grid_sha256(original["probability_grid"])
+
+
 def test_duplicate_game_id_fails():
     r, q = base_data()
     with pytest.raises(ValueError, match="duplicate game_id"):
