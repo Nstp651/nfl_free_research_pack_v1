@@ -11,6 +11,16 @@ on:
         description: NCAA week (blank = auto-resolve next active week)
         required: false
         type: string
+  # A production promotion/builder change gets an immediate active-slate build.
+  # Generated data commits do not match these paths, preventing refresh loops.
+  push:
+    branches: [main]
+    paths:
+      - 'ncaaf_totals_v1/build_pack.py'
+      - 'ncaaf_totals_v1/build_pack_entry.py'
+      - 'ncaaf_totals_v1/validate_pack.py'
+      - 'ncaaf_totals_v1/requirements.txt'
+      - '.github/workflows/ncaaf-refresh.yml'
   # NCAA season automation only. January bowls belong to the prior season;
   # August-December belong to the current calendar-year season.
   schedule:
