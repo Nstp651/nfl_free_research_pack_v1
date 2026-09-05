@@ -1,10 +1,9 @@
 name: NCAA live market board acceptance
 
+# Manual-only by design: this makes a real Odds API board request and therefore
+# consumes quota. It is infrastructure acceptance evidence, never pre-freeze
+# model input and never a scheduled health check.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ncaaf-market-board-acceptance.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +22,7 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error "$MARKET_URL/v1/totals?offset=0&limit=25" > /tmp/board.json
           python3 - <<'PY'
-          import json, math
+          import json
           b=json.load(open('/tmp/board.json'))
           assert b.get('service') == 'NCAAF_TOTALS_MARKET_GATEWAY', b
           assert b.get('sport_key') == 'americanfootball_ncaaf', b
