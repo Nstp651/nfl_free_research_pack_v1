@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/ncaaf-v1-1-2-anchor-acceptance.yml'
       - 'ncaaf_totals_v1/model/slates/**'
+      - 'ncaaf_totals_v1/model/freeze_identity.py'
       - 'ncaaf_totals_v1/worker/**'
       - 'ncaaf_totals_v1/wrangler.toml'
   workflow_dispatch:
@@ -40,13 +41,33 @@ jobs:
           cat /tmp/target.env >> "$GITHUB_ENV"
           cat /tmp/target.env
 
-      - name: Wait for live QBASE V1.1.2 identity artifact
+      - name: Wait for live transport-canonical V1.1.2 identity artifact
         shell: bash
         run: |
           set -euo pipefail
           for attempt in $(seq 1 30); do
             if curl --fail --silent --show-error "$RESEARCH_URL/v1/qbase/$SLATE_ID?offset=0&limit=1" > /tmp/qbase-first.json && python3 - <<'PY'
-          import json, os, sys
+          import hashlib, json, os, sys
+          def fixed(v,p): return f"{float(v):.{p}f}"
+          def canon_grid(grid):
+              return [{
+                'line':fixed(r['line'],1),
+                'over':fixed(r['over'],8),
+                'push':fixed(r['push'],8),
+                'under':fixed(r['under'],8),
+              } for r in grid or []]
+          def anchor(g):
+              material={
+                'game_id':str(g['game_id']),
+                'home_team':g.get('home_team'),
+                'away_team':g.get('away_team'),
+                'expected_total_qbase':fixed(g.get('expected_total_qbase'),6),
+                'residual_bucket':g.get('residual_bucket'),
+                'residual_sd':fixed(g.get('residual_sd'),6),
+                'probability_grid':canon_grid(g.get('probability_grid',[])),
+              }
+              raw=json.dumps(material,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+              return hashlib.sha256(raw).hexdigest()
           x=json.load(open('/tmp/qbase-first.json'))
           games=x.get('games',[])
           ok=(
@@ -56,16 +77,16 @@ jobs:
             and x.get('identity_binding') == 'exact_game_id_plus_qbase_anchor_sha256'
             and len(games)==1
             and isinstance(games[0].get('qbase_anchor_sha256'),str)
-            and len(games[0]['qbase_anchor_sha256'])==64
+            and games[0].get('qbase_anchor_sha256') == anchor(games[0])
           )
           if not ok:
-            print('Live QBASE has not converged to V1.1.2 identity artifact yet')
+            print('Live QBASE has not converged to transport-canonical V1.1.2 identity artifact yet')
             sys.exit(1)
-          print('LIVE_QBASE_V1_1_2_CONVERGED')
+          print('LIVE_QBASE_V1_1_2_TRANSPORT_CANONICAL_CONVERGED')
           PY
             then break; fi
             if [ "$attempt" -eq 30 ]; then
-              echo 'Live research Worker did not converge to V1.1.2 QBASE identity artifact within 5 minutes' >&2
+              echo 'Live research Worker did not converge to transport-canonical V1.1.2 identity artifact within 5 minutes' >&2
               exit 1
             fi
             sleep 10
@@ -82,9 +103,27 @@ jobs:
           def get_json(url):
               raw=subprocess.check_output(['curl','--fail','--silent','--show-error','--max-time','20',url],text=True)
               return json.loads(raw)
+          def fixed(v,p): return f"{float(v):.{p}f}"
+          def canon_grid(grid):
+              return [{
+                'line':fixed(r['line'],1),
+                'over':fixed(r['over'],8),
+                'push':fixed(r['push'],8),
+                'under':fixed(r['under'],8),
+              } for r in grid or []]
           def sha(value):
               raw=json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
               return hashlib.sha256(raw).hexdigest()
+          def anchor(g):
+              return sha({
+                'game_id':str(g['game_id']),
+                'home_team':g.get('home_team'),
+                'away_team':g.get('away_team'),
+                'expected_total_qbase':fixed(g.get('expected_total_qbase'),6),
+                'residual_bucket':g.get('residual_bucket'),
+                'residual_sd':fixed(g.get('residual_sd'),6),
+                'probability_grid':canon_grid(g.get('probability_grid',[])),
+              })
           offset=0; qrev=None; ids=[]; hashes=[]
           while offset is not None:
               params={'offset':offset,'limit':20}
@@ -99,16 +138,7 @@ jobs:
               assert current==qrev
               for g in page.get('games',[]):
                   gid=str(g['game_id']); ids.append(gid)
-                  material={
-                    'game_id':gid,
-                    'home_team':g.get('home_team'),
-                    'away_team':g.get('away_team'),
-                    'expected_total_qbase':g.get('expected_total_qbase'),
-                    'residual_bucket':g.get('residual_bucket'),
-                    'residual_sd':g.get('residual_sd'),
-                    'probability_grid':g.get('probability_grid'),
-                  }
-                  actual=sha(material); declared=g.get('qbase_anchor_sha256')
+                  actual=anchor(g); declared=g.get('qbase_anchor_sha256')
                   assert declared==actual, (gid,declared,actual)
                   hashes.append(declared)
               p=page.get('pagination',{}); assert p.get('revision')==qrev
