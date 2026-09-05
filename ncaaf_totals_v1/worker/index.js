@@ -1,6 +1,7 @@
 /** Read-only NCAA totals research/model API. No odds provider, betting lines or market data. */
 const DEFAULT_BASE = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/data';
 const DEFAULT_QBASE_URL = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/model/qbase_v0.1.0.json';
+const DEFAULT_QBASE_SLATE_BASE = 'https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/main/ncaaf_totals_v1/model/slates';
 const MAX_RESPONSE_CHARS = 90000;
 const MAX_AGE_HOURS = 36;
 
@@ -61,6 +62,15 @@ function verifyQbase(m) {
     fail(502, 'Invalid QBASE model artifact');
   }
 }
+function verifyQbaseSlate(m, slateId) {
+  verifyNoMarketData(m);
+  if (m?.schema_version !== '0.1.0' || m?.slate_id !== slateId ||
+      !/^[a-f0-9]{16}$/.test(m?.qbase_revision || '') ||
+      !/^[a-f0-9]{16}$/.test(m?.research_pack_revision || '') ||
+      !Array.isArray(m.games) || !m.games.length || m?.qbase_model_version !== '0.1.0') {
+    fail(502, 'Invalid QBASE slate artifact');
+  }
+}
 
 export default {
   async fetch(request, env = {}) {
@@ -68,8 +78,10 @@ export default {
     try {
       const url = new URL(request.url);
       const slateMatch = url.pathname.match(/^\/v1\/slates\/([0-9]{4}_[0-9]{2})$/);
+      const qbaseSlateMatch = url.pathname.match(/^\/v1\/qbase\/([0-9]{4}_[0-9]{2})$/);
       const isModel = url.pathname === '/v1/model/qbase';
-      if (!['/health', '/v1/slates'].includes(url.pathname) && !slateMatch && !isModel) return reply({error: 'Not found'}, 404);
+      if (!['/health', '/v1/slates'].includes(url.pathname) && !slateMatch && !qbaseSlateMatch && !isModel)
+        return reply({error: 'Not found'}, 404);
 
       if (isModel) {
         const modelUrl = env.QBASE_URL || DEFAULT_QBASE_URL;
@@ -77,6 +89,34 @@ export default {
         const model = await readJson(modelUrl, 'QBASE model source');
         verifyQbase(model);
         return reply({...model, served_at_utc: new Date().toISOString()});
+      }
+
+      if (qbaseSlateMatch) {
+        const slateId = qbaseSlateMatch[1];
+        const offset = integer(url.searchParams.get('offset'), 0, 1000, 0);
+        const limit = integer(url.searchParams.get('limit'), 1, 20, 6);
+        const requestedRevision = url.searchParams.get('revision');
+        if (requestedRevision !== null && !/^[a-f0-9]{16}$/.test(requestedRevision)) fail(400, 'Invalid revision');
+        const qbaseBase = (env.QBASE_SLATE_BASE_URL || DEFAULT_QBASE_SLATE_BASE).replace(/\/+$/, '');
+        if (!qbaseBase.startsWith('https://')) fail(500, 'QBASE slate source must use HTTPS');
+        const season = slateId.slice(0,4);
+        const pack = await readJson(`${qbaseBase}/${season}/${slateId}.json`, 'QBASE slate source');
+        verifyQbaseSlate(pack, slateId);
+        if (requestedRevision && requestedRevision !== pack.qbase_revision)
+          return reply({error:'QBASE slate changed; restart at offset 0', slate_id:slateId, qbase_revision:pack.qbase_revision},409);
+        if (offset > pack.games.length) fail(400, 'Offset exceeds game count');
+        const {games, ...context} = pack;
+        let count = Math.min(limit, games.length-offset);
+        let result;
+        do {
+          result = {...context, market_data:false, served_at_utc:new Date().toISOString(),
+            games:games.slice(offset,offset+count),
+            pagination:{offset,returned:count,total_games:games.length,
+              next_offset:offset+count<games.length?offset+count:null,revision:pack.qbase_revision}};
+          if (JSON.stringify(result).length < MAX_RESPONSE_CHARS) return reply(result);
+          count -= 1;
+        } while (count >= 1);
+        fail(502,'A QBASE game record exceeds the Action response limit');
       }
 
       let season, week, offset, limit;
