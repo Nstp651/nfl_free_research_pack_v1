@@ -34,11 +34,11 @@ jobs:
             ncaaf_totals_v1/requirements.txt
             ncaaf_totals_v1/model/requirements.txt
       - name: Install Python dependencies
-        run: python -m pip install -r ncaaf_totals_v1/model/requirements.txt
+        run: python -m pip install -r ncaaf_totals_v1/model/requirements.txt pytest==8.4.2
 
       - name: Python contract tests
         working-directory: ncaaf_totals_v1
-        run: python -m unittest discover -s tests -p 'test_*.py' -v
+        run: pytest -q tests
 
       - name: Build and validate real 2026 Week 1 research pack
         working-directory: ncaaf_totals_v1
