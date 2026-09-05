@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: NCAA Totals Research Pack
+  version: 1.1.2
+  description: >-
+    Read-only market-blind NCAA Football FBS-v-FBS research and calibrated QBASE
+    service. V1.1.2 binds every QBASE game to exact game_id/team identity with
+    qbase_anchor_sha256. No sportsbook or market data is returned.
+servers:
+  - url: https://ncaaf-totals-research-pack-v1.nickarnott01.workers.dev
+paths:
+  /health:
+    get:
+      operationId: healthNcaafTotalsResearchPack
+      summary: Check research-pack freshness and source health
+      responses:
+        '200':
+          description: Healthy research service
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+        '503':
+          description: Stale or incomplete research service
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /v1/slates:
+    get:
+      operationId: listNcaafTotalsResearchSlates
+      summary: Resolve the published NCAA research slate
+      parameters:
+        - name: season
+          in: query
+          required: true
+          schema: { type: integer, minimum: 2000, maximum: 2100 }
+        - name: week
+          in: query
+          required: true
+          schema: { type: integer, minimum: 0, maximum: 30 }
+      responses:
+        '200':
+          description: Matching slate entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schema_version: { type: string }
+                  market_data: { type: boolean }
+                  season: { type: integer }
+                  week: { type: integer }
+                  slates:
+                    type: array
+                    items: { $ref: '#/components/schemas/SlateEntry' }
+                  source_health: { type: object, additionalProperties: true }
+                  freshness: { type: object, additionalProperties: true }
+                  limitations:
+                    type: array
+                    items: { type: string }
+                additionalProperties: true
+  /v1/slates/{slate_id}:
+    get:
+      operationId: getNcaafTotalsResearchSlate
+      summary: Fetch an immutable page from the weekly research slate
+      parameters:
+        - name: slate_id
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[0-9]{4}_[0-9]{2}$' }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 20, default: 8 }
+        - name: revision
+          in: query
+          schema: { type: string, pattern: '^[a-f0-9]{16}$' }
+      responses:
+        '200':
+          description: Research page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SlatePage' }
+        '409':
+          description: Revision changed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /v1/model/qbase:
+    get:
+      operationId: getNcaafTotalsQbase
+      summary: Retrieve calibrated market-blind QBASE artifact
+      responses:
+        '200':
+          description: QBASE artifact
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Qbase' }
+  /v1/qbase/{slate_id}:
+    get:
+      operationId: getNcaafTotalsQbaseSlate
+      summary: Fetch an immutable page of aligned QBASE outputs
+      parameters:
+        - name: slate_id
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[0-9]{4}_[0-9]{2}$' }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 20, default: 6 }
+        - name: revision
+          in: query
+          schema: { type: string, pattern: '^[a-f0-9]{16}$' }
+      responses:
+        '200':
+          description: QBASE page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QbaseSlatePage' }
+        '409':
+          description: QBASE revision changed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        slate_id: { type: string }
+        qbase_revision: { type: string }
+      additionalProperties: true
+    Health:
+      type: object
+      properties:
+        ok: { type: boolean }
+        service: { type: string }
+        version: { type: string }
+        market_data: { type: boolean }
+        slate_count: { type: integer }
+        fixture_count: { type: integer }
+        source_health: { type: object, additionalProperties: true }
+        freshness: { type: object, additionalProperties: true }
+      additionalProperties: true
+    SlateEntry:
+      type: object
+      properties:
+        slate_id: { type: string }
+        season: { type: integer }
+        week: { type: integer }
+        pack_revision: { type: string }
+        game_count: { type: integer }
+        current_season_data_through_week:
+          type: [integer, 'null']
+      additionalProperties: true
+    TeamProfile:
+      type: object
+      properties:
+        team_id: { type: string }
+        team_name: { type: string }
+        current: { type: object, additionalProperties: true }
+        prior_season: { type: object, additionalProperties: true }
+        preseason: { type: object, additionalProperties: true }
+      additionalProperties: true
+    Game:
+      type: object
+      required: [game_id, fixture]
+      properties:
+        game_id: { type: string }
+        fixture: { type: object, additionalProperties: true }
+        home_profile: { $ref: '#/components/schemas/TeamProfile' }
+        away_profile: { $ref: '#/components/schemas/TeamProfile' }
+      additionalProperties: true
+    Pagination:
+      type: object
+      properties:
+        offset: { type: integer }
+        returned: { type: integer }
+        total_games: { type: integer }
+        next_offset: { type: [integer, 'null'] }
+        revision: { type: string }
+      additionalProperties: true
+    SlatePage:
+      type: object
+      properties:
+        schema_version: { type: string }
+        slate_id: { type: string }
+        pack_revision: { type: string }
+        season: { type: integer }
+        week: { type: integer }
+        market_data: { type: boolean }
+        data_state: { type: object, additionalProperties: true }
+        source_health: { type: object, additionalProperties: true }
+        limitations: { type: array, items: { type: string } }
+        games: { type: array, items: { $ref: '#/components/schemas/Game' } }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+      additionalProperties: true
+    Qbase:
+      type: object
+      properties:
+        model_name: { type: string }
+        model_version: { type: string }
+        market_data: { type: boolean }
+        features: { type: array, items: { type: string } }
+        coefficients: { type: array, items: { type: number } }
+        walk_forward: { type: object, additionalProperties: true }
+      additionalProperties: true
+    ProbabilityRow:
+      type: object
+      required: [line, over, push, under]
+      properties:
+        line: { type: number }
+        over: { type: number, minimum: 0, maximum: 1 }
+        push: { type: number, minimum: 0, maximum: 1 }
+        under: { type: number, minimum: 0, maximum: 1 }
+      additionalProperties: false
+    QbaseGame:
+      type: object
+      required:
+        - game_id
+        - home_team
+        - away_team
+        - expected_total_qbase
+        - residual_bucket
+        - residual_sd
+        - qbase_anchor_sha256
+        - probability_grid
+      properties:
+        game_id: { type: string }
+        home_team: { type: string }
+        away_team: { type: string }
+        expected_total_raw: { type: number }
+        oos_bias_calibration: { type: number }
+        expected_total_qbase: { type: number }
+        residual_bucket: { type: string }
+        residual_sd: { type: number }
+        missing_feature_count_before_imputation: { type: integer }
+        qbase_anchor_sha256: { type: string, pattern: '^[a-f0-9]{64}$' }
+        probability_grid:
+          type: array
+          items: { $ref: '#/components/schemas/ProbabilityRow' }
+      additionalProperties: true
+    QbaseSlatePage:
+      type: object
+      properties:
+        schema_version: { type: string }
+        probability_schema_version: { type: string }
+        integer_line_method: { type: string }
+        identity_binding: { type: string }
+        market_data: { type: boolean }
+        slate_id: { type: string }
+        season: { type: integer }
+        week: { type: integer }
+        research_pack_revision: { type: string }
+        qbase_model_name: { type: string }
+        qbase_model_version: { type: string }
+        qbase_model_sha256: { type: string }
+        qbase_revision: { type: string }
+        supported_total_grid: { type: object, additionalProperties: true }
+        games: { type: array, items: { $ref: '#/components/schemas/QbaseGame' } }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+      additionalProperties: true

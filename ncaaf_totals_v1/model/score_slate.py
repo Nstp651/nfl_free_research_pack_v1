@@ -8,6 +8,9 @@ translation. No sportsbook data is read.
 Probability-grid V0.2 supports both integer and half-point totals. NCAA
 bookmakers commonly post whole-number totals; those require an explicit push
 probability and push-aware fair-price/EV math after freeze.
+
+V1.1.2 adds an immutable per-game QBASE anchor hash so Layer 2 can prove that
+research, QBASE and frozen records were joined by exact game_id, never position.
 """
 from __future__ import annotations
 
@@ -21,13 +24,11 @@ from typing import Any
 import numpy as np
 
 import train_qbase as tq
+from freeze_identity import qbase_anchor_sha256
 
-# Keep the established QBASE slate envelope compatible with the Worker.
 SCHEMA_VERSION = "0.1.0"
 PROBABILITY_SCHEMA_VERSION = "0.2.0"
-# Deliberately wider than normal NCAA market totals so exact post-freeze mapping
-# almost never needs a new threshold. Includes BOTH integer and half-point lines.
-GRID = [x / 2.0 for x in range(40, 202)]  # 20.0 through 100.5, step 0.5
+GRID = [x / 2.0 for x in range(40, 202)]
 
 
 def finite(v: Any) -> float:
@@ -55,15 +56,7 @@ def feature_row(game: dict, week: int) -> dict[str, float]:
     pa = profile_summary(ap, "prior_season")
     fx = game.get("fixture", {})
     st = str(fx.get("season_type", "regular")).lower()
-    return tq.build_features(
-        ch,
-        ca,
-        ph,
-        pa,
-        week,
-        bool(fx.get("neutral_site", False)),
-        "postseason" in st,
-    )
+    return tq.build_features(ch, ca, ph, pa, week, bool(fx.get("neutral_site", False)), "postseason" in st)
 
 
 def raw_predict(features: dict[str, float], artifact: dict) -> float:
@@ -80,8 +73,7 @@ def raw_predict(features: dict[str, float], artifact: dict) -> float:
         if not math.isfinite(x):
             x = float(med[i])
         sc = float(scale[i]) or 1.0
-        z = (x - float(mean[i])) / sc
-        total += float(coef[i]) * z
+        total += float(coef[i]) * ((x - float(mean[i])) / sc)
     return total
 
 
@@ -94,7 +86,6 @@ def normal_cdf(x: float) -> float:
 
 
 def residual_cdf(r: float, dist: dict) -> float:
-    """Calibrated CDF for centered out-of-sample residuals."""
     levels = [float(x) for x in dist["quantile_levels"]]
     bias = float(dist.get("bias_actual_minus_pred", 0.0))
     qs = [float(x) - bias for x in dist["residual_quantiles"]]
@@ -111,15 +102,6 @@ def residual_cdf(r: float, dist: dict) -> float:
 
 
 def line_probabilities(mu: float, line: float, dist: dict) -> dict[str, float]:
-    """Return win/push/loss probabilities for an NCAA total line.
-
-    Final football totals are integer-valued. For a half-point line, the market
-    cannot push and the CDF boundary is the line itself. For an integer line n,
-    continuity-corrected mass around n is allocated to push:
-      Under n = P(T <= n-1) ~= F(n-0.5)
-      Push n  = P(T = n)    ~= F(n+0.5)-F(n-0.5)
-      Over n  = P(T >= n+1) ~= 1-F(n+0.5)
-    """
     is_integer = abs(line - round(line)) < 1e-9
     if is_integer:
         low = residual_cdf((line - 0.5) - mu, dist)
@@ -131,12 +113,7 @@ def line_probabilities(mu: float, line: float, dist: dict) -> dict[str, float]:
         under = max(0.0, min(1.0, residual_cdf(line - mu, dist)))
         push = 0.0
         over = max(0.0, min(1.0, 1.0 - under))
-    return {
-        "line": float(line),
-        "over": round(over, 8),
-        "push": round(push, 8),
-        "under": round(under, 8),
-    }
+    return {"line": float(line), "over": round(over, 8), "push": round(push, 8), "under": round(under, 8)}
 
 
 def probabilities(mu: float, dist: dict) -> list[dict[str, float]]:
@@ -165,38 +142,38 @@ def score_pack(pack: dict, artifact: dict) -> dict:
     dist = all_dist.get(key) or all_dist["ALL"]
     bias = float(dist.get("bias_actual_minus_pred", 0.0))
     games = []
+    seen: set[str] = set()
     for game in pack.get("games", []):
+        gid = str(game["game_id"])
+        if gid in seen:
+            raise ValueError(f"Duplicate research game_id {gid}")
+        seen.add(gid)
         feats = feature_row(game, week)
         raw = raw_predict(feats, artifact)
         mu = raw + bias
-        missing = sum(
-            1 for n in artifact["features"] if not math.isfinite(finite(feats.get(n)))
-        )
-        games.append(
-            {
-                "game_id": str(game["game_id"]),
-                "home_team": game.get("fixture", {}).get("home_team"),
-                "away_team": game.get("fixture", {}).get("away_team"),
-                "expected_total_raw": round(raw, 6),
-                "oos_bias_calibration": round(bias, 6),
-                "expected_total_qbase": round(mu, 6),
-                "residual_bucket": key if key in all_dist else "ALL",
-                "residual_sd": round(float(dist["residual_sd"]), 6),
-                "missing_feature_count_before_imputation": missing,
-                "probability_grid": probabilities(mu, dist),
-            }
-        )
+        missing = sum(1 for n in artifact["features"] if not math.isfinite(finite(feats.get(n))))
+        qgame = {
+            "game_id": gid,
+            "home_team": game.get("fixture", {}).get("home_team"),
+            "away_team": game.get("fixture", {}).get("away_team"),
+            "expected_total_raw": round(raw, 6),
+            "oos_bias_calibration": round(bias, 6),
+            "expected_total_qbase": round(mu, 6),
+            "residual_bucket": key if key in all_dist else "ALL",
+            "residual_sd": round(float(dist["residual_sd"]), 6),
+            "missing_feature_count_before_imputation": missing,
+            "probability_grid": probabilities(mu, dist),
+        }
+        qgame["qbase_anchor_sha256"] = qbase_anchor_sha256(qgame)
+        games.append(qgame)
+
     model_bytes = json.dumps(artifact, sort_keys=True, separators=(",", ":")).encode()
-    material = json.dumps(
-        {
-            "pack_revision": pack["pack_revision"],
-            "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
-            "probability_schema_version": PROBABILITY_SCHEMA_VERSION,
-            "games": games,
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode()
+    material = json.dumps({
+        "pack_revision": pack["pack_revision"],
+        "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
+        "probability_schema_version": PROBABILITY_SCHEMA_VERSION,
+        "games": games,
+    }, sort_keys=True, separators=(",", ":")).encode()
     return {
         "schema_version": SCHEMA_VERSION,
         "probability_schema_version": PROBABILITY_SCHEMA_VERSION,
@@ -211,10 +188,12 @@ def score_pack(pack: dict, artifact: dict) -> dict:
         "qbase_revision": hashlib.sha256(material).hexdigest()[:16],
         "supported_total_grid": {"min": GRID[0], "max": GRID[-1], "step": 0.5},
         "integer_line_method": "continuity_corrected_discrete_mass",
+        "identity_binding": "exact_game_id_plus_qbase_anchor_sha256",
         "walk_forward_reference": artifact["walk_forward"]["overall"],
         "games": games,
         "notes": [
             "QBASE is pre-market and not final P_model.",
+            "Every QBASE game is bound to its exact game_id/team/anchor/grid via qbase_anchor_sha256.",
             "Current live QB/personnel/weather scenario translation occurs after this baseline and before freeze.",
             "Integer totals include explicit push probability; half-point totals have push=0.",
         ],
@@ -239,10 +218,7 @@ def main() -> int:
         out = Path(args.output_root) / str(entry["season"]) / f"{entry['slate_id']}.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(scored, indent=2, sort_keys=True))
-        print(
-            f"QBASE_SCORE slate={entry['slate_id']} games={len(scored['games'])} "
-            f"revision={scored['qbase_revision']}"
-        )
+        print(f"QBASE_SCORE slate={entry['slate_id']} games={len(scored['games'])} revision={scored['qbase_revision']}")
     return 0
 
 
