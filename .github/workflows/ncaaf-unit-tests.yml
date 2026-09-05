@@ -2,7 +2,7 @@ name: NCAA research-pack unit tests
 
 on:
   push:
-    branches: [feature/ncaaf-totals-v1, main]
+    branches: [feature/ncaaf-totals-v1, feature/ncaaf-integer-totals-v1.1, main]
     paths:
       - 'ncaaf_totals_v1/**'
       - '.github/workflows/ncaaf-unit-tests.yml'
@@ -30,3 +30,6 @@ jobs:
       - name: Worker contract tests
         working-directory: ncaaf_totals_v1
         run: node --test worker/index.test.mjs
+      - name: Market Worker contract tests
+        working-directory: ncaaf_totals_v1/market_worker
+        run: node --test index.test.mjs
