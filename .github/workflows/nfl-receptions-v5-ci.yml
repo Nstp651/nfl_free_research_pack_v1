@@ -1,0 +1,56 @@
+name: NFL Receptions V5 Platform CI
+
+on:
+  push:
+    branches: [main, feature/platform-v1-nfl-receptions-v5]
+    paths:
+      - 'betting_platform_v1/**'
+      - 'nfl_receptions_v5/**'
+      - '.github/workflows/nfl-receptions-v5-ci.yml'
+  pull_request:
+    paths:
+      - 'betting_platform_v1/**'
+      - 'nfl_receptions_v5/**'
+      - '.github/workflows/nfl-receptions-v5-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nfl-receptions-v5-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Control-plane and model tests
+        working-directory: nfl_receptions_v5/worker
+        run: node --test '*.test.mjs'
+      - name: Hard market-gate tests
+        working-directory: nfl_receptions_v5/market_worker
+        run: node --test '*.test.mjs'
+      - name: Architecture safety checks
+        shell: bash
+        run: |
+          grep -q "NFL_RECEPTIONS_RUNS" nfl_receptions_v5/wrangler.toml
+          grep -q "Market field prohibited" nfl_receptions_v5/worker/run.js
+          grep -q "target allocation" nfl_receptions_v5/worker/model_core.js
+          grep -q "freeze_receipt_sha256" nfl_receptions_v5/market_worker/index.js
+          grep -q "player_receptions_alternate" nfl_receptions_v5/market_worker/index.js
+          ! grep -R "ODDS_API_KEY *=.*[A-Za-z0-9]" nfl_receptions_v5 --include='*.toml' --include='*.js'
+      - name: Control Worker Wrangler dry-run
+        working-directory: nfl_receptions_v5
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4.128.0 deploy --dry-run --outdir /tmp/nfl-v5-control --config wrangler.toml
+      - name: Market Worker Wrangler dry-run
+        working-directory: nfl_receptions_v5/market_worker
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4.128.0 deploy --dry-run --outdir /tmp/nfl-v5-market --config wrangler.toml
+      - name: Deployment ownership receipt
+        run: echo 'CI verifies source only. Cloudflare native Git integration owns production deployment.'

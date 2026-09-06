@@ -1,0 +1,9 @@
+# NFL Receptions V5 post-freeze market adapter.
+# ODDS_API_KEY must be an encrypted Cloudflare secret, never a GitHub secret.
+name = "nfl-receptions-market-v5"
+main = "index.js"
+compatibility_date = "2026-09-06"
+workers_dev = true
+
+[vars]
+CONTROL_BASE_URL = "https://nfl-receptions-platform-v5.nickarnott01.workers.dev"
