@@ -86,6 +86,23 @@ def parse_minutes(value: Any) -> float:
     return math.nan
 
 
+def player_minutes_series(player: pd.DataFrame, seconds: str | None, minutes: str | None) -> pd.Series:
+    """Use row-level seconds first, then fall back to the minutes field.
+
+    nblr_data keeps both columns in the combined export, but source population can
+    change by season. Choosing one column globally silently dropped 2025-26 when
+    `seconds` existed in the schema but was blank for those rows.
+    """
+    out = pd.Series(math.nan, index=player.index, dtype=float)
+    if seconds:
+        sec = numeric(player[seconds])
+        out = out.combine_first(sec.where(sec >= 0) / 60.0)
+    if minutes:
+        parsed = player[minutes].map(parse_minutes)
+        out = out.combine_first(parsed.where(parsed >= 0))
+    return out
+
+
 def normalized_name_key(df: pd.DataFrame) -> pd.Series:
     first = first_col(df, "first_name", "firstname"); family = first_col(df, "family_name", "last_name", "surname")
     scoreboard = first_col(df, "scoreboard_name", "player_name", "name")
@@ -148,7 +165,7 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
         "starter": player[starter].astype(str) if starter else None, "position": player[position].astype(str) if position else None,
         "home_away": player[home_away] if home_away else None, "_player_time": player[player_time] if player_time else pd.NA,
     })
-    out["minutes"] = numeric(player[seconds]) / 60 if seconds else (player[minutes].map(parse_minutes) if minutes else math.nan)
+    out["minutes"] = player_minutes_series(player, seconds, minutes)
     env, team_dups = canonical_team_environment(team); out = out.merge(env, on=["season", "match_id", "team", "opponent"], how="left")
 
     time_map, season_map = result_identity_maps(results)
@@ -176,16 +193,16 @@ def main() -> int:
     out = Path(args.output); out.parent.mkdir(parents=True, exist_ok=True); games.to_csv(out, index=False, compression="gzip")
     id_counts = games.dropna(subset=["source_player_id"]).groupby("player_key")["source_player_id"].nunique(); seasons = sorted(games["season"].dropna().astype(str).unique().tolist()); latest = seasons[-1]; latest_rows = games[games["season"].astype(str) == latest]
     receipt = {
-        "schema_version": "0.1.8", "market_data": False, "identity_binding": "season+globally_unique_match_uuid+team+normalized_player_name",
+        "schema_version": "0.1.9", "market_data": False, "identity_binding": "season+globally_unique_match_uuid+team+normalized_player_name",
         "timestamp_binding": "results_wide.match_id direct map -> match_time_utc; player match_time fallback", "sources": receipts, "rows": len(games), "seasons": seasons,
         "players": int(games["player_key"].nunique()), "matches": int(games[["season", "match_id"]].drop_duplicates().shape[0]), "assists_non_null": int(games["assists"].notna().sum()),
-        "rebounds_non_null": int(games["rebounds"].notna().sum()), "team_environment_match_rate": float(games["game_possessions_est"].notna().mean()),
+        "rebounds_non_null": int(games["rebounds"].notna().sum()), "minutes_non_null_rate": float(games["minutes"].notna().mean()), "team_environment_match_rate": float(games["game_possessions_est"].notna().mean()),
         "match_time_non_null_rate": float(games["match_time"].notna().mean()), "latest_season": latest, "latest_season_rows": int(len(latest_rows)),
-        "latest_season_match_time_non_null_rate": float(latest_rows["match_time"].notna().mean()), "player_identity_method": "normalized_name_with_source_player_id_retained",
-        "normalized_name_keys_with_multiple_source_ids": int((id_counts > 1).sum()), "duplicate_audit": duplicate_audit, "output_sha256": hashlib.sha256(out.read_bytes()).hexdigest(),
+        "latest_season_match_time_non_null_rate": float(latest_rows["match_time"].notna().mean()), "latest_season_minutes_non_null_rate": float(latest_rows["minutes"].notna().mean()), "player_identity_method": "normalized_name_with_source_player_id_retained",
+        "minutes_binding": "row-level seconds/60 with parsed minutes fallback", "normalized_name_keys_with_multiple_source_ids": int((id_counts > 1).sum()), "duplicate_audit": duplicate_audit, "output_sha256": hashlib.sha256(out.read_bytes()).hexdigest(),
     }
     rp = Path(args.receipt); rp.parent.mkdir(parents=True, exist_ok=True); rp.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding="utf-8")
-    print(json.dumps({"ok": True, **{k: receipt[k] for k in ("rows", "players", "matches", "team_environment_match_rate", "match_time_non_null_rate", "latest_season", "latest_season_rows", "latest_season_match_time_non_null_rate", "normalized_name_keys_with_multiple_source_ids")}, "duplicate_audit": duplicate_audit}, sort_keys=True))
+    print(json.dumps({"ok": True, **{k: receipt[k] for k in ("rows", "players", "matches", "minutes_non_null_rate", "team_environment_match_rate", "match_time_non_null_rate", "latest_season", "latest_season_rows", "latest_season_match_time_non_null_rate", "latest_season_minutes_non_null_rate", "normalized_name_keys_with_multiple_source_ids")}, "duplicate_audit": duplicate_audit}, sort_keys=True))
     return 0
 
 
