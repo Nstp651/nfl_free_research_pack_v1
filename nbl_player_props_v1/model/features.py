@@ -100,8 +100,6 @@ def build_feature_frame(raw: pd.DataFrame) -> pd.DataFrame:
         df["home_flag"] = np.nan
     df = df.sort_values(["match_time", "match_id", "team", "player_key"], na_position="last").reset_index(drop=True)
 
-    # Exact team-box environment is repeated on each player row; collapse to one
-    # team/game row. Player sums provide a fallback for older incomplete team rows.
     team_game = df.groupby(["match_id", "season", "team"], as_index=False).agg(
         match_time=("match_time", "first"), opponent=("opponent", "first"),
         player_sum_assists=("assists", "sum"), player_sum_rebounds=("rebounds", "sum"),
@@ -116,6 +114,29 @@ def build_feature_frame(raw: pd.DataFrame) -> pd.DataFrame:
     team_game["team_points"] = team_game["team_points_box"].combine_first(team_game["player_sum_points"])
     team_game["team_assists"] = team_game["team_assists_box"].combine_first(team_game["player_sum_assists"])
     team_game["team_rebounds"] = team_game["team_rebounds_box"].combine_first(team_game["player_sum_rebounds"])
+
+    # Older/synthetic rows may lack explicit opponent team-box columns. Reconstruct
+    # what each defense allowed from the opposing team's exact same-game totals.
+    # This fallback uses only completed historical game facts and is shifted before
+    # becoming a predictor for any later target game.
+    opponent_actual = team_game[[
+        "match_id", "team", "team_points", "team_assists", "team_rebounds", "team_fgm"
+    ]].rename(columns={
+        "team": "opponent",
+        "team_points": "fallback_allowed_points",
+        "team_assists": "fallback_allowed_assists",
+        "team_rebounds": "fallback_allowed_rebounds",
+        "team_fgm": "fallback_fgm_allowed",
+    })
+    team_game = team_game.merge(opponent_actual, on=["match_id", "opponent"], how="left")
+    team_game["allowed_points_game"] = team_game["allowed_points_game"].combine_first(team_game["fallback_allowed_points"])
+    team_game["allowed_assists_game"] = team_game["allowed_assists_game"].combine_first(team_game["fallback_allowed_assists"])
+    team_game["allowed_rebounds_game"] = team_game["allowed_rebounds_game"].combine_first(team_game["fallback_allowed_rebounds"])
+    team_game["fgm_allowed_game"] = team_game["fgm_allowed_game"].combine_first(team_game["fallback_fgm_allowed"])
+    team_game = team_game.drop(columns=[
+        "fallback_allowed_points", "fallback_allowed_assists", "fallback_allowed_rebounds", "fallback_fgm_allowed"
+    ])
+
     team_game = team_game.sort_values(["team", "match_time", "match_id"]).reset_index(drop=True)
     tg = team_game.groupby("team", sort=False)
     tsg = team_game.groupby(["team", "season"], sort=False)
