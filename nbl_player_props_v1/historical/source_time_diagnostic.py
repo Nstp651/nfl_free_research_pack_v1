@@ -55,7 +55,10 @@ def latest_rows(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def official_bridge(frames: dict[str, pd.DataFrame]) -> dict[str, Any]:
-    schedule = RosettaClient().schedule(2025, "all").data
+    client = RosettaClient()
+    schedule_default = client.schedule(2025, "all").data
+    schedule_full = client._get("nbl/matches/in/season/2025/all", {"limit": -1}).data
+    schedule = schedule_full if len(schedule_full) >= len(schedule_default) else schedule_default
     official_ids = {str(x.get("id") or "").strip() for x in schedule if str(x.get("id") or "").strip()}
     official_external = {str(x.get("external_id") or "").strip() for x in schedule if str(x.get("external_id") or "").strip()}
     p = latest_rows(frames["player"]); r = latest_rows(frames["results"])
@@ -71,7 +74,9 @@ def official_bridge(frames: dict[str, pd.DataFrame]) -> dict[str, Any]:
         "away": (x.get("away_team") or {}).get("name") if isinstance(x.get("away_team"), dict) else None,
     } for x in schedule[:5]]
     return {
-        "official_2025_rows": len(schedule),
+        "official_2025_default_rows": len(schedule_default),
+        "official_2025_limit_minus1_rows": len(schedule_full),
+        "official_2025_effective_rows": len(schedule),
         "official_id_count": len(official_ids),
         "official_external_id_count": len(official_external),
         "player_latest_match_ids": len(p_match),
