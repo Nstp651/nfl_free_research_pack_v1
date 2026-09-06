@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {evaluate} from './index.js';
+import {evaluate,sha256Json} from './index.js';
 
 const RUN='a'.repeat(64),RECEIPT='b'.repeat(64),FROZEN_AT='2026-09-06T06:10:00Z';
-const runBody={status:'FROZEN',freeze:{status:'FROZEN',fixture_id:'fixture-1',freeze_receipt_sha256:RECEIPT,frozen_at:FROZEN_AT,players:[{player_key:'id:p1',player_id:'p1',player_name:'Test Guard',team:'Sydney Kings'}]}};
-const playerBody={freeze_receipt_sha256:RECEIPT,frozen_at:FROZEN_AT,player:{player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',heads:{
+const frozenPlayer={player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',heads:{
   assists:{confidence:'B',fragility:'LOW',probability_grid:{half_point_grid:[{line:4.5,over:.55,push:0,under:.45}],integer_push_grid:[{line:5,over:.35,push:.2,under:.45}]}},
   rebounds:{confidence:'C',fragility:'MEDIUM',probability_grid:{half_point_grid:[{line:5.5,over:.4,push:0,under:.6}],integer_push_grid:[{line:6,over:.25,push:.15,under:.6}]}}
-}}};
+}};
+const PLAYER_HASH=await sha256Json(frozenPlayer);
+const runBody={status:'FROZEN',freeze:{status:'FROZEN',fixture_id:'fixture-1',freeze_receipt_sha256:RECEIPT,frozen_at:FROZEN_AT,players:[{player_key:'id:p1',player_model_sha256:PLAYER_HASH,player_id:'p1',player_name:'Test Guard',team:'Sydney Kings'}]}};
+const playerBody={freeze_receipt_sha256:RECEIPT,frozen_at:FROZEN_AT,player_model_sha256:PLAYER_HASH,player:frozenPlayer};
 function market(overrides={}){return {fixture_id:'fixture-1',player_name:'Test Guard',stat_type:'assists',side:'over',threshold:4.5,decimal_price:2.0,bookmaker:'Book A',captured_at:'2026-09-06T06:11:00Z',source_type:'screenshot',...overrides};}
 function mockResearch({run=runBody,player=playerBody}={}){const calls=[];globalThis.fetch=async url=>{calls.push(String(url));if(String(url).endsWith(`/v1/match-runs/${RUN}`))return new Response(JSON.stringify(run),{status:200});if(String(url).includes(`/v1/match-runs/${RUN}/players/`))return new Response(JSON.stringify(player),{status:200});return new Response(JSON.stringify({error:'unexpected'}),{status:404});};return calls;}
 const env={RESEARCH_BASE:'https://research.example.workers.dev'};
@@ -50,6 +52,14 @@ test('rejects unsupported threshold rather than interpolating',async()=>{
 
 test('rejects player receipt drift after run receipt was verified',async()=>{
   const old=globalThis.fetch;try{mockResearch({player:{...playerBody,freeze_receipt_sha256:'d'.repeat(64)}});await assert.rejects(()=>evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market()]},env),/Frozen player receipt\/timestamp mismatch/);}finally{globalThis.fetch=old;}
+});
+
+test('rejects frozen player hash receipt drift',async()=>{
+  const old=globalThis.fetch;try{mockResearch({player:{...playerBody,player_model_sha256:'d'.repeat(64)}});await assert.rejects(()=>evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market()]},env),/Frozen player hash receipt mismatch/);}finally{globalThis.fetch=old;}
+});
+
+test('rejects mutated frozen player payload even with matching run receipt',async()=>{
+  const old=globalThis.fetch;try{const mutated={...frozenPlayer,team:'Other Team'};mockResearch({player:{...playerBody,player:mutated}});await assert.rejects(()=>evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market()]},env),/Frozen player payload hash mismatch/);}finally{globalThis.fetch=old;}
 });
 
 test('no positive EV produces no forced bet',async()=>{
