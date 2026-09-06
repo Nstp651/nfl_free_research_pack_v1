@@ -8,10 +8,11 @@ export default {
       return reply({
         ok: Boolean(env.NFL_RECEPTIONS_RUNS),
         service: 'NFL_RECEPTIONS_PLATFORM_V5_CONTROL',
-        version: '1.1.0',
+        version: '1.2.0',
         market_data: false,
         durable_state: Boolean(env.NFL_RECEPTIONS_RUNS),
         source_lock: 'CONTENT_SHA256',
+        fixture_binding: 'SERVER_LOCKED',
         note: 'Health is pre-market and never accesses sportsbook data.'
       }, env.NFL_RECEPTIONS_RUNS ? 200 : 503);
     }
