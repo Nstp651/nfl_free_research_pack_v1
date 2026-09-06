@@ -16,18 +16,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok: {type: boolean}
-                  service: {type: string}
-                  version: {type: string}
-                  market_data: {type: boolean}
-                  heads:
-                    type: array
-                    items: {type: string}
-                  freeze_storage: {type: boolean}
-                required: [ok, service, version, market_data, heads, freeze_storage]
-                additionalProperties: false
+                $ref: '#/components/schemas/HealthResponse'
   /v1/fixtures:
     get:
       operationId: listNblPlayerPropsFixtures
@@ -42,21 +31,11 @@ paths:
             maximum: 2100
       responses:
         '200':
-          description: Market-blind future NBL fixtures.
+          description: Market-blind future fixtures.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  market_data: {type: boolean}
-                  season_start: {type: integer}
-                  count: {type: integer}
-                  fixtures:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Fixture'
-                required: [market_data, season_start, count, fixtures]
-                additionalProperties: false
+                $ref: '#/components/schemas/FixtureListResponse'
   /v1/match-runs:
     post:
       operationId: startNblPlayerPropsMatchRun
@@ -88,7 +67,7 @@ paths:
   /v1/match-runs/{run_id}:
     get:
       operationId: getNblPlayerPropsMatchRun
-      summary: Get run status, lock and immutable freeze receipt when available.
+      summary: Get run status and immutable freeze receipt when available.
       parameters:
         - name: run_id
           in: path
@@ -106,7 +85,7 @@ paths:
   /v1/match-runs/{run_id}/research:
     get:
       operationId: getNblPlayerPropsResearchSeed
-      summary: Retrieve the pinned fixture, roster, prior-history state and server QBASE baselines required for current research.
+      summary: Retrieve pinned fixture, roster, prior-history state and server QBASE baselines for current research.
       parameters:
         - name: run_id
           in: path
@@ -120,26 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run_id: {type: string}
-                  market_data: {type: boolean}
-                  lock:
-                    $ref: '#/components/schemas/RunLock'
-                  fixture:
-                    $ref: '#/components/schemas/Fixture'
-                  home_roster:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ResearchSeedPlayer'
-                  away_roster:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ResearchSeedPlayer'
-                  snapshot_revision: {type: string}
-                  research_note: {type: string}
-                required: [run_id, market_data, lock, fixture, home_roster, away_roster, snapshot_revision, research_note]
-                additionalProperties: false
+                $ref: '#/components/schemas/ResearchSeedResponse'
     post:
       operationId: checkpointNblPlayerPropsResearch
       summary: Persist completed current-information research before quantitative freeze.
@@ -162,22 +122,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run_id: {type: string}
-                  market_data: {type: boolean}
-                  status: {type: string}
-                  fixture_id: {type: string}
-                  research_context_sha256:
-                    type: string
-                    pattern: '^[a-f0-9]{64}$'
-                required: [run_id, market_data, status, fixture_id, research_context_sha256]
-                additionalProperties: false
+                $ref: '#/components/schemas/ResearchCheckpointResponse'
   /v1/match-runs/{run_id}/compute:
     post:
       operationId: computeNblPlayerPropsFreeze
       summary: Serverize quantitative projections and atomically freeze every requested player/stat head.
-      description: Returning-player QBASE and minutes scenarios are recomputed by the Worker. New-to-NBL players require explicit prior-competition translation receipts. Market data is forbidden.
+      description: Returning-player QBASE and minutes scenarios are recomputed by the Worker. New-to-NBL players require explicit prior-competition translation. Market data is forbidden.
       parameters:
         - name: run_id
           in: path
@@ -224,63 +174,57 @@ paths:
             type: string
       responses:
         '200':
-          description: Frozen player probability model.
+          description: Frozen player probability model with independent player hash.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run_id: {type: string}
-                  market_data: {type: boolean}
-                  freeze_receipt_sha256:
-                    type: string
-                    pattern: '^[a-f0-9]{64}$'
-                  frozen_at:
-                    type: string
-                    format: date-time
-                  player:
-                    $ref: '#/components/schemas/FrozenPlayerDetail'
-                required: [run_id, market_data, freeze_receipt_sha256, frozen_at, player]
-                additionalProperties: false
+                $ref: '#/components/schemas/FrozenPlayerResponse'
 components:
   schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok: {type: boolean}
+        service: {type: string}
+        version: {type: string}
+        market_data: {type: boolean}
+        heads:
+          type: array
+          items: {type: string}
+        freeze_storage: {type: boolean}
+      required: [ok, service, version, market_data, heads, freeze_storage]
+      additionalProperties: false
     Team:
       type: object
       properties:
         id: {type: string}
         name: {type: string}
         short_name: {type: string}
-      required: [id, name, short_name]
-      additionalProperties: false
-    Venue:
-      type: object
-      properties:
-        id: {type: string}
-        name: {type: string}
-        city: {type: string}
-      additionalProperties: false
+      required: [id, name]
+      additionalProperties: true
     Fixture:
       type: object
       properties:
         id: {type: string}
-        start_time:
-          type: string
-          format: date-time
+        start_time: {type: string}
         status: {type: string}
         home_team:
           $ref: '#/components/schemas/Team'
         away_team:
           $ref: '#/components/schemas/Team'
-        venue:
-          $ref: '#/components/schemas/Venue'
       required: [id, start_time, status, home_team, away_team]
       additionalProperties: true
-    QbaseRevision:
+    FixtureListResponse:
       type: object
       properties:
-        assists: {type: string}
-        rebounds: {type: string}
-      required: [assists, rebounds]
+        market_data: {type: boolean}
+        season_start: {type: integer}
+        count: {type: integer}
+        fixtures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fixture'
+      required: [market_data, season_start, count, fixtures]
       additionalProperties: false
     RunLock:
       type: object
@@ -292,32 +236,22 @@ components:
         run_mode:
           type: string
           enum: [BOTH, ASSISTS_ONLY, REBOUNDS_ONLY]
-        source_commit:
-          type: string
-          pattern: '^[a-f0-9]{40}$'
+        source_commit: {type: string}
         asset_revision: {type: string}
         pack_revision: {type: string}
         snapshot_revision: {type: string}
-        qbase_revision:
-          $ref: '#/components/schemas/QbaseRevision'
-        eligibility_at:
-          type: string
-          format: date-time
-      required: [fixture_id, fixture, season_start, run_mode, source_commit, asset_revision, pack_revision, snapshot_revision, qbase_revision, eligibility_at]
-      additionalProperties: false
+        eligibility_at: {type: string}
+      required: [fixture_id, fixture, season_start, run_mode, source_commit, asset_revision, pack_revision, snapshot_revision, eligibility_at]
+      additionalProperties: true
     RunStatus:
       type: object
       properties:
-        run_id:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
+        run_id: {type: string}
         market_data: {type: boolean}
         status: {type: string}
         lock:
           $ref: '#/components/schemas/RunLock'
         research_complete: {type: boolean}
-        freeze:
-          $ref: '#/components/schemas/FreezeReceipt'
       required: [run_id, market_data, status, lock]
       additionalProperties: true
     BaselineHead:
@@ -327,35 +261,12 @@ components:
           type: string
           enum: [SERVER_QBASE_RUNTIME_SCORE, PRIOR_COMP_TRANSLATION_REQUIRED]
         mean: {type: number}
-        quant_input_receipt_sha256:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
+        quant_input_receipt_sha256: {type: string}
+        player_prior_key: {type: string}
         missing_features:
           type: array
           items: {type: string}
-        player_prior_key: {type: string}
       required: [status]
-      additionalProperties: false
-    PriorNbl:
-      type: object
-      properties:
-        player_key: {type: string}
-        source_player_ids:
-          type: array
-          items: {type: string}
-        last_team: {type: string}
-        last_season: {type: integer}
-        last_match_time: {type: string}
-        features:
-          type: object
-          properties:
-            player_games_prior: {type: number}
-            player_season_games_prior: {type: number}
-            player_minutes_mean_3: {type: number}
-            player_minutes_mean_5: {type: number}
-            player_minutes_mean_10: {type: number}
-          additionalProperties: true
-      required: [player_key]
       additionalProperties: true
     QbaseBaseline:
       type: object
@@ -369,13 +280,9 @@ components:
       type: object
       properties:
         id: {type: string}
-        first_name: {type: string}
-        family_name: {type: string}
         display_name: {type: string}
         position: {type: string}
         team: {type: string}
-        prior_nbl:
-          $ref: '#/components/schemas/PriorNbl'
         nbl_history_status:
           type: string
           enum: [NBL_HISTORY_AVAILABLE, PRIOR_COMP_TRANSLATION_REQUIRED]
@@ -383,31 +290,35 @@ components:
           $ref: '#/components/schemas/QbaseBaseline'
       required: [id, display_name, team, nbl_history_status, qbase_baseline]
       additionalProperties: true
+    ResearchSeedResponse:
+      type: object
+      properties:
+        run_id: {type: string}
+        market_data: {type: boolean}
+        lock:
+          $ref: '#/components/schemas/RunLock'
+        fixture:
+          $ref: '#/components/schemas/Fixture'
+        home_roster:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResearchSeedPlayer'
+        away_roster:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResearchSeedPlayer'
+        snapshot_revision: {type: string}
+        research_note: {type: string}
+      required: [run_id, market_data, lock, fixture, home_roster, away_roster, snapshot_revision, research_note]
+      additionalProperties: false
     SourceReceipt:
       type: object
       properties:
-        url:
-          type: string
-          format: uri
+        url: {type: string}
         title: {type: string}
-        checked_at:
-          type: string
-          format: date-time
+        checked_at: {type: string}
       required: [url, title, checked_at]
       additionalProperties: false
-    FixtureContext:
-      type: object
-      properties:
-        status: {type: string}
-        source_ids:
-          type: array
-          minItems: 1
-          items: {type: string}
-        notes:
-          type: array
-          items: {type: string}
-      required: [status, source_ids]
-      additionalProperties: true
     ProjectedMinutes:
       type: object
       properties:
@@ -480,6 +391,19 @@ components:
           $ref: '#/components/schemas/StatContext'
       required: [player_name, team, availability_status, availability_source_ids, projected_minutes, role]
       additionalProperties: false
+    FixtureContext:
+      type: object
+      properties:
+        status: {type: string}
+        source_ids:
+          type: array
+          minItems: 1
+          items: {type: string}
+        notes:
+          type: array
+          items: {type: string}
+      required: [status, source_ids]
+      additionalProperties: true
     ResearchContext:
       type: object
       properties:
@@ -494,9 +418,7 @@ components:
         run_mode:
           type: string
           enum: [BOTH, ASSISTS_ONLY, REBOUNDS_ONLY]
-        checked_at:
-          type: string
-          format: date-time
+        checked_at: {type: string}
         sources:
           type: object
           properties:
@@ -513,6 +435,16 @@ components:
           items:
             $ref: '#/components/schemas/ResearchPlayer'
       required: [schema_version, market_data, fixture_id, pack_revision, run_mode, checked_at, sources, fixture_context, players]
+      additionalProperties: false
+    ResearchCheckpointResponse:
+      type: object
+      properties:
+        run_id: {type: string}
+        market_data: {type: boolean}
+        status: {type: string}
+        fixture_id: {type: string}
+        research_context_sha256: {type: string}
+      required: [run_id, market_data, status, fixture_id, research_context_sha256]
       additionalProperties: false
     Scenario:
       type: object
@@ -536,9 +468,7 @@ components:
         assumptions:
           type: array
           items: {type: string}
-        quant_input_receipt_sha256:
-          type: string
-          pattern: '^[0-9a-f]{64}$'
+        quant_input_receipt_sha256: {type: string}
         projected_minutes:
           type: number
           minimum: 0
@@ -559,9 +489,7 @@ components:
         method:
           type: string
           enum: [MAX_QBASE_PRIOR_COMP]
-        receipt_sha256:
-          type: string
-          pattern: '^[0-9a-f]{64}$'
+        receipt_sha256: {type: string}
       required: [alpha, method, receipt_sha256]
       additionalProperties: false
     ProjectionHead:
@@ -614,59 +542,29 @@ components:
         fragility: {type: string}
       required: [final_mean, dispersion_alpha, dispersion_source, confidence, fragility]
       additionalProperties: false
-    FrozenHeadsSummary:
-      type: object
-      properties:
-        assists:
-          $ref: '#/components/schemas/FrozenHeadSummary'
-        rebounds:
-          $ref: '#/components/schemas/FrozenHeadSummary'
-      additionalProperties: false
-    FrozenMinutes:
-      type: object
-      properties:
-        low: {type: number}
-        mean: {type: number}
-        high: {type: number}
-        source_ids:
-          type: array
-          items: {type: string}
-        minutes_projection_sha256:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
-      required: [low, mean, high, source_ids, minutes_projection_sha256]
-      additionalProperties: false
     FrozenPlayerSummary:
       type: object
       properties:
         player_key: {type: string}
+        player_model_sha256: {type: string}
         player_id: {type: string}
         player_name: {type: string}
         team: {type: string}
         availability_status: {type: string}
-        projected_minutes:
-          $ref: '#/components/schemas/FrozenMinutes'
         heads:
-          $ref: '#/components/schemas/FrozenHeadsSummary'
-      required: [player_key, player_name, team, availability_status, projected_minutes, heads]
-      additionalProperties: false
-    FreezeAudits:
-      type: object
-      properties:
-        market_boundary: {type: string}
-        research_binding: {type: string}
-        server_qbase_authority: {type: string}
-        scenario_weighting: {type: string}
-        probability_grid: {type: string}
-        atomic_requested_heads: {type: string}
-      required: [market_boundary, research_binding, server_qbase_authority, scenario_weighting, probability_grid, atomic_requested_heads]
-      additionalProperties: false
+          type: object
+          properties:
+            assists:
+              $ref: '#/components/schemas/FrozenHeadSummary'
+            rebounds:
+              $ref: '#/components/schemas/FrozenHeadSummary'
+          additionalProperties: false
+      required: [player_key, player_model_sha256, player_name, team, availability_status, heads]
+      additionalProperties: true
     FreezeReceipt:
       type: object
       properties:
-        run_id:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
+        run_id: {type: string}
         market_data: {type: boolean}
         status: {type: string}
         fixture_id: {type: string}
@@ -675,25 +573,71 @@ components:
           type: array
           items: {type: string}
         pack_revision: {type: string}
-        research_context_sha256:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
-        qbase_sha256:
-          $ref: '#/components/schemas/QbaseRevision'
-        frozen_at:
-          type: string
-          format: date-time
-        freeze_receipt_sha256:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
+        research_context_sha256: {type: string}
+        frozen_at: {type: string}
+        freeze_receipt_sha256: {type: string}
         audits:
-          $ref: '#/components/schemas/FreezeAudits'
+          type: object
+          properties:
+            market_boundary: {type: string}
+            research_binding: {type: string}
+            server_qbase_authority: {type: string}
+            scenario_weighting: {type: string}
+            probability_grid: {type: string}
+            atomic_requested_heads: {type: string}
+          additionalProperties: false
         players:
           type: array
           items:
             $ref: '#/components/schemas/FrozenPlayerSummary'
-      required: [run_id, market_data, status, fixture_id, run_mode, requested_heads, pack_revision, research_context_sha256, qbase_sha256, frozen_at, freeze_receipt_sha256, audits, players]
-      additionalProperties: false
+      required: [run_id, market_data, status, fixture_id, run_mode, requested_heads, pack_revision, research_context_sha256, frozen_at, freeze_receipt_sha256, audits, players]
+      additionalProperties: true
+    FrozenPlayerDetail:
+      type: object
+      properties:
+        player_id: {type: string}
+        player_name: {type: string}
+        team: {type: string}
+        availability_status: {type: string}
+        heads:
+          type: object
+          properties:
+            assists:
+              $ref: '#/components/schemas/FrozenHeadDetail'
+            rebounds:
+              $ref: '#/components/schemas/FrozenHeadDetail'
+          additionalProperties: false
+      required: [player_name, team, availability_status, heads]
+      additionalProperties: true
+    FrozenHeadDetail:
+      type: object
+      properties:
+        final_mean: {type: number}
+        dispersion_alpha: {type: number}
+        dispersion_source: {type: string}
+        confidence: {type: string}
+        fragility: {type: string}
+        probability_grid:
+          $ref: '#/components/schemas/ProbabilityGrid'
+      required: [final_mean, dispersion_alpha, dispersion_source, confidence, fragility, probability_grid]
+      additionalProperties: true
+    ProbabilityGrid:
+      type: object
+      properties:
+        distribution: {type: string}
+        mean: {type: number}
+        alpha: {type: number}
+        max_count: {type: integer}
+        half_point_grid:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProbabilityRow'
+        integer_push_grid:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProbabilityRow'
+      required: [distribution, mean, alpha, max_count, half_point_grid, integer_push_grid]
+      additionalProperties: true
     ProbabilityRow:
       type: object
       properties:
@@ -703,65 +647,15 @@ components:
         under: {type: number}
       required: [line, over, push, under]
       additionalProperties: false
-    LadderRow:
+    FrozenPlayerResponse:
       type: object
       properties:
-        threshold: {type: integer}
-        at_least: {type: number}
-      required: [threshold, at_least]
+        run_id: {type: string}
+        market_data: {type: boolean}
+        freeze_receipt_sha256: {type: string}
+        frozen_at: {type: string}
+        player_model_sha256: {type: string}
+        player:
+          $ref: '#/components/schemas/FrozenPlayerDetail'
+      required: [run_id, market_data, freeze_receipt_sha256, frozen_at, player_model_sha256, player]
       additionalProperties: false
-    ProbabilityGrid:
-      type: object
-      properties:
-        distribution: {type: string}
-        mean: {type: number}
-        alpha: {type: number}
-        max_count: {type: integer}
-        at_least_ladder:
-          type: array
-          items:
-            $ref: '#/components/schemas/LadderRow'
-        half_point_grid:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProbabilityRow'
-        integer_push_grid:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProbabilityRow'
-      required: [distribution, mean, alpha, max_count, at_least_ladder, half_point_grid, integer_push_grid]
-      additionalProperties: true
-    FrozenHeadDetail:
-      type: object
-      properties:
-        qbase_mean: {type: number}
-        final_mean: {type: number}
-        dispersion_alpha: {type: number}
-        dispersion_source: {type: string}
-        probability_grid:
-          $ref: '#/components/schemas/ProbabilityGrid'
-        confidence: {type: string}
-        fragility: {type: string}
-      required: [qbase_mean, final_mean, dispersion_alpha, dispersion_source, probability_grid, confidence, fragility]
-      additionalProperties: true
-    FrozenHeadsDetail:
-      type: object
-      properties:
-        assists:
-          $ref: '#/components/schemas/FrozenHeadDetail'
-        rebounds:
-          $ref: '#/components/schemas/FrozenHeadDetail'
-      additionalProperties: false
-    FrozenPlayerDetail:
-      type: object
-      properties:
-        player_id: {type: string}
-        player_name: {type: string}
-        team: {type: string}
-        availability_status: {type: string}
-        projected_minutes:
-          $ref: '#/components/schemas/FrozenMinutes'
-        heads:
-          $ref: '#/components/schemas/FrozenHeadsDetail'
-      required: [player_name, team, availability_status, projected_minutes, heads]
-      additionalProperties: true
