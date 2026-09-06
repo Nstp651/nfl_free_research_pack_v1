@@ -1921,7 +1921,7 @@
       "fixture": {
         "away_id": "249",
         "away_team": "North Texas",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "84",
         "home_team": "Indiana",
@@ -2034,7 +2034,7 @@
       "fixture": {
         "away_id": "2335",
         "away_team": "Liberty",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "256",
         "home_team": "James Madison",
@@ -2147,7 +2147,7 @@
       "fixture": {
         "away_id": "195",
         "away_team": "Ohio",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "158",
         "home_team": "Nebraska",
@@ -2260,7 +2260,7 @@
       "fixture": {
         "away_id": "151",
         "away_team": "East Carolina",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "333",
         "home_team": "Alabama",
@@ -2373,7 +2373,7 @@
       "fixture": {
         "away_id": "324",
         "away_team": "Coastal Carolina",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "277",
         "home_team": "West Virginia",
@@ -2486,7 +2486,7 @@
       "fixture": {
         "away_id": "204",
         "away_team": "Oregon State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "248",
         "home_team": "Houston",
@@ -2599,7 +2599,7 @@
       "fixture": {
         "away_id": "2050",
         "away_team": "Ball State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "194",
         "home_team": "Ohio State",
@@ -2712,7 +2712,7 @@
       "fixture": {
         "away_id": "193",
         "away_team": "Miami (OH)",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "221",
         "home_team": "Pittsburgh",
@@ -2825,7 +2825,7 @@
       "fixture": {
         "away_id": "2309",
         "away_team": "Kent State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2579",
         "home_team": "South Carolina",
@@ -2938,7 +2938,7 @@
       "fixture": {
         "away_id": "2655",
         "away_team": "Tulane",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "150",
         "home_team": "Duke",
@@ -3051,7 +3051,7 @@
       "fixture": {
         "away_id": "239",
         "away_team": "Baylor",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2",
         "home_team": "Auburn",
@@ -3164,7 +3164,7 @@
       "fixture": {
         "away_id": "103",
         "away_team": "Boston College",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2132",
         "home_team": "Cincinnati",
@@ -3277,7 +3277,7 @@
       "fixture": {
         "away_id": "68",
         "away_team": "Boise State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2483",
         "home_team": "Oregon",
@@ -3390,7 +3390,7 @@
       "fixture": {
         "away_id": "276",
         "away_team": "Marshall",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "213",
         "home_team": "Penn State",
@@ -3503,7 +3503,7 @@
       "fixture": {
         "away_id": "326",
         "away_team": "Texas State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "251",
         "home_team": "Texas",
@@ -3616,7 +3616,7 @@
       "fixture": {
         "away_id": "197",
         "away_team": "Oklahoma State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "202",
         "home_team": "Tulsa",
@@ -3729,7 +3729,7 @@
       "fixture": {
         "away_id": "2459",
         "away_team": "Northern Illinois",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2294",
         "home_team": "Iowa",
@@ -5713,14 +5713,14 @@
       }
     }
   ],
-  "generated_at_utc": "2026-09-05T18:30:30.979795+00:00",
-  "last_checked_at_utc": "2026-09-05T18:30:30.979795+00:00",
+  "generated_at_utc": "2026-09-06T00:41:25.564585+00:00",
+  "last_checked_at_utc": "2026-09-06T00:41:25.564585+00:00",
   "limitations": [
     "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
     "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
   ],
   "market_data": false,
-  "pack_revision": "02922e9c1f4e6d5c",
+  "pack_revision": "03bae4e2c92131d5",
   "schema_version": "0.1.0",
   "season": 2026,
   "slate_id": "2026_01",
@@ -5737,7 +5737,7 @@
       "asset": "cfb_ratings_weekly_2025.csv",
       "asset_updated_at": "2026-09-01T09:30:19Z",
       "bytes": 408427,
-      "release_updated_at": "2026-09-05T13:47:03Z",
+      "release_updated_at": "2026-09-06T00:36:03Z",
       "sha256": "2fa3e33f2c6d20e47c436816adbbf79a8cd1246b5e2a7da391150f6ea5cefeed",
       "tag": "cfb_ratings_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2025.csv"
@@ -5746,35 +5746,35 @@
       "asset": "cfb_team_summaries_weekly_2025.csv",
       "asset_updated_at": "2026-09-01T09:31:28Z",
       "bytes": 8569035,
-      "release_updated_at": "2026-09-05T13:47:19Z",
+      "release_updated_at": "2026-09-06T00:36:28Z",
       "sha256": "1605f8281b5e3a817f1909d673a81ddf9e504c3077b322bd3b49f941fbb3b9ed",
       "tag": "cfb_team_summaries_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2025.csv"
     },
     "ratings": {
       "asset": "cfb_ratings_weekly_2026.csv",
-      "asset_updated_at": "2026-09-05T13:47:01Z",
-      "bytes": 78071,
-      "release_updated_at": "2026-09-05T13:47:03Z",
-      "sha256": "2f9b907b71b1b5dcf5d5158e409578eee2c9bb5b8af4f1c3298d6b3b3e7a30ea",
+      "asset_updated_at": "2026-09-06T00:36:00Z",
+      "bytes": 190902,
+      "release_updated_at": "2026-09-06T00:36:03Z",
+      "sha256": "f253df4378720aa9f2c3d89f7e8bb8feb84f5d4af847a2bfd18118d15fc6257d",
       "tag": "cfb_ratings_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2026.csv"
     },
     "schedule": {
       "asset": "cfb_schedules_2026.csv.gz",
-      "asset_updated_at": "2026-09-05T13:45:55Z",
-      "bytes": 67790,
-      "release_updated_at": "2026-09-05T13:45:57Z",
-      "sha256": "1981549ad058e34f2f69d804c22362092b3f6a7caabe5c64287f69ff0ced2f1b",
+      "asset_updated_at": "2026-09-06T00:34:13Z",
+      "bytes": 69690,
+      "release_updated_at": "2026-09-06T00:34:15Z",
+      "sha256": "9fb749a3f1b2d242f9a79b4731041fafc13a1bfb913b6059e8f277aa483bbed4",
       "tag": "cfb_schedules",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_schedules/cfb_schedules_2026.csv.gz"
     },
     "weekly": {
       "asset": "cfb_team_summaries_weekly_2026.csv",
-      "asset_updated_at": "2026-09-05T13:47:17Z",
-      "bytes": 1529536,
-      "release_updated_at": "2026-09-05T13:47:19Z",
-      "sha256": "5e82e14a1c16345966b9773ab778c8911a142fe6a637eebd3d193da8c8ed14cd",
+      "asset_updated_at": "2026-09-06T00:36:25Z",
+      "bytes": 3734533,
+      "release_updated_at": "2026-09-06T00:36:28Z",
+      "sha256": "732d47e64792d4da7d15afa2515e66636062b54948e86404099b2a38ff238980",
       "tag": "cfb_team_summaries_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2026.csv"
     }
