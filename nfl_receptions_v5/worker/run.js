@@ -261,7 +261,11 @@ export class NflReceptionsRun {
       const packPlayerIds = new Set();
       for (let i = 0; i < meta.player_count; i++) { const p = await this.storage.get(`p:${i}`); if (p?.player_id) packPlayerIds.add(p.player_id); }
       validateResearchContext(body.context, meta.lock, meta.player_count, Date.now(), packPlayerIds);
-      const context = {...body.context, research_receipt_sha256: await sha256Hex(body.context)};
+      const context = {
+        ...body.context,
+        fixture: {away_team: meta.lock.away_team, home_team: meta.lock.home_team},
+        research_receipt_sha256: await sha256Hex(body.context),
+      };
       await this.storage.transaction(async tx => {
         await tx.put('context', context);
         await tx.put('meta', {...meta, status: 'RESEARCH_COMPLETE', research_receipt_sha256: context.research_receipt_sha256});
