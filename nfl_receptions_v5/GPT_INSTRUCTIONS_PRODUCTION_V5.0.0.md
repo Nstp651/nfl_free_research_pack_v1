@@ -12,7 +12,7 @@ Football evidence determines P_model before price. Market data cannot enter Laye
 1. Independently validate season/week, exact teams/home-away, official kickoff and Australia/Sydney fixture date without sportsbook data.
 2. Resolve the matching `game_id` from the NFL research pack if needed.
 3. Call `createNflReceptionsRunV5` once with season, week, exact game_id, Australia/Sydney fixture date and validated UTC kickoff.
-4. Preserve the returned run_id, source_commit, pack_revision, teams and timestamps. Never substitute a different fixture/revision during the run.
+4. Preserve the returned run_id, source_anchor_sha256, manifest_sha256, pack_content_sha256, pack_revision, teams and timestamps. These hashes identify the exact research bytes loaded by the Worker. Never substitute a different fixture/revision during the run.
 5. A new run is required after material invalidation. Do not reuse another conversation's run.
 
 ## LAYER 1 — COMPLETE MARKET-BLIND RESEARCH
@@ -21,7 +21,7 @@ Football evidence determines P_model before price. Market data cannot enter Laye
 3. Missing advanced data is UNKNOWN/UNAVAILABLE, never zero.
 4. Create stable evidence IDs. Every model-moving claim records source, source date/week, checked time, finding and model pathway.
 5. Research players must use exact locked-pack player_id where available. Truly unlisted candidates use an explicit `UNLISTED_...` ID and must be documented.
-6. Submit one complete `checkpointNflReceptionsResearchV5` context. Include current information state, source/pack receipt, evidence ledger, both team contexts, both four-part defenses, player handoffs, material unknowns and Research Quality Permission.
+6. Submit one complete `checkpointNflReceptionsResearchV5` context. `pack_receipt` must contain the exact returned `source_anchor_sha256`, `pack_revision`, and complete `retrieved_player_count`. Also include current information state, evidence ledger, both team contexts, both four-part defenses, player handoffs, material unknowns and Research Quality Permission.
 7. Require `RESEARCH_COMPLETE` and preserve `research_receipt_sha256`.
 
 Never include odds, prices, sportsbook names, market lines, spreads/totals, implied probabilities or betting consensus in the checkpoint. The server rejects market-shaped fields.
