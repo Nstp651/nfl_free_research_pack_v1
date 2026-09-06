@@ -73,8 +73,37 @@ def numeric(series: pd.Series) -> pd.Series:
 
 
 def ncol(df: pd.DataFrame, *names: str) -> pd.Series:
-    c = first_col(df, *names)
-    return numeric(df[c]) if c else pd.Series(math.nan, index=df.index, dtype=float)
+    """Coalesce candidate numeric columns left-to-right rather than taking only one."""
+    out = pd.Series(math.nan, index=df.index, dtype=float)
+    lower = {str(c).lower(): c for c in df.columns}
+    for name in names:
+        col = name if name in df.columns else lower.get(name.lower())
+        if col is not None:
+            out = out.combine_first(numeric(df[col]))
+    return out
+
+
+def collapse_identical_duplicates(df: pd.DataFrame, identity: list[str], label: str) -> tuple[pd.DataFrame, int]:
+    """Collapse source-export duplicates only when every non-key value agrees.
+
+    nblr_data occasionally repeats the exact same team/player row. Those are safe
+    to deduplicate. Conflicting duplicate identities remain a hard integrity failure.
+    """
+    dup = df[df.duplicated(identity, keep=False)]
+    if dup.empty:
+        return df, 0
+    compare = [c for c in df.columns if c not in identity]
+    conflicts = []
+    for key, group in dup.groupby(identity, dropna=False, sort=False):
+        if len(group[compare].drop_duplicates()) > 1:
+            conflicts.append((key, group.head(3).to_dict(orient="records")))
+            if len(conflicts) >= 3:
+                break
+    if conflicts:
+        raise RuntimeError(f"Conflicting duplicate {label} identities: {conflicts}")
+    before = len(df)
+    df = df.drop_duplicates(identity, keep="first").copy()
+    return df, before - len(df)
 
 
 def parse_minutes(value: Any) -> float:
@@ -114,7 +143,7 @@ def normalized_name_key(df: pd.DataFrame) -> pd.Series:
             .str.replace(r"[^a-z0-9]+", "", regex=True).replace("", pd.NA))
 
 
-def canonical_team_environment(team: pd.DataFrame) -> pd.DataFrame:
+def canonical_team_environment(team: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     match = first_col(team, "match_id")
     season = first_col(team, "season")
     name = first_col(team, "name", "team_name")
@@ -144,9 +173,7 @@ def canonical_team_environment(team: pd.DataFrame) -> pd.DataFrame:
         env["team_fga"] - env["team_orb"] + env["team_turnovers"] + 0.44 * env["team_fta"]
     )
     identity = ["season", "match_id", "team"]
-    if env.duplicated(identity).any():
-        sample = env[env.duplicated(identity, keep=False)].head(10)
-        raise RuntimeError("Duplicate historical season+team-game rows: " + sample.to_json(orient="records"))
+    env, duplicate_count = collapse_identical_duplicates(env, identity, "team-game")
     oppenv = env.drop(columns=["opponent"]).rename(columns={
         "team": "opponent",
         **{c: f"opp_{c[5:]}" for c in env.columns if c.startswith("team_")},
@@ -156,10 +183,10 @@ def canonical_team_environment(team: pd.DataFrame) -> pd.DataFrame:
         merged["game_possessions_est"] = merged[["team_possessions_est", "opp_possessions_est"]].mean(axis=1)
     else:
         merged["game_possessions_est"] = merged["team_possessions_est"]
-    return merged
+    return merged, duplicate_count
 
 
-def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd.DataFrame) -> pd.DataFrame:
+def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
     match = first_col(player, "match_id")
     season = first_col(player, "season")
     team_col = first_col(player, "team_name", "team")
@@ -206,7 +233,7 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
     else:
         out["minutes"] = math.nan
 
-    env = canonical_team_environment(team)
+    env, team_duplicate_count = canonical_team_environment(team)
     out = out.merge(env, on=["season", "match_id", "team", "opponent"], how="left")
 
     r_match = first_col(results, "match_id")
@@ -233,10 +260,11 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
     out = out[(out["assists"] >= 0) & (out["rebounds"] >= 0)]
     out = out.sort_values(["match_time", "season", "match_id", "team", "player_key"], na_position="last").reset_index(drop=True)
     identity = ["season", "match_id", "team", "player_key"]
-    if out.duplicated(identity).any():
-        dupes = out[out.duplicated(identity, keep=False)].head(10)
-        raise RuntimeError("Duplicate player-game identity rows: " + dupes.to_json(orient="records"))
-    return out
+    out, player_duplicate_count = collapse_identical_duplicates(out, identity, "player-game")
+    return out, {
+        "team_exact_duplicate_rows_collapsed": team_duplicate_count,
+        "player_exact_duplicate_rows_collapsed": player_duplicate_count,
+    }
 
 
 def main() -> int:
@@ -253,7 +281,7 @@ def main() -> int:
         print(f"SOURCE {key} rows={len(loaded[key])} cols={len(loaded[key].columns)} sha256={receipts[key]['sha256']}")
         print(f"COLUMNS {key}: {','.join(map(str, loaded[key].columns))}")
 
-    games = canonical_player_games(loaded["player"], loaded["team"], loaded["results"])
+    games, duplicate_audit = canonical_player_games(loaded["player"], loaded["team"], loaded["results"])
     out = Path(args.output); out.parent.mkdir(parents=True, exist_ok=True)
     games.to_csv(out, index=False, compression="gzip")
 
@@ -261,7 +289,7 @@ def main() -> int:
                  .groupby("player_key")["source_player_id"].nunique())
     multi_id_keys = int((id_counts > 1).sum())
     receipt = {
-        "schema_version": "0.1.4",
+        "schema_version": "0.1.5",
         "market_data": False,
         "identity_binding": "season+match_id+team+normalized_player_name",
         "sources": receipts,
@@ -274,12 +302,14 @@ def main() -> int:
         "team_environment_match_rate": float(games["game_possessions_est"].notna().mean()),
         "player_identity_method": "normalized_name_with_source_player_id_retained",
         "normalized_name_keys_with_multiple_source_ids": multi_id_keys,
+        "duplicate_audit": duplicate_audit,
         "output_sha256": hashlib.sha256(out.read_bytes()).hexdigest(),
     }
     rp = Path(args.receipt); rp.parent.mkdir(parents=True, exist_ok=True)
     rp.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps({"ok": True, **{k: receipt[k] for k in (
-        "rows", "players", "matches", "team_environment_match_rate", "normalized_name_keys_with_multiple_source_ids")}}, sort_keys=True))
+        "rows", "players", "matches", "team_environment_match_rate", "normalized_name_keys_with_multiple_source_ids")},
+        "duplicate_audit": duplicate_audit}, sort_keys=True))
     return 0
 
 
