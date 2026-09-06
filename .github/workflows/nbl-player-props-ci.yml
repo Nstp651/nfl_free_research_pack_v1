@@ -54,7 +54,8 @@ jobs:
           assert r['latest_season_rows'] > 500, r
           assert r['match_time_non_null_rate'] >= 0.99, r
           assert r['latest_season_match_time_non_null_rate'] >= 0.99, r
-          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']), r['latest_season'], r['latest_season_rows'], r['latest_season_match_time_non_null_rate'])
+          assert r['latest_season_minutes_non_null_rate'] >= 0.50, r
+          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']), r['latest_season'], r['latest_season_rows'], r['latest_season_match_time_non_null_rate'], r['latest_season_minutes_non_null_rate'])
           PY
       - name: Build next-game historical prior snapshot
         run: |
@@ -91,15 +92,20 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          source=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
+          latest_start=int(str(source['latest_season']).split('-')[0])
           for head in ('assists','rebounds'):
               p=Path(f'/tmp/nbl-model-artifacts/qbase_{head}_v0.1.0.json')
               a=json.loads(p.read_text())
+              wf=a['walk_forward']
               assert a['market_data'] is False
               assert a['stat_type'] == head
-              assert a['walk_forward']['overall']['n'] > 5000
-              assert a['walk_forward']['brier_at_least']['mean'] < 0.25
-              assert a['walk_forward']['nb2_alpha_oos'] > 0
-              print('NBL_HEAD_GATE=PASS', head, a['walk_forward']['overall'], a['walk_forward']['brier_at_least']['mean'])
+              assert a['training_seasons'][1] == latest_start, (head, a['training_seasons'], source['latest_season'])
+              assert wf['last_scored_season'] == latest_start, (head, wf['last_scored_season'], source['latest_season'])
+              assert wf['overall']['n'] > 5000
+              assert wf['brier_at_least']['mean'] < 0.25
+              assert wf['nb2_alpha_oos'] > 0
+              print('NBL_HEAD_GATE=PASS', head, a['training_seasons'], wf['first_scored_season'], wf['last_scored_season'], wf['overall'], wf['brier_at_least']['mean'])
           PY
       - name: Upload NBL source/model audit artifacts
         uses: actions/upload-artifact@v4
