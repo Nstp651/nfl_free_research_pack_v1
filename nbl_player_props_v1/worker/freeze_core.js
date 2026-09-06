@@ -48,7 +48,7 @@ export function probabilityGrid(mu,alpha,maxCount){
   const ladders=Array.from({length:maxCount},(_,i)=>({threshold:i+1,at_least:atLeast(i+1)}));
   const half=[]; for(let k=0;k<maxCount;k++){const under=cdf[k],over=1-under;half.push({line:k+0.5,over,push:0,under});}
   const integers=[]; for(let n=1;n<=maxCount;n++){
-    const under=n===0?0:cdf[n-1]??1,push=pmfs[n]??0,over=Math.max(0,1-under-push);
+    const under=cdf[n-1]??1,push=pmfs[n]??0,over=Math.max(0,1-under-push);
     integers.push({line:n,over,push,under});
   }
   for(let i=0;i<ladders.length-1;i++) requireThat(ladders[i+1].at_least<=ladders[i].at_least+1e-12,'ladder non-monotonic');
@@ -64,6 +64,8 @@ export function probabilityGrid(mu,alpha,maxCount){
 const AVAIL=new Set(['ACTIVE','PROBABLE','QUESTIONABLE','DOUBTFUL','OUT','UNKNOWN']);
 const CONF=new Set(['A','B','C']),FRAG=new Set(['LOW','MEDIUM','HIGH']);
 const METHODS=new Set(['QBASE_RUNTIME_SCORE','QBASE_MINUTES_RECOMPUTE','EMPIRICAL_ROLE_SPLIT','PRIOR_COMP_TRANSLATION']);
+const SERVER_QBASE_SOURCES=new Set(['SERVER_QBASE_RUNTIME_SCORE','PRIOR_COMP_TRANSLATION']);
+const HASH64=/^[0-9a-f]{64}$/;
 function sourceIds(value,known,label){
   requireThat(Array.isArray(value)&&value.length>0,`${label} evidence_source_ids required`);
   const ids=value.map(String); for(const id of ids) requireThat(known.has(id),`${label} unknown source id ${id}`); return ids;
@@ -104,6 +106,20 @@ function qbaseContract(a,stat){
   requireThat(Number.isFinite(alpha)&&alpha>0,`${stat} QBASE alpha invalid`);requireThat(Number.isInteger(max)&&max>=5&&max<=60,`${stat} QBASE max_count invalid`);
   return {stat_type:stat,model_name:a.model_name,model_version:a.model_version,feature_schema:a.feature_schema,dispersion_alpha:alpha,max_count:max};
 }
+function serverAttestation(head,key,stat){
+  const source=String(head.server_qbase_source||'').toUpperCase();
+  requireThat(SERVER_QBASE_SOURCES.has(source),`${key}.${stat} server_qbase_source invalid`);
+  const receipt=head.server_qbase_receipt_sha256==null?null:String(head.server_qbase_receipt_sha256);
+  const priorKey=head.server_player_prior_key==null?null:String(head.server_player_prior_key).trim();
+  if(source==='SERVER_QBASE_RUNTIME_SCORE'){
+    requireThat(HASH64.test(receipt||''),`${key}.${stat} server QBASE receipt required`);
+    requireThat(Boolean(priorKey),`${key}.${stat} server player prior key required`);
+  }else{
+    requireThat(receipt===null||receipt==='',`${key}.${stat} translated head cannot claim server QBASE receipt`);
+    requireThat(priorKey===null||priorKey==='',`${key}.${stat} translated head cannot claim NBL player prior key`);
+  }
+  return {source,receipt_sha256:receipt||null,player_prior_key:priorKey||null};
+}
 export async function computeFreeze(research,qbases,projections,frozenAt=new Date().toISOString()){
   validateResearchContext(research); requireThat(marketKeyHits(projections).length===0,'projection market boundary failed');
   const heads=requestedHeads(String(research.run_mode).toUpperCase()),known=new Set(Object.keys(research.sources));
@@ -119,18 +135,31 @@ export async function computeFreeze(research,qbases,projections,frozenAt=new Dat
     const outHeads={};
     for(const stat of heads){
       const h=supplied[stat],qbaseMean=Number(h.qbase_mean);requireThat(Number.isFinite(qbaseMean)&&qbaseMean>=0&&qbaseMean<=50,`${key}.${stat} qbase_mean invalid`);
+      const attestation=serverAttestation(h,key,stat);
       const confidence=String(h.confidence||'').toUpperCase(),fragility=String(h.fragility||'').toUpperCase();requireThat(CONF.has(confidence)&&FRAG.has(fragility),`${key}.${stat} confidence/fragility invalid`);
       requireThat(Array.isArray(h.scenarios)&&h.scenarios.length>0,`${key}.${stat} scenarios required`);let sum=0,weighted=0;const ids=new Set(),ledger=[];
-      for(const s of h.scenarios){const id=String(s.id||''),w=Number(s.weight),mean=Number(s.mean),method=String(s.method||'').toUpperCase();requireThat(id&&!ids.has(id),'scenario id invalid');ids.add(id);requireThat(Number.isFinite(w)&&w>0&&w<=1&&Number.isFinite(mean)&&mean>=0&&mean<=50,'scenario weight/mean invalid');requireThat(METHODS.has(method),'scenario method invalid');const evidence=sourceIds(s.evidence_source_ids,known,`${key}.${stat}.${id}`);const receipt=s.quant_input_receipt_sha256?String(s.quant_input_receipt_sha256):null;requireThat(!receipt||/^[0-9a-f]{64}$/.test(receipt),'scenario quant receipt invalid');ledger.push({id,weight:w,mean,method,evidence_source_ids:evidence,assumptions:Array.isArray(s.assumptions)?s.assumptions.map(String):[],quant_input_receipt_sha256:receipt});sum+=w;weighted+=w*mean;}
+      for(const s of h.scenarios){
+        const id=String(s.id||''),w=Number(s.weight),mean=Number(s.mean),method=String(s.method||'').toUpperCase();requireThat(id&&!ids.has(id),'scenario id invalid');ids.add(id);
+        requireThat(Number.isFinite(w)&&w>0&&w<=1&&Number.isFinite(mean)&&mean>=0&&mean<=50,'scenario weight/mean invalid');requireThat(METHODS.has(method),'scenario method invalid');
+        const evidence=sourceIds(s.evidence_source_ids,known,`${key}.${stat}.${id}`),receipt=String(s.quant_input_receipt_sha256||'');requireThat(HASH64.test(receipt),`${key}.${stat}.${id} quant input receipt required`);
+        ledger.push({id,weight:w,mean,method,evidence_source_ids:evidence,assumptions:Array.isArray(s.assumptions)?s.assumptions.map(String):[],quant_input_receipt_sha256:receipt});sum+=w;weighted+=w*mean;
+      }
       requireThat(Math.abs(sum-1)<=1e-9,'scenario weights must sum to 1');
       let alpha=q[stat].dispersion_alpha,dispersion_source='QBASE_TEMPORAL_OOS';
-      if(h.dispersion_override!==undefined){const d=h.dispersion_override||{},a=Number(d.alpha);requireThat(ledger.some(x=>x.method==='PRIOR_COMP_TRANSLATION'),'dispersion override only permitted for prior-comp translation');requireThat(d.method==='MAX_QBASE_PRIOR_COMP'&&/^[0-9a-f]{64}$/.test(String(d.receipt_sha256||'')),'dispersion override receipt invalid');requireThat(Number.isFinite(a)&&a>=alpha&&a<=5,'dispersion override may not narrow QBASE');alpha=a;dispersion_source=d.method;}
-      outHeads[stat]={qbase_anchor:q[stat],qbase_mean:qbaseMean,scenario_ledger:ledger,final_mean:weighted,dispersion_alpha:alpha,dispersion_source,probability_grid:probabilityGrid(weighted,alpha,q[stat].max_count),confidence,fragility};
+      if(attestation.source==='PRIOR_COMP_TRANSLATION'){
+        requireThat(ledger.every(x=>x.method==='PRIOR_COMP_TRANSLATION'),`${key}.${stat} translated head must use PRIOR_COMP_TRANSLATION scenarios only`);
+        requireThat(h.dispersion_override!==undefined,`${key}.${stat} translated head requires dispersion override`);
+      }
+      if(h.dispersion_override!==undefined){
+        const d=h.dispersion_override||{},a=Number(d.alpha);requireThat(ledger.some(x=>x.method==='PRIOR_COMP_TRANSLATION'),'dispersion override only permitted for prior-comp translation');
+        requireThat(d.method==='MAX_QBASE_PRIOR_COMP'&&HASH64.test(String(d.receipt_sha256||'')),'dispersion override receipt invalid');requireThat(Number.isFinite(a)&&a>=alpha&&a<=5,'dispersion override may not narrow QBASE');alpha=a;dispersion_source=d.method;
+      }
+      outHeads[stat]={qbase_anchor:q[stat],qbase_mean:qbaseMean,server_quantitative_attestation:attestation,scenario_ledger:ledger,final_mean:weighted,dispersion_alpha:alpha,dispersion_source,probability_grid:probabilityGrid(weighted,alpha,q[stat].max_count),confidence,fragility};
     }
     const minutes={low:Number(rp.projected_minutes.low),mean:Number(rp.projected_minutes.mean),high:Number(rp.projected_minutes.high),source_ids:[...rp.projected_minutes.source_ids]};minutes.minutes_projection_sha256=await sha256Json(minutes);
     frozenPlayers.push({player_id:String(projection.player_id||'')||null,player_name:String(projection.player_name),team:String(projection.team),availability_status:String(rp.availability_status).toUpperCase(),role:rp.role,projected_minutes:minutes,heads:outHeads});
   }
   frozenPlayers.sort((a,b)=>(a.team+'\0'+a.player_name).localeCompare(b.team+'\0'+b.player_name));
-  const core={schema_version:'nbl_dual_head_freeze_v1',market_data:false,status:'FROZEN',run_mode:String(research.run_mode).toUpperCase(),requested_heads:heads,fixture_id:String(research.fixture_id),pack_revision:String(research.pack_revision),research_context_sha256:await sha256Json(research),qbase_sha256:Object.fromEntries(heads.map(h=>[h,q[h].qbase_sha256])),frozen_at:frozenAt,players:frozenPlayers,audits:{market_boundary:'PASS',research_binding:'PASS',scenario_weighting:'PASS',probability_grid:'PASS',atomic_requested_heads:'PASS'}};
+  const core={schema_version:'nbl_dual_head_freeze_v1',market_data:false,status:'FROZEN',run_mode:String(research.run_mode).toUpperCase(),requested_heads:heads,fixture_id:String(research.fixture_id),pack_revision:String(research.pack_revision),research_context_sha256:await sha256Json(research),qbase_sha256:Object.fromEntries(heads.map(h=>[h,q[h].qbase_sha256])),frozen_at:frozenAt,players:frozenPlayers,audits:{market_boundary:'PASS',research_binding:'PASS',server_quantitative_authority:'PASS',scenario_weighting:'PASS',probability_grid:'PASS',atomic_requested_heads:'PASS'}};
   requireThat(marketKeyHits(core).length===0,'frozen market boundary failed');return {...core,freeze_receipt_sha256:await sha256Json(core)};
 }
