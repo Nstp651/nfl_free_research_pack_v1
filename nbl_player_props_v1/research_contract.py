@@ -83,6 +83,18 @@ def _source_ids(value: Any, known: set[str], field: str, *, required: bool = Tru
     return ids
 
 
+def _notes(value: Any, field: str, *, required: bool = True) -> list[str]:
+    if value is None:
+        notes: list[str] = []
+    elif isinstance(value, list):
+        notes = [str(x).strip() for x in value if str(x).strip()]
+    else:
+        raise ValueError(f"{field} must be a list")
+    if required and not notes:
+        raise ValueError(f"{field} requires at least one research note")
+    return notes
+
+
 def validate_research_context(context: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(context, dict):
         raise ValueError("research context must be an object")
@@ -99,7 +111,7 @@ def validate_research_context(context: dict[str, Any]) -> dict[str, Any]:
     if not fixture_id or not pack_revision:
         raise ValueError("fixture_id and pack_revision required")
     run_mode = str(context.get("run_mode") or "").strip().upper()
-    requested_heads(run_mode)
+    required_stats = set(requested_heads(run_mode))
     _iso8601(context.get("checked_at"), "checked_at")
 
     sources = context.get("sources")
@@ -170,14 +182,21 @@ def validate_research_context(context: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"players[{idx}].role.frontcourt_role invalid")
         _source_ids(role.get("source_ids"), known_sources, f"players[{idx}].role.source_ids")
 
-        stat_context = row.get("stat_context", {})
+        stat_context = row.get("stat_context")
         if not isinstance(stat_context, dict):
-            raise ValueError(f"players[{idx}].stat_context must be an object")
+            raise ValueError(f"players[{idx}].stat_context required")
+        unknown_stats = sorted(set(stat_context) - STAT_TYPES)
+        if unknown_stats:
+            raise ValueError(f"players[{idx}].stat_context contains invalid stats {unknown_stats}")
+        missing_stats = sorted(required_stats - set(stat_context))
+        if missing_stats:
+            raise ValueError(f"players[{idx}].stat_context missing requested heads {missing_stats}")
         for stat, value in stat_context.items():
-            if stat not in STAT_TYPES or not isinstance(value, dict):
-                raise ValueError(f"players[{idx}].stat_context contains invalid stat {stat}")
+            if not isinstance(value, dict):
+                raise ValueError(f"players[{idx}].stat_context.{stat} must be an object")
             _source_ids(value.get("source_ids"), known_sources,
-                        f"players[{idx}].stat_context.{stat}.source_ids", required=False)
+                        f"players[{idx}].stat_context.{stat}.source_ids")
+            _notes(value.get("notes"), f"players[{idx}].stat_context.{stat}.notes")
 
     return context
 
