@@ -15,7 +15,7 @@
   "minutes_binding": "row-level seconds/60 with parsed minutes fallback",
   "minutes_non_null_rate": 1.0,
   "normalized_name_keys_with_multiple_source_ids": 130,
-  "output_sha256": "bda4a09be224d85d480185aa59c6be2a1dba7d8f27f5b0e2f88c108cf6aa1b77",
+  "output_sha256": "279af11e9d7761e690847615857415591061f8f4310fc7efe5ddb5af6c94162d",
   "player_identity_method": "normalized_name_with_source_player_id_retained",
   "players": 616,
   "rebounds_non_null": 36428,
