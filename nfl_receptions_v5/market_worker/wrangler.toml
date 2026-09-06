@@ -1,13 +1,14 @@
 # NFL Receptions V5 post-freeze market adapter.
 # ODDS_API_KEY must be an encrypted Cloudflare runtime secret, never a GitHub secret.
-# Cloudflare production branch: feature/platform-v1-nfl-receptions-v5.
+# The control Worker is reached only through an internal Cloudflare Service Binding.
 name = "nfl-receptions-market-v5"
 main = "index.js"
 compatibility_date = "2026-09-06"
 workers_dev = true
 
-[vars]
-CONTROL_BASE_URL = "https://nfl-receptions-platform-v5.nickarnott01.workers.dev"
+[[services]]
+binding = "CONTROL_SERVICE"
+service = "nfl-receptions-platform-v5"
 
 [secrets]
 required = [ "ODDS_API_KEY" ]
