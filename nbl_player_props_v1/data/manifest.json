@@ -1,0 +1,33 @@
+{
+  "asset_revision": "a7d735ea3c7185a57cee",
+  "integrity": {
+    "market_data": false,
+    "qbase_retraining_is_explicit_only": true,
+    "routine_refresh_changes_prior_not_model": true
+  },
+  "market_data": false,
+  "prior_snapshot": {
+    "canonical_sha256": "2861eddf80b8bb40fcd5cac7dc2024a29da5854d2dd4c3ac69020a1c4ff69742",
+    "path": "prior_snapshot.json",
+    "snapshot_revision": "2af73fbc2c485ad8ccba"
+  },
+  "qbase": {
+    "assists": {
+      "canonical_sha256": "53a78bf3a75a58a689ab0de800f91def2125ac6dca1ad99bc0a46553c4e3fd54",
+      "model_version": "0.1.0",
+      "path": "model/qbase_assists_v0.1.0.json",
+      "training_source_receipt_sha256": "ba183ad2a53b0871415ac70911ef0413283189b4e3bd230ab5e3b0a6158ed5bf"
+    },
+    "rebounds": {
+      "canonical_sha256": "5ed71722eb6806331e9703800c90683b56dd0651e0d9d4dc0ac162631b440f15",
+      "model_version": "0.1.0",
+      "path": "model/qbase_rebounds_v0.1.0.json",
+      "training_source_receipt_sha256": "ba183ad2a53b0871415ac70911ef0413283189b4e3bd230ab5e3b0a6158ed5bf"
+    }
+  },
+  "runtime_source_receipt": {
+    "canonical_sha256": "ba183ad2a53b0871415ac70911ef0413283189b4e3bd230ab5e3b0a6158ed5bf",
+    "path": "source_receipt.json"
+  },
+  "schema_version": "nbl_runtime_assets_v1"
+}
