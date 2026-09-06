@@ -68,7 +68,8 @@ const SERVER_QBASE_SOURCES=new Set(['SERVER_QBASE_RUNTIME_SCORE','PRIOR_COMP_TRA
 const HASH64=/^[0-9a-f]{64}$/;
 function sourceIds(value,known,label){
   requireThat(Array.isArray(value)&&value.length>0,`${label} evidence_source_ids required`);
-  const ids=value.map(String); for(const id of ids) requireThat(known.has(id),`${label} unknown source id ${id}`); return ids;
+  const ids=value.map(String).map(x=>x.trim()).filter(Boolean);requireThat(ids.length>0,`${label} evidence_source_ids required`);
+  for(const id of ids) requireThat(known.has(id),`${label} unknown source id ${id}`); return ids;
 }
 function playerKey(row){const id=String(row.player_id||'').trim(); if(id) return `id:${id}`; const name=String(row.player_name||'').toLowerCase().replace(/[^a-z0-9]+/g,''); requireThat(name,'player identity required'); return `name:${name}`;}
 export function validateResearchContext(c){
@@ -76,7 +77,7 @@ export function validateResearchContext(c){
   requireThat(c.schema_version==='nbl_fixture_research_v1','research schema invalid');
   requireThat(c.market_data===false,'research must declare market_data=false');
   requireThat(marketKeyHits(c).length===0,'research market boundary failed');
-  requestedHeads(String(c.run_mode||'').toUpperCase());
+  const requiredStats=new Set(requestedHeads(String(c.run_mode||'').toUpperCase()));
   requireThat(String(c.fixture_id||'')&&String(c.pack_revision||''),'fixture_id/pack_revision required');
   requireThat(c.sources&&typeof c.sources==='object'&&Object.keys(c.sources).length>0,'research sources required');
   const known=new Set(Object.keys(c.sources));
@@ -96,6 +97,18 @@ export function validateResearchContext(c){
     requireThat([lo,mid,hi].every(Number.isFinite)&&0<=lo&&lo<=mid&&mid<=hi&&hi<=50,`players[${i}] minutes invalid`);
     sourceIds(m.source_ids,known,`players[${i}] projected_minutes`);
     requireThat(p.role&&Array.isArray(p.role.source_ids),`players[${i}] role required`); sourceIds(p.role.source_ids,known,`players[${i}] role`);
+    const statContext=p.stat_context;requireThat(statContext&&typeof statContext==='object'&&!Array.isArray(statContext),`players[${i}] stat_context required`);
+    for(const stat of Object.keys(statContext)) requireThat(stat==='assists'||stat==='rebounds',`players[${i}] stat_context invalid stat ${stat}`);
+    for(const stat of requiredStats){
+      const ctx=statContext[stat];requireThat(ctx&&typeof ctx==='object'&&!Array.isArray(ctx),`players[${i}] stat_context missing requested head ${stat}`);
+      sourceIds(ctx.source_ids,known,`players[${i}] stat_context.${stat}`);
+      requireThat(Array.isArray(ctx.notes)&&ctx.notes.map(String).some(x=>x.trim()),`players[${i}] stat_context.${stat} research note required`);
+    }
+    for(const [stat,ctx] of Object.entries(statContext)){
+      requireThat(ctx&&typeof ctx==='object'&&!Array.isArray(ctx),`players[${i}] stat_context.${stat} invalid`);
+      sourceIds(ctx.source_ids,known,`players[${i}] stat_context.${stat}`);
+      requireThat(Array.isArray(ctx.notes)&&ctx.notes.map(String).some(x=>x.trim()),`players[${i}] stat_context.${stat} research note required`);
+    }
   }
   return c;
 }
