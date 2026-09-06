@@ -1,0 +1,27 @@
+name: NFL Receptions V5 Freeze Acceptance
+
+on:
+  push:
+    branches: [feature/platform-v1-nfl-receptions-v5]
+    paths:
+      - 'nfl_receptions_v5/live_freeze_acceptance.mjs'
+      - 'nfl_receptions_v5/worker/**'
+      - 'nfl_receptions_v5/market_worker/**'
+      - '.github/workflows/nfl-receptions-v5-freeze-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nfl-v5-freeze-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-freeze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Full pre-market checkpoint and freeze acceptance
+        run: node nfl_receptions_v5/live_freeze_acceptance.mjs
