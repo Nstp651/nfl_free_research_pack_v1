@@ -34,6 +34,8 @@ jobs:
       - name: Live official NBL Rosetta acceptance
         working-directory: nbl_player_props_v1
         run: python source_acceptance.py --season-year 2026
+      - name: Diagnose historical timestamp coverage
+        run: python nbl_player_props_v1/historical/source_time_diagnostic.py
       - name: Build full historical assists/rebounds source table
         run: |
           python nbl_player_props_v1/historical/build_player_games.py \
