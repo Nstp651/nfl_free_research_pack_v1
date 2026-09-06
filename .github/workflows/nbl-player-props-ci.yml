@@ -11,9 +11,9 @@ permissions:
   contents: read
 
 jobs:
-  test-and-source-acceptance:
+  test-source-and-model:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,7 +30,7 @@ jobs:
       - name: Live official NBL Rosetta acceptance
         working-directory: nbl_player_props_v1
         run: python source_acceptance.py --season-year 2026
-      - name: Build historical assists/rebounds source table
+      - name: Build full historical assists/rebounds source table
         run: |
           python nbl_player_props_v1/historical/build_player_games.py \
             --output /tmp/nbl-player-games.csv.gz \
@@ -40,13 +40,38 @@ jobs:
           from pathlib import Path
           r=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
           assert r['market_data'] is False
-          assert r['rows'] > 1000
-          assert r['players'] > 100
-          assert r['matches'] > 100
-          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'])
+          assert r['rows'] > 20000, r
+          assert r['players'] > 500, r
+          assert r['matches'] > 1000, r
+          assert len(r['seasons']) >= 8, r
+          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']))
           PY
-      - name: Upload historical schema receipt
+      - name: Train and walk-forward validate ASSISTS + REBOUNDS heads
+        run: |
+          mkdir -p /tmp/nbl-model-artifacts /tmp/nbl-model-reports
+          python nbl_player_props_v1/model/train_heads.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output-dir /tmp/nbl-model-artifacts \
+            --report-dir /tmp/nbl-model-reports
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for head in ('assists','rebounds'):
+              p=Path(f'/tmp/nbl-model-artifacts/qbase_{head}_v0.1.0.json')
+              a=json.loads(p.read_text())
+              assert a['market_data'] is False
+              assert a['stat_type'] == head
+              assert a['walk_forward']['overall']['n'] > 5000
+              assert a['walk_forward']['brier_at_least']['mean'] < 0.25
+              assert a['walk_forward']['nb2_alpha_oos'] > 0
+              print('NBL_HEAD_GATE=PASS', head, a['walk_forward']['overall'], a['walk_forward']['brier_at_least']['mean'])
+          PY
+      - name: Upload NBL source/model audit artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nbl-source-receipt
-          path: /tmp/nbl-source-receipt.json
+          name: nbl-v1-source-and-model-audit
+          path: |
+            /tmp/nbl-source-receipt.json
+            /tmp/nbl-model-artifacts/*.json
+            /tmp/nbl-model-reports/*.md
