@@ -34,7 +34,7 @@ function projections(){return [{player_id:'p1',player_name:'Test Guard',team:'Sy
 
 test('BOTH freezes atomically with immutable server-attested receipt material',async()=>{
   const f=await computeFreeze(research(),{assists:qbase('assists'),rebounds:qbase('rebounds')},projections(),'2026-09-06T01:05:00Z');
-  assert.equal(f.status,'FROZEN');assert.deepEqual(f.requested_heads,['assists','rebounds']);assert.equal(f.audits.atomic_requested_heads,'PASS');assert.equal(f.audits.server_quantitative_authority,'PASS');assert.match(f.freeze_receipt_sha256,/^[0-9a-f]{64}$/);assert.equal(f.players[0].heads.assists.final_mean,5.6);assert.equal(f.players[0].heads.assists.server_quantitative_attestation.source,'SERVER_QBASE_RUNTIME_SCORE');assert.equal(f.players[0].heads.assists.server_quantitative_attestation.player_prior_key,'testguard');
+  assert.equal(f.status,'FROZEN');assert.deepEqual(f.requested_heads,['assists','rebounds']);assert.equal(f.audits.atomic_requested_heads,'PASS');assert.equal(f.audits.server_qbase_authority,'PASS');assert.match(f.freeze_receipt_sha256,/^[0-9a-f]{64}$/);assert.equal(f.players[0].heads.assists.final_mean,5.6);assert.equal(f.players[0].heads.assists.server_quantitative_attestation.source,'SERVER_QBASE_RUNTIME_SCORE');assert.equal(f.players[0].heads.assists.server_quantitative_attestation.player_prior_key,'testguard');
 });
 
 test('BOTH refuses missing head and market contamination',async()=>{
