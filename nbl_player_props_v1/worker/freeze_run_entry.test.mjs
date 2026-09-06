@@ -29,9 +29,9 @@ test('persistent run initializes, publishes server QBASE, checkpoints, freezes a
     let res=await req(run,'POST','',{fixture_id:'fixture-1',season_start:2026,run_mode:'BOTH'});assert.equal(res.status,200);let d=await res.json();assert.equal(d.status,'RESEARCH_PENDING');assert.equal(d.lock.asset_revision,h.manifest.asset_revision);
     res=await req(run,'GET','/research');d=await res.json();assert.equal(d.home_roster[0].nbl_history_status,'NBL_HISTORY_AVAILABLE');assert.equal(d.home_roster[0].qbase_baseline.assists.status,'SERVER_QBASE_RUNTIME_SCORE');assert.match(d.home_roster[0].qbase_baseline.assists.quant_input_receipt_sha256,/^[0-9a-f]{64}$/);assert.equal(d.away_roster[0].nbl_history_status,'PRIOR_COMP_TRANSLATION_REQUIRED');assert.equal(d.away_roster[0].qbase_baseline.assists.status,'PRIOR_COMP_TRANSLATION_REQUIRED');
     res=await req(run,'POST','/research',research(h.manifest.asset_revision));assert.equal(res.status,200);
-    res=await req(run,'POST','/compute',{projections:projections()});assert.equal(res.status,200);const f=await res.json();assert.equal(f.status,'FROZEN');assert.match(f.freeze_receipt_sha256,/^[0-9a-f]{64}$/);const stamp=f.frozen_at,receipt=f.freeze_receipt_sha256;
-    res=await req(run,'POST','/compute',{projections:[]});d=await res.json();assert.equal(d.frozen_at,stamp);assert.equal(d.freeze_receipt_sha256,receipt);
-    res=await req(run,'GET','/players/id%3Ap1');d=await res.json();assert.equal(d.player.player_name,'Test Guard');assert.equal(d.freeze_receipt_sha256,receipt);assert.ok(d.player.heads.assists.probability_grid.half_point_grid.length>0);
+    res=await req(run,'POST','/compute',{projections:projections()});assert.equal(res.status,200);const f=await res.json();assert.equal(f.status,'FROZEN');assert.match(f.freeze_receipt_sha256,/^[0-9a-f]{64}$/);assert.match(f.players[0].player_model_sha256,/^[0-9a-f]{64}$/);const stamp=f.frozen_at,receipt=f.freeze_receipt_sha256,playerHash=f.players[0].player_model_sha256;
+    res=await req(run,'POST','/compute',{projections:[]});d=await res.json();assert.equal(d.frozen_at,stamp);assert.equal(d.freeze_receipt_sha256,receipt);assert.equal(d.players[0].player_model_sha256,playerHash);
+    res=await req(run,'GET','/players/id%3Ap1');d=await res.json();assert.equal(d.player.player_name,'Test Guard');assert.equal(d.freeze_receipt_sha256,receipt);assert.equal(d.player_model_sha256,playerHash);assert.equal(await sha256Json(d.player),playerHash);assert.ok(d.player.heads.assists.probability_grid.half_point_grid.length>0);
   }finally{h.restore();}
 });
 
