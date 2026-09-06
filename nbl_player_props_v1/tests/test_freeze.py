@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import copy
+import sys
+from pathlib import Path
 
 import pytest
 
-from nbl_player_props_v1.freeze_core import build_frozen_matchup, validate_frozen_matchup
-from nbl_player_props_v1.research_contract import validate_research_context
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from freeze_core import build_frozen_matchup, validate_frozen_matchup  # noqa: E402
+from research_contract import validate_research_context  # noqa: E402
 
 
 def research_context():
