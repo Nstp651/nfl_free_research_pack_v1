@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: NFL Receptions V5 Post-Freeze Market
-  version: 5.0.1
+  version: 5.0.2
   description: Betting Platform V1 post-freeze Australian NFL receptions integration. A valid frozen run_id is mandatory; the service refuses Odds API access until authoritative freeze verification passes.
 servers:
   - url: https://nfl-receptions-market-v5.nickarnott01.workers.dev
@@ -9,6 +9,7 @@ paths:
   /health:
     get:
       operationId: healthNflReceptionsMarketV5
+      x-openai-isConsequential: false
       summary: Check market adapter configuration without consuming an Odds API market request
       responses:
         '200':
@@ -35,6 +36,7 @@ paths:
   /v1/receptions:
     get:
       operationId: getNflReceptionsBoardV5
+      x-openai-isConsequential: false
       summary: Verify frozen run, retrieve current AU receptions markets, exact-map frozen thresholds and rank positive edges
       parameters:
         - name: run_id
