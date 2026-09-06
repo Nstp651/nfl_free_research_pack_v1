@@ -14,7 +14,7 @@ async function jsonFetch(url, options = {}) {
 
 async function waitForHealth(url, predicate, label) {
   let last;
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < 24; i++) {
     try {
       const out = await jsonFetch(`${url}/health`);
       last = out;
@@ -26,10 +26,10 @@ async function waitForHealth(url, predicate, label) {
 }
 
 const controlHealth = await waitForHealth(CONTROL,
-  x => x.ok === true && x.durable_state === true && x.market_data === false,
+  x => x.ok === true && x.durable_state === true && x.market_data === false && x.source_lock === 'CONTENT_SHA256',
   'control');
 const marketHealth = await waitForHealth(MARKET,
-  x => x.ok === true && x.configured === true && x.service === 'NFL_RECEPTIONS_MARKET_GATEWAY',
+  x => x.ok === true && x.configured === true && x.service === 'NFL_RECEPTIONS_MARKET_GATEWAY' && x.control_transport === 'SERVICE_BINDING',
   'market');
 
 const init = {
@@ -49,8 +49,7 @@ for (let i = 0; i < 18; i++) {
     created = out.data;
     break;
   }
-  // Native Git may still be finishing a deployment. Only retry known source/deploy-race failures.
-  if (out.res.status === 422 && /Unknown run operation|Research source unavailable|revision race/i.test(String(out.data.error || ''))) {
+  if (out.res.status === 422 && /Research source unavailable|revision race/i.test(String(out.data.error || ''))) {
     await sleep(5000);
     continue;
   }
