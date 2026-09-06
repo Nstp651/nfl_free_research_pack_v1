@@ -154,10 +154,36 @@ def build_snapshot(raw: pd.DataFrame, source_receipt: dict[str, Any] | None = No
         raise ValueError(f"historical table missing snapshot fields {missing}")
     df = raw.copy()
     df["match_time"] = pd.to_datetime(df["match_time"], errors="coerce", utc=True)
-    df = df[df["match_time"].notna() & df["player_key"].notna()].copy()
-    if df.empty:
+    timestamped = df[df["match_time"].notna() & df["player_key"].notna()].copy()
+    if timestamped.empty:
         raise ValueError("historical table has no timestamped player rows")
 
+    source_latest = None
+    if source_receipt is not None:
+        source_latest = str(source_receipt.get("latest_season") or "").strip() or None
+        if source_latest is None and source_receipt.get("seasons"):
+            source_latest = max(map(str, source_receipt["seasons"]))
+    timestamped_latest = max(timestamped["season"].dropna().astype(str).unique().tolist())
+    if source_latest is not None and timestamped_latest != source_latest:
+        raise ValueError(
+            f"latest-season freshness failure: source has {source_latest} but timestamped prior ends at {timestamped_latest}"
+        )
+    if source_latest is not None:
+        source_latest_rows = df[df["season"].astype(str) == source_latest]
+        kept_latest_rows = timestamped[timestamped["season"].astype(str) == source_latest]
+        if source_latest_rows.empty:
+            raise ValueError(f"source receipt latest season {source_latest} has no canonical rows")
+        coverage = len(kept_latest_rows) / len(source_latest_rows)
+        if coverage < 0.99:
+            raise ValueError(
+                f"latest-season timestamp coverage too low for priors: {coverage:.6f} ({len(kept_latest_rows)}/{len(source_latest_rows)})"
+            )
+    else:
+        source_latest_rows = timestamped[timestamped["season"].astype(str) == timestamped_latest]
+        kept_latest_rows = source_latest_rows
+        coverage = 1.0
+
+    df = timestamped
     players = {
         str(key): player_snapshot(group)
         for key, group in df.groupby("player_key", sort=True)
@@ -178,10 +204,15 @@ def build_snapshot(raw: pd.DataFrame, source_receipt: dict[str, Any] | None = No
         "source_receipt_sha256": source_sha,
         "historical_rows": int(len(df)),
         "historical_matches": int(df[["season", "match_id"]].drop_duplicates().shape[0]),
+        "latest_historical_season": timestamped_latest,
+        "latest_season_rows": int(len(kept_latest_rows)),
+        "latest_season_timestamp_coverage": float(coverage),
         "players": players,
         "teams": teams,
         "notes": [
             "Rolling priors include the most recent completed historical game.",
+            "Latest historical season identity is required to match the canonical source receipt.",
+            "Latest-season timestamp coverage must be at least 99% before a prior snapshot is published.",
             "player_season_games_prior and team_season_games_prior are set at runtime for the target season.",
             "Projected minutes and current role are never inferred from this snapshot alone.",
         ],
@@ -210,6 +241,9 @@ def main() -> int:
         "teams": len(snapshot["teams"]),
         "historical_rows": snapshot["historical_rows"],
         "historical_matches": snapshot["historical_matches"],
+        "latest_historical_season": snapshot["latest_historical_season"],
+        "latest_season_rows": snapshot["latest_season_rows"],
+        "latest_season_timestamp_coverage": snapshot["latest_season_timestamp_coverage"],
     }, sort_keys=True))
     return 0
 
