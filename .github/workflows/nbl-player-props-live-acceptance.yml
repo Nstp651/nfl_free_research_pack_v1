@@ -1,0 +1,36 @@
+name: NBL Player Props Production Live Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nbl_player_props_v1/**'
+      - '.github/workflows/nbl-player-props-live-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nbl-player-props-production-live-acceptance
+  cancel-in-progress: false
+
+jobs:
+  live-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run live Research/Freeze + Market integrity acceptance
+        env:
+          NBL_ACCEPTANCE_OUTPUT: /tmp/nbl-production-live-acceptance.json
+        run: node nbl_player_props_v1/tools/live_production_acceptance.mjs
+      - name: Upload production acceptance receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: nbl-production-live-acceptance
+          path: /tmp/nbl-production-live-acceptance.json
+          retention-days: 90
