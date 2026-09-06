@@ -20,6 +20,10 @@ test('requires exact caller freeze receipt binding',async()=>{
   const old=globalThis.fetch;try{mockResearch();await assert.rejects(()=>evaluate({run_id:RUN,expected_freeze_receipt_sha256:'c'.repeat(64),markets:[market()]},env),/Freeze receipt mismatch/);}finally{globalThis.fetch=old;}
 });
 
+test('rejects market observations captured before P_model freeze',async()=>{
+  const old=globalThis.fetch;try{mockResearch();await assert.rejects(()=>evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market({captured_at:'2026-09-06T06:09:59Z'})]},env),/predates P_model freeze/);}finally{globalThis.fetch=old;}
+});
+
 test('half-point EV is exact, positive and bound to frozen player receipt',async()=>{
   const old=globalThis.fetch;try{const calls=mockResearch();const out=await evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market()]},env);assert.equal(out.p_model_status,'FROZEN');assert.equal(out.p_model_mutated,false);assert.equal(out.market_records_evaluated,1);assert.equal(out.positive_edges.length,1);assert.equal(out.best_single.player_name,'Test Guard');assert.ok(Math.abs(out.best_single.ev_per_unit-.10)<1e-12);assert.equal(out.best_single.p_win,.55);assert.equal(out.best_single.p_push,0);assert.equal(calls.length,2);assert.ok(calls[1].endsWith('/players/id%3Ap1'));}finally{globalThis.fetch=old;}
 });
@@ -28,8 +32,12 @@ test('integer line uses push-aware EV and fair price',async()=>{
   const old=globalThis.fetch;try{mockResearch();const out=await evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market({threshold:5,decimal_price:3})]},env);const row=out.evaluated[0];assert.equal(row.p_win,.35);assert.equal(row.p_push,.2);assert.equal(row.p_loss,.45);assert.ok(Math.abs(row.ev_per_unit-.25)<1e-12);assert.ok(Math.abs(row.conditional_win_probability-(.35/.8))<1e-12);assert.ok(Math.abs(row.fair_decimal_price-(.8/.35))<1e-12);}finally{globalThis.fetch=old;}
 });
 
-test('keeps only best price for exact player/stat/side/threshold',async()=>{
+test('keeps only best price for exact frozen player/stat/side/threshold',async()=>{
   const old=globalThis.fetch;try{const calls=mockResearch();const out=await evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market({decimal_price:1.91,bookmaker:'Book Low'}),market({decimal_price:2.05,bookmaker:'Book High'})]},env);assert.equal(out.market_records_received,2);assert.equal(out.market_records_evaluated,1);assert.equal(out.evaluated[0].bookmaker,'Book High');assert.equal(out.evaluated[0].decimal_price,2.05);assert.equal(calls.length,2);}finally{globalThis.fetch=old;}
+});
+
+test('dedupes mixed ID and name-only sources after frozen player resolution',async()=>{
+  const old=globalThis.fetch;try{const calls=mockResearch();const out=await evaluate({run_id:RUN,expected_freeze_receipt_sha256:RECEIPT,markets:[market({player_id:'p1',decimal_price:1.95,bookmaker:'API'}),market({player_id:null,decimal_price:2.10,bookmaker:'Bet365'})]},env);assert.equal(out.market_records_received,2);assert.equal(out.market_records_evaluated,1);assert.equal(out.evaluated[0].bookmaker,'Bet365');assert.equal(out.evaluated[0].frozen_player_id,'p1');assert.equal(calls.length,2);}finally{globalThis.fetch=old;}
 });
 
 test('name-only screenshot row resolves server frozen player key',async()=>{
