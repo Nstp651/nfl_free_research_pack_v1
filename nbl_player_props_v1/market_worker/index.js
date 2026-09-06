@@ -2,7 +2,8 @@
  *
  * This Worker never owns or computes P_model. It accepts market observations only
  * after the research Worker reports an immutable FROZEN run, fetches exact frozen
- * probability grids from that run, verifies the freeze receipt, and computes EV.
+ * probability grids from that run, verifies the freeze receipt and per-player hash,
+ * and computes EV.
  */
 const DEFAULT_RESEARCH_BASE='https://nbl-player-props-research-v1.nickarnott01.workers.dev';
 const ALLOWED_SOURCES=new Set(['odds_api','screenshot','public_web']);
@@ -16,6 +17,8 @@ const need=(condition,message)=>{if(!condition)throw new Error(message);};
 const normName=value=>String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
 const hash64=value=>/^[0-9a-f]{64}$/.test(String(value||''));
 const finite=value=>Number.isFinite(Number(value));
+function canonicalValue(v){if(Array.isArray(v))return v.map(canonicalValue);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonicalValue(v[k])]));return v;}
+export async function sha256Json(value){const bytes=new TextEncoder().encode(JSON.stringify(canonicalValue(value)));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function exactKeys(obj,allowed,label){need(obj&&typeof obj==='object'&&!Array.isArray(obj),`${label} must be an object`);for(const key of Object.keys(obj))need(allowed.includes(key),`${label} unexpected field ${key}`);}
 function researchBase(env){const raw=String(env?.RESEARCH_BASE||DEFAULT_RESEARCH_BASE).replace(/\/+$/,'');need(/^https:\/\/[a-z0-9.-]+$/i.test(raw),'RESEARCH_BASE invalid');return raw;}
 async function getJson(url){const res=await fetch(url,{headers:{accept:'application/json','user-agent':'nbl-market-eval/1.0'},signal:AbortSignal.timeout(15_000)});const text=await res.text();need(text.length<4_000_000,'Research response too large');let body;try{body=JSON.parse(text);}catch{throw new Error('Research response invalid JSON');}need(res.ok,`Research Worker ${res.status}: ${body?.error||'request failed'}`);return body;}
@@ -31,7 +34,7 @@ function validateMarket(row,index){
 }
 function playerIndexes(freeze){
   const byId=new Map(),byName=new Map();
-  for(const p of freeze.players||[]){const key=String(p.player_key||'');need(key,'Frozen player key missing');const id=String(p.player_id||'').trim();if(id){need(!byId.has(id),`Duplicate frozen player_id ${id}`);byId.set(id,p);}const n=normName(p.player_name);need(n,'Frozen player name missing');if(!byName.has(n))byName.set(n,[]);byName.get(n).push(p);}
+  for(const p of freeze.players||[]){const key=String(p.player_key||'');need(key,'Frozen player key missing');need(hash64(p.player_model_sha256),'Frozen player hash missing');const id=String(p.player_id||'').trim();if(id){need(!byId.has(id),`Duplicate frozen player_id ${id}`);byId.set(id,p);}const n=normName(p.player_name);need(n,'Frozen player name missing');if(!byName.has(n))byName.set(n,[]);byName.get(n).push(p);}
   return {byId,byName};
 }
 function resolvePlayer(index,row){
@@ -60,7 +63,7 @@ async function evaluate(input,env){
   const base=researchBase(env),run=await getJson(`${base}/v1/match-runs/${runId}`);need(run.status==='FROZEN'&&run.freeze?.status==='FROZEN','P_MODEL_STATUS must be FROZEN before market evaluation');const freeze=run.freeze;need(hash64(freeze.freeze_receipt_sha256)&&freeze.freeze_receipt_sha256===expected,'Freeze receipt mismatch');const frozenAtMs=Date.parse(String(freeze.frozen_at||''));need(Number.isFinite(frozenAtMs),'Frozen timestamp invalid');
   const validated=input.markets.map(validateMarket);for(const row of validated){need(row.fixture_id===String(freeze.fixture_id),'Market fixture does not match frozen fixture');need(Date.parse(row.captured_at)>=frozenAtMs,'Market observation predates P_model freeze');}
   const pIndex=playerIndexes(freeze),resolved=dedupeResolved(validated.map(row=>({row,summary:resolvePlayer(pIndex,row)}))),cache=new Map(),evaluated=[];
-  for(const {row,summary} of resolved){const key=String(summary.player_key);let full=cache.get(key);if(!full){const fetched=await getJson(`${base}/v1/match-runs/${runId}/players/${encodeURIComponent(key)}`);need(fetched.freeze_receipt_sha256===expected&&fetched.frozen_at===freeze.frozen_at,'Frozen player receipt/timestamp mismatch');full=fetched.player;need(full&&typeof full==='object','Frozen player response missing');cache.set(key,full);}evaluated.push(evaluateRow(row,full,freeze));}
+  for(const {row,summary} of resolved){const key=String(summary.player_key);let full=cache.get(key);if(!full){const fetched=await getJson(`${base}/v1/match-runs/${runId}/players/${encodeURIComponent(key)}`);need(fetched.freeze_receipt_sha256===expected&&fetched.frozen_at===freeze.frozen_at,'Frozen player receipt/timestamp mismatch');need(fetched.player_model_sha256===summary.player_model_sha256,'Frozen player hash receipt mismatch');full=fetched.player;need(full&&typeof full==='object','Frozen player response missing');need(await sha256Json(full)===summary.player_model_sha256,'Frozen player payload hash mismatch');cache.set(key,full);}evaluated.push(evaluateRow(row,full,freeze));}
   evaluated.sort(ranking);const positives=evaluated.filter(x=>x.positive_ev);positives.forEach((row,i)=>row.positive_edge_rank=i+1);
   return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:runId,fixture_id:freeze.fixture_id,freeze_receipt_sha256:expected,frozen_at:freeze.frozen_at,market_records_received:input.markets.length,market_records_evaluated:evaluated.length,evaluated,positive_edges:positives,best_single:positives[0]||null,no_forced_bet:positives.length===0};
 }
