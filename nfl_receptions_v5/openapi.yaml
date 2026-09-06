@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: NFL Receptions V5 Control Plane
-  version: 5.0.0
+  version: 5.0.1
   description: Betting Platform V1 pre-market control plane. Locks research, checkpoints market-blind context, executes Layer 2 and persists immutable P_model. No sportsbook data.
 servers:
   - url: https://nfl-receptions-platform-v5.nickarnott01.workers.dev
@@ -11,8 +11,25 @@ paths:
       operationId: healthNflReceptionsV5
       summary: Check NFL V5 control-plane state service
       responses:
-        '200': {description: Healthy, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '503': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string}
+                additionalProperties: true
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
   /v1/runs:
     post:
       operationId: createNflReceptionsRunV5
@@ -32,31 +49,116 @@ paths:
                 fixture_date_sydney: {type: string, format: date}
                 validated_kickoff_utc: {type: string, format: date-time}
       responses:
-        '200': {description: Locked run, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Locked run
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id: {type: string}
+                  status: {type: string}
+                  p_model_status: {type: string}
+                additionalProperties: true
+        '422':
+          description: Run rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
   /v1/runs/{run_id}:
     get:
       operationId: getNflReceptionsRunV5
       summary: Get authoritative run state and receipts
-      parameters: [{$ref: '#/components/parameters/RunId'}]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       responses:
-        '200': {description: Run status, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Run status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id: {type: string}
+                  status: {type: string}
+                  p_model_status: {type: string}
+                additionalProperties: true
+        '422':
+          description: Invalid run
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
   /v1/runs/{run_id}/research:
     get:
       operationId: getNflReceptionsResearchV5
       summary: Retrieve a page of the exact locked NFL research pack before checkpoint
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
-        - {name: offset, in: query, required: false, schema: {type: integer, minimum: 0, default: 0}}
-        - {name: limit, in: query, required: false, schema: {type: integer, minimum: 1, maximum: 20, default: 10}}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
+        - name: offset
+          in: query
+          required: false
+          schema: {type: integer, minimum: 0, default: 0}
+        - name: limit
+          in: query
+          required: false
+          schema: {type: integer, minimum: 1, maximum: 20, default: 10}
       responses:
-        '200': {description: Locked research page, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Locked research page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  players:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        player_id: {type: string}
+                        player_name: {type: string}
+                        current_team: {type: string}
+                      additionalProperties: true
+                  pagination:
+                    type: object
+                    properties:
+                      next_offset:
+                        type: [integer, 'null']
+                    additionalProperties: true
+                additionalProperties: true
+        '422':
+          description: Research unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
     post:
       operationId: checkpointNflReceptionsResearchV5
       summary: Persist the complete market-blind Layer 1 research receipt
-      parameters: [{$ref: '#/components/parameters/RunId'}]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       requestBody:
         required: true
         content:
@@ -66,15 +168,110 @@ paths:
               additionalProperties: false
               required: [context]
               properties:
-                context: {$ref: '#/components/schemas/AnyObject'}
+                context:
+                  type: object
+                  required: [game_id, completed_at, pack_receipt, current_information_state, research_quality_permission, evidence, team_contexts, defensive_profiles, players, material_unknowns, research_summary]
+                  properties:
+                    game_id: {type: string}
+                    completed_at: {type: string, format: date-time}
+                    pack_receipt:
+                      type: object
+                      required: [source_anchor_sha256, pack_revision, retrieved_player_count]
+                      properties:
+                        source_anchor_sha256: {type: string}
+                        pack_revision: {type: string}
+                        retrieved_player_count: {type: integer}
+                      additionalProperties: true
+                    current_information_state:
+                      type: object
+                      properties:
+                        mode: {type: string}
+                      additionalProperties: true
+                    research_quality_permission: {type: string}
+                    evidence:
+                      type: array
+                      items:
+                        type: object
+                        required: [evidence_id, source, checked_at, subject, finding, model_pathway, availability]
+                        properties:
+                          evidence_id: {type: string}
+                          source: {type: string}
+                          source_url: {type: [string, 'null']}
+                          source_date: {type: [string, 'null']}
+                          checked_at: {type: string, format: date-time}
+                          subject: {type: string}
+                          finding: {type: string}
+                          model_pathway: {type: string}
+                          availability: {type: string}
+                        additionalProperties: true
+                    team_contexts:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          team: {type: string}
+                          summary: {type: string}
+                          evidence_ids:
+                            type: array
+                            items: {type: string}
+                        additionalProperties: true
+                    defensive_profiles:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          team: {type: string}
+                        additionalProperties: true
+                    players:
+                      type: array
+                      items:
+                        type: object
+                        required: [player_id, player_name, team, research_status, evidence_ids, handoff_summary]
+                        properties:
+                          player_id: {type: string}
+                          player_name: {type: string}
+                          team: {type: string}
+                          research_status: {type: string}
+                          evidence_ids:
+                            type: array
+                            items: {type: string}
+                          handoff_summary: {type: string}
+                        additionalProperties: true
+                    material_unknowns:
+                      type: array
+                      items: {type: string}
+                    research_summary: {type: string}
+                  additionalProperties: true
       responses:
-        '200': {description: Research checkpoint receipt, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Research checkpoint receipt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string}
+                  research_receipt_sha256: {type: string}
+                additionalProperties: true
+        '422':
+          description: Checkpoint rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
   /v1/runs/{run_id}/compute:
     post:
       operationId: computeNflReceptionsFreezeV5
       summary: Execute deterministic Layer 2 and atomically freeze the complete receptions P_model
-      parameters: [{$ref: '#/components/parameters/RunId'}]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       requestBody:
         required: true
         content:
@@ -84,49 +281,179 @@ paths:
               additionalProperties: false
               required: [model_input]
               properties:
-                model_input: {$ref: '#/components/schemas/AnyObject'}
+                model_input:
+                  type: object
+                  required: [game_id, engine_version, threshold_max, teams, source_to_parameter_ledger]
+                  properties:
+                    game_id: {type: string}
+                    engine_version: {type: string}
+                    threshold_max: {type: integer, minimum: 1, maximum: 20}
+                    teams:
+                      type: array
+                      items:
+                        type: object
+                        required: [team, players, scenarios]
+                        properties:
+                          team: {type: string}
+                          players:
+                            type: array
+                            items:
+                              type: object
+                              required: [player_id, player_name, confidence, fragility, key_assumptions]
+                              properties:
+                                player_id: {type: string}
+                                player_name: {type: string}
+                                confidence: {type: string}
+                                fragility: {type: string}
+                                key_assumptions:
+                                  type: array
+                                  items: {type: string}
+                              additionalProperties: true
+                          scenarios:
+                            type: array
+                            items:
+                              type: object
+                              required: [scenario_id, weight, targetable_passes, other_share, player_params, football_rationale]
+                              properties:
+                                scenario_id: {type: string}
+                                weight: {type: number}
+                                targetable_passes:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required: [value, probability]
+                                    properties:
+                                      value: {type: integer}
+                                      probability: {type: number}
+                                    additionalProperties: false
+                                other_share: {type: number}
+                                player_params:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required: [player_id, target_method, target_rate, catch_rate]
+                                    properties:
+                                      player_id: {type: string}
+                                      target_method: {type: string, enum: [A, B]}
+                                      target_rate:
+                                        type: object
+                                        required: [mean, strength]
+                                        properties:
+                                          mean: {type: number}
+                                          strength: {type: number}
+                                        additionalProperties: false
+                                      catch_rate:
+                                        type: object
+                                        required: [mean, strength]
+                                        properties:
+                                          mean: {type: number}
+                                          strength: {type: number}
+                                        additionalProperties: false
+                                      route_counts:
+                                        type: [array, 'null']
+                                        items:
+                                          type: object
+                                          properties:
+                                            value: {type: integer}
+                                            probability: {type: number}
+                                          additionalProperties: false
+                                    additionalProperties: true
+                                football_rationale: {type: string}
+                              additionalProperties: true
+                        additionalProperties: true
+                    source_to_parameter_ledger:
+                      type: array
+                      items:
+                        type: object
+                        required: [parameter_path, evidence_ids, rationale]
+                        properties:
+                          parameter_path: {type: string}
+                          evidence_ids:
+                            type: array
+                            items: {type: string}
+                          rationale: {type: string}
+                        additionalProperties: true
+                  additionalProperties: true
       responses:
-        '200': {description: Frozen model receipt, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Frozen model receipt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  complete_model_integrity_confirmed: {type: boolean}
+                  p_model_status: {type: string}
+                additionalProperties: true
+        '422':
+          description: Compute rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
   /v1/runs/{run_id}/freeze:
     get:
       operationId: getNflReceptionsFrozenArtifactV5
       summary: Retrieve the immutable complete frozen P_model artifact
-      parameters: [{$ref: '#/components/parameters/RunId'}]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
       responses:
-        '200': {description: Frozen artifact, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
+        '200':
+          description: Frozen artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  p_model_status: {type: string}
+                additionalProperties: true
+        '422':
+          description: Frozen artifact unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
   /v1/runs/{run_id}/players/{player_id}:
     get:
       operationId: getNflReceptionsFrozenPlayerV5
       summary: Retrieve one exact frozen player ladder
       parameters:
-        - {$ref: '#/components/parameters/RunId'}
-        - {name: player_id, in: path, required: true, schema: {type: string, pattern: '^[A-Z0-9_-]{3,64}$'}}
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
+        - name: player_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[A-Z0-9_-]{3,64}$'}
       responses:
-        '200': {description: Frozen player, content: {application/json: {schema: {$ref: '#/components/schemas/AnyObject'}}}}
-        '422': {$ref: '#/components/responses/Error'}
-components:
-  parameters:
-    RunId:
-      name: run_id
-      in: path
-      required: true
-      schema: {type: string, pattern: '^[a-f0-9]{64}$'}
-  schemas:
-    AnyObject:
-      type: object
-      additionalProperties: true
-    Error:
-      type: object
-      properties:
-        error: {type: string}
-        market_data: {type: boolean}
-        p_model_status: {type: string}
-      additionalProperties: true
-  responses:
-    Error:
-      description: Request rejected by platform integrity gate
-      content:
-        application/json:
-          schema: {$ref: '#/components/schemas/Error'}
+        '200':
+          description: Frozen player
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  player_id: {type: string}
+                  freeze_receipt_sha256: {type: string}
+                additionalProperties: true
+        '422':
+          description: Frozen player unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
