@@ -1,6 +1,8 @@
 import {NflReceptionsRun, routeRun, reply} from './run.js';
 export {NflReceptionsRun};
 
+const CANONICAL_ENGINE_VERSION = 'NFL_RECEPTIONS_V5_EXACT_HBB_1.0.0';
+
 const CANONICAL_PATHWAYS = new Set([
   'TEAM_PASS_OPPORTUNITY', 'ROUTES', 'TARGETS', 'CATCH_CONVERSION', 'QB',
   'PERSONNEL', 'DEFENSE', 'WEATHER', 'ROLE', 'AVAILABILITY', 'SYSTEM', 'OTHER'
@@ -23,21 +25,47 @@ function canonicalModelPathway(value) {
   return 'OTHER';
 }
 
-async function normalizeCheckpointRequest(request) {
+async function normalizeControlRequest(request) {
   const url = new URL(request.url);
-  if (request.method !== 'POST' || !/^\/v1\/runs\/[a-f0-9]{64}\/research$/.test(url.pathname)) return request;
+  if (request.method !== 'POST') return request;
+
+  const researchPath = /^\/v1\/runs\/[a-f0-9]{64}\/research$/.test(url.pathname);
+  const computePath = /^\/v1\/runs\/[a-f0-9]{64}\/compute$/.test(url.pathname);
+  if (!researchPath && !computePath) return request;
+
   const raw = await request.clone().text();
   if (!raw) return request;
   let body;
   try { body = JSON.parse(raw); } catch { return request; }
-  const evidence = body?.context?.evidence;
-  if (!Array.isArray(evidence)) return request;
-  for (const item of evidence) {
-    if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
-    if (!Object.prototype.hasOwnProperty.call(item, 'source_url')) item.source_url = null;
-    if (!Object.prototype.hasOwnProperty.call(item, 'source_date')) item.source_date = null;
-    item.model_pathway = canonicalModelPathway(item.model_pathway);
+
+  if (researchPath) {
+    const evidence = body?.context?.evidence;
+    if (Array.isArray(evidence)) {
+      for (const item of evidence) {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+        if (!Object.prototype.hasOwnProperty.call(item, 'source_url')) item.source_url = null;
+        if (!Object.prototype.hasOwnProperty.call(item, 'source_date')) item.source_date = null;
+        item.model_pathway = canonicalModelPathway(item.model_pathway);
+      }
+    }
   }
+
+  if (computePath && body?.model_input && typeof body.model_input === 'object' && !Array.isArray(body.model_input)) {
+    body.model_input.engine_version = CANONICAL_ENGINE_VERSION;
+    for (const team of body.model_input.teams || []) {
+      for (const player of team?.players || []) {
+        if (typeof player?.confidence === 'string') player.confidence = player.confidence.trim().toUpperCase();
+        if (typeof player?.fragility === 'string') player.fragility = player.fragility.trim().toUpperCase();
+      }
+      for (const scenario of team?.scenarios || []) {
+        for (const param of scenario?.player_params || []) {
+          if (typeof param?.target_method === 'string') param.target_method = param.target_method.trim().toUpperCase();
+          if (!Object.prototype.hasOwnProperty.call(param || {}, 'route_counts')) param.route_counts = null;
+        }
+      }
+    }
+  }
+
   return new Request(request.url, {
     method: request.method,
     headers: request.headers,
@@ -52,16 +80,19 @@ export default {
       return reply({
         ok: Boolean(env.NFL_RECEPTIONS_RUNS),
         service: 'NFL_RECEPTIONS_PLATFORM_V5_CONTROL',
-        version: '1.2.1',
+        version: '1.2.2',
         market_data: false,
         durable_state: Boolean(env.NFL_RECEPTIONS_RUNS),
         source_lock: 'CONTENT_SHA256',
         fixture_binding: 'SERVER_LOCKED',
         checkpoint_pathway_normalization: true,
+        compute_engine_version: CANONICAL_ENGINE_VERSION,
+        server_owned_engine_version: true,
+        compute_request_normalization: true,
         note: 'Health is pre-market and never accesses sportsbook data.'
       }, env.NFL_RECEPTIONS_RUNS ? 200 : 503);
     }
-    const normalizedRequest = await normalizeCheckpointRequest(request);
+    const normalizedRequest = await normalizeControlRequest(request);
     const run = await routeRun(normalizedRequest, env);
     if (run) return run;
     return reply({error: 'Not found', market_data: false}, 404);
