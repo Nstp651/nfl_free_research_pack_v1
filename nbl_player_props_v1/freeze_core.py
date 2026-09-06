@@ -330,7 +330,7 @@ def build_frozen_matchup(
         "audits": {
             "market_boundary": "PASS",
             "research_binding": "PASS",
-            "server_quantitative_authority": "PASS",
+            "server_qbase_authority": "PASS",
             "scenario_weighting": "PASS",
             "probability_grid": "PASS",
             "atomic_requested_heads": "PASS",
