@@ -35,7 +35,7 @@ paths:
     post:
       operationId: evaluateNblPlayerPropsMarkets
       summary: Evaluate exact post-freeze sportsbook rows against one immutable frozen NBL P_model.
-      description: Call only after the research run is FROZEN. Every captured_at must be at or after frozen_at. Screenshot, Odds API, or public-web observations are normalized, resolved to the frozen player identity, deduplicated by exact player/stat/side/threshold with the best price retained, and evaluated without modifying P_model.
+      description: Call only after the research run is FROZEN. Every captured_at must be at or after frozen_at. Rows are resolved to frozen player identity before best-price deduplication and are evaluated without modifying P_model.
       requestBody:
         required: true
         content:
@@ -111,36 +111,25 @@ components:
       type: object
       properties:
         fixture_id: {type: string}
-        player_id: {type: string}
         player_name: {type: string}
         stat_type: {type: string}
         side: {type: string}
         threshold: {type: number}
         decimal_price: {type: number}
         bookmaker: {type: string}
-        captured_at:
-          type: string
-          format: date-time
+        captured_at: {type: string}
         source_type: {type: string}
         frozen_player_name: {type: string}
-        frozen_player_id: {type: string}
         p_win: {type: number}
         p_push: {type: number}
         p_loss: {type: number}
-        conditional_win_probability: {type: number}
         market_break_even_probability: {type: number}
-        probability_edge: {type: number}
-        fair_decimal_price: {type: number}
         ev_per_unit: {type: number}
         positive_ev: {type: boolean}
         confidence: {type: string}
         fragility: {type: string}
-        freeze_receipt_sha256:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
-        frozen_at:
-          type: string
-          format: date-time
+        freeze_receipt_sha256: {type: string}
+        frozen_at: {type: string}
         positive_edge_rank: {type: integer}
       required: [fixture_id, player_name, stat_type, side, threshold, decimal_price, bookmaker, captured_at, source_type, frozen_player_name, p_win, p_push, p_loss, market_break_even_probability, ev_per_unit, positive_ev, confidence, fragility, freeze_receipt_sha256, frozen_at]
       additionalProperties: true
@@ -150,16 +139,10 @@ components:
         market_data: {type: boolean}
         p_model_mutated: {type: boolean}
         p_model_status: {type: string}
-        run_id:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
+        run_id: {type: string}
         fixture_id: {type: string}
-        freeze_receipt_sha256:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
-        frozen_at:
-          type: string
-          format: date-time
+        freeze_receipt_sha256: {type: string}
+        frozen_at: {type: string}
         market_records_received: {type: integer}
         market_records_evaluated: {type: integer}
         evaluated:
@@ -170,8 +153,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EvaluatedMarket'
-        best_single:
-          $ref: '#/components/schemas/EvaluatedMarket'
         no_forced_bet: {type: boolean}
       required: [market_data, p_model_mutated, p_model_status, run_id, fixture_id, freeze_receipt_sha256, frozen_at, market_records_received, market_records_evaluated, evaluated, positive_edges, no_forced_bet]
-      additionalProperties: false
+      additionalProperties: true
