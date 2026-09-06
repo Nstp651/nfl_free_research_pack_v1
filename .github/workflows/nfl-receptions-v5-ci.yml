@@ -41,7 +41,13 @@ jobs:
           grep -q "target allocation" nfl_receptions_v5/worker/model_core.js
           grep -q "freeze_receipt_sha256" nfl_receptions_v5/market_worker/index.js
           grep -q "player_receptions_alternate" nfl_receptions_v5/market_worker/index.js
+          grep -q "createNflReceptionsTrackerRun" nfl_receptions_v5/tracker_openapi.yaml
+          grep -q "recordNflReceptionsBet" nfl_receptions_v5/tracker_openapi.yaml
+          grep -q "X-GPT-Action-Key" nfl_receptions_v5/tracker_openapi.yaml
+          grep -q "TRACKER RUN HANDOFF" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
+          grep -q "model_selection_id" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
           ! grep -R "ODDS_API_KEY *=.*[A-Za-z0-9]" nfl_receptions_v5 --include='*.toml' --include='*.js'
+          ! grep -R "X-GPT-Action-Key: *[A-Za-z0-9]" nfl_receptions_v5 --include='*.yaml' --include='*.yml' --include='*.md'
       - name: Control Worker Wrangler dry-run
         working-directory: nfl_receptions_v5
         env:
