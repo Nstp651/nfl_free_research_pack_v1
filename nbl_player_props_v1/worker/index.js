@@ -1,4 +1,4 @@
-import {listFixtures,response,routeMatchRuns,NblMatchRun} from './freeze_run.js';
+import {listFixtures,response,routeMatchRuns,NblMatchRun} from './freeze_run_entry.js';
 export {NblMatchRun};
 
 const cors={
