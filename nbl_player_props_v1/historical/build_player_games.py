@@ -116,12 +116,14 @@ def normalized_name_key(df: pd.DataFrame) -> pd.Series:
 
 def canonical_team_environment(team: pd.DataFrame) -> pd.DataFrame:
     match = first_col(team, "match_id")
+    season = first_col(team, "season")
     name = first_col(team, "name", "team_name")
     opp = first_col(team, "opp_name", "opponent")
-    if not match or not name or not opp:
-        raise RuntimeError("Historical team box source missing match/team/opponent identity")
+    if not match or not season or not name or not opp:
+        raise RuntimeError("Historical team box source missing season/match/team/opponent identity")
     env = pd.DataFrame({
         "match_id": team[match].astype(str),
+        "season": team[season].astype(str),
         "team": team[name].astype(str),
         "opponent": team[opp].astype(str),
         "team_points_box": ncol(team, "points", "score"),
@@ -141,13 +143,15 @@ def canonical_team_environment(team: pd.DataFrame) -> pd.DataFrame:
     env["team_possessions_est"] = (
         env["team_fga"] - env["team_orb"] + env["team_turnovers"] + 0.44 * env["team_fta"]
     )
-    if env.duplicated(["match_id", "team"]).any():
-        raise RuntimeError("Duplicate historical team-game rows")
+    identity = ["season", "match_id", "team"]
+    if env.duplicated(identity).any():
+        sample = env[env.duplicated(identity, keep=False)].head(10)
+        raise RuntimeError("Duplicate historical season+team-game rows: " + sample.to_json(orient="records"))
     oppenv = env.drop(columns=["opponent"]).rename(columns={
         "team": "opponent",
         **{c: f"opp_{c[5:]}" for c in env.columns if c.startswith("team_")},
     })
-    merged = env.merge(oppenv, on=["match_id", "opponent"], how="left")
+    merged = env.merge(oppenv, on=["season", "match_id", "opponent"], how="left")
     if "opp_possessions_est" in merged:
         merged["game_possessions_est"] = merged[["team_possessions_est", "opp_possessions_est"]].mean(axis=1)
     else:
@@ -203,25 +207,34 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
         out["minutes"] = math.nan
 
     env = canonical_team_environment(team)
-    out = out.merge(env, on=["match_id", "team", "opponent"], how="left")
+    out = out.merge(env, on=["season", "match_id", "team", "opponent"], how="left")
 
     r_match = first_col(results, "match_id")
+    r_season = first_col(results, "season")
     r_time = first_col(results, "match_time_utc", "match_time", "date", "match_date")
     if r_match and r_time:
-        lookup = results[[r_match, r_time]].copy()
-        lookup.columns = ["match_id", "match_time"]
+        cols = [r_match, r_time] if not r_season else [r_season, r_match, r_time]
+        lookup = results[cols].copy()
+        if r_season:
+            lookup.columns = ["season", "match_id", "match_time"]
+            lookup["season"] = lookup["season"].astype(str)
+            merge_keys = ["season", "match_id"]
+        else:
+            lookup.columns = ["match_id", "match_time"]
+            merge_keys = ["match_id"]
         lookup["match_id"] = lookup["match_id"].astype(str)
-        lookup = lookup.drop_duplicates("match_id")
-        out = out.merge(lookup, on="match_id", how="left")
+        lookup = lookup.drop_duplicates(merge_keys)
+        out = out.merge(lookup, on=merge_keys, how="left")
         out["match_time"] = pd.to_datetime(out["match_time"], errors="coerce", utc=True)
     else:
         out["match_time"] = pd.NaT
 
     out = out[out["player_key"].notna() & out["assists"].notna() & out["rebounds"].notna()].copy()
     out = out[(out["assists"] >= 0) & (out["rebounds"] >= 0)]
-    out = out.sort_values(["match_time", "match_id", "team", "player_key"], na_position="last").reset_index(drop=True)
-    if out.duplicated(["match_id", "team", "player_key"]).any():
-        dupes = out[out.duplicated(["match_id", "team", "player_key"], keep=False)].head(10)
+    out = out.sort_values(["match_time", "season", "match_id", "team", "player_key"], na_position="last").reset_index(drop=True)
+    identity = ["season", "match_id", "team", "player_key"]
+    if out.duplicated(identity).any():
+        dupes = out[out.duplicated(identity, keep=False)].head(10)
         raise RuntimeError("Duplicate player-game identity rows: " + dupes.to_json(orient="records"))
     return out
 
@@ -248,13 +261,14 @@ def main() -> int:
                  .groupby("player_key")["source_player_id"].nunique())
     multi_id_keys = int((id_counts > 1).sum())
     receipt = {
-        "schema_version": "0.1.3",
+        "schema_version": "0.1.4",
         "market_data": False,
+        "identity_binding": "season+match_id+team+normalized_player_name",
         "sources": receipts,
         "rows": len(games),
         "seasons": sorted(games["season"].dropna().astype(str).unique().tolist()),
         "players": int(games["player_key"].nunique()),
-        "matches": int(games["match_id"].nunique()),
+        "matches": int(games[["season", "match_id"]].drop_duplicates().shape[0]),
         "assists_non_null": int(games["assists"].notna().sum()),
         "rebounds_non_null": int(games["rebounds"].notna().sum()),
         "team_environment_match_rate": float(games["game_possessions_est"].notna().mean()),
