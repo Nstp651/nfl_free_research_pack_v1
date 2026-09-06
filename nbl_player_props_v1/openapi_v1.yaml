@@ -22,12 +22,16 @@ paths:
                   service: {type: string}
                   version: {type: string}
                   market_data: {type: boolean}
-                required: [ok, service, version, market_data]
+                  heads:
+                    type: array
+                    items: {type: string}
+                  freeze_storage: {type: boolean}
+                required: [ok, service, version, market_data, heads, freeze_storage]
                 additionalProperties: false
   /v1/fixtures:
     get:
       operationId: listNblPlayerPropsFixtures
-      summary: List sanitized NBL fixtures for one season start year.
+      summary: List sanitized future NBL fixtures for one season start year.
       parameters:
         - name: season_start
           in: query
@@ -38,7 +42,7 @@ paths:
             maximum: 2100
       responses:
         '200':
-          description: Market-blind NBL fixtures.
+          description: Market-blind future NBL fixtures.
           content:
             application/json:
               schema:
@@ -121,9 +125,7 @@ paths:
                   run_id: {type: string}
                   market_data: {type: boolean}
                   lock:
-                    type: object
-                    properties: {}
-                    additionalProperties: true
+                    $ref: '#/components/schemas/RunLock'
                   fixture:
                     $ref: '#/components/schemas/Fixture'
                   home_roster:
@@ -166,7 +168,9 @@ paths:
                   market_data: {type: boolean}
                   status: {type: string}
                   fixture_id: {type: string}
-                  research_context_sha256: {type: string}
+                  research_context_sha256:
+                    type: string
+                    pattern: '^[a-f0-9]{64}$'
                 required: [run_id, market_data, status, fixture_id, research_context_sha256]
                 additionalProperties: false
   /v1/match-runs/{run_id}/compute:
@@ -228,12 +232,14 @@ paths:
                 properties:
                   run_id: {type: string}
                   market_data: {type: boolean}
-                  freeze_receipt_sha256: {type: string}
-                  frozen_at: {type: string}
+                  freeze_receipt_sha256:
+                    type: string
+                    pattern: '^[a-f0-9]{64}$'
+                  frozen_at:
+                    type: string
+                    format: date-time
                   player:
-                    type: object
-                    properties: {}
-                    additionalProperties: true
+                    $ref: '#/components/schemas/FrozenPlayerDetail'
                 required: [run_id, market_data, freeze_receipt_sha256, frozen_at, player]
                 additionalProperties: false
 components:
@@ -252,54 +258,113 @@ components:
         id: {type: string}
         name: {type: string}
         city: {type: string}
-      required: [id, name, city]
       additionalProperties: false
     Fixture:
       type: object
       properties:
         id: {type: string}
-        start_time: {type: string}
-        round:
-          type: [integer, string, 'null']
+        start_time:
+          type: string
+          format: date-time
         status: {type: string}
         home_team:
           $ref: '#/components/schemas/Team'
         away_team:
           $ref: '#/components/schemas/Team'
         venue:
-          anyOf:
-            - $ref: '#/components/schemas/Venue'
-            - type: 'null'
+          $ref: '#/components/schemas/Venue'
       required: [id, start_time, status, home_team, away_team]
+      additionalProperties: true
+    QbaseRevision:
+      type: object
+      properties:
+        assists: {type: string}
+        rebounds: {type: string}
+      required: [assists, rebounds]
+      additionalProperties: false
+    RunLock:
+      type: object
+      properties:
+        fixture_id: {type: string}
+        fixture:
+          $ref: '#/components/schemas/Fixture'
+        season_start: {type: integer}
+        run_mode:
+          type: string
+          enum: [BOTH, ASSISTS_ONLY, REBOUNDS_ONLY]
+        source_commit:
+          type: string
+          pattern: '^[a-f0-9]{40}$'
+        asset_revision: {type: string}
+        pack_revision: {type: string}
+        snapshot_revision: {type: string}
+        qbase_revision:
+          $ref: '#/components/schemas/QbaseRevision'
+        eligibility_at:
+          type: string
+          format: date-time
+      required: [fixture_id, fixture, season_start, run_mode, source_commit, asset_revision, pack_revision, snapshot_revision, qbase_revision, eligibility_at]
       additionalProperties: false
     RunStatus:
       type: object
       properties:
-        run_id: {type: string}
+        run_id:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
         market_data: {type: boolean}
         status: {type: string}
         lock:
-          type: object
-          properties: {}
-          additionalProperties: true
+          $ref: '#/components/schemas/RunLock'
         research_complete: {type: boolean}
         freeze:
-          type: [object, 'null']
-          properties: {}
-          additionalProperties: true
+          $ref: '#/components/schemas/FreezeReceipt'
       required: [run_id, market_data, status, lock]
       additionalProperties: true
     BaselineHead:
       type: object
       properties:
-        status: {type: string}
+        status:
+          type: string
+          enum: [SERVER_QBASE_RUNTIME_SCORE, PRIOR_COMP_TRANSLATION_REQUIRED]
         mean: {type: number}
-        quant_input_receipt_sha256: {type: string}
+        quant_input_receipt_sha256:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
         missing_features:
           type: array
           items: {type: string}
+        player_prior_key: {type: string}
       required: [status]
+      additionalProperties: false
+    PriorNbl:
+      type: object
+      properties:
+        player_key: {type: string}
+        source_player_ids:
+          type: array
+          items: {type: string}
+        last_team: {type: string}
+        last_season: {type: integer}
+        last_match_time: {type: string}
+        features:
+          type: object
+          properties:
+            player_games_prior: {type: number}
+            player_season_games_prior: {type: number}
+            player_minutes_mean_3: {type: number}
+            player_minutes_mean_5: {type: number}
+            player_minutes_mean_10: {type: number}
+          additionalProperties: true
+      required: [player_key]
       additionalProperties: true
+    QbaseBaseline:
+      type: object
+      properties:
+        assists:
+          $ref: '#/components/schemas/BaselineHead'
+        rebounds:
+          $ref: '#/components/schemas/BaselineHead'
+      additionalProperties: false
     ResearchSeedPlayer:
       type: object
       properties:
@@ -310,18 +375,12 @@ components:
         position: {type: string}
         team: {type: string}
         prior_nbl:
-          type: [object, 'null']
-          properties: {}
-          additionalProperties: true
-        nbl_history_status: {type: string}
+          $ref: '#/components/schemas/PriorNbl'
+        nbl_history_status:
+          type: string
+          enum: [NBL_HISTORY_AVAILABLE, PRIOR_COMP_TRANSLATION_REQUIRED]
         qbase_baseline:
-          type: object
-          properties:
-            assists:
-              $ref: '#/components/schemas/BaselineHead'
-            rebounds:
-              $ref: '#/components/schemas/BaselineHead'
-          additionalProperties: false
+          $ref: '#/components/schemas/QbaseBaseline'
       required: [id, display_name, team, nbl_history_status, qbase_baseline]
       additionalProperties: true
     SourceReceipt:
@@ -403,8 +462,7 @@ components:
     ResearchPlayer:
       type: object
       properties:
-        player_id:
-          type: [string, 'null']
+        player_id: {type: string}
         player_name: {type: string}
         team: {type: string}
         availability_status:
@@ -427,10 +485,10 @@ components:
       properties:
         schema_version:
           type: string
-          const: nbl_fixture_research_v1
+          enum: [nbl_fixture_research_v1]
         market_data:
           type: boolean
-          const: false
+          enum: [false]
         fixture_id: {type: string}
         pack_revision: {type: string}
         run_mode:
@@ -441,7 +499,9 @@ components:
           format: date-time
         sources:
           type: object
-          properties: {}
+          properties:
+            official_fixture:
+              $ref: '#/components/schemas/SourceReceipt'
           minProperties: 1
           additionalProperties:
             $ref: '#/components/schemas/SourceReceipt'
@@ -498,7 +558,7 @@ components:
           maximum: 5
         method:
           type: string
-          const: MAX_QBASE_PRIOR_COMP
+          enum: [MAX_QBASE_PRIOR_COMP]
         receipt_sha256:
           type: string
           pattern: '^[0-9a-f]{64}$'
@@ -537,44 +597,76 @@ components:
     PlayerProjection:
       type: object
       properties:
-        player_id:
-          type: [string, 'null']
+        player_id: {type: string}
         player_name: {type: string}
         team: {type: string}
         heads:
           $ref: '#/components/schemas/Heads'
       required: [player_name, team, heads]
       additionalProperties: false
+    FrozenHeadSummary:
+      type: object
+      properties:
+        final_mean: {type: number}
+        dispersion_alpha: {type: number}
+        dispersion_source: {type: string}
+        confidence: {type: string}
+        fragility: {type: string}
+      required: [final_mean, dispersion_alpha, dispersion_source, confidence, fragility]
+      additionalProperties: false
+    FrozenHeadsSummary:
+      type: object
+      properties:
+        assists:
+          $ref: '#/components/schemas/FrozenHeadSummary'
+        rebounds:
+          $ref: '#/components/schemas/FrozenHeadSummary'
+      additionalProperties: false
+    FrozenMinutes:
+      type: object
+      properties:
+        low: {type: number}
+        mean: {type: number}
+        high: {type: number}
+        source_ids:
+          type: array
+          items: {type: string}
+        minutes_projection_sha256:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+      required: [low, mean, high, source_ids, minutes_projection_sha256]
+      additionalProperties: false
     FrozenPlayerSummary:
       type: object
       properties:
         player_key: {type: string}
-        player_id:
-          type: [string, 'null']
+        player_id: {type: string}
         player_name: {type: string}
         team: {type: string}
         availability_status: {type: string}
         projected_minutes:
-          type: object
-          properties:
-            low: {type: number}
-            mean: {type: number}
-            high: {type: number}
-            source_ids:
-              type: array
-              items: {type: string}
-            minutes_projection_sha256: {type: string}
-          additionalProperties: true
+          $ref: '#/components/schemas/FrozenMinutes'
         heads:
-          type: object
-          properties: {}
-          additionalProperties: true
+          $ref: '#/components/schemas/FrozenHeadsSummary'
       required: [player_key, player_name, team, availability_status, projected_minutes, heads]
+      additionalProperties: false
+    FreezeAudits:
+      type: object
+      properties:
+        market_boundary: {type: string}
+        research_binding: {type: string}
+        server_qbase_authority: {type: string}
+        scenario_weighting: {type: string}
+        probability_grid: {type: string}
+        atomic_requested_heads: {type: string}
+      required: [market_boundary, research_binding, server_qbase_authority, scenario_weighting, probability_grid, atomic_requested_heads]
       additionalProperties: false
     FreezeReceipt:
       type: object
       properties:
-        run_id: {type: string}
+        run_id:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
         market_data: {type: boolean}
         status: {type: string}
         fixture_id: {type: string}
@@ -583,28 +675,93 @@ components:
           type: array
           items: {type: string}
         pack_revision: {type: string}
-        research_context_sha256: {type: string}
+        research_context_sha256:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
         qbase_sha256:
-          type: object
-          properties:
-            assists: {type: string}
-            rebounds: {type: string}
-          additionalProperties: false
-        frozen_at: {type: string}
-        freeze_receipt_sha256: {type: string}
+          $ref: '#/components/schemas/QbaseRevision'
+        frozen_at:
+          type: string
+          format: date-time
+        freeze_receipt_sha256:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
         audits:
-          type: object
-          properties:
-            market_boundary: {type: string}
-            research_binding: {type: string}
-            server_quantitative_authority: {type: string}
-            scenario_weighting: {type: string}
-            probability_grid: {type: string}
-            atomic_requested_heads: {type: string}
-          additionalProperties: true
+          $ref: '#/components/schemas/FreezeAudits'
         players:
           type: array
           items:
             $ref: '#/components/schemas/FrozenPlayerSummary'
       required: [run_id, market_data, status, fixture_id, run_mode, requested_heads, pack_revision, research_context_sha256, qbase_sha256, frozen_at, freeze_receipt_sha256, audits, players]
+      additionalProperties: false
+    ProbabilityRow:
+      type: object
+      properties:
+        line: {type: number}
+        over: {type: number}
+        push: {type: number}
+        under: {type: number}
+      required: [line, over, push, under]
+      additionalProperties: false
+    LadderRow:
+      type: object
+      properties:
+        threshold: {type: integer}
+        at_least: {type: number}
+      required: [threshold, at_least]
+      additionalProperties: false
+    ProbabilityGrid:
+      type: object
+      properties:
+        distribution: {type: string}
+        mean: {type: number}
+        alpha: {type: number}
+        max_count: {type: integer}
+        at_least_ladder:
+          type: array
+          items:
+            $ref: '#/components/schemas/LadderRow'
+        half_point_grid:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProbabilityRow'
+        integer_push_grid:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProbabilityRow'
+      required: [distribution, mean, alpha, max_count, at_least_ladder, half_point_grid, integer_push_grid]
+      additionalProperties: true
+    FrozenHeadDetail:
+      type: object
+      properties:
+        qbase_mean: {type: number}
+        final_mean: {type: number}
+        dispersion_alpha: {type: number}
+        dispersion_source: {type: string}
+        probability_grid:
+          $ref: '#/components/schemas/ProbabilityGrid'
+        confidence: {type: string}
+        fragility: {type: string}
+      required: [qbase_mean, final_mean, dispersion_alpha, dispersion_source, probability_grid, confidence, fragility]
+      additionalProperties: true
+    FrozenHeadsDetail:
+      type: object
+      properties:
+        assists:
+          $ref: '#/components/schemas/FrozenHeadDetail'
+        rebounds:
+          $ref: '#/components/schemas/FrozenHeadDetail'
+      additionalProperties: false
+    FrozenPlayerDetail:
+      type: object
+      properties:
+        player_id: {type: string}
+        player_name: {type: string}
+        team: {type: string}
+        availability_status: {type: string}
+        projected_minutes:
+          $ref: '#/components/schemas/FrozenMinutes'
+        heads:
+          $ref: '#/components/schemas/FrozenHeadsDetail'
+      required: [player_name, team, availability_status, projected_minutes, heads]
       additionalProperties: true
