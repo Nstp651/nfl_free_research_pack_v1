@@ -78,10 +78,14 @@ jobs:
             'assists': {'mae':1.20,'rmse':1.75,'brier':0.070,'early_mae':1.35},
             'rebounds':{'mae':1.95,'rmse':2.55,'brier':0.085,'early_mae':2.15},
           }
+          source=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
+          latest_start=int(str(source['latest_season']).split('-')[0])
+          assert source['latest_season_minutes_non_null_rate'] >= .50, source
           for h,g in gates.items():
               a=json.loads(Path(f'/tmp/nbl-model-artifacts/qbase_{h}_v0.1.0.json').read_text())
               wf=a['walk_forward']; o=wf['overall']; early=wf['early_late']['SEASON_GAMES_0_2']
-              assert wf['first_scored_season'] <= 2018 and wf['last_scored_season'] >= 2024, wf
+              assert a['training_seasons'][1] == latest_start, (h,a['training_seasons'],source['latest_season'])
+              assert wf['first_scored_season'] <= 2018 and wf['last_scored_season'] == latest_start, (h,wf,source['latest_season'])
               assert o['n'] > 20000, o
               assert o['mae'] <= g['mae'], (h,o)
               assert o['rmse'] <= g['rmse'], (h,o)
@@ -89,7 +93,7 @@ jobs:
               assert wf['brier_at_least']['mean'] <= g['brier'], (h,wf['brier_at_least'])
               assert early['mae'] <= g['early_mae'], (h,early)
               assert wf['nb2_alpha_oos'] > 0
-              print('NBL_QBASE_PROMOTION_GATE=PASS',h,o,wf['brier_at_least']['mean'],early)
+              print('NBL_QBASE_PROMOTION_GATE=PASS',h,a['training_seasons'],wf['first_scored_season'],wf['last_scored_season'],o,wf['brier_at_least']['mean'],early)
           PY
       - name: Resolve approved QBASE file inputs
         id: paths
