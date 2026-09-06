@@ -1,0 +1,7 @@
+name = "nbl-player-props-market-v1"
+main = "index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[vars]
+RESEARCH_BASE = "https://nbl-player-props-research-v1.nickarnott01.workers.dev"
