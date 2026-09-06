@@ -23,10 +23,12 @@ jobs:
           cache-dependency-path: nbl_player_props_v1/requirements.txt
       - name: Install dependencies
         run: pip install -r nbl_player_props_v1/requirements.txt
-      - name: Unit tests
+      - name: Python unit tests
         run: pytest -q nbl_player_props_v1/tests
       - name: Compile Python
         run: python -m compileall -q nbl_player_props_v1
+      - name: Worker quantitative/freeze tests
+        run: node --test nbl_player_props_v1/worker/*.test.mjs
       - name: Live official NBL Rosetta acceptance
         working-directory: nbl_player_props_v1
         run: python source_acceptance.py --season-year 2026
