@@ -84,11 +84,7 @@ def ncol(df: pd.DataFrame, *names: str) -> pd.Series:
 
 
 def collapse_identical_duplicates(df: pd.DataFrame, identity: list[str], label: str) -> tuple[pd.DataFrame, int]:
-    """Collapse source-export duplicates only when every non-key value agrees.
-
-    nblr_data occasionally repeats the exact same team/player row. Those are safe
-    to deduplicate. Conflicting duplicate identities remain a hard integrity failure.
-    """
+    """Collapse source-export duplicates only when every non-key value agrees."""
     dup = df[df.duplicated(identity, keep=False)]
     if dup.empty:
         return df, 0
@@ -186,6 +182,38 @@ def canonical_team_environment(team: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     return merged, duplicate_count
 
 
+def result_time_lookup(results: pd.DataFrame) -> pd.DataFrame:
+    """Return one authoritative timestamp per globally unique NBL match UUID.
+
+    nblr_data's 2025-26 player/team files intentionally have blank match_time while
+    results_wide contains complete timestamps. Matching only on season+ID silently
+    failed for those rows in the prior implementation. Match IDs are UUIDs and are
+    audited here as globally unique identities; season agreement is checked after
+    the merge so a cross-season collision fails closed rather than contaminating time.
+    """
+    r_match = first_col(results, "match_id")
+    r_time = first_col(results, "match_time_utc", "match_time", "date", "match_date")
+    r_season = first_col(results, "season")
+    if not r_match or not r_time:
+        return pd.DataFrame(columns=["match_id", "_results_match_time", "_results_season"])
+    lookup = pd.DataFrame({
+        "match_id": results[r_match].astype(str),
+        "_results_match_time": results[r_time],
+        "_results_season": results[r_season].astype(str) if r_season else pd.NA,
+    })
+    conflicts = []
+    for match_id, group in lookup.groupby("match_id", sort=False):
+        times = pd.to_datetime(group["_results_match_time"], errors="coerce", utc=True).dropna().unique()
+        seasons = group["_results_season"].dropna().astype(str).unique()
+        if len(times) > 1 or len(seasons) > 1:
+            conflicts.append({"match_id": match_id, "times": [str(x) for x in times[:3]], "seasons": list(seasons[:3])})
+            if len(conflicts) >= 3:
+                break
+    if conflicts:
+        raise RuntimeError(f"Historical results match_id is not globally unique: {conflicts}")
+    return lookup.drop_duplicates("match_id", keep="first")
+
+
 def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
     match = first_col(player, "match_id")
     season = first_col(player, "season")
@@ -239,23 +267,18 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
     out = out.merge(env, on=["season", "match_id", "team", "opponent"], how="left")
     player_match_time = pd.to_datetime(out.pop("_player_match_time_raw"), errors="coerce", utc=True)
 
-    r_match = first_col(results, "match_id")
-    r_season = first_col(results, "season")
-    r_time = first_col(results, "match_time_utc", "match_time", "date", "match_date")
-    if r_match and r_time:
-        cols = [r_match, r_time] if not r_season else [r_season, r_match, r_time]
-        lookup = results[cols].copy()
-        if r_season:
-            lookup.columns = ["season", "match_id", "_results_match_time"]
-            lookup["season"] = lookup["season"].astype(str)
-            merge_keys = ["season", "match_id"]
-        else:
-            lookup.columns = ["match_id", "_results_match_time"]
-            merge_keys = ["match_id"]
-        lookup["match_id"] = lookup["match_id"].astype(str)
-        lookup = lookup.drop_duplicates(merge_keys)
-        out = out.merge(lookup, on=merge_keys, how="left")
+    lookup = result_time_lookup(results)
+    if not lookup.empty:
+        out = out.merge(lookup, on="match_id", how="left")
+        known = out["_results_season"].notna()
+        mismatch = out[known & (out["_results_season"].astype(str) != out["season"].astype(str))]
+        if not mismatch.empty:
+            raise RuntimeError(
+                "Historical result/player season mismatch for match UUID: " +
+                json.dumps(mismatch[["match_id", "season", "_results_season"]].head(5).to_dict(orient="records"))
+            )
         results_match_time = pd.to_datetime(out.pop("_results_match_time"), errors="coerce", utc=True)
+        out = out.drop(columns=["_results_season"])
         out["match_time"] = results_match_time.combine_first(player_match_time)
     else:
         out["match_time"] = player_match_time
@@ -292,15 +315,17 @@ def main() -> int:
     id_counts = (games.dropna(subset=["source_player_id"])
                  .groupby("player_key")["source_player_id"].nunique())
     multi_id_keys = int((id_counts > 1).sum())
-    latest_season = max(games["season"].dropna().astype(str).unique().tolist())
+    seasons = sorted(games["season"].dropna().astype(str).unique().tolist())
+    latest_season = seasons[-1]
     latest_rows = games[games["season"].astype(str) == latest_season]
     receipt = {
-        "schema_version": "0.1.6",
+        "schema_version": "0.1.7",
         "market_data": False,
-        "identity_binding": "season+match_id+team+normalized_player_name",
+        "identity_binding": "season+globally_unique_match_uuid+team+normalized_player_name",
+        "timestamp_binding": "results_wide.match_id -> match_time_utc, player match_time fallback",
         "sources": receipts,
         "rows": len(games),
-        "seasons": sorted(games["season"].dropna().astype(str).unique().tolist()),
+        "seasons": seasons,
         "players": int(games["player_key"].nunique()),
         "matches": int(games[["season", "match_id"]].drop_duplicates().shape[0]),
         "assists_non_null": int(games["assists"].notna().sum()),
