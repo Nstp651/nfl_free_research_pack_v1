@@ -13,7 +13,7 @@ permissions:
 jobs:
   test-source-and-model:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,6 +29,8 @@ jobs:
         run: python -m compileall -q nbl_player_props_v1
       - name: Worker quantitative/freeze tests
         run: node --test nbl_player_props_v1/worker/*.test.mjs
+      - name: Worker deployment dry run
+        run: npx --yes wrangler@4.128.0 deploy --dry-run --config nbl_player_props_v1/worker/wrangler.toml
       - name: Live official NBL Rosetta acceptance
         working-directory: nbl_player_props_v1
         run: python source_acceptance.py --season-year 2026
@@ -46,7 +48,11 @@ jobs:
           assert r['players'] > 500, r
           assert r['matches'] > 1000, r
           assert len(r['seasons']) >= 8, r
-          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']))
+          assert r['latest_season'] == max(map(str, r['seasons'])), r
+          assert r['latest_season_rows'] > 500, r
+          assert r['match_time_non_null_rate'] >= 0.99, r
+          assert r['latest_season_match_time_non_null_rate'] >= 0.99, r
+          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']), r['latest_season'], r['latest_season_rows'], r['latest_season_match_time_non_null_rate'])
           PY
       - name: Build next-game historical prior snapshot
         run: |
@@ -58,12 +64,19 @@ jobs:
           import json
           from pathlib import Path
           s=json.loads(Path('/tmp/nbl-prior-snapshot.json').read_text())
+          r=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
           assert s['market_data'] is False
           assert len(s['players']) > 500, len(s['players'])
           assert len(s['teams']) >= 10, len(s['teams'])
           assert s['historical_matches'] > 1000
           assert len(s['snapshot_revision']) == 20
-          print('NBL_PRIOR_SNAPSHOT_ACCEPTANCE=PASS', len(s['players']), len(s['teams']), s['snapshot_revision'])
+          assert s['latest_historical_season'] == r['latest_season'], (s['latest_historical_season'], r['latest_season'])
+          assert s['latest_season_timestamp_coverage'] >= 0.99, s['latest_season_timestamp_coverage']
+          latest_team_count=sum(1 for t in s['teams'].values() if str(t.get('last_season')) == r['latest_season'])
+          latest_player_count=sum(1 for p in s['players'].values() if str(p.get('last_season')) == r['latest_season'])
+          assert latest_team_count >= 10, latest_team_count
+          assert latest_player_count >= 100, latest_player_count
+          print('NBL_PRIOR_SNAPSHOT_ACCEPTANCE=PASS', len(s['players']), len(s['teams']), s['snapshot_revision'], s['latest_historical_season'], s['latest_season_timestamp_coverage'], latest_team_count, latest_player_count)
           PY
       - name: Train and walk-forward validate ASSISTS + REBOUNDS heads
         run: |
