@@ -1,9 +1,10 @@
 /** NFL receptions market adapter — Betting Platform V1.
- * POST-FREEZE ONLY. It verifies the authoritative control-plane run before
- * making any Odds API request. Health never touches market data. */
+ * POST-FREEZE ONLY. It verifies the authoritative control-plane run through a
+ * Cloudflare Service Binding before making any Odds API request. */
 const SPORT = 'americanfootball_nfl';
 const MARKETS = ['player_receptions', 'player_receptions_alternate'];
 const ODDS_HOST = 'https://api.the-odds-api.com';
+const CONTROL_INTERNAL_ORIGIN = 'https://nfl-receptions-control.internal';
 const VERSION = '1.0.0';
 const MAX_UPSTREAM_CHARS = 8_000_000;
 const MAX_RESPONSE_CHARS = 90000;
@@ -20,13 +21,17 @@ function safeRunId(v){if(!/^[a-f0-9]{64}$/.test(v||'')) fail(400,'Invalid run_id
 async function readJson(res,label){const text=await res.text();if(text.length>MAX_UPSTREAM_CHARS) fail(502,`${label} response exceeds size limit`);let value;try{value=JSON.parse(text);}catch{fail(502,`${label} returned invalid JSON`);}return {value,text};}
 function exactThreshold(point){if(typeof point!=='number'||!Number.isFinite(point)||point<0) return null;const k=Math.round(point+0.5);return Math.abs(point-(k-0.5))<=1e-9&&k>=1&&k<=20?k:null;}
 
+async function controlFetch(env,path){
+  if(!env.CONTROL_SERVICE||typeof env.CONTROL_SERVICE.fetch!=='function') fail(503,'CONTROL_SERVICE is not configured');
+  return env.CONTROL_SERVICE.fetch(new Request(`${CONTROL_INTERNAL_ORIGIN}${path}`,{
+    headers:{'user-agent':`nfl-receptions-market/${VERSION}`},
+  }));
+}
+
 export async function verifyFrozenRun(env,runId){
-  if(!env.CONTROL_BASE_URL) fail(503,'CONTROL_BASE_URL is not configured');
-  const base=String(env.CONTROL_BASE_URL).replace(/\/+$/,'');
-  requireThat(/^https:\/\//.test(base),'CONTROL_BASE_URL must use HTTPS');
-  const res=await fetch(`${base}/v1/runs/${runId}`,{headers:{'user-agent':`nfl-receptions-market/${VERSION}`},signal:AbortSignal.timeout(10000)});
+  const res=await controlFetch(env,`/v1/runs/${runId}`);
   const {value}=await readJson(res,'Control plane');
-  if(!res.ok) fail(503,`Control plane unavailable (${res.status})`);
+  if(!res.ok) fail(res.status===422?422:503,`Control plane unavailable (${res.status})`);
   requireThat(value.run_id===runId,'Control-plane run identity mismatch');
   requireThat(value.status==='FROZEN'&&value.p_model_status==='FROZEN','Market access denied — P_model is not frozen');
   requireThat(value.freeze&&/^[a-f0-9]{64}$/.test(value.freeze.freeze_receipt_sha256||''),'Frozen run receipt missing');
@@ -37,10 +42,9 @@ export async function verifyFrozenRun(env,runId){
 }
 
 async function fetchFrozenArtifact(env,runId,status){
-  const base=String(env.CONTROL_BASE_URL).replace(/\/+$/,'');
-  const res=await fetch(`${base}/v1/runs/${runId}/freeze`,{headers:{'user-agent':`nfl-receptions-market/${VERSION}`},signal:AbortSignal.timeout(10000)});
+  const res=await controlFetch(env,`/v1/runs/${runId}/freeze`);
   const {value}=await readJson(res,'Frozen artifact');
-  if(!res.ok) fail(503,`Frozen artifact unavailable (${res.status})`);
+  if(!res.ok) fail(res.status===422?422:503,`Frozen artifact unavailable (${res.status})`);
   requireThat(value.run_id===runId&&value.p_model_status==='FROZEN','Frozen artifact identity/status mismatch');
   requireThat(value.freeze?.freeze_receipt_sha256===status.freeze.freeze_receipt_sha256,'Frozen artifact receipt does not match control-plane status');
   requireThat(Array.isArray(value.freeze?.players)&&value.freeze.players.length>0,'Frozen artifact has no players');
@@ -110,10 +114,10 @@ export default {async fetch(request,env={}){
   if(request.method!=='GET') return reply({error:'GET requests only'},405);
   try{
     const url=new URL(request.url);
-    if(url.pathname==='/health') return reply({ok:Boolean(env.CONTROL_BASE_URL&&env.ODDS_API_KEY),service:'NFL_RECEPTIONS_MARKET_GATEWAY',version:VERSION,market_group:'nfl-receptions',sport_key:SPORT,region:'au',markets:MARKETS,configured:Boolean(env.CONTROL_BASE_URL&&env.ODDS_API_KEY),note:'Health performs no control-plane market call and no Odds API request.'},env.CONTROL_BASE_URL&&env.ODDS_API_KEY?200:503);
+    if(url.pathname==='/health') return reply({ok:Boolean(env.CONTROL_SERVICE&&env.ODDS_API_KEY),service:'NFL_RECEPTIONS_MARKET_GATEWAY',version:VERSION,market_group:'nfl-receptions',sport_key:SPORT,region:'au',markets:MARKETS,configured:Boolean(env.CONTROL_SERVICE&&env.ODDS_API_KEY),control_transport:'SERVICE_BINDING',note:'Health performs no control-plane market call and no Odds API request.'},env.CONTROL_SERVICE&&env.ODDS_API_KEY?200:503);
     if(url.pathname!=='/v1/receptions') return reply({error:'Not found'},404);
     const runId=safeRunId(url.searchParams.get('run_id'));
-    // Critical ordering: freeze verification happens before ANY Odds API call.
+    // Critical ordering: authoritative freeze verification happens before ANY Odds API call.
     const run=await verifyFrozenRun(env,runId);
     const freeze=await fetchFrozenArtifact(env,runId,run);
     // Only after both status and immutable artifact receipts are verified may market data be touched.
