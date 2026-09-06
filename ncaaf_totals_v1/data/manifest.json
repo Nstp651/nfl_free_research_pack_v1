@@ -5,8 +5,8 @@
     "repository": "https://github.com/sportsdataverse/sportsdataverse-data"
   },
   "fixture_count": 51,
-  "generated_at_utc": "2026-09-06T00:41:25.564585+00:00",
-  "last_checked_at_utc": "2026-09-06T00:41:25.564585+00:00",
+  "generated_at_utc": "2026-09-06T06:33:36.637129+00:00",
+  "last_checked_at_utc": "2026-09-06T06:33:36.637129+00:00",
   "limitations": [
     "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
     "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
@@ -17,7 +17,7 @@
     {
       "current_season_data_through_week": null,
       "game_count": 51,
-      "pack_revision": "03bae4e2c92131d5",
+      "pack_revision": "c419d9e74cab8c6f",
       "season": 2026,
       "slate_id": "2026_01",
       "week": 1
