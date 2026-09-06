@@ -1,73 +1,99 @@
 # NBL Player Props V1
 
-GitHub-first production build for Nick's NBL match-by-match player-prop model.
+GitHub-first production build for Nick's match-by-match NBL player-prop model.
 
 ## Product shape
 One Custom GPT / one fixture research pass / two independent quantitative heads:
 - ASSISTS
 - REBOUNDS
 
-Run modes: `BOTH`, `ASSISTS_ONLY`, `REBOUNDS_ONLY`.
+Run modes: `BOTH` (default), `ASSISTS_ONLY`, `REBOUNDS_ONLY`.
 
-## Current build checkpoint
-The feature branch now contains the complete V1 source architecture rather than only a data/model prototype:
-- official NBL/Genius Rosetta fixture and roster client with strict market-boundary sanitization;
-- free historical nblR/nblr_data player-game spine;
-- leak-safe shifted pregame features and temporal walk-forward validation;
-- independently trained ASSISTS and REBOUNDS QBASE heads;
-- temporal-OOS NB2 dispersion and exact count / at-least / half-point / integer-push probability grids;
-- canonical immutable QBASE artifacts and historical prior snapshot under `data/manifest.json`;
-- routine prior refresh architecture with QBASE retraining explicit-only;
-- server-side returning-player QBASE runtime scoring and minutes recomputation;
-- explicit prior-competition translation contract for new-to-NBL players;
-- evidence-bound current research checkpoint;
-- Durable Object persistent match run and atomic dual-head freeze;
-- immutable freeze receipt plus independent `player_model_sha256` binding for each full frozen player payload;
-- separate post-freeze Market Worker with exact freeze/player binding, post-freeze timestamp enforcement, cross-source best-price deduplication, exact-threshold mapping and push-aware EV;
-- Custom GPT Research and Market OpenAPI schemas;
-- production methodology, Instructions, launch prompt and install guide;
-- Python reference implementation and JS/Python integrity tests.
+## Production architecture
+`market-blind structured priors -> current fixture/player research -> stat-specific scenarios -> server-authoritative QBASE translation -> atomic P_model freeze -> separate post-freeze market gateway -> ranking -> Nick Bet Tracker`
 
-The branch remains a draft until repository verification, Cloudflare deployment health and real Custom GPT Action/E2E acceptance are all demonstrated. Source completeness is not the same as production acceptance.
+The Custom GPT orchestrates and performs current qualitative research; server-side Workers own identity, QBASE authority, immutable run state, probability generation and freeze integrity.
 
-## Source policy
-Layers 0-2 never read sportsbook lines, odds, prices, consensus or betting-derived fields.
+### Research / freeze Worker
+- official NBL/Genius Rosetta fixture + roster source;
+- immutable source commit / runtime-asset revision lock per run;
+- one evidence-bound current research checkpoint;
+- returning-player QBASE runtime score and minutes recomputation performed server-side;
+- explicit prior-competition translation path for new-to-NBL players;
+- persistent Durable Object matchup run;
+- atomic BOTH-head freeze;
+- immutable freeze receipt and per-player model hashes.
 
-Current structured source: nbl.com.au Rosetta / Genius Sports.
-Historical source: JaseZiv/nblr_data public GitHub releases.
+### Market Worker
+Separate Worker with no authority to create or modify P_model. It:
+- accepts only post-freeze observations;
+- binds to exact run / freeze receipt / player-model hash;
+- rejects observations captured before `frozen_at`;
+- resolves player identity before cross-source deduplication;
+- keeps best price by exact player/stat/side/threshold;
+- maps exact integer/half-point frozen lines only;
+- uses explicit push-aware EV;
+- never forces a bet.
 
-Current reporting and official team/NBL evidence are researched separately by the GPT and checkpointed before freeze. Structured historical data is a prior, not current-role truth.
+### Bet Tracker
+A third Custom GPT Action connects to the existing Nick Bet Tracker after Layer 4. Frozen model selections are stored once; a real wager is recorded only after Nick explicitly confirms bookmaker, accepted odds and stake. Tracker data never feeds Layers 1-2.
 
-## Quantitative philosophy
-Historical prediction uses only information available before the target game. Player/team/opponent rolling values are shifted one completed game before calculation. The historical heads are conditional on the player taking the court; current availability, minutes and role remain explicit live-research inputs.
+## Historical source and QBASE
+Free historical source: `JaseZiv/nblr_data` public releases.
 
-Returning-player QBASE means are server-authoritative. Context can move the final P_model only through explicit evidence-bound scenarios. New-to-NBL players are handled through prior-competition translation with explicit uncertainty rather than silent average imputation.
+Canonical source currently covers:
+- 2015-16 through 2025-26;
+- 36,428 player-game rows;
+- 616 players;
+- 1,572 matches;
+- 100% game-time coverage;
+- 100% latest-season minutes coverage after row-level seconds -> minutes fallback.
 
-Model promotion is based on temporal out-of-sample calibration and count error. Routine data refreshes update priors without silently retraining QBASE.
+The 2026-27 preseason QBASE promotion gate requires training and walk-forward scoring through the latest completed season (2025-26), not merely presence of those rows in the source table.
 
-## Market optionality
-Post-freeze Layer 3 may use:
-1. The Odds API if NBL assists/rebounds props are actually returned;
-2. user sportsbook screenshots, including Bet365;
-3. clean public-web prices on a best-effort basis.
+Latest validated candidate evidence from CI:
 
-Every observation must be captured at or after the immutable `frozen_at`. Rows are resolved to the exact frozen player first, then the best valid price is retained for each exact player/stat/side/threshold. P_model never depends on market-source availability.
+| Head | OOS N | MAE | RMSE | Bias actual-pred | Mean threshold Brier | NB2 alpha | Early-season MAE |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ASSISTS | 24,208 | 1.1324 | 1.5896 | -0.0393 | 0.06244 | 0.14517 | 1.1532 |
+| REBOUNDS | 24,208 | 1.8158 | 2.3931 | +0.0247 | 0.07548 | 0.13447 | 1.9049 |
+
+Both selected Poisson mean models with temporal-OOS NB2 dispersion. Model-family selection is driven by temporal threshold calibration first, then count error; sophistication is never preferred narratively.
+
+## Source / leakage policy
+Layers 0-2 never read sportsbook odds, lines, prices, betting consensus or betting-derived features.
+
+Historical player/team/opponent rolling features are shifted one completed game before every target observation. The QBASE is conditional on the player taking the court; current availability, minutes, role, lineup, coaching and import context are rebuilt before freeze.
+
+## Early-season edge design
+2025-26 production is statistical prior evidence for 2026-27. Current role is reconstructed from:
+- roster turnover and imports;
+- vacated minutes / creation / rebounding responsibility;
+- new coaches and systems;
+- projected starters and rotation;
+- preseason / Blitz deployment;
+- injuries and late news;
+- prior-competition translation for new arrivals.
+
+Prior-season production is never treated as current role by default.
+
+## Runtime assets
+`nbl_player_props_v1/data/manifest.json` cryptographically binds:
+- immutable ASSISTS QBASE;
+- immutable REBOUNDS QBASE;
+- refreshable historical prior snapshot;
+- source receipt.
+
+Routine scheduled refresh updates the prior/source assets only. QBASE retraining/promotion is explicit and must pass latest-season plus quantitative gates.
 
 ## Production files
 - `NBL_ASSISTS_REBOUNDS_4_LAYER_MASTER_PRODUCTION_V1.0.md`
 - `GPT_INSTRUCTIONS_PRODUCTION_V1.0.md`
 - `LAUNCH_PROMPT_PRODUCTION_V1.0.md`
 - `INSTALL_PRODUCTION_V1.0.md`
-- `openapi_v1.yaml`
-- `market_openapi_v1.yaml`
+- `openapi_v1.yaml` — Research/Freeze Action
+- `market_openapi_v1.yaml` — Market Action
+- `tracker_openapi_v1.yaml` — Nick Bet Tracker Action
 
-## Production acceptance gate
-Do not call V1 production-ready until:
-- unit/integrity suites pass;
-- Research Worker verification passes;
-- Market Worker verification passes;
-- Cloudflare production health is confirmed;
-- both Custom GPT Action schemas import cleanly;
-- one live future-fixture BOTH run freezes atomically and preserves receipt/hash identity on retry;
-- post-freeze market evaluation verifies exact freeze receipt and per-player payload hash;
-- pre-freeze and pre-frozen_at market attempts are rejected.
+## Final acceptance
+Do not call V1 production-ready until the PR's production acceptance gates are closed: final CI, coherent promoted assets, both Cloudflare Workers healthy, all three Custom GPT Actions import cleanly, one live future-fixture BOTH freeze E2E, post-freeze market hash/timestamp acceptance, and Tracker health / real later confirmed-wager path.
