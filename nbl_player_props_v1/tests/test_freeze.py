@@ -12,6 +12,17 @@ sys.path.insert(0, str(ROOT))
 from freeze_core import build_frozen_matchup, validate_frozen_matchup  # noqa: E402
 from research_contract import validate_research_context  # noqa: E402
 
+H = {
+    "assist_server": "a" * 64,
+    "rebound_server": "b" * 64,
+    "low": "c" * 64,
+    "base": "d" * 64,
+    "high": "e" * 64,
+    "rebound": "f" * 64,
+    "prior": "1" * 64,
+    "dispersion": "2" * 64,
+}
+
 
 def research_context():
     return {
@@ -33,10 +44,7 @@ def research_context():
                 "checked_at": "2026-09-06T00:58:00Z",
             },
         },
-        "fixture_context": {
-            "status": "scheduled",
-            "source_ids": ["official"],
-        },
+        "fixture_context": {"status": "scheduled", "source_ids": ["official"]},
         "players": [
             {
                 "player_id": "p1",
@@ -86,6 +94,9 @@ def projections():
             "heads": {
                 "assists": {
                     "qbase_mean": 5.4,
+                    "server_qbase_source": "SERVER_QBASE_RUNTIME_SCORE",
+                    "server_qbase_receipt_sha256": H["assist_server"],
+                    "server_player_prior_key": "testguard",
                     "confidence": "B",
                     "fragility": "MEDIUM",
                     "scenarios": [
@@ -96,6 +107,7 @@ def projections():
                             "method": "QBASE_MINUTES_RECOMPUTE",
                             "evidence_source_ids": ["official", "report"],
                             "assumptions": ["27 minute downside"],
+                            "quant_input_receipt_sha256": H["low"],
                         },
                         {
                             "id": "base",
@@ -104,6 +116,7 @@ def projections():
                             "method": "QBASE_RUNTIME_SCORE",
                             "evidence_source_ids": ["report"],
                             "assumptions": ["30 minute primary creator"],
+                            "quant_input_receipt_sha256": H["base"],
                         },
                         {
                             "id": "high_minutes",
@@ -112,11 +125,15 @@ def projections():
                             "method": "QBASE_MINUTES_RECOMPUTE",
                             "evidence_source_ids": ["official", "report"],
                             "assumptions": ["33 minute upside"],
+                            "quant_input_receipt_sha256": H["high"],
                         },
                     ],
                 },
                 "rebounds": {
                     "qbase_mean": 4.1,
+                    "server_qbase_source": "SERVER_QBASE_RUNTIME_SCORE",
+                    "server_qbase_receipt_sha256": H["rebound_server"],
+                    "server_player_prior_key": "testguard",
                     "confidence": "B",
                     "fragility": "LOW",
                     "scenarios": [
@@ -127,6 +144,7 @@ def projections():
                             "method": "QBASE_RUNTIME_SCORE",
                             "evidence_source_ids": ["report"],
                             "assumptions": ["Rebound role stable"],
+                            "quant_input_receipt_sha256": H["rebound"],
                         }
                     ],
                 },
@@ -149,8 +167,15 @@ def test_atomic_dual_head_freeze_and_hash_validation():
     assert frozen["status"] == "FROZEN"
     assert frozen["requested_heads"] == ["assists", "rebounds"]
     assert frozen["audits"]["atomic_requested_heads"] == "PASS"
+    assert frozen["audits"]["server_quantitative_authority"] == "PASS"
     assists = frozen["players"][0]["heads"]["assists"]
     assert assists["final_mean"] == pytest.approx(0.2 * 4.7 + 0.6 * 5.6 + 0.2 * 6.2)
+    assert assists["server_quantitative_attestation"] == {
+        "source": "SERVER_QBASE_RUNTIME_SCORE",
+        "receipt_sha256": H["assist_server"],
+        "player_prior_key": "testguard",
+    }
+    assert assists["dispersion_source"] == "QBASE_TEMPORAL_OOS"
     assert assists["probability_grid"]["half_point_grid"]
     for row in assists["probability_grid"]["integer_push_grid"]:
         assert row["over"] + row["push"] + row["under"] == pytest.approx(1.0)
@@ -161,11 +186,7 @@ def test_both_mode_refuses_partial_head_freeze():
     p = projections()
     del p[0]["heads"]["rebounds"]
     with pytest.raises(ValueError, match="missing requested heads"):
-        build_frozen_matchup(
-            research_context(),
-            {"assists": qbase("assists"), "rebounds": qbase("rebounds")},
-            p,
-        )
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
 
 
 def test_market_field_contamination_fails_before_freeze():
@@ -179,33 +200,82 @@ def test_scenario_weights_must_sum_exactly_to_one():
     p = projections()
     p[0]["heads"]["assists"]["scenarios"][0]["weight"] = 0.1
     with pytest.raises(ValueError, match="weights must sum"):
-        build_frozen_matchup(
-            research_context(),
-            {"assists": qbase("assists"), "rebounds": qbase("rebounds")},
-            p,
-        )
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
 
 
 def test_unknown_evidence_source_fails():
     p = projections()
     p[0]["heads"]["rebounds"]["scenarios"][0]["evidence_source_ids"] = ["not-a-source"]
     with pytest.raises(ValueError, match="unknown source ids"):
-        build_frozen_matchup(
-            research_context(),
-            {"assists": qbase("assists"), "rebounds": qbase("rebounds")},
-            p,
-        )
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
 
 
 def test_out_player_cannot_be_frozen():
     c = research_context()
     c["players"][0]["availability_status"] = "OUT"
     with pytest.raises(ValueError, match="cannot freeze modeled OUT player"):
-        build_frozen_matchup(
-            c,
-            {"assists": qbase("assists"), "rebounds": qbase("rebounds")},
-            projections(),
-        )
+        build_frozen_matchup(c, {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, projections())
+
+
+def test_server_attestation_and_scenario_receipts_are_mandatory():
+    p = projections()
+    del p[0]["heads"]["assists"]["server_qbase_source"]
+    with pytest.raises(ValueError, match="server_qbase_source invalid"):
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
+
+    p = projections()
+    del p[0]["heads"]["rebounds"]["scenarios"][0]["quant_input_receipt_sha256"]
+    with pytest.raises(ValueError, match="quant input receipt required"):
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
+
+
+def test_prior_comp_translation_requires_widening_contract():
+    p = projections()
+    p[0]["heads"]["assists"] = {
+        "qbase_mean": 5.8,
+        "server_qbase_source": "PRIOR_COMP_TRANSLATION",
+        "server_qbase_receipt_sha256": None,
+        "server_player_prior_key": None,
+        "confidence": "C",
+        "fragility": "HIGH",
+        "scenarios": [
+            {
+                "id": "translated",
+                "weight": 1.0,
+                "mean": 5.8,
+                "method": "PRIOR_COMP_TRANSLATION",
+                "evidence_source_ids": ["report"],
+                "assumptions": ["Prior competition role translated to NBL"],
+                "quant_input_receipt_sha256": H["prior"],
+            }
+        ],
+        "dispersion_override": {
+            "alpha": 0.5,
+            "method": "MAX_QBASE_PRIOR_COMP",
+            "receipt_sha256": H["dispersion"],
+        },
+    }
+    frozen = build_frozen_matchup(
+        research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p
+    )
+    assists = frozen["players"][0]["heads"]["assists"]
+    assert assists["dispersion_alpha"] == 0.5
+    assert assists["dispersion_source"] == "MAX_QBASE_PRIOR_COMP"
+    assert assists["server_quantitative_attestation"]["source"] == "PRIOR_COMP_TRANSLATION"
+
+    p[0]["heads"]["assists"]["dispersion_override"]["alpha"] = 0.1
+    with pytest.raises(ValueError, match="may not narrow QBASE"):
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
+
+
+def test_translated_head_cannot_claim_returning_player_receipt():
+    p = projections()
+    h = p[0]["heads"]["assists"]
+    h["server_qbase_source"] = "PRIOR_COMP_TRANSLATION"
+    h["server_qbase_receipt_sha256"] = H["assist_server"]
+    h["server_player_prior_key"] = None
+    with pytest.raises(ValueError, match="cannot claim server QBASE receipt"):
+        build_frozen_matchup(research_context(), {"assists": qbase("assists"), "rebounds": qbase("rebounds")}, p)
 
 
 def test_freeze_receipt_detects_mutation():
