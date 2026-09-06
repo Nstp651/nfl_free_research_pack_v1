@@ -56,7 +56,7 @@ Require:
 - original `frozen_at`;
 - immutable `freeze_receipt_sha256`;
 - each `player_model_sha256`;
-- audits PASS: market_boundary, research_binding, server_quantitative_authority, scenario_weighting, probability_grid, atomic_requested_heads.
+- audits PASS: market_boundary, research_binding, server_qbase_authority, scenario_weighting, probability_grid, atomic_requested_heads.
 
 No market before complete freeze.
 
