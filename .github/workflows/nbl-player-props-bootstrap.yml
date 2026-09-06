@@ -1,0 +1,130 @@
+name: NBL Player Props Bootstrap Assets
+
+on:
+  push:
+    branches: [feature/nbl-player-props-v1]
+    paths:
+      - '.github/workflows/nbl-player-props-bootstrap.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nbl-player-props-bootstrap-assets
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/nbl-player-props-v1
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: nbl_player_props_v1/requirements.txt
+      - name: Install dependencies
+        run: pip install -r nbl_player_props_v1/requirements.txt
+      - name: Integrity tests
+        run: |
+          pytest -q nbl_player_props_v1/tests
+          python -m compileall -q nbl_player_props_v1
+          node --test nbl_player_props_v1/worker/*.test.mjs
+          npx --yes wrangler@4.128.0 deploy --dry-run --config nbl_player_props_v1/worker/wrangler.toml
+      - name: Build canonical market-blind historical source
+        run: |
+          python nbl_player_props_v1/historical/build_player_games.py \
+            --output /tmp/nbl-player-games.csv.gz \
+            --receipt /tmp/nbl-source-receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
+          assert r['market_data'] is False
+          assert r['rows'] > 20000
+          assert r['players'] > 500
+          assert r['matches'] > 1000
+          assert r['match_time_non_null_rate'] >= 0.99
+          assert r['latest_season_match_time_non_null_rate'] >= 0.99
+          print('NBL_BOOTSTRAP_SOURCE_GATE=PASS',r['rows'],r['players'],r['matches'],r['latest_season'])
+          PY
+      - name: Build next-game prior snapshot
+        run: |
+          python nbl_player_props_v1/historical/build_prior_snapshot.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output /tmp/nbl-prior-snapshot.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('/tmp/nbl-prior-snapshot.json').read_text())
+          assert s['market_data'] is False
+          assert len(s['players']) > 500
+          assert len(s['teams']) >= 10
+          assert s['historical_matches'] > 1000
+          assert s['latest_season_timestamp_coverage'] >= 0.99
+          print('NBL_BOOTSTRAP_PRIOR_GATE=PASS',len(s['players']),len(s['teams']),s['snapshot_revision'])
+          PY
+      - name: Train and promotion-gate both immutable QBASE heads
+        run: |
+          mkdir -p /tmp/nbl-model-artifacts /tmp/nbl-model-reports
+          python nbl_player_props_v1/model/train_heads.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output-dir /tmp/nbl-model-artifacts \
+            --report-dir /tmp/nbl-model-reports
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gates={
+            'assists': {'mae':1.20,'rmse':1.75,'brier':0.070,'early_mae':1.35},
+            'rebounds':{'mae':1.95,'rmse':2.55,'brier':0.085,'early_mae':2.15},
+          }
+          for h,g in gates.items():
+              a=json.loads(Path(f'/tmp/nbl-model-artifacts/qbase_{h}_v0.1.0.json').read_text())
+              assert a['market_data'] is False and a['stat_type']==h
+              wf=a['walk_forward']; o=wf['overall']; early=wf['early_late']['SEASON_GAMES_0_2']
+              assert wf['first_scored_season'] <= 2018 and wf['last_scored_season'] >= 2024
+              assert o['n'] > 20000
+              assert o['mae'] <= g['mae']
+              assert o['rmse'] <= g['rmse']
+              assert abs(o['bias_actual_minus_pred']) <= 0.15
+              assert wf['brier_at_least']['mean'] <= g['brier']
+              assert early['mae'] <= g['early_mae']
+              assert wf['nb2_alpha_oos'] > 0
+              print('NBL_BOOTSTRAP_QBASE_GATE=PASS',h,o,wf['brier_at_least']['mean'],early)
+          PY
+      - name: Publish immutable runtime assets
+        run: |
+          python nbl_player_props_v1/publish_assets.py \
+            --assists /tmp/nbl-model-artifacts/qbase_assists_v0.1.0.json \
+            --rebounds /tmp/nbl-model-artifacts/qbase_rebounds_v0.1.0.json \
+            --prior /tmp/nbl-prior-snapshot.json \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output-dir nbl_player_props_v1/data
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path('nbl_player_props_v1/data/manifest.json').read_text())
+          assert m['schema_version']=='nbl_runtime_assets_v1'
+          assert m['market_data'] is False
+          assert len(m['asset_revision'])==20
+          assert m['integrity']['qbase_retraining_is_explicit_only'] is True
+          assert m['integrity']['routine_refresh_changes_prior_not_model'] is True
+          print('NBL_BOOTSTRAP_RUNTIME_ASSET_GATE=PASS',m['asset_revision'],m['prior_snapshot']['snapshot_revision'])
+          PY
+      - name: Commit validated bootstrap assets to feature branch
+        run: |
+          git config user.name 'nbl-assets-bot'
+          git config user.email 'nbl-assets-bot@users.noreply.github.com'
+          git add nbl_player_props_v1/data/
+          if git diff --cached --quiet; then
+            echo 'No NBL bootstrap asset changes.'
+          else
+            git commit -m 'Publish validated NBL V1 runtime assets'
+            git push origin HEAD:feature/nbl-player-props-v1
+          fi
