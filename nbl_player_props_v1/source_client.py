@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Read-only NBL/Genius source client for the player-props research pack.
 
-The NBL Rosetta schedule response contains an `odds` property. Layers 0-2 must
-remain market-blind, so schedule records are rebuilt from strict top-level AND
-nested allow-lists immediately at the source boundary. No bookmaker/price field
-is ever returned to the research pack.
+The NBL Rosetta schedule response contains betting metadata at both fixture level
+and inside nested season/competition objects. Layers 0-2 must remain market-blind,
+so schedule records are rebuilt from strict top-level and nested allow-lists at the
+source boundary. No bookmaker/price/odds field is ever returned to the model pack.
 """
 from __future__ import annotations
 
@@ -33,13 +33,14 @@ MARKET_KEY = re.compile(
 )
 SAFE_MATCH_KEYS = {
     "id", "external_id", "start_time", "start_time_datetime", "round", "override_round",
-    "season", "match_status", "status", "match_type", "match_slug", "match_title",
+    "match_status", "status", "match_type", "match_slug", "match_title",
     "home_score", "away_score", "attendance", "date_updated",
 }
 SAFE_TEAM_KEYS = {
     "id", "external_id", "name", "team_code", "short_name", "nickname", "team_logo",
 }
 SAFE_VENUE_KEYS = {"id", "external_id", "name", "city", "state", "country"}
+SAFE_SEASON_KEYS = {"id", "external_id", "name", "year", "season_type", "start_date", "end_date"}
 
 
 class SourceError(RuntimeError):
@@ -69,6 +70,7 @@ def safe_fixture(row: dict[str, Any]) -> dict[str, Any]:
     out["home_team"] = _allow_nested(row.get("home_team"), SAFE_TEAM_KEYS)
     out["away_team"] = _allow_nested(row.get("away_team"), SAFE_TEAM_KEYS)
     out["venue"] = _allow_nested(row.get("venue"), SAFE_VENUE_KEYS)
+    out["season"] = _allow_nested(row.get("season"), SAFE_SEASON_KEYS)
     hits = market_key_hits(out)
     if hits:
         raise SourceError("Safe fixture allow-list retained market fields: " + ", ".join(hits[:10]))
@@ -149,7 +151,7 @@ class RosettaClient:
             data=clean,
             receipt={
                 **raw.receipt,
-                "research_allowlist": "SAFE_MATCH_KEYS_V2_DEEP",
+                "research_allowlist": "SAFE_MATCH_KEYS_V3_DEEP_SEASON",
                 "market_fields_exposed_to_model": False,
             },
         )
