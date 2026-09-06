@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: NFL Receptions V5 Control Plane
-  version: 5.0.1
+  version: 5.0.2
   description: Betting Platform V1 pre-market control plane. Locks research, checkpoints market-blind context, executes Layer 2 and persists immutable P_model. No sportsbook data.
 servers:
   - url: https://nfl-receptions-platform-v5.nickarnott01.workers.dev
@@ -9,6 +9,7 @@ paths:
   /health:
     get:
       operationId: healthNflReceptionsV5
+      x-openai-isConsequential: false
       summary: Check NFL V5 control-plane state service
       responses:
         '200':
@@ -33,6 +34,7 @@ paths:
   /v1/runs:
     post:
       operationId: createNflReceptionsRunV5
+      x-openai-isConsequential: false
       summary: Start and lock one new pre-market NFL fixture run
       requestBody:
         required: true
@@ -73,6 +75,7 @@ paths:
   /v1/runs/{run_id}:
     get:
       operationId: getNflReceptionsRunV5
+      x-openai-isConsequential: false
       summary: Get authoritative run state and receipts
       parameters:
         - name: run_id
@@ -104,6 +107,7 @@ paths:
   /v1/runs/{run_id}/research:
     get:
       operationId: getNflReceptionsResearchV5
+      x-openai-isConsequential: false
       summary: Retrieve a page of the exact locked NFL research pack before checkpoint
       parameters:
         - name: run_id
@@ -153,6 +157,7 @@ paths:
                 additionalProperties: true
     post:
       operationId: checkpointNflReceptionsResearchV5
+      x-openai-isConsequential: false
       summary: Persist the complete market-blind Layer 1 research receipt
       parameters:
         - name: run_id
@@ -201,8 +206,12 @@ paths:
                           checked_at: {type: string, format: date-time}
                           subject: {type: string}
                           finding: {type: string}
-                          model_pathway: {type: string}
-                          availability: {type: string}
+                          model_pathway:
+                            type: string
+                            enum: [TEAM_PASS_OPPORTUNITY, ROUTES, TARGETS, CATCH_CONVERSION, QB, PERSONNEL, DEFENSE, WEATHER, ROLE, AVAILABILITY, SYSTEM, OTHER]
+                          availability:
+                            type: string
+                            enum: [VERIFIED, PARTIAL, UNAVAILABLE, UNKNOWN]
                         additionalProperties: true
                     team_contexts:
                       type: array
@@ -266,6 +275,7 @@ paths:
   /v1/runs/{run_id}/compute:
     post:
       operationId: computeNflReceptionsFreezeV5
+      x-openai-isConsequential: false
       summary: Execute deterministic Layer 2 and atomically freeze the complete receptions P_model
       parameters:
         - name: run_id
@@ -398,6 +408,7 @@ paths:
   /v1/runs/{run_id}/freeze:
     get:
       operationId: getNflReceptionsFrozenArtifactV5
+      x-openai-isConsequential: false
       summary: Retrieve the immutable complete frozen P_model artifact
       parameters:
         - name: run_id
@@ -427,6 +438,7 @@ paths:
   /v1/runs/{run_id}/players/{player_id}:
     get:
       operationId: getNflReceptionsFrozenPlayerV5
+      x-openai-isConsequential: false
       summary: Retrieve one exact frozen player ladder
       parameters:
         - name: run_id
