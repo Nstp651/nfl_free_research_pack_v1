@@ -200,6 +200,7 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
     home_away = first_col(player, "home_away")
     points = first_col(player, "points")
     source_pid = first_col(player, "player_id", "person_id", "external_id")
+    player_time = first_col(player, "match_time_utc", "match_time", "date", "match_date")
     required = {"match_id": match, "season": season, "team": team_col,
                 "assists": assists, "rebounds": rebounds}
     missing = [k for k, v in required.items() if not v]
@@ -225,6 +226,7 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
         "starter": player[starter].astype(str) if starter else None,
         "position": player[position].astype(str) if position else None,
         "home_away": player[home_away] if home_away else None,
+        "_player_match_time_raw": player[player_time] if player_time else pd.NA,
     })
     if seconds:
         out["minutes"] = numeric(player[seconds]) / 60.0
@@ -235,6 +237,7 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
 
     env, team_duplicate_count = canonical_team_environment(team)
     out = out.merge(env, on=["season", "match_id", "team", "opponent"], how="left")
+    player_match_time = pd.to_datetime(out.pop("_player_match_time_raw"), errors="coerce", utc=True)
 
     r_match = first_col(results, "match_id")
     r_season = first_col(results, "season")
@@ -243,18 +246,19 @@ def canonical_player_games(player: pd.DataFrame, team: pd.DataFrame, results: pd
         cols = [r_match, r_time] if not r_season else [r_season, r_match, r_time]
         lookup = results[cols].copy()
         if r_season:
-            lookup.columns = ["season", "match_id", "match_time"]
+            lookup.columns = ["season", "match_id", "_results_match_time"]
             lookup["season"] = lookup["season"].astype(str)
             merge_keys = ["season", "match_id"]
         else:
-            lookup.columns = ["match_id", "match_time"]
+            lookup.columns = ["match_id", "_results_match_time"]
             merge_keys = ["match_id"]
         lookup["match_id"] = lookup["match_id"].astype(str)
         lookup = lookup.drop_duplicates(merge_keys)
         out = out.merge(lookup, on=merge_keys, how="left")
-        out["match_time"] = pd.to_datetime(out["match_time"], errors="coerce", utc=True)
+        results_match_time = pd.to_datetime(out.pop("_results_match_time"), errors="coerce", utc=True)
+        out["match_time"] = results_match_time.combine_first(player_match_time)
     else:
-        out["match_time"] = pd.NaT
+        out["match_time"] = player_match_time
 
     out = out[out["player_key"].notna() & out["assists"].notna() & out["rebounds"].notna()].copy()
     out = out[(out["assists"] >= 0) & (out["rebounds"] >= 0)]
@@ -288,8 +292,10 @@ def main() -> int:
     id_counts = (games.dropna(subset=["source_player_id"])
                  .groupby("player_key")["source_player_id"].nunique())
     multi_id_keys = int((id_counts > 1).sum())
+    latest_season = max(games["season"].dropna().astype(str).unique().tolist())
+    latest_rows = games[games["season"].astype(str) == latest_season]
     receipt = {
-        "schema_version": "0.1.5",
+        "schema_version": "0.1.6",
         "market_data": False,
         "identity_binding": "season+match_id+team+normalized_player_name",
         "sources": receipts,
@@ -300,6 +306,10 @@ def main() -> int:
         "assists_non_null": int(games["assists"].notna().sum()),
         "rebounds_non_null": int(games["rebounds"].notna().sum()),
         "team_environment_match_rate": float(games["game_possessions_est"].notna().mean()),
+        "match_time_non_null_rate": float(games["match_time"].notna().mean()),
+        "latest_season": latest_season,
+        "latest_season_rows": int(len(latest_rows)),
+        "latest_season_match_time_non_null_rate": float(latest_rows["match_time"].notna().mean()),
         "player_identity_method": "normalized_name_with_source_player_id_retained",
         "normalized_name_keys_with_multiple_source_ids": multi_id_keys,
         "duplicate_audit": duplicate_audit,
@@ -308,7 +318,9 @@ def main() -> int:
     rp = Path(args.receipt); rp.parent.mkdir(parents=True, exist_ok=True)
     rp.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps({"ok": True, **{k: receipt[k] for k in (
-        "rows", "players", "matches", "team_environment_match_rate", "normalized_name_keys_with_multiple_source_ids")},
+        "rows", "players", "matches", "team_environment_match_rate", "match_time_non_null_rate",
+        "latest_season", "latest_season_rows", "latest_season_match_time_non_null_rate",
+        "normalized_name_keys_with_multiple_source_ids")},
         "duplicate_audit": duplicate_audit}, sort_keys=True))
     return 0
 
