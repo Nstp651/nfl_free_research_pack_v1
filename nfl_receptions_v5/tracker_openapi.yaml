@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Nick NFL Receptions V5 Bet Tracker
-  version: 1.0.0
+  version: 1.0.1
   description: >
     Production tracker Action for NFL Receptions V5. Records the completed frozen
     model run and only user-confirmed placed wagers in the existing Nick Bet Tracker.
@@ -13,6 +13,7 @@ paths:
   /tracker/health:
     get:
       operationId: checkBetTracker
+      x-openai-isConsequential: false
       summary: Check production bet tracker health
       responses:
         "200":
@@ -31,6 +32,7 @@ paths:
   /tracker/model-runs:
     post:
       operationId: createNflReceptionsTrackerRun
+      x-openai-isConsequential: false
       summary: Record a completed frozen NFL Receptions V5 run
       description: >
         Call after Layer 3/4 is complete. Stores the frozen model and exact selections
@@ -77,6 +79,7 @@ paths:
   /tracker/bets:
     post:
       operationId: recordNflReceptionsBet
+      x-openai-isConsequential: false
       summary: Record a user-confirmed NFL Receptions wager
       description: >
         Call only after the user explicitly confirms the wager was placed. Every leg
@@ -127,6 +130,7 @@ paths:
 
     get:
       operationId: listNflReceptionsTrackedBets
+      x-openai-isConsequential: false
       summary: List tracked bets
       parameters:
         - name: status
