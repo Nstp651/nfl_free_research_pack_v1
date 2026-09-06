@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Temporary/operational diagnostic for historical NBL timestamp coverage."""
+"""Operational diagnostic for historical NBL timestamp coverage and ID recovery."""
 from __future__ import annotations
 
 import json
+import sys
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-try:
-    from .build_player_games import ASSETS, download_csv, first_col, release_asset
-except ImportError:
-    from build_player_games import ASSETS, download_csv, first_col, release_asset
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from source_client import RosettaClient  # noqa: E402
+from build_player_games import ASSETS, download_csv, first_col, release_asset  # noqa: E402
 
 
 def audit_frame(label: str, df: pd.DataFrame) -> dict[str, Any]:
@@ -37,12 +40,61 @@ def audit_frame(label: str, df: pd.DataFrame) -> dict[str, Any]:
     }
 
 
+def string_set(series: pd.Series) -> set[str]:
+    return {str(x).strip() for x in series.dropna().tolist() if str(x).strip()}
+
+
+def latest_rows(df: pd.DataFrame) -> pd.DataFrame:
+    season_col = first_col(df, "season")
+    if not season_col:
+        return df.iloc[0:0]
+    seasons = sorted(df[season_col].dropna().astype(str).unique().tolist())
+    if not seasons:
+        return df.iloc[0:0]
+    return df[df[season_col].astype(str) == seasons[-1]].copy()
+
+
+def official_bridge(frames: dict[str, pd.DataFrame]) -> dict[str, Any]:
+    schedule = RosettaClient().schedule(2025, "all").data
+    official_ids = {str(x.get("id") or "").strip() for x in schedule if str(x.get("id") or "").strip()}
+    official_external = {str(x.get("external_id") or "").strip() for x in schedule if str(x.get("external_id") or "").strip()}
+    p = latest_rows(frames["player"]); r = latest_rows(frames["results"])
+    p_match_col = first_col(p, "match_id"); r_match_col = first_col(r, "match_id"); r_external_col = first_col(r, "external_id")
+    p_match = string_set(p[p_match_col]) if p_match_col else set()
+    r_match = string_set(r[r_match_col]) if r_match_col else set()
+    r_external = string_set(r[r_external_col]) if r_external_col else set()
+    sample = [{
+        "id": x.get("id"),
+        "external_id": x.get("external_id"),
+        "start_time": x.get("start_time_datetime") or x.get("start_time"),
+        "home": (x.get("home_team") or {}).get("name") if isinstance(x.get("home_team"), dict) else None,
+        "away": (x.get("away_team") or {}).get("name") if isinstance(x.get("away_team"), dict) else None,
+    } for x in schedule[:5]]
+    return {
+        "official_2025_rows": len(schedule),
+        "official_id_count": len(official_ids),
+        "official_external_id_count": len(official_external),
+        "player_latest_match_ids": len(p_match),
+        "results_latest_match_ids": len(r_match),
+        "results_latest_external_ids": len(r_external),
+        "player_match_to_official_id": len(p_match & official_ids),
+        "player_match_to_official_external_id": len(p_match & official_external),
+        "results_match_to_official_id": len(r_match & official_ids),
+        "results_match_to_official_external_id": len(r_match & official_external),
+        "results_external_to_official_id": len(r_external & official_ids),
+        "results_external_to_official_external_id": len(r_external & official_external),
+        "official_sample": sample,
+    }
+
+
 def main() -> int:
     reports = []
+    frames: dict[str, pd.DataFrame] = {}
     for key, (tag, name) in ASSETS.items():
-        frame, _ = download_csv(release_asset(tag, name))
+        frame, _ = download_csv(release_asset(tag, name)); frames[key] = frame
         reports.append(audit_frame(key, frame))
-    print("NBL_SOURCE_TIME_DIAGNOSTIC=" + json.dumps(reports, sort_keys=True, default=str))
+    bridge = official_bridge(frames)
+    print("NBL_SOURCE_TIME_DIAGNOSTIC=" + json.dumps({"sources": reports, "official_bridge": bridge}, sort_keys=True, default=str))
     return 0
 
 
