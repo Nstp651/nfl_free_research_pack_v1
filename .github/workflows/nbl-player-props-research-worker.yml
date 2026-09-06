@@ -1,0 +1,51 @@
+name: Verify NBL Player Props Research Worker
+
+# Source verification only. Production deployment is owned by the Cloudflare Git
+# project once the NBL research Worker is connected there.
+on:
+  push:
+    branches: [main, feature/nbl-player-props-v1]
+    paths:
+      - 'nbl_player_props_v1/worker/**'
+      - 'nbl_player_props_v1/openapi_v1.yaml'
+      - '.github/workflows/nbl-player-props-research-worker.yml'
+  pull_request:
+    paths:
+      - 'nbl_player_props_v1/worker/**'
+      - 'nbl_player_props_v1/openapi_v1.yaml'
+      - '.github/workflows/nbl-player-props-research-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nbl-player-props-research-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Worker contract tests
+        run: node --test nbl_player_props_v1/worker/*.test.mjs
+      - name: Research boundary and Action sanity
+        shell: bash
+        run: |
+          grep -q "server_quantitative_authority:'PASS'" nbl_player_props_v1/worker/freeze_core.js
+          grep -q "market_data:false" nbl_player_props_v1/worker/freeze_run.js
+          grep -q 'operationId: startNblPlayerPropsMatchRun' nbl_player_props_v1/openapi_v1.yaml
+          grep -q 'operationId: checkpointNblPlayerPropsResearch' nbl_player_props_v1/openapi_v1.yaml
+          grep -q 'operationId: computeNblPlayerPropsFreeze' nbl_player_props_v1/openapi_v1.yaml
+          grep -q 'operationId: getNblPlayerPropsFrozenPlayer' nbl_player_props_v1/openapi_v1.yaml
+          grep -q 'nbl-player-props-research-v1.nickarnott01.workers.dev' nbl_player_props_v1/openapi_v1.yaml
+          grep -q 'name = "nbl-player-props-research-v1"' nbl_player_props_v1/worker/wrangler.toml
+      - name: Wrangler dry run
+        working-directory: nbl_player_props_v1/worker
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4.128.0 deploy --dry-run --outdir /tmp/nbl-research-worker --config wrangler.toml
+      - name: Deployment ownership receipt
+        run: echo 'Cloudflare Git integration will own production deployment; this workflow verifies source only.'
