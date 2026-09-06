@@ -67,7 +67,7 @@ jobs:
               assert not missing,(path,missing)
           instructions=Path('nbl_player_props_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.0.md').read_text()
           assert len(instructions.encode()) < 8000, len(instructions.encode())
-          assert 'server_quantitative_authority' in instructions
+          assert 'server_qbase_authority' in instructions
           assert 'schema_version=2.1.0' in instructions
           print('NBL_CUSTOM_GPT_CONTRACT_GATE=PASS',len(instructions.encode()))
           PY
