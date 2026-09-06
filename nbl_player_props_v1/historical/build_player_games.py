@@ -5,6 +5,11 @@ Uses the free nblR/nblr_data GitHub release CSVs. The raw canonical table retain
 player role/box-score facts plus exact team and opponent game environment. Model
 features are constructed later with strict shift(1), so no target-game box score
 can enter its own pregame prediction.
+
+Release files use stable public GitHub download URLs directly. We intentionally do
+not call GitHub's unauthenticated release API in CI because its shared-runner rate
+limit is not a data-quality signal. Every downloaded byte stream is SHA-256 hashed
+and recorded in the source receipt instead.
 """
 from __future__ import annotations
 
@@ -20,7 +25,7 @@ import pandas as pd
 import requests
 
 REPO = "JaseZiv/nblr_data"
-RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/tags"
+RELEASE_BASE = f"https://github.com/{REPO}/releases/download"
 ASSETS = {
     "player": ("box_player", "box_player.csv"),
     "team": ("box_team", "box_team.csv"),
@@ -29,17 +34,12 @@ ASSETS = {
 
 
 def release_asset(tag: str, name: str) -> dict[str, Any]:
-    r = requests.get(f"{RELEASE_API}/{tag}", timeout=30, headers={"user-agent": "nick-nbl-model/0.1"})
-    r.raise_for_status()
-    release = r.json()
-    matches = [a for a in release.get("assets", []) if a.get("name") == name]
-    if len(matches) != 1:
-        raise RuntimeError(f"Expected one {name} asset in release {tag}, found {len(matches)}")
-    a = matches[0]
     return {
-        "tag": tag, "name": name, "url": a["browser_download_url"],
-        "size": a.get("size"), "digest": a.get("digest"),
-        "updated_at": a.get("updated_at"), "release_updated_at": release.get("updated_at"),
+        "tag": tag,
+        "name": name,
+        "url": f"{RELEASE_BASE}/{tag}/{name}",
+        "source_repository": f"https://github.com/{REPO}",
+        "discovery": "stable_release_download_url",
     }
 
 
@@ -48,10 +48,14 @@ def download_csv(asset: dict[str, Any]) -> tuple[pd.DataFrame, dict[str, Any]]:
     r.raise_for_status()
     raw = r.content
     actual = "sha256:" + hashlib.sha256(raw).hexdigest()
-    expected = asset.get("digest")
-    if expected and expected != actual:
-        raise RuntimeError(f"Digest mismatch for {asset['name']}: {actual} != {expected}")
-    return pd.read_csv(pd.io.common.BytesIO(raw), low_memory=False), {**asset, "sha256": actual, "bytes": len(raw)}
+    receipt = {
+        **asset,
+        "sha256": actual,
+        "bytes": len(raw),
+        "etag": r.headers.get("ETag"),
+        "last_modified": r.headers.get("Last-Modified"),
+    }
+    return pd.read_csv(pd.io.common.BytesIO(raw), low_memory=False), receipt
 
 
 def first_col(df: pd.DataFrame, *names: str) -> str | None:
@@ -233,7 +237,7 @@ def main() -> int:
     for key, (tag, name) in ASSETS.items():
         asset = release_asset(tag, name)
         loaded[key], receipts[key] = download_csv(asset)
-        print(f"SOURCE {key} rows={len(loaded[key])} cols={len(loaded[key].columns)} updated={asset.get('updated_at')}")
+        print(f"SOURCE {key} rows={len(loaded[key])} cols={len(loaded[key].columns)} sha256={receipts[key]['sha256']}")
         print(f"COLUMNS {key}: {','.join(map(str, loaded[key].columns))}")
 
     games = canonical_player_games(loaded["player"], loaded["team"], loaded["results"])
@@ -244,7 +248,7 @@ def main() -> int:
                  .groupby("player_key")["source_player_id"].nunique())
     multi_id_keys = int((id_counts > 1).sum())
     receipt = {
-        "schema_version": "0.1.2",
+        "schema_version": "0.1.3",
         "market_data": False,
         "sources": receipts,
         "rows": len(games),
