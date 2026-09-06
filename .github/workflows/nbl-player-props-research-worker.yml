@@ -34,7 +34,7 @@ jobs:
       - name: Research boundary and Action sanity
         shell: bash
         run: |
-          grep -q "server_quantitative_authority:'PASS'" nbl_player_props_v1/worker/freeze_core.js
+          grep -q "server_qbase_authority:'PASS'" nbl_player_props_v1/worker/freeze_core.js
           grep -q "market_data:false" nbl_player_props_v1/worker/freeze_run.js
           grep -q 'operationId: startNblPlayerPropsMatchRun' nbl_player_props_v1/openapi_v1.yaml
           grep -q 'operationId: checkpointNblPlayerPropsResearch' nbl_player_props_v1/openapi_v1.yaml
