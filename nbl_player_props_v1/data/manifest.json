@@ -1,5 +1,5 @@
 {
-  "asset_revision": "b0e69562fdc19f56fe87",
+  "asset_revision": "fa1c0403cf8c391be083",
   "integrity": {
     "market_data": false,
     "qbase_retraining_is_explicit_only": true,
@@ -7,9 +7,9 @@
   },
   "market_data": false,
   "prior_snapshot": {
-    "canonical_sha256": "eaab525d0f5c9ec4fc3710f568471a741e4b8a0e6726a8a6ce5cc0af6562dd99",
+    "canonical_sha256": "bfd9fa689fa6ead998426249096cbeb20132a1c081be62516f1356935cf10f0b",
     "path": "prior_snapshot.json",
-    "snapshot_revision": "eef12d4ae3d3f98e43f8"
+    "snapshot_revision": "9b059a70ae7dbcfac1b1"
   },
   "qbase": {
     "assists": {
@@ -26,7 +26,7 @@
     }
   },
   "runtime_source_receipt": {
-    "canonical_sha256": "40724628033bce7aa1581afe44eddd9628d58b68dffaef60fb856286a33ae722",
+    "canonical_sha256": "2a46193821911c91ff2f41e27cddc3be63e383a0c7a3ba9b19324c7f7187966d",
     "path": "source_receipt.json"
   },
   "schema_version": "nbl_runtime_assets_v1"
