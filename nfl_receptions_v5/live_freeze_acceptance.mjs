@@ -46,8 +46,9 @@ assert.equal(lastPage.retrieval.served_player_count,players.length);
 
 const teams=[lock.away_team,lock.home_team];
 const chosen=teams.map(team=>{
-  const p=players.find(x=>x.team===team&&typeof x.player_id==='string'&&/^[A-Z0-9_-]{3,64}$/.test(x.player_id)&&typeof x.player_name==='string'&&x.player_name.length>=2);
-  assert.ok(p,`No contract-valid pack player for ${team}`); return p;
+  const raw=players.find(x=>(x.team||x.current_team)===team&&typeof x.player_id==='string'&&/^[A-Z0-9_-]{3,64}$/.test(x.player_id)&&typeof x.player_name==='string'&&x.player_name.length>=2);
+  assert.ok(raw,`No contract-valid pack player for ${team}`);
+  return {...raw,team};
 });
 const now=new Date().toISOString();
 const evidence=[];
