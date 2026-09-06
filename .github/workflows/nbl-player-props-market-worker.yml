@@ -1,0 +1,50 @@
+name: Verify NBL Player Props Market Worker
+
+# Source verification only. Production deployment is owned by the Cloudflare Git
+# project once the NBL market Worker is connected there.
+on:
+  push:
+    branches: [main, feature/nbl-player-props-v1]
+    paths:
+      - 'nbl_player_props_v1/market_worker/**'
+      - 'nbl_player_props_v1/market_openapi_v1.yaml'
+      - '.github/workflows/nbl-player-props-market-worker.yml'
+  pull_request:
+    paths:
+      - 'nbl_player_props_v1/market_worker/**'
+      - 'nbl_player_props_v1/market_openapi_v1.yaml'
+      - '.github/workflows/nbl-player-props-market-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nbl-player-props-market-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Contract tests
+        working-directory: nbl_player_props_v1/market_worker
+        run: node --test index.test.mjs
+      - name: Market boundary sanity
+        shell: bash
+        run: |
+          grep -q "P_MODEL_STATUS must be FROZEN" nbl_player_props_v1/market_worker/index.js
+          grep -q "expected_freeze_receipt_sha256 required" nbl_player_props_v1/market_worker/index.js
+          grep -q "p_model_mutated:false" nbl_player_props_v1/market_worker/index.js
+          grep -q 'operationId: evaluateNblPlayerPropsMarkets' nbl_player_props_v1/market_openapi_v1.yaml
+          grep -q 'nbl-player-props-market-v1.nickarnott01.workers.dev' nbl_player_props_v1/market_openapi_v1.yaml
+          grep -q 'name = "nbl-player-props-market-v1"' nbl_player_props_v1/market_worker/wrangler.toml
+      - name: Wrangler dry run
+        working-directory: nbl_player_props_v1/market_worker
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4.128.0 deploy --dry-run --outdir /tmp/nbl-market-worker --config wrangler.toml
+      - name: Deployment ownership receipt
+        run: echo 'Cloudflare Git integration will own production deployment; this workflow verifies source only.'
