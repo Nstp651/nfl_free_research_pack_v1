@@ -1,7 +1,7 @@
 # NFL Receptions V5 — Betting Platform V1 Migration
 
 ## Status
-BUILD CANDIDATE. Not production-deployed and not season-locked yet.
+BUILD CANDIDATE. Cloudflare control project connected to the V5 feature branch; live deployment validation still pending. Not production-deployed and not season-locked yet.
 
 V5 preserves NFL Receptions V4.2 football/research methodology and moves orchestration, numerical execution, freeze state and market integration onto Betting Platform V1.
 
