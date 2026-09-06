@@ -1,8 +1,7 @@
 import {computeFrozenModel, exactKeys, requireThat, sha256Hex, evidenceIdSet} from './model_core.js';
 
 const REPO = 'Nstp651/nfl_free_research_pack_v1';
-const ROOT = `https://raw.githubusercontent.com/${REPO}/`;
-const HEAD_API = `https://api.github.com/repos/${REPO}/commits/main`;
+const DATA_ROOT = `https://raw.githubusercontent.com/${REPO}/main/nfl_free_research_pack_v1/data/`;
 const MAX_AGE_MS = 36 * 3600_000;
 
 export function reply(value, status = 200) {
@@ -22,13 +21,18 @@ function integer(value, min, max, fallback) {
 }
 
 async function readJson(url) {
-  requireThat(url === HEAD_API || new RegExp(`^https://raw\\.githubusercontent\\.com/${REPO.replace('/', '\\/')}/[a-f0-9]{40}/nfl_free_research_pack_v1/data/(manifest\\.json|games/\\d{4}/\\d{4}_\\d{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}\\.json)$`).test(url),
-    'Source URL not allowed');
-  const res = await fetch(url, {headers: {'user-agent': 'nick-nfl-receptions-platform-v5/1.0.0'}, signal: AbortSignal.timeout(12000)});
+  const allowed = url === `${DATA_ROOT}manifest.json` ||
+    new RegExp(`^${DATA_ROOT.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}games/\\d{4}/\\d{4}_\\d{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}\\.json$`).test(url);
+  requireThat(allowed, 'Source URL not allowed');
+  const res = await fetch(url, {
+    headers: {'user-agent': 'nick-nfl-receptions-platform-v5/1.0.0', 'cache-control': 'no-cache'},
+    signal: AbortSignal.timeout(12000),
+    cf: {cacheTtl: 0, cacheEverything: false},
+  });
   requireThat(res.ok, `Research source unavailable (${res.status})`);
   const raw = await res.text();
   requireThat(raw.length < 8_000_000, 'Research source exceeds size limit');
-  try { return JSON.parse(raw); } catch { throw new Error('Research source returned invalid JSON'); }
+  try { return {value: JSON.parse(raw), raw}; } catch { throw new Error('Research source returned invalid JSON'); }
 }
 
 function validateInit(input) {
@@ -47,24 +51,42 @@ function validateInit(input) {
 
 export async function loadLockedPack(input) {
   validateInit(input);
-  const head = await readJson(HEAD_API);
-  requireThat(/^[a-f0-9]{40}$/.test(head.sha), 'Invalid GitHub source commit');
-  const base = `${ROOT}${head.sha}/nfl_free_research_pack_v1/data/`;
-  const manifest = await readJson(`${base}manifest.json`);
-  requireThat(manifest.schema_version === '1.1.0' && Array.isArray(manifest.games), 'Invalid NFL research manifest');
-  const checkedAt = Date.parse(manifest.last_checked_at_utc || manifest.generated_at_utc);
-  requireThat(Number.isFinite(checkedAt) && checkedAt <= Date.now() + 300_000 && Date.now() - checkedAt <= MAX_AGE_MS, 'NFL research manifest stale/invalid');
-  const entry = manifest.games.find(g => g.game_id === input.game_id);
-  requireThat(entry && entry.season === input.season && entry.week === input.week, 'Fixture not found in locked research manifest');
-  requireThat(typeof entry.path === 'string' && /^games\/\d{4}\/\d{4}_\d{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}\.json$/.test(entry.path), 'Invalid research pack path');
-  const pack = await readJson(`${base}${entry.path}`);
-  requireThat(pack.schema_version === '1.1.0' && pack.fixture?.game_id === input.game_id && pack.fixture?.season === input.season && pack.fixture?.week === input.week, 'Research pack fixture mismatch');
-  requireThat(pack.fixture.away_team === entry.away_team && pack.fixture.home_team === entry.home_team, 'Research pack team mismatch');
-  requireThat(pack.pack_revision === entry.pack_revision, 'Research pack revision mismatch');
-  requireThat(Array.isArray(pack.players) && pack.players.length > 0, 'Research pack has no players');
-  const through = pack.data_state?.current_season_data_through_week;
-  requireThat(through === null || (Number.isInteger(through) && through <= input.week - 1), 'Current-season research leakage detected');
-  return {source_commit: head.sha, manifest, entry, pack};
+  let lastRevisionMismatch = false;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const manifestResult = await readJson(`${DATA_ROOT}manifest.json`);
+    const manifest = manifestResult.value;
+    requireThat(manifest.schema_version === '1.1.0' && Array.isArray(manifest.games), 'Invalid NFL research manifest');
+    const checkedAt = Date.parse(manifest.last_checked_at_utc || manifest.generated_at_utc);
+    requireThat(Number.isFinite(checkedAt) && checkedAt <= Date.now() + 300_000 && Date.now() - checkedAt <= MAX_AGE_MS, 'NFL research manifest stale/invalid');
+    const entry = manifest.games.find(g => g.game_id === input.game_id);
+    requireThat(entry && entry.season === input.season && entry.week === input.week, 'Fixture not found in locked research manifest');
+    requireThat(typeof entry.path === 'string' && /^games\/\d{4}\/\d{4}_\d{2}_[A-Z0-9]{2,4}_[A-Z0-9]{2,4}\.json$/.test(entry.path), 'Invalid research pack path');
+
+    const packResult = await readJson(`${DATA_ROOT}${entry.path}`);
+    const pack = packResult.value;
+    requireThat(pack.schema_version === '1.1.0' && pack.fixture?.game_id === input.game_id && pack.fixture?.season === input.season && pack.fixture?.week === input.week, 'Research pack fixture mismatch');
+    requireThat(pack.fixture.away_team === entry.away_team && pack.fixture.home_team === entry.home_team, 'Research pack team mismatch');
+    if (pack.pack_revision !== entry.pack_revision) {
+      lastRevisionMismatch = true;
+      if (attempt === 0) continue;
+      requireThat(false, 'Research manifest/pack revision race; retry new run');
+    }
+    requireThat(typeof pack.pack_revision === 'string' && /^[a-f0-9]{16}$/.test(pack.pack_revision), 'Invalid research pack revision');
+    requireThat(Array.isArray(pack.players) && pack.players.length > 0, 'Research pack has no players');
+    const through = pack.data_state?.current_season_data_through_week;
+    requireThat(through === null || (Number.isInteger(through) && through <= input.week - 1), 'Current-season research leakage detected');
+
+    const manifest_sha256 = await sha256Hex(manifestResult.raw);
+    const pack_content_sha256 = await sha256Hex(packResult.raw);
+    const source_anchor_sha256 = await sha256Hex({
+      game_id: input.game_id,
+      pack_revision: pack.pack_revision,
+      manifest_sha256,
+      pack_content_sha256,
+    });
+    return {source_anchor_sha256, manifest_sha256, pack_content_sha256, manifest, entry, pack};
+  }
+  requireThat(!lastRevisionMismatch, 'Research source lock failed');
 }
 
 function bannedMarketKeyScan(value, path = '') {
@@ -88,8 +110,8 @@ export function validateResearchContext(context, lock, playerCount, now = Date.n
   requireThat(context.game_id === lock.game_id, 'Research game_id does not match run lock');
   const completed = Date.parse(context.completed_at);
   requireThat(Number.isFinite(completed) && completed <= now + 300_000 && completed >= lock.created_at - 300_000, 'Invalid research completion timestamp');
-  exactKeys(context.pack_receipt, ['source_commit', 'pack_revision', 'retrieved_player_count'], 'pack receipt');
-  requireThat(context.pack_receipt.source_commit === lock.source_commit, 'Research source commit mismatch');
+  exactKeys(context.pack_receipt, ['source_anchor_sha256', 'pack_revision', 'retrieved_player_count'], 'pack receipt');
+  requireThat(context.pack_receipt.source_anchor_sha256 === lock.source_anchor_sha256, 'Research source anchor mismatch');
   requireThat(context.pack_receipt.pack_revision === lock.pack_revision, 'Research pack revision mismatch');
   requireThat(context.pack_receipt.retrieved_player_count === playerCount, 'Incomplete research pack player retrieval');
   requireThat(context.current_information_state && typeof context.current_information_state === 'object', 'Current Information State required');
@@ -172,12 +194,14 @@ export class NflReceptionsRun {
     if (request.method === 'POST' && action.length === 0) {
       requireThat(!meta, 'Run already initialized');
       const input = await request.json();
-      const {source_commit, manifest, entry, pack} = await loadLockedPack(input);
+      const {source_anchor_sha256, manifest_sha256, pack_content_sha256, manifest, pack} = await loadLockedPack(input);
       const now = Date.now();
       const {players, ...packMeta} = pack;
       const lock = {
         ...input,
-        source_commit,
+        source_anchor_sha256,
+        manifest_sha256,
+        pack_content_sha256,
         pack_revision: pack.pack_revision,
         away_team: pack.fixture.away_team,
         home_team: pack.fixture.home_team,
@@ -190,6 +214,14 @@ export class NflReceptionsRun {
         await tx.put('meta', {lock, player_count: players.length, status: 'RESEARCH_IN_PROGRESS', research_receipt_sha256: null, freeze: null});
       });
       meta = await this.storage.get('meta');
+      return reply({
+        market_data: false,
+        status: meta.status,
+        p_model_status: 'NOT FROZEN',
+        lock: meta.lock,
+        research: {player_count: meta.player_count, served_player_count: 0, checkpointed: false, research_receipt_sha256: null},
+        freeze: null,
+      });
     }
 
     requireThat(meta, 'Unknown run');
