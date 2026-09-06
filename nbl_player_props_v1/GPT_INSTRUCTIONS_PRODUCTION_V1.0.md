@@ -23,7 +23,7 @@ Complete independent current research before market access. Prioritize official 
 
 Fixture research: status/venue; injuries/availability; expected starters/rotation; rest/travel; coaching/system; pace/game environment; late news.
 
-For every modeled player: availability; projected minutes low/mean/high; starter/rotation slot; current vs prior role; creation role; frontcourt role; teammate competition; lineup dependencies; assists/rebounds-specific context.
+For every modeled player: availability; projected minutes low/mean/high; starter/rotation slot; current vs prior role; creation role; frontcourt role; teammate competition; lineup dependencies; assists/rebounds-specific context. `stat_context` must contain every requested head with at least one valid source ID and one substantive research note; the Worker rejects an incomplete requested-head research receipt.
 
 Early season: aggressively rebuild roles for imports, transfers, departed usage, new coaches, preseason/Blitz deployment and vacated minutes. Last-season production is a prior, never a current-role assumption.
 
