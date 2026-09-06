@@ -57,7 +57,8 @@ def latest_rows(df: pd.DataFrame) -> pd.DataFrame:
 def official_bridge(frames: dict[str, pd.DataFrame]) -> dict[str, Any]:
     client = RosettaClient()
     schedule_default = client.schedule(2025, "all").data
-    schedule_full = client._get("nbl/matches/in/season/2025/all", {"limit": -1}).data
+    raw_full = client.get("/get/nbl/matches/in/season/2025/all", params={"limit": -1})
+    schedule_full = raw_full.data
     schedule = schedule_full if len(schedule_full) >= len(schedule_default) else schedule_default
     official_ids = {str(x.get("id") or "").strip() for x in schedule if str(x.get("id") or "").strip()}
     official_external = {str(x.get("external_id") or "").strip() for x in schedule if str(x.get("external_id") or "").strip()}
