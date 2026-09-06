@@ -46,6 +46,23 @@ jobs:
           assert len(r['seasons']) >= 8, r
           print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']))
           PY
+      - name: Build next-game historical prior snapshot
+        run: |
+          python nbl_player_props_v1/historical/build_prior_snapshot.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output /tmp/nbl-prior-snapshot.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('/tmp/nbl-prior-snapshot.json').read_text())
+          assert s['market_data'] is False
+          assert len(s['players']) > 500, len(s['players'])
+          assert len(s['teams']) >= 10, len(s['teams'])
+          assert s['historical_matches'] > 1000
+          assert len(s['snapshot_revision']) == 20
+          print('NBL_PRIOR_SNAPSHOT_ACCEPTANCE=PASS', len(s['players']), len(s['teams']), s['snapshot_revision'])
+          PY
       - name: Train and walk-forward validate ASSISTS + REBOUNDS heads
         run: |
           mkdir -p /tmp/nbl-model-artifacts /tmp/nbl-model-reports
@@ -73,5 +90,6 @@ jobs:
           name: nbl-v1-source-and-model-audit
           path: |
             /tmp/nbl-source-receipt.json
+            /tmp/nbl-prior-snapshot.json
             /tmp/nbl-model-artifacts/*.json
             /tmp/nbl-model-reports/*.md
