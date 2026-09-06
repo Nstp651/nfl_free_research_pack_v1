@@ -18,8 +18,8 @@ export default {
         return withCors(response({ok:true,service:'nbl-player-props-research-freeze',version:'1.0.0',market_data:false,heads:['assists','rebounds'],freeze_storage:Boolean(env.MATCH_RUNS)}));
       }
       if(request.method==='GET'&&url.pathname==='/v1/fixtures'){
-        const season=Number(url.searchParams.get('season_start'));const fixtures=await listFixtures(season);const now=Date.now();
-        return withCors(response({market_data:false,season_start:season,fixtures:fixtures.filter(f=>Date.parse(f.start_time)>now)}));
+        const season=Number(url.searchParams.get('season_start'));const fixtures=(await listFixtures(season)).filter(f=>Date.parse(f.start_time)>Date.now());
+        return withCors(response({market_data:false,season_start:season,count:fixtures.length,fixtures}));
       }
       return withCors(response({market_data:false,error:'Not found'},404));
     }catch(e){return withCors(response({market_data:false,error:e.message},422));}
