@@ -1,190 +1,228 @@
 # NBL Player Props V1 — One Match Engine, Dual Stat Heads
 
 ## Decision
-Build ONE production NBL match engine with two independent quantitative heads:
+Build one production NBL matchup engine with a shared market-blind research state and two mathematically independent quantitative heads:
 
 1. ASSISTS
 2. REBOUNDS
 
-The engine is run match-by-match. A single Layer 0/1 research pass covers the fixture once, then Layer 2 branches into separate stat-specific P_models. The heads never share a probability distribution or force one stat to inherit the other's assumptions.
-
 Run modes:
-- `BOTH` (default): research once, freeze assists + rebounds together for the matchup.
-- `ASSISTS_ONLY`: same shared research spine, only assists head executes.
-- `REBOUNDS_ONLY`: same shared research spine, only rebounds head executes.
+- `BOTH` (default)
+- `ASSISTS_ONLY`
+- `REBOUNDS_ONLY`
 
-This avoids duplicating the expensive research layer while preserving stat-specific modelling integrity.
+One Layer 0/1 pass prevents duplicated research while separate Layer 2 distributions preserve stat-specific modelling integrity.
 
-## Objective
-Build one production NBL player-prop system sharing one free structured research/data spine and one fixture research state, with separate assists and rebounds model outputs.
+## End-to-end flow
 
-The system must remain market-input agnostic. Layers 0-2 build and freeze P_model before any sportsbook prices are inspected. Layer 3 accepts whichever post-freeze market adapter is available without changing the frozen model.
+`immutable free data assets -> exact fixture/run lock -> current basketball research -> research checkpoint -> server QBASE/current-role scenarios -> atomic requested-head freeze -> immutable receipt + per-player hashes -> separate post-freeze market gateway -> exact EV mapping -> no-forced-bet ranking`
 
-## Core flow
+The Custom GPT orchestrates research and Actions. It is not trusted as the sole integrity layer.
 
-`free NBL data pack -> one current fixture research pass -> ASSISTS head + REBOUNDS head -> atomic matchup freeze -> market adapter -> exact mapping -> stat-specific EV/ranking -> bet tracker`
+---
 
-## Shared Layer 0/1 data spine
+## 1. Structured data plane
+Primary current structured source:
+- official NBL/Genius Rosetta data exposed by nbl.com.au.
 
-Primary structured source: official NBL/Genius data exposed by nbl.com.au's Rosetta JSON proxy. No sportsbook data.
+Historical source:
+- nblR / nblr_data public GitHub releases.
 
-Target feeds:
-- seasons
-- teams
-- schedule/results
-- current rosters
-- player season stats
-- player game-log boxscores
-- team season stats
-- stat leaders
-- official NBL news
+Runtime assets committed under `data/`:
+- immutable assists QBASE;
+- immutable rebounds QBASE;
+- historical next-game player/team prior snapshot;
+- source receipt;
+- manifest binding canonical hashes and revisions.
 
-Historical supporting source:
-- nblR / nblr_data public GitHub releases where useful for historical player box scores, team box scores, play-by-play and shot data back to 2015-16.
+Routine scheduled refresh updates the prior snapshot. QBASE retraining is explicit-only, preventing silent model drift during the season.
 
-Optional in-season support:
-- current-season Welo supplied after Week 1; never prior-season Welo as a substitute for current team strength.
+Layers 0–2 reject market-like fields.
 
-## One fixture research state
-The shared research layer is authoritative for facts common to both stat heads:
-- exact fixture/team identity
-- current availability and injury state
-- expected starters and rotation
-- expected minutes bands
-- returning/departed players
-- imports/transfers/new arrivals
-- coaching/system changes
-- preseason/Blitz evidence
-- current role hierarchy
-- opponent context
-- rest/travel
-- late credible news
-- expected game environment / pace
+---
 
-Every material research finding is timestamped and sourced once, then each stat head consumes only the pathways relevant to that stat.
+## 2. Persistent Research/Freeze Worker
+Production project:
+`nbl-player-props-research-v1`
 
-## New/changed player translation
-New/changed players require prior-competition translation from the most relevant competitive environment in the previous 12-18 months where possible: NBL, NBA/G League, NCAA, EuroLeague/EuroCup/domestic Europe, B.LEAGUE/Asia, FIBA, Summer League, NBL1, NZ NBL or other credible pro leagues.
+A Durable Object `NblMatchRun` owns one matchup run.
 
-No fixed league-to-NBL multiplier unless empirically validated later. Prior production is evidence; current NBL role/minutes remain the key translation target.
+At initialization it:
+- resolves one exact future fixture;
+- pins one GitHub `main` commit;
+- loads the manifest from that pinned commit;
+- verifies QBASE/prior canonical hashes;
+- stores exact fixture/run/asset identity;
+- rejects already-started fixtures.
 
-## ASSISTS head
-Stat-specific pathways:
-- minutes / rotation role
-- primary vs secondary creator status
-- touches / initiation responsibility
-- potential assists where available
-- AST%, AST/TO and passing role
-- teammate shooting/conversion environment
-- co-creator competition
-- lineup-dependent creation share
-- pace/possessions
-- opponent scheme / turnover pressure / assist allowance where validated
+The run remains market blind.
 
-Outputs:
-- player expected assists
-- count distribution
-- exact threshold probabilities
-- Confidence / Fragility
-- stat-specific assumptions + adjustment ledger
+### Research seed
+The Worker publishes:
+- locked fixture/rosters;
+- prior-NBL history state;
+- returning-player server QBASE baselines;
+- `PRIOR_COMP_TRANSLATION_REQUIRED` state for players without sufficient NBL history.
 
-## REBOUNDS head
-Stat-specific pathways:
-- minutes / frontcourt role
-- ORB%, DRB%, TRB%
-- rebound chances/share where available
-- expected shot misses
-- lineup size / small-ball / two-big structure
-- teammate rebound competition
-- opponent shot profile and miss environment
-- pace/possessions
-- opponent offensive/defensive rebounding environment where validated
+Structured data is explicitly labelled prior evidence. Current availability, minutes, role, lineup, imports, coaching and late news remain a separate current-research responsibility.
 
-Outputs:
-- player expected rebounds
-- count distribution
-- exact threshold probabilities
-- Confidence / Fragility
-- stat-specific assumptions + adjustment ledger
+### Research checkpoint
+The Custom GPT submits an evidence-bound current research context. The Worker validates:
+- exact fixture/pack/run-mode identity;
+- source receipts;
+- player team membership;
+- availability;
+- projected minute bands;
+- role state;
+- market boundary.
 
-## Early-season regime
-Opening weeks receive extra emphasis on roster turnover, imports, new coaches/systems, vacated minutes and actual preseason/Blitz deployment. Prior-season production is a statistical prior only; current expected role must be rebuilt.
+A research hash is persisted before Layer 2.
 
-For BOTH mode, one researched minutes/rotation state is shared, but assists and rebounds may use different stat-specific scenarios if the same uncertainty has different consequences.
+---
 
-Example: a guard's uncertain starting role may materially change assists distribution but barely move rebounds. A centre's small-ball role may materially change rebounds but not assists.
+## 3. Quantitative authority
+### Returning players
+The Worker owns the historical QBASE calculation.
 
-## Freeze contract
-The matchup freezes atomically only after both requested stat heads pass integrity checks.
+Supported serverized paths:
+- `QBASE_RUNTIME_SCORE`
+- `QBASE_MINUTES_RECOMPUTE`
 
-For each requested head retain:
-- exact fixture/player/stat identity
-- input data revision
-- role/minutes assumptions
-- stat-specific ledger
-- scenario weights
-- expected count
-- dispersion/distribution parameters
-- complete supported threshold grid
-- Confidence / Fragility
-- input/output hashes
-- original frozen timestamp
+For these paths, the Worker calculates/overwrites the mean and quantitative receipt. A client cannot arbitrarily move the returning-player historical anchor.
 
-If run mode is BOTH and either stat head fails, do not partially expose markets for the other head unless the run was explicitly restarted in single-stat mode.
+`EMPIRICAL_ROLE_SPLIT` is retained for evidence-supported role changes that minutes alone cannot represent. It requires explicit evidence and quantitative receipt.
 
-Material post-freeze availability/role/minutes news invalidates the affected matchup freeze rather than repricing from sportsbook information.
+### New-to-NBL players
+Players without NBL prior use `PRIOR_COMP_TRANSLATION` only for that head.
 
-## Market adapter contract
-Layer 3 is provider-agnostic. Supported adapters:
+Translation is based on current research into the most relevant prior competition. There is no fixed universal league multiplier. Translated heads must use an explicit `MAX_QBASE_PRIOR_COMP` dispersion override that can widen but never narrow the QBASE temporal-OOS dispersion.
 
-### A. Odds API adapter
-Use The Odds API automatically if `basketball_nbl` player assists/rebounds markets are actually returned. Standard NBL sport/event coverage does not imply player-prop coverage.
+---
 
-### B. Screenshot adapter
-If API player props are unavailable, ingest user-supplied sportsbook screenshots only after `P_MODEL_STATUS: FROZEN`. Extract bookmaker, player, stat, threshold, side, decimal price and capture time. Never alter P_model from screenshot content.
+## 4. Independent stat heads
+### ASSISTS
+Primary pathways:
+- minutes / starter probability;
+- primary vs secondary creator role;
+- initiation/touches/potential assists when available;
+- co-creator competition;
+- lineup-specific creation share;
+- teammate conversion environment;
+- pace/possessions;
+- opponent pressure/assist environment where validated.
 
-### C. Public-web adapter (best effort only)
-A public sportsbook/web source may be used only if prices are directly accessible without login/auth/anti-bot bypass and can be validated reliably. This is optional convenience, never a production dependency.
+### REBOUNDS
+Primary pathways:
+- minutes / frontcourt role;
+- ORB/DRB/TRB profile;
+- lineup size and small-ball/two-big structure;
+- teammate rebound competition;
+- shot/miss environment;
+- pace/possessions;
+- opponent rebounding environment where validated.
 
-All adapters normalize into one canonical market record:
-`fixture_id, player_id/name, stat_type, side, threshold, decimal_price, bookmaker, captured_at, source_type`
+The two heads may share the same researched minutes/rotation facts while translating them differently into stat-specific scenarios.
 
-## Layer 3/4 ranking
-Keep assists and rebounds EV calculations separate, then allow one combined matchup ranking after exact post-freeze market mapping.
+---
 
-Outputs in BOTH mode:
-- BEST SINGLE across assists + rebounds
-- ranked assists positives
-- ranked rebounds positives
-- combined positive-edge ranking
-- no forced bet
+## 5. Atomic freeze
+The Worker freezes all requested heads together.
 
-The ranking may select either stat. It does not require one assists and one rebounds recommendation.
+BOTH mode cannot partially succeed for one stat while silently dropping the other.
 
-## Runtime design
-Use GitHub-first engineering and Cloudflare Worker patterns proven by NCAA:
-- source-controlled ETL, models, schemas and tests
-- scheduled data refresh
-- immutable pack revisions
-- resumable run state if required
-- server-side freeze integrity checks
-- one matchup research receipt shared by requested stat heads
-- separate stat-head model receipts
-- Custom GPT remains orchestration/research interface, not the sole integrity enforcement layer
+Each frozen head contains:
+- QBASE anchor;
+- scenario ledger;
+- final mean;
+- temporal-OOS or explicitly widened dispersion;
+- count distribution;
+- at-least ladder;
+- half-point grid;
+- integer over/push/under grid;
+- Confidence / Fragility.
 
-Because the user runs match-by-match rather than full-slate, the runtime can be materially simpler than NCAA's slate checkpoint loop while still retaining resumability and immutable freeze state.
+The matchup returns:
+- immutable `freeze_receipt_sha256`;
+- original `frozen_at`;
+- research/QBASE binding;
+- PASS integrity audits;
+- compact frozen player summaries.
 
-## Tracker
-Use the existing Nick Bet Tracker after Layer 4. Assists and rebounds use distinct stat/market identifiers. Create model selections after final ranking; record a bet only after explicit user confirmation.
+Each full stored player payload also has an independent `player_model_sha256` exposed in the compact receipt. Frozen-player retrieval recomputes this hash server-side before returning the payload.
 
-## Build order
-1. Audit/live-test official NBL Rosetta feeds and nblR historical assets.
-2. Build shared matchup research pack + validation/tests.
-3. Build historical player-game training dataset.
-4. Develop and walk-forward validate separate assists and rebounds quantitative heads.
-5. Add shared current-role/minutes translation + stat-specific contextual ledgers.
-6. Add atomic dual-head freeze runtime with `BOTH`, `ASSISTS_ONLY`, `REBOUNDS_ONLY` modes.
-7. Implement provider-agnostic market adapter.
-8. Add Odds API adapter if live NBL props exist; screenshot adapter regardless.
-9. Add Bet Tracker integration.
-10. Production acceptance and one NBL Custom GPT production kit capable of running both stats match-by-match.
+Repeated compute after freeze returns the original receipt rather than recomputing.
+
+---
+
+## 6. Separate Market Worker
+Production project:
+`nbl-player-props-market-v1`
+
+This Worker cannot create P_model. It only evaluates post-freeze market observations.
+
+Accepted source types:
+- `odds_api`
+- `screenshot`
+- `public_web`
+
+Before evaluating a row it requires:
+- run is FROZEN;
+- exact caller freeze receipt matches;
+- fixture matches;
+- market `captured_at >= frozen_at`;
+- compact player hash exists;
+- full frozen-player response carries the same receipt/timestamp/hash;
+- independently recomputed full-player hash matches `player_model_sha256`.
+
+Rows from different sources are first resolved to the exact frozen player identity. The highest valid price is then retained for each exact:
+`fixture + frozen player + stat + side + threshold`.
+
+This correctly allows an ID-bearing API row and name-only Bet365 screenshot row to compete for best price.
+
+Only exact frozen integer/half-point thresholds are evaluated. No interpolation.
+
+Integer lines use explicit push-aware EV.
+
+---
+
+## 7. Early-season edge regime
+Opening weeks deliberately emphasize information that historical averages are slow to absorb:
+- roster turnover;
+- imports/transfers;
+- vacated minutes/usage;
+- coaching/system changes;
+- preseason/Blitz deployment;
+- injuries and temporary opportunity;
+- actual current role hierarchy.
+
+Prior-season NBL production is an anchor, not a current-role assumption.
+
+Current-season Welo may be used as supporting team-strength evidence after Week 1 when supplied/available. Prior-season Welo is not used as a substitute for current team strength.
+
+---
+
+## 8. Custom GPT production package
+- `NBL_ASSISTS_REBOUNDS_4_LAYER_MASTER_PRODUCTION_V1.0.md`
+- `GPT_INSTRUCTIONS_PRODUCTION_V1.0.md`
+- `LAUNCH_PROMPT_PRODUCTION_V1.0.md`
+- `INSTALL_PRODUCTION_V1.0.md`
+- `openapi_v1.yaml`
+- `market_openapi_v1.yaml`
+
+The Research Action performs fixture/run/research/freeze operations. The Market Action is physically separate and post-freeze only.
+
+---
+
+## 9. Final ranking
+BOTH mode may output:
+- BEST SINGLE across both stats;
+- assists positive edges;
+- rebounds positive edges;
+- combined positive-edge ranking.
+
+There is no requirement to produce one recommendation from each stat. NO BET is a valid production result.
+
+Material post-freeze basketball news invalidates the run; it never justifies changing a frozen P_model because the market moved.
+
+## Production acceptance
+Source architecture is not sufficient for sign-off. Production requires passing repository verification, Cloudflare deployment health, clean Custom GPT schema imports and a live future-fixture E2E proving freeze persistence, per-player hash binding and post-freeze-only market evaluation.
