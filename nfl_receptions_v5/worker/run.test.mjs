@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {validateResearchContext} from './run.js';
 
 const lock = {
-  game_id: '2026_01_NE_SEA', source_commit: 'a'.repeat(40), pack_revision: 'b'.repeat(16),
+  game_id: '2026_01_NE_SEA', source_anchor_sha256: 'a'.repeat(64), pack_revision: 'b'.repeat(16),
   away_team: 'NE', home_team: 'SEA', created_at: Date.parse('2026-09-06T01:00:00Z')
 };
 const part = id => ({status: 'VERIFIED', summary: 'Verified current football evidence.', evidence_ids: [id]});
@@ -11,7 +11,7 @@ function context() {
   return {
     game_id: lock.game_id,
     completed_at: '2026-09-06T02:00:00Z',
-    pack_receipt: {source_commit: lock.source_commit, pack_revision: lock.pack_revision, retrieved_player_count: 30},
+    pack_receipt: {source_anchor_sha256: lock.source_anchor_sha256, pack_revision: lock.pack_revision, retrieved_player_count: 30},
     current_information_state: {practice: 'PARTIAL', inactives: 'NOT AVAILABLE'},
     research_quality_permission: 'YES',
     evidence: [
@@ -39,6 +39,11 @@ function context() {
 
 test('complete market-blind research checkpoint passes', () => {
   assert.doesNotThrow(() => validateResearchContext(context(), lock, 30, Date.parse('2026-09-06T02:01:00Z')));
+});
+
+test('source anchor mismatch blocks checkpoint', () => {
+  const c = context(); c.pack_receipt.source_anchor_sha256 = 'c'.repeat(64);
+  assert.throws(() => validateResearchContext(c, lock, 30, Date.parse('2026-09-06T02:01:00Z')), /source anchor mismatch/i);
 });
 
 test('market fields are rejected before freeze', () => {
