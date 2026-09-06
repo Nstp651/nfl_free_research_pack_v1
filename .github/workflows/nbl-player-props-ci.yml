@@ -31,6 +31,46 @@ jobs:
         run: node --test nbl_player_props_v1/worker/*.test.mjs
       - name: Worker deployment dry run
         run: npx --yes wrangler@4.128.0 deploy --dry-run --config nbl_player_props_v1/worker/wrangler.toml
+      - name: Custom GPT Action and Instructions sanity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          checks={
+            'nbl_player_props_v1/openapi_v1.yaml':[
+              'https://nbl-player-props-research-v1.nickarnott01.workers.dev',
+              'operationId: healthNblPlayerPropsResearch',
+              'operationId: listNblPlayerPropsFixtures',
+              'operationId: startNblPlayerPropsMatchRun',
+              'operationId: getNblPlayerPropsMatchRun',
+              'operationId: getNblPlayerPropsResearchSeed',
+              'operationId: checkpointNblPlayerPropsResearch',
+              'operationId: computeNblPlayerPropsFreeze',
+              'operationId: getNblPlayerPropsFrozenPlayer',
+            ],
+            'nbl_player_props_v1/market_openapi_v1.yaml':[
+              'https://nbl-player-props-market-v1.nickarnott01.workers.dev',
+              'operationId: healthNblPlayerPropsMarket',
+              'operationId: evaluateNblPlayerPropsMarkets',
+            ],
+            'nbl_player_props_v1/tracker_openapi_v1.yaml':[
+              'https://nick-betting-api.nickarnott01.workers.dev',
+              'name: X-GPT-Action-Key',
+              'operationId: checkBetTracker',
+              'operationId: createModelRun',
+              'operationId: recordBet',
+              'enum: [nbl]',
+            ],
+          }
+          for path,tokens in checks.items():
+              text=Path(path).read_text()
+              missing=[t for t in tokens if t not in text]
+              assert not missing,(path,missing)
+          instructions=Path('nbl_player_props_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.0.md').read_text()
+          assert len(instructions.encode()) < 8000, len(instructions.encode())
+          assert 'server_quantitative_authority' in instructions
+          assert 'schema_version=2.1.0' in instructions
+          print('NBL_CUSTOM_GPT_CONTRACT_GATE=PASS',len(instructions.encode()))
+          PY
       - name: Live official NBL Rosetta acceptance
         working-directory: nbl_player_props_v1
         run: python source_acceptance.py --season-year 2026
