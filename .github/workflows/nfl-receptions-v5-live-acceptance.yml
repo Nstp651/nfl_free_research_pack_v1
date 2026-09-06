@@ -1,0 +1,21 @@
+name: NFL Receptions V5 Live Acceptance
+
+on:
+  push:
+    branches: [feature/platform-v1-nfl-receptions-v5]
+    paths:
+      - 'nfl_receptions_v5/live_acceptance.mjs'
+      - '.github/workflows/nfl-receptions-v5-live-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-pre-freeze-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Run live control and market gate acceptance
+        run: node nfl_receptions_v5/live_acceptance.mjs

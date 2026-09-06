@@ -1,0 +1,14 @@
+# NFL Receptions V5 control plane — Betting Platform V1.
+# Cloudflare native Git integration should own production deployment.
+name = "nfl-receptions-platform-v5"
+main = "worker/index.js"
+compatibility_date = "2026-09-06"
+workers_dev = true
+
+[[durable_objects.bindings]]
+name = "NFL_RECEPTIONS_RUNS"
+class_name = "NflReceptionsRun"
+
+[[migrations]]
+tag = "nfl-receptions-platform-v5-run-v1"
+new_sqlite_classes = ["NflReceptionsRun"]

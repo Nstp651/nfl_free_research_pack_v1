@@ -1,0 +1,116 @@
+openapi: 3.1.0
+info:
+  title: NFL Receptions V5 Post-Freeze Market
+  version: 5.0.1
+  description: Betting Platform V1 post-freeze Australian NFL receptions integration. A valid frozen run_id is mandatory; the service refuses Odds API access until authoritative freeze verification passes.
+servers:
+  - url: https://nfl-receptions-market-v5.nickarnott01.workers.dev
+paths:
+  /health:
+    get:
+      operationId: healthNflReceptionsMarketV5
+      summary: Check market adapter configuration without consuming an Odds API market request
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string}
+                  configured: {type: boolean}
+                  control_transport: {type: string}
+                additionalProperties: true
+        '503':
+          description: Market adapter unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+
+  /v1/receptions:
+    get:
+      operationId: getNflReceptionsBoardV5
+      summary: Verify frozen run, retrieve current AU receptions markets, exact-map frozen thresholds and rank positive edges
+      parameters:
+        - name: run_id
+          in: query
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
+      responses:
+        '200':
+          description: Deterministically integrated post-freeze board
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id: {type: string}
+                  p_model_status: {type: string}
+                  event_id: {type: string}
+                  positive_edge_ranked:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        player_id: {type: string}
+                        player_name: {type: string}
+                        threshold: {type: number}
+                        bookmaker: {type: string}
+                        price: {type: number}
+                        p_model: {type: number}
+                        implied_probability: {type: number}
+                        fair_price: {type: number}
+                        price_edge: {type: number}
+                        expected_roi: {type: number}
+                      additionalProperties: true
+                additionalProperties: true
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+        '422':
+          description: Freeze verification or mapping rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+        '429':
+          description: Upstream quota or rate limit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+        '502':
+          description: Upstream market provider error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true
+        '503':
+          description: Market adapter unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                additionalProperties: true

@@ -1,0 +1,542 @@
+openapi: 3.1.0
+info:
+  title: Nick NFL Receptions V5 Bet Tracker
+  version: 1.0.0
+  description: >
+    Production tracker Action for NFL Receptions V5. Records the completed frozen
+    model run and only user-confirmed placed wagers in the existing Nick Bet Tracker.
+servers:
+  - url: https://nick-betting-api.nickarnott01.workers.dev
+security:
+  - apiKeyAuth: []
+paths:
+  /tracker/health:
+    get:
+      operationId: checkBetTracker
+      summary: Check production bet tracker health
+      responses:
+        "200":
+          description: Tracker health
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackerHealth"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tracker/model-runs:
+    post:
+      operationId: createNflReceptionsTrackerRun
+      summary: Record a completed frozen NFL Receptions V5 run
+      description: >
+        Call after Layer 3/4 is complete. Stores the frozen model and exact selections
+        needed for later user-confirmed bet logging. This tracker write must never
+        change or replace the Betting Platform V1 freeze.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateModelRunRequest"
+      responses:
+        "200":
+          description: Existing idempotent model run
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateModelRunResponse"
+        "201":
+          description: New model run recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateModelRunResponse"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: request_id conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tracker/bets:
+    post:
+      operationId: recordNflReceptionsBet
+      summary: Record a user-confirmed NFL Receptions wager
+      description: >
+        Call only after the user explicitly confirms the wager was placed. Every leg
+        must reference a model_selection_id returned by createNflReceptionsTrackerRun.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordBetRequest"
+      responses:
+        "200":
+          description: Existing idempotent bet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordBetResponse"
+        "201":
+          description: Bet recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordBetResponse"
+        "400":
+          description: Invalid bet payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Model selection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: request_id conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      operationId: listNflReceptionsTrackedBets
+      summary: List tracked bets
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: bookmaker
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: bet_type
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Tracked bets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  bets:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-GPT-Action-Key
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type:
+            - string
+            - "null"
+        message:
+          type:
+            - string
+            - "null"
+
+    TrackerHealth:
+      type: object
+      properties:
+        service:
+          type: string
+        status:
+          type: string
+        api_version:
+          type: string
+        schema_version:
+          type: string
+        database_binding:
+          type: string
+        current_unit_size:
+          type: number
+
+    ModelSelectionInput:
+      type: object
+      required:
+        - selection_name
+        - market_family
+        - p_model
+      properties:
+        selection_name:
+          type: string
+        player_name:
+          type:
+            - string
+            - "null"
+        team_name:
+          type:
+            - string
+            - "null"
+        market_family:
+          type: string
+          enum:
+            - nfl_receptions
+        market_key:
+          type:
+            - string
+            - "null"
+        side:
+          type:
+            - string
+            - "null"
+        threshold:
+          type:
+            - number
+            - "null"
+        p_model:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 1
+        fair_odds:
+          type:
+            - number
+            - "null"
+        confidence:
+          type:
+            - number
+            - "null"
+        market_price_at_integration:
+          type:
+            - number
+            - "null"
+        market_bookmaker_at_integration:
+          type:
+            - string
+            - "null"
+        p_market_at_integration:
+          type:
+            - number
+            - "null"
+          minimum: 0
+          maximum: 1
+        edge_at_integration:
+          type:
+            - number
+            - "null"
+        ranking_score:
+          type:
+            - number
+            - "null"
+        final_rank:
+          type:
+            - integer
+            - "null"
+        final_play:
+          type: boolean
+        key_assumptions:
+          type:
+            - string
+            - "null"
+        notes:
+          type:
+            - string
+            - "null"
+
+    CreateModelRunRequest:
+      type: object
+      required:
+        - sport
+        - league
+        - model_name
+        - fixture
+        - selections
+      properties:
+        request_id:
+          type:
+            - string
+            - "null"
+          pattern: ^[A-Za-z0-9_-]{8,80}$
+        sport:
+          type: string
+          enum:
+            - nfl
+        league:
+          type: string
+          enum:
+            - nfl
+        model_name:
+          type: string
+          enum:
+            - NFL Receptions V5
+        model_version:
+          type:
+            - string
+            - "null"
+        season:
+          type:
+            - string
+            - "null"
+        round_week:
+          type:
+            - string
+            - "null"
+        fixture_date:
+          type:
+            - string
+            - "null"
+        event_id:
+          type:
+            - string
+            - "null"
+        home_team:
+          type:
+            - string
+            - "null"
+        away_team:
+          type:
+            - string
+            - "null"
+        fixture:
+          type: string
+        timing_mode:
+          type:
+            - string
+            - "null"
+        frozen_at:
+          type:
+            - string
+            - "null"
+        research_state:
+          type:
+            - string
+            - "null"
+        notes:
+          type:
+            - string
+            - "null"
+        selections:
+          type: array
+          minItems: 1
+          maxItems: 250
+          items:
+            $ref: "#/components/schemas/ModelSelectionInput"
+
+    ModelSelectionStored:
+      type: object
+      properties:
+        id:
+          type: string
+        selection_name:
+          type: string
+        player_name:
+          type:
+            - string
+            - "null"
+        market_family:
+          type: string
+        market_key:
+          type:
+            - string
+            - "null"
+        threshold:
+          type:
+            - number
+            - "null"
+        p_model:
+          type: number
+        final_rank:
+          type:
+            - integer
+            - "null"
+        final_play:
+          type:
+            - integer
+            - boolean
+            - "null"
+
+    CreateModelRunResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        idempotent:
+          type: boolean
+        request_id:
+          type:
+            - string
+            - "null"
+        model_run_id:
+          type: string
+        selection_count:
+          type: integer
+        selections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelSelectionStored"
+
+    RecordBetLeg:
+      type: object
+      required:
+        - model_selection_id
+      properties:
+        model_selection_id:
+          type: string
+        execution_leg_odds:
+          type:
+            - number
+            - "null"
+
+    RecordBetRequest:
+      type: object
+      required:
+        - bookmaker
+        - bet_type
+        - stake
+        - accepted_odds
+        - legs
+      properties:
+        request_id:
+          type:
+            - string
+            - "null"
+          pattern: ^[A-Za-z0-9_-]{8,80}$
+        bookmaker:
+          type: string
+        bet_type:
+          type: string
+          enum:
+            - single
+        stake:
+          type: number
+          exclusiveMinimum: 0
+        accepted_odds:
+          type: number
+          exclusiveMinimum: 1
+        unboosted_odds:
+          type:
+            - number
+            - "null"
+        promo_label:
+          type:
+            - string
+            - "null"
+        bookmaker_bet_id:
+          type:
+            - string
+            - "null"
+        placed_at:
+          type:
+            - string
+            - "null"
+        notes:
+          type:
+            - string
+            - "null"
+        legs:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/RecordBetLeg"
+
+    RecordedBetLeg:
+      type: object
+      properties:
+        id:
+          type:
+            - string
+            - "null"
+        leg_number:
+          type:
+            - integer
+            - "null"
+        model_selection_id:
+          type:
+            - string
+            - "null"
+        model_run_id:
+          type:
+            - string
+            - "null"
+        selection_name:
+          type:
+            - string
+            - "null"
+        fixture:
+          type:
+            - string
+            - "null"
+
+    RecordBetResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        idempotent:
+          type: boolean
+        request_id:
+          type:
+            - string
+            - "null"
+        bet_ticket_id:
+          type: string
+        bookmaker:
+          type: string
+        bet_type:
+          type: string
+        stake:
+          type: number
+        accepted_odds:
+          type: number
+        unit_size:
+          type: number
+        units_staked:
+          type: number
+        legs:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecordedBetLeg"
