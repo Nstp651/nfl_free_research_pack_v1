@@ -20,7 +20,7 @@ function research(){return {
   schema_version:'nbl_fixture_research_v1',market_data:false,fixture_id:'fixture-1',pack_revision:'pack-1',run_mode:'BOTH',checked_at:'2026-09-06T01:00:00Z',
   sources:{official:{url:'https://nbl.com.au/news/x',title:'Official',checked_at:'2026-09-06T00:55:00Z'},report:{url:'https://example.com/report',title:'Report',checked_at:'2026-09-06T00:56:00Z'}},
   fixture_context:{status:'scheduled',source_ids:['official']},
-  players:[{player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',availability_status:'ACTIVE',availability_source_ids:['official'],projected_minutes:{low:27,mean:30,high:33,source_ids:['official','report']},role:{state:'RETURNING_CHANGED',creation_role:'PRIMARY',frontcourt_role:'GUARD',source_ids:['report']}}]
+  players:[{player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',availability_status:'ACTIVE',availability_source_ids:['official'],projected_minutes:{low:27,mean:30,high:33,source_ids:['official','report']},role:{state:'RETURNING_CHANGED',creation_role:'PRIMARY',frontcourt_role:'GUARD',source_ids:['report']},stat_context:{assists:{source_ids:['report'],notes:['Primary creator role researched']},rebounds:{source_ids:['report'],notes:['Guard rebound role researched']}}}]
 };}
 function qbase(stat){return {model_name:`${stat} q`,model_version:'0.1.0',feature_schema:'nbl_player_pregame_v1',stat_type:stat,market_data:false,walk_forward:{nb2_alpha_oos:0.2},probability_contract:{max_count:stat==='assists'?20:30}};}
 function runtimeHead(qbaseMean,mean,confidence,fragility,scenarioReceipt){return {
@@ -35,6 +35,13 @@ function projections(){return [{player_id:'p1',player_name:'Test Guard',team:'Sy
 test('BOTH freezes atomically with immutable server-attested receipt material',async()=>{
   const f=await computeFreeze(research(),{assists:qbase('assists'),rebounds:qbase('rebounds')},projections(),'2026-09-06T01:05:00Z');
   assert.equal(f.status,'FROZEN');assert.deepEqual(f.requested_heads,['assists','rebounds']);assert.equal(f.audits.atomic_requested_heads,'PASS');assert.equal(f.audits.server_qbase_authority,'PASS');assert.match(f.freeze_receipt_sha256,/^[0-9a-f]{64}$/);assert.equal(f.players[0].heads.assists.final_mean,5.6);assert.equal(f.players[0].heads.assists.server_quantitative_attestation.source,'SERVER_QBASE_RUNTIME_SCORE');assert.equal(f.players[0].heads.assists.server_quantitative_attestation.player_prior_key,'testguard');
+});
+
+test('BOTH refuses incomplete stat-specific current research',async()=>{
+  const r=research();delete r.players[0].stat_context.rebounds;
+  await assert.rejects(()=>computeFreeze(r,{assists:qbase('assists'),rebounds:qbase('rebounds')},projections()),/stat_context missing requested head rebounds/);
+  const empty=research();empty.players[0].stat_context.assists.notes=[];
+  await assert.rejects(()=>computeFreeze(empty,{assists:qbase('assists'),rebounds:qbase('rebounds')},projections()),/research note required/);
 });
 
 test('BOTH refuses missing head and market contamination',async()=>{
