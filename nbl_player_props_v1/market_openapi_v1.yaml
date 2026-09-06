@@ -1,0 +1,181 @@
+openapi: 3.1.0
+info:
+  title: NBL Player Props Market Gateway
+  version: 1.0.0
+  description: Post-freeze market evaluation for NBL assists and rebounds. Requires an exact frozen research run receipt before any market row is evaluated.
+servers:
+  - url: https://nbl-player-props-market-v1.nickarnott01.workers.dev
+paths:
+  /health:
+    get:
+      operationId: healthNblPlayerPropsMarket
+      summary: Check NBL market gateway health.
+      responses:
+        '200':
+          description: Health response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  service:
+                    type: string
+                  version:
+                    type: string
+                  market_data:
+                    type: boolean
+                  research_base:
+                    type: string
+                  supported_stats:
+                    type: array
+                    items:
+                      type: string
+                  supported_sources:
+                    type: array
+                    items:
+                      type: string
+                required: [ok, service, version, market_data, research_base, supported_stats, supported_sources]
+                additionalProperties: false
+  /v1/evaluate:
+    post:
+      operationId: evaluateNblPlayerPropsMarkets
+      summary: Evaluate exact sportsbook rows against one immutable frozen NBL P_model.
+      description: Call only after the research run is FROZEN. Screenshot, Odds API, or public-web market observations are accepted; P_model is never modified.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                run_id:
+                  type: string
+                  pattern: '^[a-f0-9]{64}$'
+                expected_freeze_receipt_sha256:
+                  type: string
+                  pattern: '^[a-f0-9]{64}$'
+                markets:
+                  type: array
+                  minItems: 1
+                  maxItems: 250
+                  items:
+                    $ref: '#/components/schemas/MarketRecord'
+              required: [run_id, expected_freeze_receipt_sha256, markets]
+              additionalProperties: false
+      responses:
+        '200':
+          description: Exact post-freeze EV evaluation and positive-edge ranking.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationResponse'
+        '422':
+          description: Freeze binding, identity, threshold, market, or probability validation failure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  market_data:
+                    type: boolean
+                  p_model_mutated:
+                    type: boolean
+                  error:
+                    type: string
+                required: [market_data, p_model_mutated, error]
+                additionalProperties: false
+components:
+  schemas:
+    MarketRecord:
+      type: object
+      properties:
+        fixture_id:
+          type: string
+        player_id:
+          type: [string, 'null']
+        player_name:
+          type: string
+        stat_type:
+          type: string
+          enum: [assists, rebounds]
+        side:
+          type: string
+          enum: [over, under]
+        threshold:
+          type: number
+          minimum: 0
+          maximum: 40
+        decimal_price:
+          type: number
+          exclusiveMinimum: 1
+          maximum: 1000
+        bookmaker:
+          type: string
+        captured_at:
+          type: string
+          format: date-time
+        source_type:
+          type: string
+          enum: [odds_api, screenshot, public_web]
+      required: [fixture_id, player_name, stat_type, side, threshold, decimal_price, bookmaker, captured_at, source_type]
+      additionalProperties: false
+    EvaluatedMarket:
+      type: object
+      properties:
+        fixture_id: {type: string}
+        player_id: {type: [string, 'null']}
+        player_name: {type: string}
+        stat_type: {type: string}
+        side: {type: string}
+        threshold: {type: number}
+        decimal_price: {type: number}
+        bookmaker: {type: string}
+        captured_at: {type: string}
+        source_type: {type: string}
+        frozen_player_name: {type: string}
+        frozen_player_id: {type: [string, 'null']}
+        p_win: {type: number}
+        p_push: {type: number}
+        p_loss: {type: number}
+        conditional_win_probability: {type: [number, 'null']}
+        market_break_even_probability: {type: number}
+        probability_edge: {type: [number, 'null']}
+        fair_decimal_price: {type: [number, 'null']}
+        ev_per_unit: {type: number}
+        positive_ev: {type: boolean}
+        confidence: {type: string}
+        fragility: {type: string}
+        freeze_receipt_sha256: {type: string}
+        frozen_at: {type: string}
+        positive_edge_rank: {type: [integer, 'null']}
+      required: [fixture_id, player_name, stat_type, side, threshold, decimal_price, bookmaker, captured_at, source_type, frozen_player_name, p_win, p_push, p_loss, market_break_even_probability, ev_per_unit, positive_ev, confidence, fragility, freeze_receipt_sha256, frozen_at]
+      additionalProperties: true
+    EvaluationResponse:
+      type: object
+      properties:
+        market_data: {type: boolean}
+        p_model_mutated: {type: boolean}
+        p_model_status: {type: string}
+        run_id: {type: string}
+        fixture_id: {type: string}
+        freeze_receipt_sha256: {type: string}
+        frozen_at: {type: string}
+        market_records_received: {type: integer}
+        market_records_evaluated: {type: integer}
+        evaluated:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluatedMarket'
+        positive_edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluatedMarket'
+        best_single:
+          anyOf:
+            - $ref: '#/components/schemas/EvaluatedMarket'
+            - type: 'null'
+        no_forced_bet: {type: boolean}
+      required: [market_data, p_model_mutated, p_model_status, run_id, fixture_id, freeze_receipt_sha256, frozen_at, market_records_received, market_records_evaluated, evaluated, positive_edges, no_forced_bet]
+      additionalProperties: false
