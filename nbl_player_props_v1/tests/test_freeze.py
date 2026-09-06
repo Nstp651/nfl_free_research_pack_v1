@@ -167,7 +167,7 @@ def test_atomic_dual_head_freeze_and_hash_validation():
     assert frozen["status"] == "FROZEN"
     assert frozen["requested_heads"] == ["assists", "rebounds"]
     assert frozen["audits"]["atomic_requested_heads"] == "PASS"
-    assert frozen["audits"]["server_quantitative_authority"] == "PASS"
+    assert frozen["audits"]["server_qbase_authority"] == "PASS"
     assists = frozen["players"][0]["heads"]["assists"]
     assert assists["final_mean"] == pytest.approx(0.2 * 4.7 + 0.6 * 5.6 + 0.2 * 6.2)
     assert assists["server_quantitative_attestation"] == {
