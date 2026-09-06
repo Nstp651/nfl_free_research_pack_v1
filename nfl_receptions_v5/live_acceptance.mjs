@@ -49,9 +49,6 @@ for (let i = 0; i < 18; i++) {
     created = out.data;
     break;
   }
-  // During a native-Git deployment race the immediately previous control build
-  // may still expose the old false-failure initialization response. Retry only
-  // that known transitional response; all other failures are real acceptance failures.
   if (out.res.status === 422 && out.data.error === 'Unknown run operation') {
     await sleep(5000);
     continue;
@@ -71,7 +68,8 @@ assert.equal(before.data.research.checkpointed, false);
 assert.equal(before.data.freeze, null);
 
 const denied = await jsonFetch(`${MARKET}/v1/receptions?run_id=${runId}`);
-assert.equal(denied.res.status, 422, `Expected pre-freeze market denial, got ${denied.res.status}`);
+console.log('PRE_FREEZE_DENIAL', JSON.stringify({status: denied.res.status, data: denied.data}));
+assert.equal(denied.res.status, 422, `Expected pre-freeze market denial, got ${denied.res.status}: ${JSON.stringify(denied.data)}`);
 assert.match(String(denied.data.error || ''), /not frozen/i);
 assert.equal('quota' in denied.data, false, 'Pre-freeze denial must not expose an Odds API quota receipt');
 assert.equal('event' in denied.data, false, 'Pre-freeze denial must occur before event-market resolution');
