@@ -11,9 +11,9 @@ permissions:
   contents: read
 
 jobs:
-  test-and-source-acceptance:
+  test-source-and-model:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,14 +23,60 @@ jobs:
           cache-dependency-path: nbl_player_props_v1/requirements.txt
       - name: Install dependencies
         run: pip install -r nbl_player_props_v1/requirements.txt
-      - name: Unit tests
+      - name: Python unit tests
         run: pytest -q nbl_player_props_v1/tests
       - name: Compile Python
         run: python -m compileall -q nbl_player_props_v1
+      - name: Worker quantitative/freeze tests
+        run: node --test nbl_player_props_v1/worker/*.test.mjs
+      - name: Worker deployment dry run
+        run: npx --yes wrangler@4.128.0 deploy --dry-run --config nbl_player_props_v1/worker/wrangler.toml
+      - name: Custom GPT Action and Instructions sanity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          checks={
+            'nbl_player_props_v1/openapi_v1.yaml':[
+              'https://nbl-player-props-research-v1.nickarnott01.workers.dev',
+              'operationId: healthNblPlayerPropsResearch',
+              'operationId: listNblPlayerPropsFixtures',
+              'operationId: startNblPlayerPropsMatchRun',
+              'operationId: getNblPlayerPropsMatchRun',
+              'operationId: getNblPlayerPropsResearchSeed',
+              'operationId: checkpointNblPlayerPropsResearch',
+              'operationId: computeNblPlayerPropsFreeze',
+              'operationId: getNblPlayerPropsFrozenPlayer',
+            ],
+            'nbl_player_props_v1/market_openapi_v1.yaml':[
+              'https://nbl-player-props-market-v1.nickarnott01.workers.dev',
+              'operationId: healthNblPlayerPropsMarket',
+              'operationId: evaluateNblPlayerPropsMarkets',
+            ],
+            'nbl_player_props_v1/tracker_openapi_v1.yaml':[
+              'https://nick-betting-api.nickarnott01.workers.dev',
+              'name: X-GPT-Action-Key',
+              'operationId: checkBetTracker',
+              'operationId: createModelRun',
+              'operationId: recordBet',
+              'enum: [nbl]',
+            ],
+          }
+          for path,tokens in checks.items():
+              text=Path(path).read_text()
+              missing=[t for t in tokens if t not in text]
+              assert not missing,(path,missing)
+          instructions=Path('nbl_player_props_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.0.md').read_text()
+          assert len(instructions.encode()) < 8000, len(instructions.encode())
+          assert 'server_qbase_authority' in instructions
+          assert 'schema_version=2.1.0' in instructions
+          print('NBL_CUSTOM_GPT_CONTRACT_GATE=PASS',len(instructions.encode()))
+          PY
       - name: Live official NBL Rosetta acceptance
         working-directory: nbl_player_props_v1
         run: python source_acceptance.py --season-year 2026
-      - name: Build historical assists/rebounds source table
+      - name: Diagnose historical timestamp coverage
+        run: python nbl_player_props_v1/historical/source_time_diagnostic.py
+      - name: Build full historical assists/rebounds source table
         run: |
           python nbl_player_props_v1/historical/build_player_games.py \
             --output /tmp/nbl-player-games.csv.gz \
@@ -40,13 +86,73 @@ jobs:
           from pathlib import Path
           r=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
           assert r['market_data'] is False
-          assert r['rows'] > 1000
-          assert r['players'] > 100
-          assert r['matches'] > 100
-          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'])
+          assert r['rows'] > 20000, r
+          assert r['players'] > 500, r
+          assert r['matches'] > 1000, r
+          assert len(r['seasons']) >= 8, r
+          assert r['latest_season'] == max(map(str, r['seasons'])), r
+          assert r['latest_season_rows'] > 500, r
+          assert r['match_time_non_null_rate'] >= 0.99, r
+          assert r['latest_season_match_time_non_null_rate'] >= 0.99, r
+          assert r['latest_season_minutes_non_null_rate'] >= 0.50, r
+          print('NBL_HISTORICAL_SOURCE_ACCEPTANCE=PASS', r['rows'], r['players'], r['matches'], len(r['seasons']), r['latest_season'], r['latest_season_rows'], r['latest_season_match_time_non_null_rate'], r['latest_season_minutes_non_null_rate'])
           PY
-      - name: Upload historical schema receipt
+      - name: Build next-game historical prior snapshot
+        run: |
+          python nbl_player_props_v1/historical/build_prior_snapshot.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output /tmp/nbl-prior-snapshot.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('/tmp/nbl-prior-snapshot.json').read_text())
+          r=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
+          assert s['market_data'] is False
+          assert len(s['players']) > 500, len(s['players'])
+          assert len(s['teams']) >= 10, len(s['teams'])
+          assert s['historical_matches'] > 1000
+          assert len(s['snapshot_revision']) == 20
+          assert s['latest_historical_season'] == r['latest_season'], (s['latest_historical_season'], r['latest_season'])
+          assert s['latest_season_timestamp_coverage'] >= 0.99, s['latest_season_timestamp_coverage']
+          latest_team_count=sum(1 for t in s['teams'].values() if str(t.get('last_season')) == r['latest_season'])
+          latest_player_count=sum(1 for p in s['players'].values() if str(p.get('last_season')) == r['latest_season'])
+          assert latest_team_count >= 10, latest_team_count
+          assert latest_player_count >= 100, latest_player_count
+          print('NBL_PRIOR_SNAPSHOT_ACCEPTANCE=PASS', len(s['players']), len(s['teams']), s['snapshot_revision'], s['latest_historical_season'], s['latest_season_timestamp_coverage'], latest_team_count, latest_player_count)
+          PY
+      - name: Train and walk-forward validate ASSISTS + REBOUNDS heads
+        run: |
+          mkdir -p /tmp/nbl-model-artifacts /tmp/nbl-model-reports
+          python nbl_player_props_v1/model/train_heads.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output-dir /tmp/nbl-model-artifacts \
+            --report-dir /tmp/nbl-model-reports
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          source=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
+          latest_start=int(str(source['latest_season']).split('-')[0])
+          for head in ('assists','rebounds'):
+              p=Path(f'/tmp/nbl-model-artifacts/qbase_{head}_v0.1.0.json')
+              a=json.loads(p.read_text())
+              wf=a['walk_forward']
+              assert a['market_data'] is False
+              assert a['stat_type'] == head
+              assert a['training_seasons'][1] == latest_start, (head, a['training_seasons'], source['latest_season'])
+              assert wf['last_scored_season'] == latest_start, (head, wf['last_scored_season'], source['latest_season'])
+              assert wf['overall']['n'] > 5000
+              assert wf['brier_at_least']['mean'] < 0.25
+              assert wf['nb2_alpha_oos'] > 0
+              print('NBL_HEAD_GATE=PASS', head, a['training_seasons'], wf['first_scored_season'], wf['last_scored_season'], wf['overall'], wf['brier_at_least']['mean'])
+          PY
+      - name: Upload NBL source/model audit artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nbl-source-receipt
-          path: /tmp/nbl-source-receipt.json
+          name: nbl-v1-source-and-model-audit
+          path: |
+            /tmp/nbl-source-receipt.json
+            /tmp/nbl-prior-snapshot.json
+            /tmp/nbl-model-artifacts/*.json
+            /tmp/nbl-model-reports/*.md

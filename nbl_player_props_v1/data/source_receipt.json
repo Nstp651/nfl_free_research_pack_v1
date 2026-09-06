@@ -1,0 +1,74 @@
+{
+  "assists_non_null": 36428,
+  "duplicate_audit": {
+    "player_exact_duplicate_rows_collapsed": 0,
+    "team_exact_duplicate_rows_collapsed": 10
+  },
+  "identity_binding": "season+globally_unique_match_uuid+team+normalized_player_name",
+  "latest_season": "2025-2026",
+  "latest_season_match_time_non_null_rate": 1.0,
+  "latest_season_minutes_non_null_rate": 1.0,
+  "latest_season_rows": 3810,
+  "market_data": false,
+  "match_time_non_null_rate": 1.0,
+  "matches": 1572,
+  "minutes_binding": "row-level seconds/60 with parsed minutes fallback",
+  "minutes_non_null_rate": 1.0,
+  "normalized_name_keys_with_multiple_source_ids": 130,
+  "output_sha256": "bda4a09be224d85d480185aa59c6be2a1dba7d8f27f5b0e2f88c108cf6aa1b77",
+  "player_identity_method": "normalized_name_with_source_player_id_retained",
+  "players": 616,
+  "rebounds_non_null": 36428,
+  "rows": 36428,
+  "schema_version": "0.1.9",
+  "seasons": [
+    "2015-2016",
+    "2016-2017",
+    "2017-2018",
+    "2018-2019",
+    "2019-2020",
+    "2020-2021",
+    "2021-2022",
+    "2022-2023",
+    "2023-2024",
+    "2024-2025",
+    "2025-2026"
+  ],
+  "sources": {
+    "player": {
+      "bytes": 15612745,
+      "discovery": "stable_release_download_url",
+      "etag": "\"0x8DE941E76AD0C75\"",
+      "last_modified": "Mon, 06 Apr 2026 20:52:49 GMT",
+      "name": "box_player.csv",
+      "sha256": "sha256:bcd4660715290c1265b6dde115a909e24fc3161ebd7afc40e776f55379b5a2df",
+      "source_repository": "https://github.com/JaseZiv/nblr_data",
+      "tag": "box_player",
+      "url": "https://github.com/JaseZiv/nblr_data/releases/download/box_player/box_player.csv"
+    },
+    "results": {
+      "bytes": 1899236,
+      "discovery": "stable_release_download_url",
+      "etag": "\"0x8DE941E692609D4\"",
+      "last_modified": "Mon, 06 Apr 2026 20:52:26 GMT",
+      "name": "results_wide.csv",
+      "sha256": "sha256:afd222d4833d8e9aa62dbed36ee6d89900be5a7d62d4b7039c48919f56aedf67",
+      "source_repository": "https://github.com/JaseZiv/nblr_data",
+      "tag": "match_results",
+      "url": "https://github.com/JaseZiv/nblr_data/releases/download/match_results/results_wide.csv"
+    },
+    "team": {
+      "bytes": 949441,
+      "discovery": "stable_release_download_url",
+      "etag": "\"0x8DE941E6DEEA9E4\"",
+      "last_modified": "Mon, 06 Apr 2026 20:52:34 GMT",
+      "name": "box_team.csv",
+      "sha256": "sha256:3ff1272d49d2457926e30ce8ec941258a9c20fb9b4462c24b91a94c16ad055fa",
+      "source_repository": "https://github.com/JaseZiv/nblr_data",
+      "tag": "box_team",
+      "url": "https://github.com/JaseZiv/nblr_data/releases/download/box_team/box_team.csv"
+    }
+  },
+  "team_environment_match_rate": 1.0,
+  "timestamp_binding": "results_wide.match_id direct map -> match_time_utc; player match_time fallback"
+}

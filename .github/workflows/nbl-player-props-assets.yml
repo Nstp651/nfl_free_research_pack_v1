@@ -1,0 +1,141 @@
+name: NBL Player Props Runtime Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nbl_player_props_v1/**'
+      - '.github/workflows/nbl-player-props-assets.yml'
+      - '!nbl_player_props_v1/data/**'
+  workflow_dispatch:
+    inputs:
+      retrain_qbase:
+        description: 'Explicitly retrain/promote QBASE heads (model change)'
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    - cron: '20 0,6,12,18 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nbl-player-props-runtime-assets
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: nbl_player_props_v1/requirements.txt
+      - name: Install dependencies
+        run: pip install -r nbl_player_props_v1/requirements.txt
+      - name: Unit integrity tests
+        run: |
+          pytest -q nbl_player_props_v1/tests
+          node --test nbl_player_props_v1/worker/*.test.mjs
+      - name: Build market-blind historical source and next-game prior
+        run: |
+          python nbl_player_props_v1/historical/build_player_games.py \
+            --output /tmp/nbl-player-games.csv.gz \
+            --receipt /tmp/nbl-source-receipt.json
+          python nbl_player_props_v1/historical/build_prior_snapshot.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output /tmp/nbl-prior-snapshot.json
+      - name: Decide whether QBASE retraining is permitted
+        id: model
+        shell: bash
+        run: |
+          RETRAIN='false'
+          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.retrain_qbase }}" = 'true' ]; then RETRAIN='true'; fi
+          if [ ! -f nbl_player_props_v1/data/model/qbase_assists_v0.1.0.json ] || [ ! -f nbl_player_props_v1/data/model/qbase_rebounds_v0.1.0.json ]; then RETRAIN='true'; fi
+          echo "retrain=$RETRAIN" >> "$GITHUB_OUTPUT"
+          echo "QBASE_RETRAIN=$RETRAIN"
+      - name: Train candidate QBASE heads only when explicitly/bootstrap permitted
+        if: steps.model.outputs.retrain == 'true'
+        run: |
+          mkdir -p /tmp/nbl-model-artifacts /tmp/nbl-model-reports
+          python nbl_player_props_v1/model/train_heads.py \
+            --data /tmp/nbl-player-games.csv.gz \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output-dir /tmp/nbl-model-artifacts \
+            --report-dir /tmp/nbl-model-reports
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gates={
+            'assists': {'mae':1.20,'rmse':1.75,'brier':0.070,'early_mae':1.35},
+            'rebounds':{'mae':1.95,'rmse':2.55,'brier':0.085,'early_mae':2.15},
+          }
+          source=json.loads(Path('/tmp/nbl-source-receipt.json').read_text())
+          latest_start=int(str(source['latest_season']).split('-')[0])
+          assert source['latest_season_minutes_non_null_rate'] >= .50, source
+          for h,g in gates.items():
+              a=json.loads(Path(f'/tmp/nbl-model-artifacts/qbase_{h}_v0.1.0.json').read_text())
+              wf=a['walk_forward']; o=wf['overall']; early=wf['early_late']['SEASON_GAMES_0_2']
+              assert a['training_seasons'][1] == latest_start, (h,a['training_seasons'],source['latest_season'])
+              assert wf['first_scored_season'] <= 2018 and wf['last_scored_season'] == latest_start, (h,wf,source['latest_season'])
+              assert o['n'] > 20000, o
+              assert o['mae'] <= g['mae'], (h,o)
+              assert o['rmse'] <= g['rmse'], (h,o)
+              assert abs(o['bias_actual_minus_pred']) <= 0.15, (h,o)
+              assert wf['brier_at_least']['mean'] <= g['brier'], (h,wf['brier_at_least'])
+              assert early['mae'] <= g['early_mae'], (h,early)
+              assert wf['nb2_alpha_oos'] > 0
+              print('NBL_QBASE_PROMOTION_GATE=PASS',h,a['training_seasons'],wf['first_scored_season'],wf['last_scored_season'],o,wf['brier_at_least']['mean'],early)
+          PY
+      - name: Resolve approved QBASE file inputs
+        id: paths
+        shell: bash
+        run: |
+          if [ "${{ steps.model.outputs.retrain }}" = 'true' ]; then
+            echo 'assists=/tmp/nbl-model-artifacts/qbase_assists_v0.1.0.json' >> "$GITHUB_OUTPUT"
+            echo 'rebounds=/tmp/nbl-model-artifacts/qbase_rebounds_v0.1.0.json' >> "$GITHUB_OUTPUT"
+          else
+            echo 'assists=nbl_player_props_v1/data/model/qbase_assists_v0.1.0.json' >> "$GITHUB_OUTPUT"
+            echo 'rebounds=nbl_player_props_v1/data/model/qbase_rebounds_v0.1.0.json' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish runtime assets and immutable manifest
+        run: |
+          python nbl_player_props_v1/publish_assets.py \
+            --assists '${{ steps.paths.outputs.assists }}' \
+            --rebounds '${{ steps.paths.outputs.rebounds }}' \
+            --prior /tmp/nbl-prior-snapshot.json \
+            --source-receipt /tmp/nbl-source-receipt.json \
+            --output-dir nbl_player_props_v1/data
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path('nbl_player_props_v1/data/manifest.json').read_text())
+          assert m['schema_version']=='nbl_runtime_assets_v1'
+          assert m['market_data'] is False
+          assert len(m['asset_revision'])==20
+          assert m['integrity']['qbase_retraining_is_explicit_only'] is True
+          print('NBL_RUNTIME_ASSET_GATE=PASS',m['asset_revision'],m['prior_snapshot']['snapshot_revision'])
+          PY
+      - name: Commit changed runtime assets
+        run: |
+          git config user.name 'nbl-assets-bot'
+          git config user.email 'nbl-assets-bot@users.noreply.github.com'
+          git add nbl_player_props_v1/data/
+          if git diff --cached --quiet; then
+            echo 'No NBL runtime asset changes.'
+          else
+            if [ "${{ steps.model.outputs.retrain }}" = 'true' ]; then
+              git commit -m 'Publish validated NBL QBASE and runtime assets'
+            else
+              git commit -m 'Refresh NBL runtime prior snapshot'
+            fi
+            git push origin main
+          fi
