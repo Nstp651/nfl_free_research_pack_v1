@@ -49,7 +49,8 @@ for (let i = 0; i < 18; i++) {
     created = out.data;
     break;
   }
-  if (out.res.status === 422 && out.data.error === 'Unknown run operation') {
+  // Native Git may still be finishing a deployment. Only retry known source/deploy-race failures.
+  if (out.res.status === 422 && /Unknown run operation|Research source unavailable|revision race/i.test(String(out.data.error || ''))) {
     await sleep(5000);
     continue;
   }
@@ -59,6 +60,10 @@ assert.ok(created, 'Updated control Worker did not become available');
 const runId = created.run_id;
 assert.equal(created.p_model_status, 'NOT FROZEN');
 assert.equal(created.freeze, null);
+assert.match(created.lock.source_anchor_sha256, /^[a-f0-9]{64}$/);
+assert.match(created.lock.manifest_sha256, /^[a-f0-9]{64}$/);
+assert.match(created.lock.pack_content_sha256, /^[a-f0-9]{64}$/);
+assert.match(created.lock.pack_revision, /^[a-f0-9]{16}$/);
 
 const before = await jsonFetch(`${CONTROL}/v1/runs/${runId}`);
 assert.equal(before.res.status, 200);
@@ -88,7 +93,7 @@ console.log(JSON.stringify({
   market_health: marketHealth,
   run_id: runId,
   locked_game_id: after.data.lock.game_id,
-  source_commit: after.data.lock.source_commit,
+  source_anchor_sha256: after.data.lock.source_anchor_sha256,
   pack_revision: after.data.lock.pack_revision,
   pre_freeze_market_status: denied.res.status,
   pre_freeze_market_error: denied.data.error,
