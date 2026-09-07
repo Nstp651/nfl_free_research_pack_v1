@@ -25,6 +25,10 @@ def canonical_sha(value: Any) -> str:
     return hashlib.sha256(canonical_bytes(value)).hexdigest()
 
 
+def file_sha(path: str | Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
 def load_json(path: str | Path) -> dict[str, Any]:
     value = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -69,7 +73,13 @@ def publish(assists_path: str | Path, rebounds_path: str | Path, prior_path: str
     (out / "source_receipt.json").write_text(json.dumps(source_receipt, indent=2, sort_keys=True), encoding="utf-8")
 
     qhash = {"assists": canonical_sha(assists), "rebounds": canonical_sha(rebounds)}
+    qfile = {
+        "assists": file_sha(out / model_files["assists"]),
+        "rebounds": file_sha(out / model_files["rebounds"]),
+    }
     prior_hash = canonical_sha(prior); source_hash = canonical_sha(source_receipt)
+    prior_file_hash = file_sha(out / "prior_snapshot.json")
+    source_file_hash = file_sha(out / "source_receipt.json")
     identity = {
         "qbase": qhash,
         "prior_snapshot": prior_hash,
@@ -83,19 +93,19 @@ def publish(assists_path: str | Path, rebounds_path: str | Path, prior_path: str
         "asset_revision": asset_revision,
         "qbase": {
             "assists": {
-                "path": model_files["assists"], "canonical_sha256": qhash["assists"],
+                "path": model_files["assists"], "canonical_sha256": qhash["assists"], "file_sha256": qfile["assists"],
                 "model_version": assists["model_version"], "training_source_receipt_sha256": assists.get("source_receipt_sha256"),
             },
             "rebounds": {
-                "path": model_files["rebounds"], "canonical_sha256": qhash["rebounds"],
+                "path": model_files["rebounds"], "canonical_sha256": qhash["rebounds"], "file_sha256": qfile["rebounds"],
                 "model_version": rebounds["model_version"], "training_source_receipt_sha256": rebounds.get("source_receipt_sha256"),
             },
         },
         "prior_snapshot": {
-            "path": "prior_snapshot.json", "canonical_sha256": prior_hash,
+            "path": "prior_snapshot.json", "canonical_sha256": prior_hash, "file_sha256": prior_file_hash,
             "snapshot_revision": prior.get("snapshot_revision"),
         },
-        "runtime_source_receipt": {"path": "source_receipt.json", "canonical_sha256": source_hash},
+        "runtime_source_receipt": {"path": "source_receipt.json", "canonical_sha256": source_hash, "file_sha256": source_file_hash},
         "integrity": {
             "qbase_retraining_is_explicit_only": True,
             "routine_refresh_changes_prior_not_model": True,

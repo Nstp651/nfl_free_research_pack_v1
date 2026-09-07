@@ -133,10 +133,10 @@ function serverAttestation(head,key,stat){
   }
   return {source,receipt_sha256:receipt||null,player_prior_key:priorKey||null};
 }
-export async function computeFreeze(research,qbases,projections,frozenAt=new Date().toISOString()){
+export async function computeFreeze(research,qbases,projections,frozenAt=new Date().toISOString(),qbaseCanonicalSha={}){
   validateResearchContext(research); requireThat(marketKeyHits(projections).length===0,'projection market boundary failed');
   const heads=requestedHeads(String(research.run_mode).toUpperCase()),known=new Set(Object.keys(research.sources));
-  const q={}; for(const stat of heads){q[stat]=qbaseContract(qbases[stat],stat);q[stat].qbase_sha256=await sha256Json(qbases[stat]);}
+  const q={}; for(const stat of heads){q[stat]=qbaseContract(qbases[stat],stat);const authoritative=qbaseCanonicalSha?.[stat];if(authoritative!==undefined){requireThat(HASH64.test(String(authoritative)),`${stat} authoritative QBASE hash invalid`);q[stat].qbase_sha256=String(authoritative);}else q[stat].qbase_sha256=await sha256Json(qbases[stat]);}
   const rmap=new Map(research.players.map(p=>[playerKey(p),p])); requireThat(Array.isArray(projections)&&projections.length>0,'projections required');
   const frozenPlayers=[],seen=new Set();
   for(const projection of projections){
