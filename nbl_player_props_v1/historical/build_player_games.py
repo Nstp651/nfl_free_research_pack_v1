@@ -190,7 +190,7 @@ def main() -> int:
         print(f"SOURCE {key} rows={len(loaded[key])} cols={len(loaded[key].columns)} sha256={receipts[key]['sha256']}")
         print(f"COLUMNS {key}: {','.join(map(str, loaded[key].columns))}")
     games, duplicate_audit = canonical_player_games(loaded["player"], loaded["team"], loaded["results"])
-    out = Path(args.output); out.parent.mkdir(parents=True, exist_ok=True); games.to_csv(out, index=False, compression="gzip")
+    out = Path(args.output); out.parent.mkdir(parents=True, exist_ok=True); games.to_csv(out, index=False, compression={"method": "gzip", "mtime": 0})
     id_counts = games.dropna(subset=["source_player_id"]).groupby("player_key")["source_player_id"].nunique(); seasons = sorted(games["season"].dropna().astype(str).unique().tolist()); latest = seasons[-1]; latest_rows = games[games["season"].astype(str) == latest]
     receipt = {
         "schema_version": "0.1.9", "market_data": False, "identity_binding": "season+globally_unique_match_uuid+team+normalized_player_name",
