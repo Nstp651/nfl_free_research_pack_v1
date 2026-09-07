@@ -5713,14 +5713,14 @@
       }
     }
   ],
-  "generated_at_utc": "2026-09-07T12:37:55.098458+00:00",
-  "last_checked_at_utc": "2026-09-07T12:37:55.098458+00:00",
+  "generated_at_utc": "2026-09-07T18:33:41.218779+00:00",
+  "last_checked_at_utc": "2026-09-07T18:33:41.218779+00:00",
   "limitations": [
     "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
     "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
   ],
   "market_data": false,
-  "pack_revision": "6d75c8bbd1a47ffe",
+  "pack_revision": "05b20a245508f709",
   "schema_version": "0.1.0",
   "season": 2026,
   "slate_id": "2026_01",
@@ -5737,7 +5737,7 @@
       "asset": "cfb_ratings_weekly_2025.csv",
       "asset_updated_at": "2026-09-01T09:30:19Z",
       "bytes": 408427,
-      "release_updated_at": "2026-09-07T10:36:33Z",
+      "release_updated_at": "2026-09-07T18:17:33Z",
       "sha256": "2fa3e33f2c6d20e47c436816adbbf79a8cd1246b5e2a7da391150f6ea5cefeed",
       "tag": "cfb_ratings_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2025.csv"
@@ -5746,35 +5746,35 @@
       "asset": "cfb_team_summaries_weekly_2025.csv",
       "asset_updated_at": "2026-09-01T09:31:28Z",
       "bytes": 8569035,
-      "release_updated_at": "2026-09-07T10:37:17Z",
+      "release_updated_at": "2026-09-07T18:18:24Z",
       "sha256": "1605f8281b5e3a817f1909d673a81ddf9e504c3077b322bd3b49f941fbb3b9ed",
       "tag": "cfb_team_summaries_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2025.csv"
     },
     "ratings": {
       "asset": "cfb_ratings_weekly_2026.csv",
-      "asset_updated_at": "2026-09-07T08:40:07Z",
-      "bytes": 229636,
-      "release_updated_at": "2026-09-07T10:36:33Z",
-      "sha256": "5174be13b74aaf91efc790ef5691510fb44097d64e1a9084078dec76ab6fcc6a",
+      "asset_updated_at": "2026-09-07T14:49:00Z",
+      "bytes": 229569,
+      "release_updated_at": "2026-09-07T18:17:33Z",
+      "sha256": "9dd10fe22ab66095c6bb9e9be5e3ff951ec395dafd53269dcf35c89bf50d872f",
       "tag": "cfb_ratings_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2026.csv"
     },
     "schedule": {
       "asset": "cfb_schedules_2026.csv.gz",
-      "asset_updated_at": "2026-09-07T08:38:37Z",
-      "bytes": 70696,
-      "release_updated_at": "2026-09-07T10:34:50Z",
-      "sha256": "d69c8c345171aac3e6754d9b5935b03b2a7d6c182c9046e21276172e715ff9fa",
+      "asset_updated_at": "2026-09-07T14:47:26Z",
+      "bytes": 70685,
+      "release_updated_at": "2026-09-07T18:15:41Z",
+      "sha256": "8c7626e7b92d75fc701a7ffc76cc2a5cd8065f3c2044af82cb535d6e4841e57b",
       "tag": "cfb_schedules",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_schedules/cfb_schedules_2026.csv.gz"
     },
     "weekly": {
       "asset": "cfb_team_summaries_weekly_2026.csv",
-      "asset_updated_at": "2026-09-07T08:40:32Z",
-      "bytes": 4463392,
-      "release_updated_at": "2026-09-07T10:37:17Z",
-      "sha256": "9d21e15cce32e0732c499f9ac1234528ff0a7777304710a7dd2dd98ec0ed34f9",
+      "asset_updated_at": "2026-09-07T14:49:25Z",
+      "bytes": 4468927,
+      "release_updated_at": "2026-09-07T18:18:24Z",
+      "sha256": "10d711dca7444dc5e623a2563c94ce90b5b65caa99cc8c2ecc6b0d08ed2258d5",
       "tag": "cfb_team_summaries_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2026.csv"
     }
