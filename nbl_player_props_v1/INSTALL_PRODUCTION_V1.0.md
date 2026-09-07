@@ -76,16 +76,18 @@ Production Research Worker expects immutable runtime assets under:
 - `nbl_player_props_v1/data/prior_snapshot.json`
 - `nbl_player_props_v1/data/source_receipt.json`
 
-The Research Worker pins one GitHub `main` commit at run start and verifies canonical hashes before accepting the run.
+The Research Worker is pinned at Cloudflare build time to the exact deployed Git commit (`WORKERS_CI_COMMIT_SHA`) and verifies immutable runtime asset hashes before accepting a run. The checked-in generated source-commit placeholder fails closed if the build pin is unavailable.
 
 ## Cloudflare
 Research Worker:
 - Wrangler project: `nbl-player-props-research-v1`
 - Durable Object binding `MATCH_RUNS` -> `NblMatchRun`.
+- Wrangler custom build generates the exact deployment source commit before bundling.
 
 Market Worker:
 - Wrangler project: `nbl-player-props-market-v1`
-- `RESEARCH_BASE` resolves to the production Research Worker URL.
+- production Worker-to-Worker transport uses Cloudflare Service Binding `RESEARCH` -> `nbl-player-props-research-v1`.
+- `RESEARCH_BASE` is retained only as a local/test fallback.
 
 Production deployment is owned by Cloudflare Git integration. GitHub workflows verify source/contracts and Wrangler dry-run; do not create a competing deployment owner.
 
