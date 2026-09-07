@@ -29,7 +29,7 @@ Start one persistent match run. Preserve:
 - rebounds QBASE revision
 - `eligibility_at`
 
-The Worker pins one immutable GitHub main commit and verifies canonical hashes for the QBASE artifacts and historical prior snapshot.
+The Worker is bound at Cloudflare build time to the exact deployed Git commit and verifies immutable runtime-asset hashes before accepting a run. That exact deployment commit is preserved as `source_commit` in the run lock.
 
 ## 0.2 Market boundary
 Layers 0–2 are strictly market blind.
