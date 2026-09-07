@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-07T12:43:52.768Z",
+  "tested_at_utc": "2026-09-07T18:41:35.067Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/9e3946c354e3669ba1b945b6de595a81d4ca9a63/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/9e5a4d9d60d8715389b806110c68a2d7f47f8d6f/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 1,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "4085763dfe96f8ff",
+      "pack_revision": "9b99cb3c4489840e",
       "fixture": {
         "game_id": "2026_01_NE_SEA",
         "season": 2026,
@@ -217,12 +217,12 @@
             }
           },
           "current_roster": {
-            "rows": 2946,
+            "rows": 2954,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 501068,
+            "rows": 503245,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "4d01feb1df663c3d",
+      "pack_revision": "537c8913159b2834",
       "fixture": {
         "game_id": "2026_01_SF_LA",
         "season": 2026,
@@ -272,7 +272,7 @@
         "surface": "matrixturf",
         "location": "Neutral"
       },
-      "total_players": 42,
+      "total_players": 41,
       "pages": 5,
       "page_sizes": [
         {
@@ -284,20 +284,20 @@
           "bytes": 51453
         },
         {
-          "chars": 43536,
-          "bytes": 43566
+          "chars": 43946,
+          "bytes": 43976
         },
         {
-          "chars": 55186,
-          "bytes": 55220
+          "chars": 51053,
+          "bytes": 51083
         },
         {
-          "chars": 10045,
-          "bytes": 10047
+          "chars": 8975,
+          "bytes": 8977
         }
       ],
       "players_by_team": {
-        "SF": 22,
+        "SF": 21,
         "LA": 20
       },
       "rookies": [
@@ -318,7 +318,7 @@
         "KhaDarel Hodge",
         "Mike Evans"
       ],
-      "missing_prior_ngs": 33,
+      "missing_prior_ngs": 32,
       "missing_prior_ftn": 16,
       "source_receipt": {
         "availability": {
@@ -463,12 +463,12 @@
             }
           },
           "current_roster": {
-            "rows": 2946,
+            "rows": 2954,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 501068,
+            "rows": 503245,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -525,7 +525,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-07T12:43:46.388998+00:00",
+      "last_checked_at_utc": "2026-09-07T18:41:30.746533+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
