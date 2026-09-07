@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-07T12:43:46.391704+00:00",
-  "build_commit": "256fad6dd7c8afd7d08c5e0e5389b4bcd22e9304",
+  "tested_at_utc": "2026-09-07T18:41:30.748479+00:00",
+  "build_commit": "f29fe8938ef64b464fa28b087dd8f54954a4c0d3",
   "python": "3.12.14",
-  "workflow_run_id": "34123283697",
+  "workflow_run_id": "34152539154",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "4085763dfe96f8ff",
+      "pack_revision": "9b99cb3c4489840e",
       "players": 44,
       "teams": {
         "NE": {
@@ -186,8 +186,8 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "4d01feb1df663c3d",
-      "players": 42,
+      "pack_revision": "537c8913159b2834",
+      "players": 41,
       "teams": {
         "SF": {
           "2024": {
@@ -289,8 +289,8 @@
           ]
         }
       ],
-      "player_checks": 165,
-      "ftn_checks": 936,
+      "player_checks": 159,
+      "ftn_checks": 900,
       "ngs_identity_matches": [
         {
           "player_id": "00-0036244",
@@ -338,7 +338,7 @@
           "ngs_name": "Ricky Pearsall"
         }
       ],
-      "missing_prior_ngs": 33
+      "missing_prior_ngs": 32
     }
   ],
   "ftn_join_counts": {
