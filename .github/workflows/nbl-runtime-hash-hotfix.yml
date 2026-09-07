@@ -1,0 +1,131 @@
+name: NBL runtime hash hotfix bootstrap
+
+on:
+  push:
+    branches:
+      - fix/nbl-runtime-canonical-hash
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/nbl-runtime-canonical-hash
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply narrow runtime integrity fix
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_one(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one match, got {count}\n--- OLD ---\n{old}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          # 1) Publisher: keep existing canonical model identities, add exact-file SHA-256
+          #    so the JavaScript runtime can verify immutable bytes without reserializing numbers.
+          path = 'nbl_player_props_v1/publish_assets.py'
+          replace_one(path,
+          '''def canonical_sha(value: Any) -> str:\n    return hashlib.sha256(canonical_bytes(value)).hexdigest()\n\n\ndef load_json''',
+          '''def canonical_sha(value: Any) -> str:\n    return hashlib.sha256(canonical_bytes(value)).hexdigest()\n\n\ndef file_sha(path: str | Path) -> str:\n    return hashlib.sha256(Path(path).read_bytes()).hexdigest()\n\n\ndef load_json''')
+          replace_one(path,
+          '''    (out / "source_receipt.json").write_text(json.dumps(source_receipt, indent=2, sort_keys=True), encoding="utf-8")\n\n    qhash = {"assists": canonical_sha(assists), "rebounds": canonical_sha(rebounds)}\n    prior_hash = canonical_sha(prior); source_hash = canonical_sha(source_receipt)''',
+          '''    (out / "source_receipt.json").write_text(json.dumps(source_receipt, indent=2, sort_keys=True), encoding="utf-8")\n\n    qhash = {"assists": canonical_sha(assists), "rebounds": canonical_sha(rebounds)}\n    qfile = {\n        "assists": file_sha(out / model_files["assists"]),\n        "rebounds": file_sha(out / model_files["rebounds"]),\n    }\n    prior_hash = canonical_sha(prior); source_hash = canonical_sha(source_receipt)\n    prior_file_hash = file_sha(out / "prior_snapshot.json")\n    source_file_hash = file_sha(out / "source_receipt.json")''')
+          replace_one(path,
+          '''                "path": model_files["assists"], "canonical_sha256": qhash["assists"],\n                "model_version": assists["model_version"], "training_source_receipt_sha256": assists.get("source_receipt_sha256"),''',
+          '''                "path": model_files["assists"], "canonical_sha256": qhash["assists"], "file_sha256": qfile["assists"],\n                "model_version": assists["model_version"], "training_source_receipt_sha256": assists.get("source_receipt_sha256"),''')
+          replace_one(path,
+          '''                "path": model_files["rebounds"], "canonical_sha256": qhash["rebounds"],\n                "model_version": rebounds["model_version"], "training_source_receipt_sha256": rebounds.get("source_receipt_sha256"),''',
+          '''                "path": model_files["rebounds"], "canonical_sha256": qhash["rebounds"], "file_sha256": qfile["rebounds"],\n                "model_version": rebounds["model_version"], "training_source_receipt_sha256": rebounds.get("source_receipt_sha256"),''')
+          replace_one(path,
+          '''            "path": "prior_snapshot.json", "canonical_sha256": prior_hash,\n            "snapshot_revision": prior.get("snapshot_revision"),''',
+          '''            "path": "prior_snapshot.json", "canonical_sha256": prior_hash, "file_sha256": prior_file_hash,\n            "snapshot_revision": prior.get("snapshot_revision"),''')
+          replace_one(path,
+          '''        "runtime_source_receipt": {"path": "source_receipt.json", "canonical_sha256": source_hash},''',
+          '''        "runtime_source_receipt": {"path": "source_receipt.json", "canonical_sha256": source_hash, "file_sha256": source_file_hash},''')
+
+          # 2) Production Worker: verify the exact committed bytes against file_sha256.
+          path = 'nbl_player_props_v1/worker/freeze_run.js'
+          replace_one(path,
+          '''async function readJson(url,{maxBytes=4_000_000}={}){\n  requireThat(allowedUrl(url),'Source URL not allowed');const rosetta=url.startsWith(ROSETTA);\n  const headers=rosetta?{'accept':'application/json','origin':'https://nbl.com.au','referer':'https://nbl.com.au/','user-agent':'nbl-props-freeze/1.0'}:{'accept':'application/json','user-agent':'nbl-props-freeze/1.0'};\n  const res=await fetch(url,{headers,signal:AbortSignal.timeout(15_000)});requireThat(res.ok,`Source unavailable ${res.status}`);\n  const raw=await res.text();requireThat(raw.length<=maxBytes,'Source response too large');return JSON.parse(raw);\n}''',
+          '''async function sha256Utf8(raw){const bytes=new TextEncoder().encode(raw),hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}\nasync function readJson(url,{maxBytes=4_000_000,expectedFileSha=null,label='Source'}={}){\n  requireThat(allowedUrl(url),'Source URL not allowed');const rosetta=url.startsWith(ROSETTA);\n  const headers=rosetta?{'accept':'application/json','origin':'https://nbl.com.au','referer':'https://nbl.com.au/','user-agent':'nbl-props-freeze/1.0'}:{'accept':'application/json','user-agent':'nbl-props-freeze/1.0'};\n  const res=await fetch(url,{headers,signal:AbortSignal.timeout(15_000)});requireThat(res.ok,`Source unavailable ${res.status}`);\n  const raw=await res.text();requireThat(raw.length<=maxBytes,'Source response too large');\n  if(expectedFileSha!==null){requireThat(/^[a-f0-9]{64}$/.test(String(expectedFileSha)),`${label} file hash invalid`);requireThat(await sha256Utf8(raw)===String(expectedFileSha),`${label} file hash mismatch`);}\n  return JSON.parse(raw);\n}''')
+          replace_one(path,
+          '''  const entries=manifest.qbase||{},priorMeta=manifest.prior_snapshot||{};for(const stat of ['assists','rebounds'])requireThat(entries[stat]?.path&&/^[a-f0-9]{64}$/.test(String(entries[stat].canonical_sha256||'')),`manifest ${stat} QBASE invalid`);requireThat(priorMeta.path&&/^[a-f0-9]{64}$/.test(String(priorMeta.canonical_sha256||'')),'manifest prior snapshot invalid');\n  const [assists,rebounds,prior]=await Promise.all([readJson(rawUrl(commit,entries.assists.path)),readJson(rawUrl(commit,entries.rebounds.path)),readJson(rawUrl(commit,priorMeta.path),{maxBytes:4_000_000})]);\n  requireThat(await sha256Json(assists)===entries.assists.canonical_sha256,'assists QBASE hash mismatch');requireThat(await sha256Json(rebounds)===entries.rebounds.canonical_sha256,'rebounds QBASE hash mismatch');requireThat(await sha256Json(prior)===priorMeta.canonical_sha256,'prior snapshot hash mismatch');requireThat(prior.market_data===false&&String(prior.snapshot_revision)===String(priorMeta.snapshot_revision),'prior snapshot identity mismatch');''',
+          '''  const entries=manifest.qbase||{},priorMeta=manifest.prior_snapshot||{};for(const stat of ['assists','rebounds'])requireThat(entries[stat]?.path&&/^[a-f0-9]{64}$/.test(String(entries[stat].canonical_sha256||''))&&/^[a-f0-9]{64}$/.test(String(entries[stat].file_sha256||'')),`manifest ${stat} QBASE invalid`);requireThat(priorMeta.path&&/^[a-f0-9]{64}$/.test(String(priorMeta.canonical_sha256||''))&&/^[a-f0-9]{64}$/.test(String(priorMeta.file_sha256||'')),'manifest prior snapshot invalid');\n  const [assists,rebounds,prior]=await Promise.all([readJson(rawUrl(commit,entries.assists.path),{expectedFileSha:entries.assists.file_sha256,label:'assists QBASE'}),readJson(rawUrl(commit,entries.rebounds.path),{expectedFileSha:entries.rebounds.file_sha256,label:'rebounds QBASE'}),readJson(rawUrl(commit,priorMeta.path),{maxBytes:4_000_000,expectedFileSha:priorMeta.file_sha256,label:'prior snapshot'})]);\n  requireThat(prior.market_data===false&&String(prior.snapshot_revision)===String(priorMeta.snapshot_revision),'prior snapshot identity mismatch');''')
+          replace_one(path,
+          '''  const {fixture,season_start,source_commit,manifest}=meta.lock;const prior=await readJson(rawUrl(source_commit,manifest.prior_snapshot.path),{maxBytes:4_000_000});requireThat(await sha256Json(prior)===manifest.prior_snapshot.canonical_sha256,'Pinned prior hash mismatch');''',
+          '''  const {fixture,season_start,source_commit,manifest}=meta.lock;const prior=await readJson(rawUrl(source_commit,manifest.prior_snapshot.path),{maxBytes:4_000_000,expectedFileSha:manifest.prior_snapshot.file_sha256,label:'Pinned prior'});''')
+          replace_one(path,
+          '''const frozen=await computeFreeze(research,{assists:await this.storage.get('q:assists'),rebounds:await this.storage.get('q:rebounds')},body.projections,new Date().toISOString());''',
+          '''const frozen=await computeFreeze(research,{assists:await this.storage.get('q:assists'),rebounds:await this.storage.get('q:rebounds')},body.projections,new Date().toISOString(),meta.lock.qbase_revision);''')
+
+          # 3) Entry research path: same byte-level verification for pinned prior.
+          path = 'nbl_player_props_v1/worker/freeze_run_entry.js'
+          replace_one(path,
+          '''async function readJson(url,maxBytes=4_000_000){\n  const allowed=/^https:\\/\\/raw\\.githubusercontent\\.com\\/Nstp651\\/nfl_free_research_pack_v1\\/[a-f0-9]{40}\\/nbl_player_props_v1\\/data\\/[A-Za-z0-9_./-]+\\.json$/.test(url)||/^https:\\/\\/prod\\.rosetta\\.nbl\\.com\\.au\\/get\\/nbl\\/players\\/for\\/team\\/[A-Za-z0-9-]+\\/in\\/season\\/\\d{4}$/.test(url);requireThat(allowed,'Entry research source URL not allowed');\n  const rosetta=url.startsWith(ROSETTA),headers=rosetta?{'accept':'application/json','origin':'https://nbl.com.au','referer':'https://nbl.com.au/','user-agent':'nbl-props-freeze/1.0'}:{'accept':'application/json','user-agent':'nbl-props-freeze/1.0'};const res=await fetch(url,{headers,signal:AbortSignal.timeout(15_000)});requireThat(res.ok,`Entry research source unavailable ${res.status}`);const raw=await res.text();requireThat(raw.length<=maxBytes,'Entry research source too large');return JSON.parse(raw);\n}''',
+          '''async function sha256Utf8(raw){const bytes=new TextEncoder().encode(raw),hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}\nasync function readJson(url,maxBytes=4_000_000,expectedFileSha=null,label='Entry research source'){\n  const allowed=/^https:\\/\\/raw\\.githubusercontent\\.com\\/Nstp651\\/nfl_free_research_pack_v1\\/[a-f0-9]{40}\\/nbl_player_props_v1\\/data\\/[A-Za-z0-9_./-]+\\.json$/.test(url)||/^https:\\/\\/prod\\.rosetta\\.nbl\\.com\\.au\\/get\\/nbl\\/players\\/for\\/team\\/[A-Za-z0-9-]+\\/in\\/season\\/\\d{4}$/.test(url);requireThat(allowed,'Entry research source URL not allowed');\n  const rosetta=url.startsWith(ROSETTA),headers=rosetta?{'accept':'application/json','origin':'https://nbl.com.au','referer':'https://nbl.com.au/','user-agent':'nbl-props-freeze/1.0'}:{'accept':'application/json','user-agent':'nbl-props-freeze/1.0'};const res=await fetch(url,{headers,signal:AbortSignal.timeout(15_000)});requireThat(res.ok,`Entry research source unavailable ${res.status}`);const raw=await res.text();requireThat(raw.length<=maxBytes,'Entry research source too large');if(expectedFileSha!==null){requireThat(/^[a-f0-9]{64}$/.test(String(expectedFileSha)),`${label} file hash invalid`);requireThat(await sha256Utf8(raw)===String(expectedFileSha),`${label} file hash mismatch`);}return JSON.parse(raw);\n}''')
+          replace_one(path,
+          '''async function pinnedPrior(meta){const commit=meta.lock.source_commit,manifest=await readJson(rawUrl(commit,'manifest.json'),200_000);requireThat(manifest?.schema_version==='nbl_runtime_assets_v1'&&manifest.market_data===false,'Pinned manifest invalid');requireThat(String(manifest.asset_revision)===String(meta.lock.asset_revision),'Pinned manifest revision drift');const priorMeta=manifest.prior_snapshot||{};requireThat(priorMeta.path&&/^[a-f0-9]{64}$/.test(String(priorMeta.canonical_sha256||'')),'Pinned prior metadata invalid');const prior=await readJson(rawUrl(commit,priorMeta.path));requireThat(await sha256Json(prior)===priorMeta.canonical_sha256,'Pinned prior hash mismatch');requireThat(prior.market_data===false&&String(prior.snapshot_revision)===String(meta.lock.snapshot_revision),'Pinned prior identity mismatch');return {manifest,prior};}''',
+          '''async function pinnedPrior(meta){const commit=meta.lock.source_commit,manifest=await readJson(rawUrl(commit,'manifest.json'),200_000);requireThat(manifest?.schema_version==='nbl_runtime_assets_v1'&&manifest.market_data===false,'Pinned manifest invalid');requireThat(String(manifest.asset_revision)===String(meta.lock.asset_revision),'Pinned manifest revision drift');const priorMeta=manifest.prior_snapshot||{};requireThat(priorMeta.path&&/^[a-f0-9]{64}$/.test(String(priorMeta.canonical_sha256||''))&&/^[a-f0-9]{64}$/.test(String(priorMeta.file_sha256||'')),'Pinned prior metadata invalid');const prior=await readJson(rawUrl(commit,priorMeta.path),4_000_000,priorMeta.file_sha256,'Pinned prior');requireThat(prior.market_data===false&&String(prior.snapshot_revision)===String(meta.lock.snapshot_revision),'Pinned prior identity mismatch');return {manifest,prior};}''')
+
+          # 4) Freeze receipt must bind to the authoritative manifest QBASE identities,
+          #    not a JavaScript reserialization of the parsed model object.
+          path = 'nbl_player_props_v1/worker/freeze_core.js'
+          replace_one(path,
+          '''export async function computeFreeze(research,qbases,projections,frozenAt=new Date().toISOString()){\n  validateResearchContext(research); requireThat(marketKeyHits(projections).length===0,'projection market boundary failed');\n  const heads=requestedHeads(String(research.run_mode).toUpperCase()),known=new Set(Object.keys(research.sources));\n  const q={}; for(const stat of heads){q[stat]=qbaseContract(qbases[stat],stat);q[stat].qbase_sha256=await sha256Json(qbases[stat]);}''',
+          '''export async function computeFreeze(research,qbases,projections,frozenAt=new Date().toISOString(),qbaseCanonicalSha={}){\n  validateResearchContext(research); requireThat(marketKeyHits(projections).length===0,'projection market boundary failed');\n  const heads=requestedHeads(String(research.run_mode).toUpperCase()),known=new Set(Object.keys(research.sources));\n  const q={}; for(const stat of heads){q[stat]=qbaseContract(qbases[stat],stat);const authoritative=qbaseCanonicalSha?.[stat];if(authoritative!==undefined){requireThat(HASH64.test(String(authoritative)),`${stat} authoritative QBASE hash invalid`);q[stat].qbase_sha256=String(authoritative);}else q[stat].qbase_sha256=await sha256Json(qbases[stat]);}''')
+
+          # Regression assertion for the publisher's byte-level hashes.
+          path = 'nbl_player_props_v1/tests/test_publish_assets.py'
+          replace_one(path,
+          '''    assert m1['qbase']['assists']['canonical_sha256']==canonical_sha(qbase('assists'))\n    assert json.loads((out/'manifest.json').read_text())==m1''',
+          '''    assert m1['qbase']['assists']['canonical_sha256']==canonical_sha(qbase('assists'))\n    assert len(m1['qbase']['assists']['file_sha256'])==64\n    assert len(m1['prior_snapshot']['file_sha256'])==64\n    assert json.loads((out/'manifest.json').read_text())==m1''')
+          PY
+
+      - name: Republish current runtime manifest without retraining QBASE
+        shell: bash
+        run: |
+          python nbl_player_props_v1/publish_assets.py \
+            --assists nbl_player_props_v1/data/model/qbase_assists_v0.1.0.json \
+            --rebounds nbl_player_props_v1/data/model/qbase_rebounds_v0.1.0.json \
+            --prior nbl_player_props_v1/data/prior_snapshot.json \
+            --source-receipt nbl_player_props_v1/data/source_receipt.json \
+            --output-dir nbl_player_props_v1/data
+
+      - name: Run NBL Python tests
+        shell: bash
+        run: |
+          python -m pip install -r nbl_player_props_v1/requirements.txt
+          python -m pytest nbl_player_props_v1/tests -q
+
+      - name: Run NBL Worker tests
+        shell: bash
+        run: |
+          node --test nbl_player_props_v1/worker/*.test.mjs nbl_player_props_v1/market_worker/*.test.mjs
+
+      - name: Commit tested fix and remove bootstrap workflow
+        shell: bash
+        run: |
+          rm .github/workflows/nbl-runtime-hash-hotfix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nbl_player_props_v1 .github/workflows/nbl-runtime-hash-hotfix.yml
+          git commit -m "Fix NBL runtime QBASE byte integrity verification"
+          git push origin HEAD:fix/nbl-runtime-canonical-hash
