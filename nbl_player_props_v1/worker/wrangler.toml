@@ -13,4 +13,4 @@ tag = "v1"
 new_sqlite_classes = ["NblMatchRun"]
 
 [build]
-command = "node build_source_commit.mjs"
+command = "if [ -f build_source_commit.mjs ]; then node build_source_commit.mjs; else node nbl_player_props_v1/worker/build_source_commit.mjs; fi"
