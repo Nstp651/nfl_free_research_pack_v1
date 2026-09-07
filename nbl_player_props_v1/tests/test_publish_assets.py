@@ -33,6 +33,8 @@ def test_publish_assets_is_stable_and_market_blind(tmp_path: Path):
     assert m1['market_data'] is False
     assert len(m1['asset_revision'])==20
     assert m1['qbase']['assists']['canonical_sha256']==canonical_sha(qbase('assists'))
+    assert len(m1['qbase']['assists']['file_sha256'])==64
+    assert len(m1['prior_snapshot']['file_sha256'])==64
     assert json.loads((out/'manifest.json').read_text())==m1
     assert (out/'model/qbase_assists_v0.1.0.json').exists()
     assert (out/'prior_snapshot.json').exists()

@@ -8,18 +8,21 @@
   "market_data": false,
   "prior_snapshot": {
     "canonical_sha256": "8929dee9f2cf4782c4dba5b8577d62cdae86c71b9d0448a67fe677ea833a0de2",
+    "file_sha256": "eb9ee1901446ae331cdc00251fce9bfe01448c2ef3d106421de5b33cc327c295",
     "path": "prior_snapshot.json",
     "snapshot_revision": "69ede3cd5805765fac4b"
   },
   "qbase": {
     "assists": {
       "canonical_sha256": "8e714c693f0a1eddfd3989c6717f120079ec3fa0e1c42e1eaf5c1d670d265eab",
+      "file_sha256": "4a71800c37f735f90858b70054aa042f65a1510ee4c081ca5dde2f76741c4714",
       "model_version": "0.1.0",
       "path": "model/qbase_assists_v0.1.0.json",
       "training_source_receipt_sha256": "431d62c430236e56188413a2d4d164e29fc99d69b51b060124ead762b6408812"
     },
     "rebounds": {
       "canonical_sha256": "61e8e4792e7376f6d0f70b832e1ea7e3bea928c6e4e7acf512851185a1d7086f",
+      "file_sha256": "cd83dce0b8641aab145735f8e36dc7f6e575b58f5327b9c00a9e4b3d140c46fb",
       "model_version": "0.1.0",
       "path": "model/qbase_rebounds_v0.1.0.json",
       "training_source_receipt_sha256": "431d62c430236e56188413a2d4d164e29fc99d69b51b060124ead762b6408812"
@@ -27,6 +30,7 @@
   },
   "runtime_source_receipt": {
     "canonical_sha256": "4cef2b6f2c963544ac9bdb97ef1262526debdae1706574f79d4fe554c964a1b9",
+    "file_sha256": "92cdc6c7277d921133c6866cba1836088355715faef9a1b4fd47e6c0652c5ab9",
     "path": "source_receipt.json"
   },
   "schema_version": "nbl_runtime_assets_v1"
