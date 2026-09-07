@@ -1,7 +1,7 @@
 /** Persistent market-blind NBL matchup run and atomic P_model freeze. */
 import {computeFreeze,marketKeyHits,requireThat,sha256Json,validateResearchContext} from './freeze_core.js';
+import {DEPLOY_SOURCE_COMMIT} from './source_commit.generated.js';
 
-const GH_API='https://api.github.com/repos/Nstp651/nfl_free_research_pack_v1/commits/main';
 const GH_RAW='https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/';
 const ROSETTA='https://prod.rosetta.nbl.com.au';
 const MAX_AGE_MS=48*3600_000;
@@ -12,8 +12,7 @@ const playerStorageKey=p=>String(p.player_id||'').trim()?`id:${String(p.player_i
 
 function rawUrl(commit,path){return `${GH_RAW}${commit}/nbl_player_props_v1/data/${path}`;}
 function allowedUrl(url){
-  return url===GH_API ||
-    /^https:\/\/raw\.githubusercontent\.com\/Nstp651\/nfl_free_research_pack_v1\/[a-f0-9]{40}\/nbl_player_props_v1\/data\/[A-Za-z0-9_./-]+\.json$/.test(url) ||
+  return /^https:\/\/raw\.githubusercontent\.com\/Nstp651\/nfl_free_research_pack_v1\/[a-f0-9]{40}\/nbl_player_props_v1\/data\/[A-Za-z0-9_./-]+\.json$/.test(url) ||
     /^https:\/\/prod\.rosetta\.nbl\.com\.au\/get\/nbl\/matches\/in\/season\/\d{4}\/all\?limit=-1$/.test(url) ||
     /^https:\/\/prod\.rosetta\.nbl\.com\.au\/get\/nbl\/players\/for\/team\/[A-Za-z0-9-]+\/in\/season\/\d{4}$/.test(url);
 }
@@ -42,8 +41,8 @@ export async function listFixtures(seasonStart){
   requireThat(marketKeyHits(fixtures).length===0,'Sanitized fixture market-boundary failure');return fixtures;
 }
 async function loadAssets(){
-  const head=await readJson(GH_API,{maxBytes:100_000});requireThat(/^[a-f0-9]{40}$/.test(String(head.sha||'')),'Invalid GitHub source commit');
-  const commit=head.sha,manifest=await readJson(rawUrl(commit,'manifest.json'),{maxBytes:200_000});
+  const commit=String(DEPLOY_SOURCE_COMMIT||'').trim();requireThat(/^[a-f0-9]{40}$/.test(commit)&&!/^0{40}$/.test(commit),'Invalid build-pinned source commit');
+  const manifest=await readJson(rawUrl(commit,'manifest.json'),{maxBytes:200_000});
   requireThat(manifest?.schema_version==='nbl_runtime_assets_v1'&&manifest.market_data===false,'NBL asset manifest invalid');requireThat(marketKeyHits(manifest).length===0,'Asset manifest market-boundary failure');requireThat(/^[a-f0-9]{16,64}$/.test(String(manifest.asset_revision||'')),'asset_revision invalid');
   const entries=manifest.qbase||{},priorMeta=manifest.prior_snapshot||{};for(const stat of ['assists','rebounds'])requireThat(entries[stat]?.path&&/^[a-f0-9]{64}$/.test(String(entries[stat].canonical_sha256||''))&&/^[a-f0-9]{64}$/.test(String(entries[stat].file_sha256||'')),`manifest ${stat} QBASE invalid`);requireThat(priorMeta.path&&/^[a-f0-9]{64}$/.test(String(priorMeta.canonical_sha256||''))&&/^[a-f0-9]{64}$/.test(String(priorMeta.file_sha256||'')),'manifest prior snapshot invalid');
   const [assists,rebounds,prior]=await Promise.all([readJson(rawUrl(commit,entries.assists.path),{expectedFileSha:entries.assists.file_sha256,label:'assists QBASE'}),readJson(rawUrl(commit,entries.rebounds.path),{expectedFileSha:entries.rebounds.file_sha256,label:'rebounds QBASE'}),readJson(rawUrl(commit,priorMeta.path),{maxBytes:4_000_000,expectedFileSha:priorMeta.file_sha256,label:'prior snapshot'})]);
