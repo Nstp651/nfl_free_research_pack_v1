@@ -5,3 +5,8 @@ workers_dev = true
 
 [vars]
 RESEARCH_BASE = "https://nbl-player-props-research-v1.nickarnott01.workers.dev"
+
+# Production Worker-to-Worker transport. Public URL remains a local/test fallback.
+[[services]]
+binding = "RESEARCH"
+service = "nbl-player-props-research-v1"
