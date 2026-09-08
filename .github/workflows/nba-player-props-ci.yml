@@ -72,6 +72,12 @@ jobs:
             --cache /tmp/nba-source-audit-cache \
             --output /tmp/nba-source-rebuild/source_acceptance.json \
             --as-of 2026-09-08T16:00:00Z
+      - name: Audit raw player exclusions
+        run: |
+          python -m nba_player_props_v1.historical.player_exclusion_audit \
+            --seasons 2022 2023 2024 2025 2026 \
+            --cache /tmp/nba-player-exclusion-cache \
+            --output /tmp/nba-source-rebuild/player_exclusion_audit.json
       - name: Probe official/specialist source connectivity
         run: python -m nba_player_props_v1.historical.probe_sources --output /tmp/nba-source-rebuild/specialist_probe.json
       - name: Preserve source verification evidence
