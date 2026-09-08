@@ -34,7 +34,7 @@ test('lineup dependency transform is head specific',()=>{
   assert.throws(()=>applyTypedTransform(artifact,base,{type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_rebounds_l5:50}}),/unsupported lineup feature/);
 });
 
-test('free-form transform and invalid head artifact are rejected',()=>{
+test('free-form transform and invalid head artifact are rejected', async()=>{
   assert.throws(()=>applyTypedTransform(artifact,base,{type:'NARRATIVE_MEAN_OVERRIDE',mean:8}),/unsupported transform/);
-  assert.throws(()=>scoreQbase({...artifact,head:'points'},base),/artifact head required/);
+  await assert.rejects(scoreQbase({...artifact,head:'points'},base),/artifact head required/);
 });
