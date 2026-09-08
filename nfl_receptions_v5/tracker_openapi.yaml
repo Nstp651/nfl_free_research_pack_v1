@@ -1,10 +1,12 @@
 openapi: 3.1.0
 info:
   title: Nick NFL Receptions V5 Bet Tracker
-  version: 1.0.1
+  version: 1.0.2
   description: >
     Production tracker Action for NFL Receptions V5. Records the completed frozen
     model run and only user-confirmed placed wagers in the existing Nick Bet Tracker.
+    Runtime contract 1.0.2 bounds model-run handoffs to the actionable ranked board
+    so large NFL ladders cannot overflow the Action response.
 servers:
   - url: https://nick-betting-api.nickarnott01.workers.dev
 security:
@@ -35,9 +37,10 @@ paths:
       x-openai-isConsequential: false
       summary: Record a completed frozen NFL Receptions V5 run
       description: >
-        Call after Layer 3/4 is complete. Stores the frozen model and exact selections
-        needed for later user-confirmed bet logging. This tracker write must never
-        change or replace the Betting Platform V1 freeze.
+        Call once after Layer 3/4 is complete. Stores only the actionable deterministic
+        post-freeze ranked selections needed for later user-confirmed bet logging,
+        never the complete frozen ladder. Maximum 25 selections. This tracker write
+        must never change or replace the Betting Platform V1 freeze.
       requestBody:
         required: true
         content:
@@ -136,18 +139,15 @@ paths:
         - name: status
           in: query
           required: false
-          schema:
-            type: string
+          schema: {type: string}
         - name: bookmaker
           in: query
           required: false
-          schema:
-            type: string
+          schema: {type: string}
         - name: bet_type
           in: query
           required: false
-          schema:
-            type: string
+          schema: {type: string}
         - name: limit
           in: query
           required: false
@@ -164,8 +164,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  count:
-                    type: integer
+                  count: {type: integer}
                   bets:
                     type: array
                     items:
@@ -184,363 +183,190 @@ components:
       type: object
       properties:
         error:
-          type:
-            - string
-            - "null"
+          type: [string, "null"]
         message:
-          type:
-            - string
-            - "null"
+          type: [string, "null"]
+      additionalProperties: true
 
     TrackerHealth:
       type: object
       properties:
-        service:
-          type: string
-        status:
-          type: string
-        api_version:
-          type: string
-        schema_version:
-          type: string
-        database_binding:
-          type: string
-        current_unit_size:
-          type: number
+        service: {type: string}
+        status: {type: string}
+        api_version: {type: string}
+        schema_version: {type: string}
+        database_binding: {type: string}
+        current_unit_size: {type: number}
+      additionalProperties: true
 
     ModelSelectionInput:
       type: object
-      required:
-        - selection_name
-        - market_family
-        - p_model
+      required: [selection_name, market_family, p_model]
       properties:
-        selection_name:
-          type: string
-        player_name:
-          type:
-            - string
-            - "null"
-        team_name:
-          type:
-            - string
-            - "null"
+        selection_name: {type: string}
+        player_name: {type: [string, "null"]}
+        team_name: {type: [string, "null"]}
         market_family:
           type: string
-          enum:
-            - nfl_receptions
-        market_key:
-          type:
-            - string
-            - "null"
-        side:
-          type:
-            - string
-            - "null"
-        threshold:
-          type:
-            - number
-            - "null"
+          enum: [nfl_receptions]
+        market_key: {type: [string, "null"]}
+        side: {type: [string, "null"]}
+        threshold: {type: [number, "null"]}
         p_model:
           type: number
           exclusiveMinimum: 0
           maximum: 1
-        fair_odds:
-          type:
-            - number
-            - "null"
+        fair_odds: {type: [number, "null"]}
         confidence:
-          type:
-            - number
-            - "null"
-        market_price_at_integration:
-          type:
-            - number
-            - "null"
-        market_bookmaker_at_integration:
-          type:
-            - string
-            - "null"
+          type: [number, "null"]
+          description: Legacy numeric tracker field. NFL categorical Confidence must be preserved in notes/key_assumptions instead of this field.
+        market_price_at_integration: {type: [number, "null"]}
+        market_bookmaker_at_integration: {type: [string, "null"]}
         p_market_at_integration:
-          type:
-            - number
-            - "null"
+          type: [number, "null"]
           minimum: 0
           maximum: 1
-        edge_at_integration:
-          type:
-            - number
-            - "null"
-        ranking_score:
-          type:
-            - number
-            - "null"
-        final_rank:
-          type:
-            - integer
-            - "null"
-        final_play:
-          type: boolean
-        key_assumptions:
-          type:
-            - string
-            - "null"
-        notes:
-          type:
-            - string
-            - "null"
+        edge_at_integration: {type: [number, "null"]}
+        ranking_score: {type: [number, "null"]}
+        final_rank: {type: [integer, "null"]}
+        final_play: {type: boolean}
+        key_assumptions: {type: [string, "null"]}
+        notes: {type: [string, "null"]}
+      additionalProperties: false
 
     CreateModelRunRequest:
       type: object
-      required:
-        - sport
-        - league
-        - model_name
-        - fixture
-        - selections
+      required: [sport, league, model_name, fixture, selections]
       properties:
         request_id:
-          type:
-            - string
-            - "null"
+          type: [string, "null"]
           pattern: ^[A-Za-z0-9_-]{8,80}$
         sport:
           type: string
-          enum:
-            - nfl
+          enum: [nfl]
         league:
           type: string
-          enum:
-            - nfl
+          enum: [nfl]
         model_name:
           type: string
-          enum:
-            - NFL Receptions V5
-        model_version:
-          type:
-            - string
-            - "null"
-        season:
-          type:
-            - string
-            - "null"
-        round_week:
-          type:
-            - string
-            - "null"
-        fixture_date:
-          type:
-            - string
-            - "null"
-        event_id:
-          type:
-            - string
-            - "null"
-        home_team:
-          type:
-            - string
-            - "null"
-        away_team:
-          type:
-            - string
-            - "null"
-        fixture:
-          type: string
-        timing_mode:
-          type:
-            - string
-            - "null"
-        frozen_at:
-          type:
-            - string
-            - "null"
-        research_state:
-          type:
-            - string
-            - "null"
-        notes:
-          type:
-            - string
-            - "null"
+          enum: [NFL Receptions V5]
+        model_version: {type: [string, "null"]}
+        season: {type: [string, "null"]}
+        round_week: {type: [string, "null"]}
+        fixture_date: {type: [string, "null"]}
+        event_id: {type: [string, "null"]}
+        home_team: {type: [string, "null"]}
+        away_team: {type: [string, "null"]}
+        fixture: {type: string}
+        timing_mode: {type: [string, "null"]}
+        frozen_at: {type: [string, "null"]}
+        research_state: {type: [string, "null"]}
+        notes: {type: [string, "null"]}
         selections:
           type: array
           minItems: 1
-          maxItems: 250
+          maxItems: 25
+          description: >
+            Compact handoff only. Send deterministic positive-edge ranked selections
+            in rank order, including BEST SINGLE when present. Never send the whole
+            frozen ladder or zero/negative-edge rows merely to archive them.
           items:
             $ref: "#/components/schemas/ModelSelectionInput"
+      additionalProperties: false
 
     ModelSelectionStored:
       type: object
       properties:
-        id:
-          type: string
-        selection_name:
-          type: string
-        player_name:
-          type:
-            - string
-            - "null"
-        market_family:
-          type: string
-        market_key:
-          type:
-            - string
-            - "null"
-        threshold:
-          type:
-            - number
-            - "null"
-        p_model:
-          type: number
-        final_rank:
-          type:
-            - integer
-            - "null"
-        final_play:
-          type:
-            - integer
-            - boolean
-            - "null"
+        id: {type: string}
+        selection_name: {type: string}
+        player_name: {type: [string, "null"]}
+        market_family: {type: string}
+        market_key: {type: [string, "null"]}
+        threshold: {type: [number, "null"]}
+        p_model: {type: number}
+        final_rank: {type: [integer, "null"]}
+        final_play: {type: [integer, boolean, "null"]}
+      additionalProperties: true
 
     CreateModelRunResponse:
       type: object
       properties:
-        status:
-          type: string
-        idempotent:
-          type: boolean
-        request_id:
-          type:
-            - string
-            - "null"
-        model_run_id:
-          type: string
-        selection_count:
-          type: integer
+        status: {type: string}
+        idempotent: {type: boolean}
+        request_id: {type: [string, "null"]}
+        model_run_id: {type: string}
+        selection_count: {type: integer}
         selections:
           type: array
+          maxItems: 25
           items:
             $ref: "#/components/schemas/ModelSelectionStored"
+      additionalProperties: true
 
     RecordBetLeg:
       type: object
-      required:
-        - model_selection_id
+      required: [model_selection_id]
       properties:
-        model_selection_id:
-          type: string
-        execution_leg_odds:
-          type:
-            - number
-            - "null"
+        model_selection_id: {type: string}
+        execution_leg_odds: {type: [number, "null"]}
+      additionalProperties: false
 
     RecordBetRequest:
       type: object
-      required:
-        - bookmaker
-        - bet_type
-        - stake
-        - accepted_odds
-        - legs
+      required: [bookmaker, bet_type, stake, accepted_odds, legs]
       properties:
         request_id:
-          type:
-            - string
-            - "null"
+          type: [string, "null"]
           pattern: ^[A-Za-z0-9_-]{8,80}$
-        bookmaker:
-          type: string
+        bookmaker: {type: string}
         bet_type:
           type: string
-          enum:
-            - single
+          enum: [single]
         stake:
           type: number
           exclusiveMinimum: 0
         accepted_odds:
           type: number
           exclusiveMinimum: 1
-        unboosted_odds:
-          type:
-            - number
-            - "null"
-        promo_label:
-          type:
-            - string
-            - "null"
-        bookmaker_bet_id:
-          type:
-            - string
-            - "null"
-        placed_at:
-          type:
-            - string
-            - "null"
-        notes:
-          type:
-            - string
-            - "null"
+        unboosted_odds: {type: [number, "null"]}
+        promo_label: {type: [string, "null"]}
+        bookmaker_bet_id: {type: [string, "null"]}
+        placed_at: {type: [string, "null"]}
+        notes: {type: [string, "null"]}
         legs:
           type: array
           minItems: 1
           maxItems: 1
           items:
             $ref: "#/components/schemas/RecordBetLeg"
+      additionalProperties: false
 
     RecordedBetLeg:
       type: object
       properties:
-        id:
-          type:
-            - string
-            - "null"
-        leg_number:
-          type:
-            - integer
-            - "null"
-        model_selection_id:
-          type:
-            - string
-            - "null"
-        model_run_id:
-          type:
-            - string
-            - "null"
-        selection_name:
-          type:
-            - string
-            - "null"
-        fixture:
-          type:
-            - string
-            - "null"
+        id: {type: [string, "null"]}
+        leg_number: {type: [integer, "null"]}
+        model_selection_id: {type: [string, "null"]}
+        model_run_id: {type: [string, "null"]}
+        selection_name: {type: [string, "null"]}
+        fixture: {type: [string, "null"]}
+      additionalProperties: true
 
     RecordBetResponse:
       type: object
       properties:
-        status:
-          type: string
-        idempotent:
-          type: boolean
-        request_id:
-          type:
-            - string
-            - "null"
-        bet_ticket_id:
-          type: string
-        bookmaker:
-          type: string
-        bet_type:
-          type: string
-        stake:
-          type: number
-        accepted_odds:
-          type: number
-        unit_size:
-          type: number
-        units_staked:
-          type: number
+        status: {type: string}
+        idempotent: {type: boolean}
+        request_id: {type: [string, "null"]}
+        bet_ticket_id: {type: string}
+        bookmaker: {type: string}
+        bet_type: {type: string}
+        stake: {type: number}
+        accepted_odds: {type: number}
+        unit_size: {type: number}
+        units_staked: {type: number}
         legs:
           type: array
           items:
             $ref: "#/components/schemas/RecordedBetLeg"
+      additionalProperties: true
