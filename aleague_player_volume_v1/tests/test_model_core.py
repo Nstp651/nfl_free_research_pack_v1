@@ -1,14 +1,13 @@
-import math
 import unittest
 
 from aleague_player_volume_v1.model_core import (
     ModelIntegrityError,
     PlayerShotProjection,
+    allocate_team_shots,
     allocation_audit,
     assert_market_blind,
     build_at_least_ladder,
     expected_goalkeeper_saves,
-    expected_player_shots,
     expected_player_sot,
     negative_binomial_pmf,
     shrink_binomial_rate,
@@ -36,14 +35,24 @@ class ModelCoreTests(unittest.TestCase):
         values = list(ladder.values())
         self.assertTrue(all(a >= b for a, b in zip(values, values[1:])))
 
-    def test_player_shot_projection(self):
-        projection = PlayerShotProjection(
-            player_id="p1",
-            minutes_mean=90,
-            normalized_shot_share=0.20,
-            role_multiplier=1.10,
-        )
-        self.assertAlmostEqual(expected_player_shots(15.0, projection), 3.3)
+    def test_team_allocation_is_exact_and_minutes_enter_once(self):
+        projections = [
+            PlayerShotProjection("p1", minutes_mean=90, shots_per90_prior=3.0),
+            PlayerShotProjection("p2", minutes_mean=45, shots_per90_prior=3.0),
+        ]
+        means, unmodelled = allocate_team_shots(12.0, projections, unmodelled_weight=1.5)
+        self.assertAlmostEqual(means["p1"], 6.0)
+        self.assertAlmostEqual(means["p2"], 3.0)
+        self.assertAlmostEqual(unmodelled, 3.0)
+        self.assertAlmostEqual(sum(means.values()) + unmodelled, 12.0)
+
+    def test_duplicate_player_allocation_rejected(self):
+        projections = [
+            PlayerShotProjection("p1", 90, 2.0),
+            PlayerShotProjection("p1", 45, 1.0),
+        ]
+        with self.assertRaises(ModelIntegrityError):
+            allocate_team_shots(10.0, projections, 1.0)
 
     def test_sot_cannot_exceed_shots_in_mean(self):
         mu_shots = 3.3

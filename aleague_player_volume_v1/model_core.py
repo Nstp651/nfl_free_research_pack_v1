@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import exp, lgamma, log
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple
 
 
-MODEL_VERSION = "ALEAGUE_PLAYER_VOLUME_V1_0.1.0"
+MODEL_VERSION = "ALEAGUE_PLAYER_VOLUME_V1_0.2.0"
 
 PROHIBITED_MARKET_KEYS = {
     "odds",
@@ -133,7 +133,7 @@ def build_at_least_ladder(mean: float, dispersion: float, max_threshold: int = 8
 class PlayerShotProjection:
     player_id: str
     minutes_mean: float
-    normalized_shot_share: float
+    shots_per90_prior: float
     role_multiplier: float = 1.0
 
     def validate(self) -> None:
@@ -141,22 +141,41 @@ class PlayerShotProjection:
             raise ModelIntegrityError("player_id required")
         if not 0 <= self.minutes_mean <= 130:
             raise ModelIntegrityError("minutes_mean outside supported football range")
-        if not 0 <= self.normalized_shot_share <= 1:
-            raise ModelIntegrityError("normalized_shot_share must be within [0, 1]")
+        _validate_nonnegative("shots_per90_prior", self.shots_per90_prior)
         if not 0 < self.role_multiplier <= 2.0:
             raise ModelIntegrityError("role_multiplier outside hard V1 bound (0, 2]")
 
+    @property
+    def shot_propensity_weight(self) -> float:
+        """Expected relative shot opportunity before team-volume normalization."""
+        self.validate()
+        return self.shots_per90_prior * (self.minutes_mean / 90.0) * self.role_multiplier
 
-def expected_player_shots(team_shot_mean: float, projection: PlayerShotProjection) -> float:
-    """Allocate a team 90-minute shot environment to a projected player."""
+
+def allocate_team_shots(
+    team_shot_mean: float,
+    projections: Sequence[PlayerShotProjection],
+    unmodelled_weight: float,
+) -> Tuple[Dict[str, float], float]:
+    """Allocate the full team shot mean by exposure-adjusted shot propensity.
+
+    This avoids double-counting minutes: player history supplies a per-90 propensity,
+    projected minutes converts it to an exposure weight, and only then are weights
+    normalized to the team-level shot environment.
+    """
     _validate_nonnegative("team_shot_mean", team_shot_mean)
-    projection.validate()
-    return (
-        team_shot_mean
-        * projection.normalized_shot_share
-        * (projection.minutes_mean / 90.0)
-        * projection.role_multiplier
-    )
+    _validate_nonnegative("unmodelled_weight", unmodelled_weight)
+    ids = [p.player_id for p in projections]
+    if len(ids) != len(set(ids)):
+        raise ModelIntegrityError("duplicate player_id in shot allocation")
+    weights = {p.player_id: p.shot_propensity_weight for p in projections}
+    denom = sum(weights.values()) + unmodelled_weight
+    if denom <= 0:
+        raise ModelIntegrityError("total shot propensity weight must be > 0")
+    means = {player_id: team_shot_mean * weight / denom for player_id, weight in weights.items()}
+    unmodelled_mean = team_shot_mean * unmodelled_weight / denom
+    allocation_audit(team_shot_mean, means.values(), unmodelled_mean)
+    return means, unmodelled_mean
 
 
 def expected_player_sot(player_shot_mean: float, p_sot_given_shot: float) -> float:

@@ -21,7 +21,7 @@ Canonical repository assets will ultimately include:
 - `goalkeeper_match` — minutes, shots on target faced, saves/goals allowed and advanced keeper fields where available;
 - `roster_identity` — canonical team/player IDs plus source aliases;
 - `qbase_team_shots` — leakage-safe team attacking/defensive priors;
-- `qbase_player_shots` — leakage-safe player shot-rate/share priors;
+- `qbase_player_shots` — leakage-safe player shot-rate priors;
 - `qbase_player_sot` — shrunk `P(SoT | shot)` priors;
 - `qbase_keeper_saves` — shrunk save-rate priors;
 - `manifest` — canonical hashes, schema versions and publication revision.
@@ -66,17 +66,23 @@ The first calibration family is Negative Binomial with mean `mu_team_shots` and 
 
 ## 6. Player shot allocation
 
+V1 deliberately separates historical **shot propensity** from current projected exposure.
+
 For each projected outfield player:
 
-`mu_player_shots = mu_team_shots * normalized_shot_share * minutes_mean/90 * role_multiplier`
+`weight_i = qbase_shots_per90_i * projected_minutes_i/90 * role_multiplier_i`
 
-Production implementation must avoid double-counting minutes inside both the share prior and the explicit minutes term. Shot-share priors therefore need a precisely documented exposure basis.
+Then normalize all player weights plus an explicit unmodelled/bench weight to the team environment:
 
-Allocation audit:
+`mu_player_shots_i = mu_team_shots * weight_i / (sum(weights) + unmodelled_weight)`
 
-`sum(mu_player_shots) + mu_unmodelled_shots ~= mu_team_shots`
+This is preferred to multiplying a historical share by minutes because that can double-count exposure. The unmodelled bucket covers bench/low-minute/uncertain players and may not be silently discarded.
 
-within a hard tolerance defined by the Worker. The unmodelled bucket covers bench/low-minute/uncertain players and may not be silently discarded.
+Hard allocation audit:
+
+`sum(mu_player_shots) + mu_unmodelled_shots == mu_team_shots`
+
+within a defined floating-point tolerance.
 
 Player shot counts use a calibrated Negative Binomial (`mean`, `dispersion`). Dispersion may be player-class or hierarchical rather than individual when samples are thin.
 
