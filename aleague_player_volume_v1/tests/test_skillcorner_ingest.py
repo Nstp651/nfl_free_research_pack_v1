@@ -34,11 +34,35 @@ class SkillCornerIngestTests(unittest.TestCase):
         profiles, coverage = build_role_profiles(obr, passing, physical)
         self.assertEqual(len(profiles), 1)
         self.assertEqual(coverage["complete_join_rate"], 1.0)
+        self.assertEqual(coverage["all_role_complete_join_rate"], 1.0)
         profile = profiles[0]
         self.assertEqual(profile["player_name"], "Adam Taggart")
         self.assertEqual(profile["model_use"], "ROLE_FEATURE_RESEARCH_ONLY_UNTIL_VALIDATED")
         self.assertEqual(profile["features"]["obr"]["offballrun_count_penaltyarea_p30tip"], 9.0)
         self.assertEqual(profile["features"]["physical"]["psv99"], 29.0)
+
+    def test_goalkeeper_sparse_family_does_not_dilute_attacking_gate(self):
+        obr = parse_aggregate(self.obr, "obr")
+        passing = parse_aggregate(self.passing, "passing")
+        physical = parse_aggregate(self.physical, "physical")
+        goalkeeper_prefix = "AUS - A-League,2024/2025,3443,Filip Kurto,1991-06-14,1804,Macarthur FC,Goalkeeper"
+        goalkeeper_physical = parse_aggregate(
+            PHYS_HEADER + row(goalkeeper_prefix, [1800, 100, 10, 1, 11, 25, 120, 5, 1]),
+            "physical",
+        )
+        physical.update(goalkeeper_physical)
+
+        profiles, coverage = build_role_profiles(obr, passing, physical)
+
+        self.assertEqual(len(profiles), 2)
+        self.assertEqual(coverage["attacking_profiles"], 1)
+        self.assertEqual(coverage["excluded_non_attacking_profiles"], 1)
+        self.assertEqual(coverage["complete_join_rate"], 1.0)
+        self.assertEqual(coverage["attacking_complete_join_rate"], 1.0)
+        self.assertEqual(coverage["all_role_complete_join_rate"], 0.5)
+        goalkeeper = next(profile for profile in profiles if profile["position_group"] == "Goalkeeper")
+        self.assertEqual(goalkeeper["model_use"], "SOURCE_VALIDATION_ONLY")
+        self.assertEqual(goalkeeper["source_presence"], ["physical"])
 
     def test_wrong_competition_fails_closed(self):
         broken = self.obr.replace("AUS - A-League", "Other League")
