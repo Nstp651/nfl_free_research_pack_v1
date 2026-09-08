@@ -71,7 +71,7 @@ def test_final_box_separates_player_and_team_rebounds():
     assert stats["player"]["field_goals_attempted"] == 20
     assert stats["player"]["rebounds"] == 11
     assert stats["team"]["rebounds"] == 12
-    assert stats["team_only_rebounds"] == {
+    assert stats["team_minus_player_rebounds"] == {
         "rebounds": 1,
         "offensive_rebounds": 1,
         "defensive_rebounds": 0,
@@ -94,3 +94,12 @@ def test_release_decisions_have_no_tolerance():
         "assists", {"raw": 8.0, "team": 9.0}, final
     )
     assert unresolved["decision"] == "UNRESOLVED"
+
+
+def test_internal_final_box_mismatch_requires_rebuild():
+    final = derive_final_box_stats(_payload())["4"]
+    final["team"]["assists"] = 6
+    decision = _adjudicate_field(
+        "assists", {"raw": 7.0, "team": 6.0}, final
+    )
+    assert decision["decision"] == "FINAL_BOX_INTERNAL_ACCOUNTING_MISMATCH_REBUILD_REQUIRED"
