@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "model": "ALEAGUE_PLAYER_VOLUME_V1",
   "sources": [
     {
@@ -18,7 +18,8 @@
       ],
       "runtime_dependency": false,
       "credential": "API_FOOTBALL_KEY",
-      "notes": "Primary V1 structured feed candidate. A-League Men is API-Football league 188. Canonical assets are published into the repo/pack so runtime never depends on the API being reachable. Coverage flags and null-rate gates are mandatory."
+      "league_id": 188,
+      "notes": "Primary V1 structured feed candidate. Canonical assets are published into the research pack so runtime never depends on the live API. Coverage flags, historical-range checks, null-rate gates and reconciliation are mandatory."
     },
     {
       "id": "skillcorner_opendata",
@@ -32,7 +33,8 @@
       ],
       "runtime_dependency": false,
       "license": "MIT",
-      "notes": "Open A-League 2024/25 sample contains 10 tracking matches plus season-level Physical/OBR/Passing aggregates. Valuable for feature engineering and role priors but not sufficient as the core historical event feed."
+      "approved_commit": "c1e17a0cc3e07e1774b52d929c1a0b85115143fc",
+      "notes": "Open A-League 2024/25 release contains ten tracking matches plus season-level Physical/OBR/Passing aggregates. Approved for pinned derived role profiles and feature research; not sufficient as the core outcome/training panel."
     },
     {
       "id": "official_aleague_clubs",
@@ -46,7 +48,7 @@
       "class": "RESEARCH_RECONCILIATION_ONLY",
       "purpose": ["manual_reconciliation", "historical_context", "spot_checks"],
       "runtime_dependency": false,
-      "notes": "Do not schedule automated extraction or build the predictive database from FBref. Sports Reference data-use restrictions and 2026 provider changes make it unsuitable as V1 machine ingestion."
+      "notes": "Do not schedule automated extraction or build the predictive database from FBref."
     },
     {
       "id": "fotmob",
