@@ -1,350 +1,400 @@
 # NBA Assists + Rebounds V1 Architecture
 
-Status: BUILDING. This is an isolated NBA implementation; NBL production is unchanged.
+Status: **PRODUCTION CANDIDATE — LIVE ACCEPTANCE PENDING.** PR #20 remains draft. NBA is isolated under `nba_player_props_v1/`; NBL production is unchanged.
 
-## 1. Architectural baseline
+## 1. Platform shape
 
-The platform baseline is `nbl_player_props_v1/`: GitHub-authored immutable assets, separate Research/Freeze and Market Workers, persistent Durable Object runs, exact source pinning, server-authoritative QBASE, research receipts, atomic freeze, per-player hashes, exact probability grids, market-to-freeze binding, and downstream-only Bet Tracker.
+NBA V1 adapts the proven platform pattern to one complete NBA `America/New_York` league-date slate:
 
-NBA changes the unit of work from **one matchup** to **one complete NBA league-date slate**.
+- GitHub-authored immutable source/model assets;
+- separate Research/Freeze and Market Workers;
+- persistent Durable Object runs;
+- server-enforced 1–2 game research batches;
+- `market_data=false` through Layers 0–2;
+- independently promoted Assists/Rebounds QBASE heads;
+- typed server current-role transforms;
+- atomic **whole-slate** freeze;
+- exact count probability grids including integer pushes;
+- per-head, per-player and whole-slate integrity hashes;
+- post-freeze market access only;
+- downstream-only shared Bet Tracker.
 
-A second proven platform pattern is reused from `ncaaf_totals_v1/`: the Research Worker exposes only the current small pending batch, requires its checkpoint before advancing the queue, and publishes frozen outputs atomically only after every eligible game is complete.
+Production deployment ownership remains Cloudflare-native Git. GitHub Actions verifies/builds/promotes assets; it is not a competing Worker deployment owner.
 
-## 2. NBL → NBA transfer matrix
+## 2. Services
 
-| Area | Decision | NBA V1 implementation |
-|---|---|---|
-| GitHub source/model authority | KEEP | NBA assets live only under `nba_player_props_v1/`; exact source commit pinned per run. |
-| Cloudflare native Git deployment | KEEP | GitHub Actions verify/dry-run; Cloudflare Git integration is sole production deployment owner. |
-| Combined GPT, independent assists/rebounds heads | KEEP | Default BOTH; each head has separate QBASE, calibration, distribution and player/head hash. |
-| Separate Research/Freeze and Market Workers | KEEP | No Odds API credentials or market fetch paths exist in Research Worker. |
-| Persistent Durable Object run | ADAPT | One `NbaSlateRun` owns an entire NBA league-date slate. |
-| One research payload per matchup | REPLACE | Server queue returns at most 2 games; each checkpoint is persisted separately. |
-| Atomic BOTH freeze | ADAPT | Atomic **requested-head, whole-slate** publication. No game/player grid is market-readable before global freeze. |
-| Historical prior snapshot | ADAPT | NBA multi-season prior plus richer lagged role/opportunity features and identity crosswalks. |
-| NBL Rosetta/nblR source spine | REPLACE | SportsDataverse release backbone + official NBA enrichment with deterministic receipts. |
-| QBASE feature set | REPLACE | NBA-specific, leak-safe feature challenge; richer tracking/lineup inputs only when validated. |
-| Temporal walk-forward validation | KEEP+ADD | Season/date-forward only; explicit early-season buckets and team-change/role-change slices. |
-| NB2 exact distribution contract | KEEP AS CANDIDATE | Distribution family is re-challenged using OOS probability calibration; exact count and push contract remains. |
-| GPT-supplied scenario means | REPLACE | No free-form mean override for returning NBA players. Current-role translation must use typed server-audited transforms. |
-| Prior-competition translation | ADAPT | Explicit NCAA/G League/international/Summer League/preseason evidence with uncertainty; no universal multiplier. |
-| Research contract | ADAPT | Game-scoped checkpoints, evidence tier/recency/materiality, descriptive-vs-causal tags, objective fragility components. |
-| Per-player model hashes | KEEP+ADD | Hash each full player plus each requested head; slate receipt commits to ordered game/player/head hashes. |
-| Material late-news handling | ADD | Explicit immutable invalidation/supersession protocol; no frozen probability mutation. |
-| Odds API market layer | ADAPT | NBA event-level prop pulls, request-credit budgeting, event↔fixture binding, exact market merge, global slate ranking. |
-| Screenshot support | KEEP | Post-freeze Bet365/manual screenshots only; exact thresholds; best valid current price wins. |
-| Bet Tracker separation | KEEP | Recommendations are never wagers; log only explicit confirmed bets. |
+### Research / Freeze Worker
+Name: `nba-player-props-research-v1`
 
-## 3. Daily-slate identity and lock
+Durable Object:
+- binding `SLATE_RUNS`
+- class `NbaSlateRun`
 
-### 3.1 Canonical date
+Responsibilities:
+- sanitized fixture discovery;
+- current roster/status source;
+- runtime asset loading from exact deployed Git commit;
+- persistent slate lock;
+- research queue/checkpoints;
+- server historical priors;
+- server QBASE/current-role scoring;
+- atomic freeze;
+- invalidation state;
+- market-access grant.
 
-A run is keyed by `slate_date_et` (`America/New_York`, YYYY-MM-DD), because the NBA schedule is grouped by league date and games can cross UTC/Sydney dates. The API also returns all exact UTC start times and a Sydney display date/time.
+Actual routes:
+- `GET /health`
+- `GET /v1/fixtures?date=YYYY-MM-DD`
+- `POST /v1/runs`
+- `GET /v1/runs/{run_id}`
+- `GET /v1/runs/{run_id}/research/next`
+- `POST /v1/runs/{run_id}/research/checkpoint`
+- `POST /v1/runs/{run_id}/freeze`
+- `GET /v1/runs/{run_id}/freeze`
+- `POST /v1/runs/{run_id}/invalidate`
+- `GET /v1/runs/{run_id}/market-access`
 
-The Worker never derives membership by UTC calendar date alone.
+### Market Worker
+Name: `nba-player-props-market-v1`
 
-### 3.2 Run initialization
+Durable Object:
+- binding `MARKET_RUNS`
+- class `NbaMarketRun`
 
-`POST /v1/slate-runs`
+Service binding:
+- `RESEARCH_SERVICE -> nba-player-props-research-v1`
 
-Input:
+Responsibilities:
+- obtain fresh server market grant before each operation;
+- resolve The Odds API events to exact frozen fixtures;
+- ingest only approved Assists/Rebounds standard/alternate props;
+- accept post-freeze sportsbook screenshots;
+- bind market rows to exact frozen player/head/threshold;
+- replace stale current snapshots;
+- best-price merge;
+- push-aware EV/global ranking.
 
-- `slate_date_et`
-- `run_mode`: BOTH | ASSISTS_ONLY | REBOUNDS_ONLY
+Actual routes:
+- `GET /health`
+- `POST /v1/runs/{run_id}/refresh`
+- `POST /v1/runs/{run_id}/manual-quotes`
+- `GET /v1/runs/{run_id}/rankings`
+- `GET /v1/runs/{run_id}/state`
 
-Server locks:
+## 3. League-date / fixture identity
 
-- exact eligible `game_ids` and ordered fixture identities;
-- source commit;
-- asset revision;
-- prior snapshot revision;
-- assists and/or rebounds QBASE revisions;
-- source receipt hashes;
-- eligibility timestamp;
-- schedule snapshot hash;
-- requested heads.
+`slate_date_et` is canonical and represents `America/New_York` league date, not UTC or Sydney calendar date.
 
-Eligibility requires an exact future NBA fixture. Started/completed games are excluded at initialization and cannot later be added to the run.
+Fixture discovery uses a sanitized non-market ESPN scoreboard fallback because the official NBA schedule endpoint has been HTTP-blocked in the source probes. Raw schedule payload fields that could include market material are not propagated into the research state.
 
-## 4. Research queue and checkpoints
+Each eligible fixture lock contains:
+- ESPN `game_id`;
+- season;
+- exact UTC start time;
+- home ESPN team ID/name;
+- away ESPN team ID/name.
 
-### 4.1 States
+Only not-yet-started returned games are eligible at run creation. Fixture metadata is persisted into the run and then into the immutable game freeze. A research checkpoint cannot change matchup/season/kickoff while retaining the same game ID.
 
-`RESEARCH_IN_PROGRESS` → `RESEARCH_COMPLETE` → `FREEZE_COMPUTING` → `FROZEN`
+## 4. Persistent run state
 
-Terminal/safety states:
+Current states:
+- `RESEARCH_IN_PROGRESS`
+- `RESEARCH_COMPLETE`
+- `FROZEN`
+- `FROZEN_BUT_INVALIDATED`
 
-- `EXPIRED`
-- `INVALIDATED`
+`FROZEN_BUT_INVALIDATED` does not alter the stored freeze object. It records affected game IDs/reasons and causes subsequent market grants to exclude those scopes.
 
-A frozen run is immutable.
+A changed P_model always requires a new run.
 
-### 4.2 Queue discipline
+## 5. Research queue
 
-`GET /v1/slate-runs/{run_id}/research` returns **only the first 1–2 pending game_ids** and their locked seed/QBASE anchors. It does not accept pagination or arbitrary game selection.
+`GET /v1/runs/{run_id}/research/next` exposes only the first 1–2 pending game IDs and their research seeds.
 
-`POST /v1/slate-runs/{run_id}/research` accepts only complete checkpoints for games in the current queue head. The transaction persists each checkpoint under `research:{game_id}` with its SHA-256 receipt.
+`POST /v1/runs/{run_id}/research/checkpoint` accepts only 1–2 games from the current queue head. Completed IDs are persisted before later pending IDs can be exposed.
 
-Only after persistence do those game IDs move to `completed_game_ids`; the next GET may then reveal the next pending batch.
+This makes long NBA slates resumable and prevents the GPT from researching/preloading the full remaining slate without server checkpoints.
 
-This prevents preloading/researching later games without checkpointing earlier work, keeps each Durable Object value small, and makes long daily slates resumable.
+## 6. Research contract
 
-### 4.3 Research checkpoint contract
+Every checkpoint is `nba_game_research_v1` and must declare `market_data=false`.
 
-Each game checkpoint binds:
+It binds:
+- run mode / slate date / game / exact fixture;
+- evidence rows with HTTPS URL, title, checked time, tier, evidence type;
+- specialist metric status registry;
+- exact player and team IDs;
+- availability;
+- current role state;
+- projected minutes low/mean/high;
+- expected starter probability;
+- confidence/fragility inputs;
+- requested-head causal pathways;
+- current head-specific opportunity values.
 
-- run_id / slate_date_et / game_id / fixture hash;
-- source_commit / pack_revision / QBASE revisions;
-- checkpointed_at;
-- evidence list: URL, title, checked_at, source tier, evidence type, published_at when available;
-- current team availability state;
-- expected starters/rotation;
-- relevant player records;
-- minutes low/mean/high;
-- current role vs historical role;
-- closing likelihood;
-- creator/frontcourt hierarchy;
-- teammate competition / lineup dependencies;
-- role breakpoints;
-- stat-specific causal pathways;
-- validated specialist-metric availability statuses;
-- Confidence inputs and Fragility inputs;
-- explicit market boundary assertion (`market_data=false`).
+Current opportunity accepted by the Worker is intentionally narrow.
 
-Market keywords/keys and sportsbook-derived projections are rejected during Layers 0–2.
+Assists:
+- expected assist share;
+- expected team assists;
+- expected possessions.
 
-## 5. Server-authoritative quantitative model
+Rebounds:
+- expected rebound share;
+- expected team rebounds;
+- expected possessions.
 
-### 5.1 Historical QBASE
+These are researched basketball-state inputs, not client-entered final player means.
 
-Each head is trained independently. All player/team/opponent rolling values are pregame-only and use `shift(1)` or an equivalent strict timestamp cutoff.
+The checkpoint validator rejects market keywords/fields, invalid identities, incomplete requested heads, unsupported opportunity fields and missing evidence bindings.
 
-Candidate selection hierarchy:
+## 7. Historical authority / source acceptance
 
-1. probability calibration at bettable thresholds (Brier/log loss/calibration slope/intercept/reliability);
-2. tail calibration and ladder monotonicity/coherence;
-3. bias and count deviance;
-4. MAE/RMSE as secondary diagnostics.
+Historical backbone: **SportsDataverse/hoopR** pinned release assets with deterministic receipts.
 
-Validation is temporal only. It includes explicit slices for:
+Original normalized build:
+- 139,809 player-games.
 
-- season games 0–2;
-- 3–7;
-- 8+;
-- team changers;
-- starter/bench role changes;
-- low-history players;
-- back-to-backs/rest;
-- high/low projected-minutes bands.
+Independent final-box adjudication identified 14 inconsistent games. Source correction removes each entire game, producing:
+- 139,529 accepted player-games;
+- accepted history SHA `2e6926aa87ccebafbf938322f8facefeb54de63eb22f924dc2793afc61750b25`.
 
-### 5.2 Current-role translation
+No individual stat patching or team-only removal is permitted.
 
-GPT narrative cannot submit a free-form final mean for a returning NBA player.
+Specialist metrics remain explicitly feature-gated as:
+`AVAILABLE / PARTIAL / UNAVAILABLE / BLOCKED / NOT_RELIABLE`.
 
-Allowed server transformations are typed and receiptized, for example:
+Base V1 uses `BASE_V1_WITHOUT_SPECIALIST_METRICS`; missing metrics are omitted, never represented as zero.
 
-- `QBASE_REFERENCE`
+## 8. QBASE promotion
+
+Assists and Rebounds are independent count-model challenges.
+
+Temporal protocol:
+- expanding 2024/2025 validation;
+- 2026 untouched holdout;
+- fixed head-specific count threshold grids;
+- selection by validation Brier with early-season cohort non-regression versus the locked baseline;
+- holdout pass/fail review only; never holdout family reselection.
+
+Both corrected-history heads currently pass `PROMOTED_CORE_V1`:
+- `NBA_ASSISTS_QBASE_V1.0.0`
+- `NBA_REBOUNDS_QBASE_V1.0.0`
+
+Runtime artifact promotion is fail-closed. CI quantizes exported production numeric parameters, forces single-thread numerical execution, reruns the challenges twice and requires byte-identical evidence before assets can be committed.
+
+## 9. Runtime prior pack
+
+The deterministic runtime prior pack contains accepted-history player and team state keyed by ESPN identities.
+
+Player prior includes:
+- last team / opponent / game / season;
+- career and season game counts;
+- rolling minutes/start rate;
+- rolling Assists/Rebounds rates/shares and related head features.
+
+Team prior includes:
+- team possessions;
+- team assists/rebounds;
+- assists/rebounds allowed;
+- season game counts.
+
+At a new season, season/team game counts reset to zero while historical rolling role values remain prior evidence. Team changes are detected by ESPN team ID. Prior timestamps at or after target kickoff are rejected.
+
+Research seed exposes compact player and team environment priors plus server historical QBASE prior means. Every value is explicitly labelled historical prior only.
+
+## 10. Server-authoritative current-role translation
+
+The client cannot submit a free-form final mean.
+
+Implemented transform types:
+- `QBASE_RUNTIME_SCORE`
 - `MINUTES_RECOMPUTE`
 - `ROLE_OPPORTUNITY_RECOMPUTE`
 - `LINEUP_DEPENDENCY_RECOMPUTE`
-- `PRIOR_COMP_TRANSLATION`
 
-Each transform has fixed required numeric inputs, bounded domains, evidence IDs and a deterministic server implementation. One REFERENCE state at weight 1.0 is default. Multiple states are allowed only when the research checkpoint records objective routine mixture evidence and the server validates weights and state definitions.
+All transform inputs are whitelisted and bounded. Head-inappropriate fields are rejected.
 
-### 5.3 Assists causal engine
+The server composes historical base features with evidence-bound current research, then scores the promoted QBASE artifact.
 
-Historical/current opportunity chain:
+### Prior competition
+The prior-competition framework requires a separately `PROMOTED` explicit competition route with minimum sample and uncertainty controls. There is no universal NCAA/G League/Euro/NBL fallback multiplier.
 
-`minutes → on-ball creation opportunity → potential-assist/pass/touch environment → teammate finishing environment → assists count distribution`
+Without a promoted route, a rookie/new-to-NBA player may be researched for teammate context but is excluded from that player's P_model as `NO_PROMOTED_PRIOR_COMP_TRANSLATION`.
 
-Validated tracking features can include lagged touches, passes, secondary assists, potential assists, drives, time of possession, AST%, usage, lineup creation share and teammate finishing. Unvalidated fields are omitted, never zero-imputed as if observed.
+## 11. Exact distributions
 
-### 5.4 Rebounds causal engine
+Runtime QBASE produces count means and dispersion. Probability grid is Poisson when dispersion is effectively zero, otherwise NB2.
 
-Historical/current opportunity chain:
+Each frozen head stores:
+- final mean;
+- dispersion alpha;
+- exact count PMF;
+- tail-above-grid probability;
+- at-least ladder;
+- half-point Over/Under grid;
+- integer Over/Push/Under grid;
+- quantitative receipts;
+- `head_model_sha256`.
 
-`minutes + position → opponent/team missed-shot environment → rebound chances → teammate competition/capture rate → rebounds count distribution`
+Each frozen player stores `player_model_sha256`.
 
-Validated features can include lagged offensive/defensive/total rebound chances, ORB%/DRB%/TRB%, lineup rebound share, teammate competition, shot-location/miss environment and pace.
+The slate stores an `integrity_index` of game receipts, player hashes and requested head hashes before its own `freeze_receipt_sha256` is calculated.
 
-### 5.5 Exact probability contract
+## 12. Whole-slate freeze
 
-Every frozen head provides a coherent exact non-negative integer count distribution and exact grids for every supported threshold.
+`POST /v1/runs/{run_id}/freeze` accepts an empty body and is valid only at `RESEARCH_COMPLETE`.
 
-- half-point line: over/under, no push;
-- integer line: over/push/under with exact-count push;
-- no interpolation;
-- monotonic ladder audit;
-- total probability audit;
-- OOS-calibrated dispersion cannot be silently narrowed by research narrative.
+The client never submits final projections to this endpoint. The Worker rebuilds player priors, applies current-state transforms and computes the complete requested-head slate server-side.
 
-## 6. Whole-slate freeze
+Freeze is one immutable publication:
+- all eligible games represented;
+- modeled players / objective exclusions;
+- exact grids;
+- exact fixture identities;
+- original `frozen_at`;
+- QBASE lineage;
+- integrity index;
+- whole-slate receipt.
 
-`POST /v1/slate-runs/{run_id}/compute`
+No market-access grant can exist before this state.
 
-Preconditions:
+## 13. Late-news invalidation
 
-- no pending games;
-- all requested game checkpoints pass binding checks;
-- all requested player/head transforms pass modelability and evidence checks;
-- no market access token exists for this run;
-- run not expired/invalidated.
+`POST /v1/runs/{run_id}/invalidate` accepts affected game IDs plus reason only after freeze.
 
-The server computes all modelable requested heads and stages them. Publication is one Durable Object transaction:
+The original freeze object, timestamp, player/head hashes and probabilities remain untouched. The run becomes `FROZEN_BUT_INVALIDATED` and new market grants exclude affected game IDs.
 
-- write all frozen player records;
-- write all player/head hashes;
-- write compact slate receipt;
-- transition `RESEARCH_COMPLETE` → `FROZEN`.
+Price movement alone is not basketball-news invalidation evidence.
 
-No player probability grid is retrievable until the transaction completes.
+## 14. Market access boundary
 
-The receipt includes:
+The Market Worker obtains `nba_market_access_grant_v1` from Research before each state/read/refresh operation.
 
-- `freeze_receipt_sha256`;
-- `frozen_at`;
-- source/QBASE/snapshot revisions;
-- ordered eligible game IDs;
-- ordered frozen player/head hashes;
-- exclusions with objective reasons;
-- global integrity audit.
+Grant binds:
+- run ID;
+- slate date;
+- run mode;
+- frozen timestamp;
+- freeze receipt;
+- allowed games;
+- invalidated games.
 
-Freeze retry returns the original immutable receipt and timestamp.
+Pre-freeze calls fail before any Odds API request.
 
-## 7. Late-news invalidation
+## 15. The Odds API
 
-Frozen probabilities are never mutated.
+Sport key: `basketball_nba`.
 
-Material news is anything that changes a model input beyond a configured tolerance, including OUT/IN status, starter change, meaningful minutes restriction, role-changing teammate status, or material lineup dependency.
-
-Protocol:
-
-1. append an immutable invalidation event with source/evidence hash;
-2. mark affected `game_id`, player IDs and affected heads invalid;
-3. Market Worker rejects those scopes immediately;
-4. unaffected frozen scopes may remain eligible only if the slate receipt exposes the invalidation registry and Market Worker confirms the exact scope is unaffected;
-5. if a fresh P_model is needed, create a **new slate run** and repeat full market-blind Layers 0–2 before its first market access. Never recompute a market-exposed run.
-
-## 8. Data source architecture
-
-### 8.1 Production backbone
-
-SportsDataverse release assets are the preferred historical base because they are GitHub-hosted, automation-friendly, multi-season, and explicitly licensed. Pin release asset URLs/checksums in a source receipt and normalize into canonical NBA player-game/team-game tables.
-
-### 8.2 Official enrichment
-
-NBA official sources are enrichment, not unchecked hard dependencies. Each enrichment endpoint must pass:
-
-- HTTP reliability gate;
-- schema fingerprint gate;
-- game/player identity gate;
-- non-null/completeness gate;
-- date coverage gate;
-- duplicate gate;
-- cross-source reconciliation gate.
-
-Tracking fields that pass are material NBA advantages. Fields that fail are classified `PARTIAL`, `BLOCKED`, `NOT_RELIABLE`, or `UNAVAILABLE` and are not model features.
-
-### 8.3 Current schedule/identity
-
-Use official NBA CDN schedule/scoreboard where reliable, with SportsDataverse/ESPN schedule as independent reconciliation. Lock exact NBA/ESPN IDs and UTC timestamps; reject unresolved identity ambiguity.
-
-### 8.4 Current information hierarchy
-
-Tier 0 — official NBA injury reports / official transaction records / official team status releases.
-
-Tier 1 — official team coach/practice/shootaround reports and confirmed starting information.
-
-Tier 2 — established beat reporters with direct team access.
-
-Tier 3 — reputable national reporting useful for context.
-
-Excluded from Layers 0–2 — betting-tip sites, sportsbook prices, market consensus, prop projections derived from markets.
-
-## 9. Market Worker
-
-Market Worker owns no modelling code and cannot mutate Research Worker storage.
-
-It requires:
-
-- run status `FROZEN`;
-- exact `freeze_receipt_sha256`;
-- no invalidation covering the market scope;
-- exact slate game identity;
-- market observation `captured_at >= frozen_at`;
-- exact frozen player/head hash;
-- exact threshold in frozen probability grid.
-
-### Odds API
-
-The Odds API NBA sport key is `basketball_nba`. Player props use event-level additional markets. V1 requests only the requested market keys for the games in the frozen slate and logs response usage headers. Empty data are not retried aggressively.
-
-Market keys:
-
+V1 market keys only:
 - `player_assists`
 - `player_assists_alternate`
 - `player_rebounds`
 - `player_rebounds_alternate`
 
-Requests are grouped to minimize the number of unique returned markets × regions. The default production region is the minimum set needed to cover the user's active books; additional regions are opt-in because they multiply credits.
+Default region is `au`, one region only, to align the production Australian bookmaker stack and minimize credit multiplication.
 
-Manual screenshot rows remain supported post-freeze. Duplicate exact market keys (`game|player|head|side|threshold`) are merged by highest valid current decimal price with deterministic timestamp/bookmaker tie-breaks.
+Event discovery occurs first. Frozen fixture → Odds API event mapping requires exactly one match on normalized home team, normalized away team and kickoff within strict tolerance.
 
-Final outputs: BEST SINGLE across both heads, separate ranked assists/rebounds lists, combined positive-edge Top 10, all positives on request, and NO BET when none pass.
+Player mapping is then restricted to the frozen game. Ambiguous or unmodeled names are skipped/reported, never guessed.
 
-## 10. Modelability
+Only Overs are retained for V1 ranking.
 
-A player/head is frozen only if one route succeeds:
+## 16. Market snapshots / screenshots
 
-**Returning NBA:** sufficient timestamped NBA history for QBASE plus current-role translation inputs within supported ranges.
+Current ranking uses only:
+- latest API snapshot;
+- latest manual screenshot snapshot.
 
-**Changed role/team:** NBA QBASE remains authority; current opportunity is translated through typed transforms.
+Previous snapshot receipts remain in history but stale prices do not compete in the current best-price merge.
 
-**Rookie/new-to-NBA:** explicit prior-competition translation artifact with source competition, sample/minutes, role, pace/context fields, uncertainty and translation receipt. No universal league multiplier.
+Any market snapshot must have `captured_at >= frozen_at`.
 
-Objective exclusion reasons include unresolved identity, unavailable/contradictory status, minutes uncertainty above configured maximum, insufficient prior translation, unsupported role break, or failed source-quality gates.
+Bet365/manual rows are post-freeze only and bind to:
+- exact freeze receipt;
+- allowed game;
+- frozen player;
+- frozen head;
+- exact player/head hashes;
+- exact integer/half threshold.
 
-## 11. Day-one improvements over NBL
+No interpolation.
 
-1. Slate-global freeze and batch research checkpoints instead of one-match runs.
-2. Explicit invalidation registry enforced by the Market Worker.
-3. Head-level hashes in addition to full-player hashes.
-4. Typed server role transforms; no arbitrary externally supplied returning-player mean.
-5. Server-derived Fragility components rather than purely narrative labels.
-6. Source-quality/recency/materiality fields and contradiction ledger in research checkpoints.
-7. Specialist metric availability registry so missing advanced data cannot become silent zeros.
-8. Broader QBASE model-family challenge and probability-calibration-first selection.
-9. Early-season promotion gates stricter than full-season aggregate gates.
-10. Odds API credit budget/usage receipt attached to each market snapshot.
-11. Explicit league-date/timezone contract and cross-source game identity crosswalk.
+## 17. EV / rankings
 
-## 12. Production acceptance gates
+Half-point:
+- no push.
 
-Production status is prohibited until all pass:
+Integer:
+- exact `P_win / P_push / P_loss`.
 
-- deterministic source rebuild from pinned receipts;
-- source/release/normalized-table hashes;
-- identity and duplicate audits;
-- timestamp coverage audit;
-- leak-safe feature tests and `shift(1)`/cutoff assertions;
-- temporal walk-forward backtest and early-season slices;
-- reproducible QBASE artifacts;
-- server-authoritative returning-player scoring;
-- prior-competition translation tests;
-- research market-boundary rejection;
-- server-enforced 1–2 game queue and resumable checkpoint recovery;
-- wrong-game/out-of-order checkpoint rejection;
-- atomic whole-slate requested-head freeze;
-- immutable retry and original timestamp;
-- exact probability-grid audits including integer pushes;
-- per-player + per-head hash verification;
-- pre-freeze Market Worker rejection;
-- wrong receipt/hash/game rejection;
-- invalidated-scope rejection;
-- post-freeze Odds API/screenshot evaluation;
-- exact threshold/no-interpolation tests;
-- best-price deterministic merge;
-- positive-edge global ranking + NO BET;
-- tracker health and no recommendation-as-wager tests;
-- Cloudflare live Research/Freeze + Market acceptance;
-- final Custom GPT Action acceptance.
+EV:
+`P_win * (decimal_odds - 1) - P_loss`
+
+Fair decimal price:
+`(1 - P_push) / P_win`
+
+Tracker-compatible push-adjusted market probability:
+`(1 - P_push) / decimal_odds`
+
+Push-adjusted probability edge:
+`P_win - push_adjusted_market_probability`
+
+EV remains the positive-selection/ranking authority.
+
+Outputs:
+- BEST SINGLE or NO BET;
+- Top 10 combined positive EV;
+- Assists positives;
+- Rebounds positives.
+
+## 18. Bet Tracker
+
+Existing production tracker is reused.
+
+Identity:
+- `sport=nba`
+- `league=nba`
+- `model_name=Nick NBA Assists + Rebounds`
+- `model_version=1.0`
+
+Create one tracker model run only after the first completed Layer 4. Price/screenshot refreshes do not create a new canonical model run.
+
+Actual `recordBet` occurs only after explicit confirmation of exact selection, bookmaker, accepted odds and stake.
+
+## 19. Runtime asset integrity
+
+Cloudflare build runs `worker/build_source_commit.mjs`, replacing the checked-in `UNBUILT` placeholder with exact deployed Git HEAD.
+
+Runtime loading chain:
+`deployment Git commit -> manifest -> exact raw-file SHA-256 -> promoted QBASE/prior lineage`.
+
+Python promotion receipt hashes are treated as opaque lineage identities across languages. JavaScript does not pretend Python float serialization hashes are portable; exact raw file SHA is the transport authority.
+
+## 20. Production acceptance gates
+
+V1 must not be called production-ready until all pass:
+
+1. accepted corrected source history;
+2. deterministic source rebuild;
+3. independent Assists promotion;
+4. independent Rebounds promotion;
+5. repeated byte-identical challenge rebuild;
+6. promoted runtime assets committed;
+7. generated asset commit reproduces with zero diff;
+8. all Python/JS CI green;
+9. NBL isolation green;
+10. Cloudflare Research Worker live with exact Git source pin + Durable Object;
+11. Cloudflare Market Worker live with Durable Object + Research service binding + Odds API secret;
+12. real future ET slate fixture resolution;
+13. full server-enforced Layer 1 batch/checkpoint loop;
+14. atomic whole-slate Layer 2 freeze;
+15. proof no market access before freeze;
+16. real Odds API retrieval and exact event/player binding;
+17. Layer 4 global ranking;
+18. Tracker model-run acceptance after Layer 4;
+19. post-freeze Bet365 screenshot refresh preserving the same `run_id`, `frozen_at`, `freeze_receipt_sha256`, player/head hashes and probabilities;
+20. no unresolved integrity/control failure.
+
+Synthetic tests and green CI are necessary but do not replace the live acceptance sequence.
