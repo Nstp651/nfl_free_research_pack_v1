@@ -32,61 +32,53 @@ def accept_quarantined_history(final_source: dict, adjudication: dict, quarantin
     accepted_sha = str(quarantine.get("accepted_history_sha256") or "")
     _need(len(accepted_sha) == 64, "accepted history SHA missing")
 
-    report = {
+    rule = (
+        "THE ACCEPTED MODEL HISTORY IS THE DETERMINISTIC PRE-MARKET HISTORY AFTER REMOVING THE ENTIRE GAME "
+        "FOR EVERY FINAL-BOX-ADJUDICATED INCONSISTENT UNIT. NO INDIVIDUAL STAT PATCHING, TEAM-ONLY REMOVAL, "
+        "OR HOLDOUT-DRIVEN MODEL-FAMILY RESELECTION IS PERMITTED."
+    )
+    stable_core = {
         "schema_version": "nba_source_acceptance_quarantined_v1",
         "market_data": False,
         "status": "PASS",
         "reason": "ALL_ADJUDICATED_INCONSISTENT_GAMES_REMOVED_AS_COMPLETE_GAMES",
         "canonical_runtime_identity": final_source.get("canonical_runtime_identity", "ESPN_ID"),
-        "official_nba_id_crosswalk": copy.deepcopy(final_source.get("official_nba_id_crosswalk")),
         "pre_quarantine_history_sha256": final_source.get("history_sha256"),
         "history_sha256": accepted_sha,
-        "accepted_history_sha256": accepted_sha,
-        "source_state_receipt_sha256": final_source.get("receipt_sha256"),
-        "adjudication_receipt_sha256": adjudication.get("receipt_sha256"),
-        "quarantine_receipt_sha256": quarantine.get("receipt_sha256"),
         "rebuild_required_game_ids": required_games,
         "games_removed": len(required_games),
         "rows_removed": int(quarantine.get("rows_removed", 0)),
         "rows_after": int(quarantine.get("rows_after", 0)),
         "identity_and_schedule_pass": bool(final_source.get("identity_and_schedule_pass")),
+        "runtime_fixture_source_status": (final_source.get("runtime_fixture_source") or {}).get("status"),
+        "training_quarantine_status": (final_source.get("training_quarantine_audit") or {}).get("status"),
+        "specialist_metrics_required_for_base_v1": False,
+        "acceptance_rule": rule,
+    }
+    _need(stable_core["identity_and_schedule_pass"] is True, "identity/schedule gate failed")
+    _need(stable_core["runtime_fixture_source_status"] == "PASS", "runtime fixture source gate failed")
+    _need(stable_core["training_quarantine_status"] == "PASS", "training quarantine gate failed")
+
+    report = {
+        **stable_core,
+        "accepted_history_sha256": accepted_sha,
+        "official_nba_id_crosswalk": copy.deepcopy(final_source.get("official_nba_id_crosswalk")),
+        "source_state_receipt_sha256": final_source.get("receipt_sha256"),
+        "adjudication_receipt_sha256": adjudication.get("receipt_sha256"),
+        "quarantine_receipt_sha256": quarantine.get("receipt_sha256"),
         "runtime_fixture_source": copy.deepcopy(final_source.get("runtime_fixture_source")),
         "training_quarantine_audit": copy.deepcopy(final_source.get("training_quarantine_audit")),
-        "specialist_metrics_required_for_base_v1": False,
-        "acceptance_rule": (
-            "THE ACCEPTED MODEL HISTORY IS THE DETERMINISTIC PRE-MARKET HISTORY AFTER REMOVING THE ENTIRE GAME "
-            "FOR EVERY FINAL-BOX-ADJUDICATED INCONSISTENT UNIT. NO INDIVIDUAL STAT PATCHING, TEAM-ONLY REMOVAL, "
-            "OR HOLDOUT-DRIVEN MODEL-FAMILY RESELECTION IS PERMITTED."
-        ),
+        "receipt_rule": "receipt_sha256 hashes stable_core only; volatile source check timestamps and transport receipts remain lineage metadata but cannot churn promoted runtime assets",
     }
-    _need(report["identity_and_schedule_pass"] is True, "identity/schedule gate failed")
-    _need((report.get("runtime_fixture_source") or {}).get("status") == "PASS", "runtime fixture source gate failed")
-    _need((report.get("training_quarantine_audit") or {}).get("status") == "PASS", "training quarantine gate failed")
-    report["receipt_sha256"] = sha256_bytes(canonical_json(report))
+    report["receipt_sha256"] = sha256_bytes(canonical_json(stable_core))
     return report
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--final-source", required=True)
-    parser.add_argument("--adjudication", required=True)
-    parser.add_argument("--quarantine", required=True)
-    parser.add_argument("--output", required=True)
-    args = parser.parse_args()
-    report = accept_quarantined_history(
-        json.loads(Path(args.final_source).read_text()),
-        json.loads(Path(args.adjudication).read_text()),
-        json.loads(Path(args.quarantine).read_text()),
-    )
+    parser = argparse.ArgumentParser(); parser.add_argument("--final-source", required=True); parser.add_argument("--adjudication", required=True); parser.add_argument("--quarantine", required=True); parser.add_argument("--output", required=True); args = parser.parse_args()
+    report = accept_quarantined_history(json.loads(Path(args.final_source).read_text()), json.loads(Path(args.adjudication).read_text()), json.loads(Path(args.quarantine).read_text()))
     Path(args.output).write_bytes(canonical_json(report) + b"\n")
-    print(json.dumps({
-        "status": report["status"],
-        "history_sha256": report["history_sha256"],
-        "games_removed": report["games_removed"],
-        "rows_removed": report["rows_removed"],
-        "receipt_sha256": report["receipt_sha256"],
-    }))
+    print(json.dumps({"status": report["status"], "history_sha256": report["history_sha256"], "games_removed": report["games_removed"], "rows_removed": report["rows_removed"], "receipt_sha256": report["receipt_sha256"]}))
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
