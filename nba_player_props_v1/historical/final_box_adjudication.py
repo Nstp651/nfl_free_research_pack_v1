@@ -12,8 +12,11 @@ RAW_URL = (
     "https://raw.githubusercontent.com/sportsdataverse/hoopR-nba-raw/"
     "main/nba/json/final/{game_id}.json"
 )
-CORE_FIELDS = (
+ALL_FIELDS = (
     "assists",
+    "rebounds",
+    "offensive_rebounds",
+    "defensive_rebounds",
     "field_goals_made",
     "field_goals_attempted",
     "three_point_field_goals_made",
@@ -21,113 +24,158 @@ CORE_FIELDS = (
     "free_throws_made",
     "free_throws_attempted",
 )
-REBOUND_FIELDS = ("rebounds", "offensive_rebounds", "defensive_rebounds")
+REBOUND_FIELDS = {"rebounds", "offensive_rebounds", "defensive_rebounds"}
+PAIR_KEYS = {
+    "fieldGoalsMade-fieldGoalsAttempted": ("field_goals_made", "field_goals_attempted"),
+    "threePointFieldGoalsMade-threePointFieldGoalsAttempted": (
+        "three_point_field_goals_made",
+        "three_point_field_goals_attempted",
+    ),
+    "freeThrowsMade-freeThrowsAttempted": ("free_throws_made", "free_throws_attempted"),
+}
+SINGLE_KEYS = {
+    "assists": "assists",
+    "rebounds": "rebounds",
+    "totalRebounds": "rebounds",
+    "offensiveRebounds": "offensive_rebounds",
+    "defensiveRebounds": "defensive_rebounds",
+}
 
 
-def _team_id(play: dict) -> str:
-    value = play.get("team.id")
-    if value is None and isinstance(play.get("team"), dict):
-        value = play["team"].get("id")
-    return str(value or "")
+def _empty_stats() -> dict[str, float]:
+    return {field: 0.0 for field in ALL_FIELDS}
 
 
-def _type_text(play: dict) -> str:
-    value = play.get("type.text")
-    if value is None and isinstance(play.get("type"), dict):
-        value = play["type"].get("text")
-    return str(value or "")
-
-
-def _participant(play: dict, index: int) -> str | None:
-    value = play.get(f"participants.{index}.athlete.id")
-    if value is not None:
-        return str(value)
-    rows = play.get("participants")
-    if isinstance(rows, list) and len(rows) > index and isinstance(rows[index], dict):
-        athlete = rows[index].get("athlete")
-        if isinstance(athlete, dict) and athlete.get("id") is not None:
-            return str(athlete["id"])
-    return None
-
-
-def _number(value, default=0.0) -> float:
-    try:
+def _number(value) -> float:
+    if isinstance(value, (int, float)):
         return float(value)
-    except (TypeError, ValueError):
-        return float(default)
+    text = str(value or "").strip().replace(",", "")
+    if not text or text in {"--", "-", "DNP"}:
+        return 0.0
+    return float(text)
 
 
-def derive_pbp_team_stats(payload: dict) -> dict[str, dict]:
-    plays = payload.get("plays")
-    if not isinstance(plays, list) or not plays:
-        raise ValueError("final game payload missing plays")
+def _pair(value) -> tuple[float, float]:
+    text = str(value or "").strip()
+    if not text or text in {"--", "-"}:
+        return 0.0, 0.0
+    parts = text.split("-")
+    if len(parts) != 2:
+        raise ValueError(f"invalid made-attempted stat {value!r}")
+    return _number(parts[0]), _number(parts[1])
+
+
+def _team_stats(team_row: dict) -> dict[str, float]:
+    out = _empty_stats()
+    stats = team_row.get("statistics")
+    if not isinstance(stats, list):
+        raise ValueError("final team box missing statistics")
+    seen = set()
+    for item in stats:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name") or "")
+        if name in PAIR_KEYS:
+            made_key, attempt_key = PAIR_KEYS[name]
+            made, attempted = _pair(item.get("displayValue"))
+            out[made_key], out[attempt_key] = made, attempted
+            seen.update((made_key, attempt_key))
+        elif name in SINGLE_KEYS:
+            key = SINGLE_KEYS[name]
+            out[key] = _number(item.get("value", item.get("displayValue")))
+            seen.add(key)
+    missing = sorted(set(ALL_FIELDS).difference(seen))
+    if missing:
+        raise ValueError(f"final team box missing required stats {missing}")
+    if out["offensive_rebounds"] + out["defensive_rebounds"] != out["rebounds"]:
+        raise ValueError("final team box ORB + DRB != REB")
+    return out
+
+
+def _player_group_stats(group: dict) -> dict[str, float]:
+    out = _empty_stats()
+    sections = group.get("statistics")
+    if not isinstance(sections, list) or not sections:
+        raise ValueError("final player box missing statistics group")
+    rows_seen = 0
+    keys_seen = set()
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        keys = section.get("keys")
+        athletes = section.get("athletes")
+        if not isinstance(keys, list) or not isinstance(athletes, list):
+            continue
+        index = {str(key): i for i, key in enumerate(keys)}
+        required = {
+            "assists",
+            "rebounds",
+            "offensiveRebounds",
+            "defensiveRebounds",
+            *PAIR_KEYS.keys(),
+        }
+        if not required.issubset(index):
+            continue
+        keys_seen.update(required)
+        for row in athletes:
+            if not isinstance(row, dict) or bool(row.get("didNotPlay")):
+                continue
+            values = row.get("stats")
+            if not isinstance(values, list) or len(values) < len(keys):
+                raise ValueError("final player stat row malformed")
+            rows_seen += 1
+            out["assists"] += _number(values[index["assists"]])
+            out["rebounds"] += _number(values[index["rebounds"]])
+            out["offensive_rebounds"] += _number(values[index["offensiveRebounds"]])
+            out["defensive_rebounds"] += _number(values[index["defensiveRebounds"]])
+            for source_key, (made_key, attempt_key) in PAIR_KEYS.items():
+                made, attempted = _pair(values[index[source_key]])
+                out[made_key] += made
+                out[attempt_key] += attempted
+    if rows_seen == 0 or len(keys_seen) < 7:
+        raise ValueError("final player box has no usable played rows")
+    if out["offensive_rebounds"] + out["defensive_rebounds"] != out["rebounds"]:
+        raise ValueError("final player box ORB + DRB != REB")
+    return out
+
+
+def derive_final_box_stats(payload: dict) -> dict[str, dict]:
+    box = payload.get("boxscore")
+    if not isinstance(box, dict):
+        raise ValueError("final game payload missing boxscore")
+    teams = box.get("teams")
+    players = box.get("players")
+    if not isinstance(teams, list) or len(teams) != 2:
+        raise ValueError("final boxscore must contain two teams")
+    if not isinstance(players, list) or len(players) != 2:
+        raise ValueError("final boxscore must contain two player groups")
+
     out: dict[str, dict] = {}
+    for item in teams:
+        team = item.get("team") if isinstance(item, dict) else None
+        team_id = str((team or {}).get("id") or "")
+        if not team_id:
+            raise ValueError("final team identity missing")
+        out.setdefault(team_id, {})["team"] = _team_stats(item)
+    for group in players:
+        team = group.get("team") if isinstance(group, dict) else None
+        team_id = str((team or {}).get("id") or "")
+        if not team_id or team_id not in out:
+            raise ValueError("final player group identity mismatch")
+        out[team_id]["player"] = _player_group_stats(group)
 
-    def row(team: str) -> dict:
-        return out.setdefault(
-            team,
-            {
-                "assists": 0,
-                "field_goals_made": 0,
-                "field_goals_attempted": 0,
-                "three_point_field_goals_made": 0,
-                "three_point_field_goals_attempted": 0,
-                "free_throws_made": 0,
-                "free_throws_attempted": 0,
-                "player_rebounds": 0,
-                "player_offensive_rebounds": 0,
-                "player_defensive_rebounds": 0,
-                "team_rebounds": 0,
-                "team_offensive_rebounds": 0,
-                "team_defensive_rebounds": 0,
-            },
-        )
-
-    for play in plays:
-        if not isinstance(play, dict):
-            continue
-        team = _team_id(play)
-        if not team:
-            continue
-        stats = row(team)
-        kind = _type_text(play).lower()
-        scoring = bool(play.get("scoringPlay"))
-        shooting = bool(play.get("shootingPlay"))
-        attempted = _number(play.get("pointsAttempted"))
-        score_value = _number(play.get("scoreValue"))
-        is_free_throw = "free throw" in kind
-
-        if is_free_throw:
-            stats["free_throws_attempted"] += 1
-            if scoring and score_value == 1:
-                stats["free_throws_made"] += 1
-        elif shooting and attempted in (2, 3):
-            stats["field_goals_attempted"] += 1
-            if attempted == 3:
-                stats["three_point_field_goals_attempted"] += 1
-            if scoring and score_value in (2, 3):
-                stats["field_goals_made"] += 1
-                if score_value == 3:
-                    stats["three_point_field_goals_made"] += 1
-                if _participant(play, 1) is not None:
-                    stats["assists"] += 1
-
-        if "rebound" in kind:
-            offensive = "offensive" in kind
-            defensive = "defensive" in kind
-            player_attributed = _participant(play, 0) is not None
-            if player_attributed:
-                stats["player_rebounds"] += 1
-                if offensive:
-                    stats["player_offensive_rebounds"] += 1
-                if defensive:
-                    stats["player_defensive_rebounds"] += 1
-            else:
-                stats["team_rebounds"] += 1
-                if offensive:
-                    stats["team_offensive_rebounds"] += 1
-                if defensive:
-                    stats["team_defensive_rebounds"] += 1
+    for team_id, values in out.items():
+        if "player" not in values or "team" not in values:
+            raise ValueError(f"final box incomplete for team {team_id}")
+        values["team_only_rebounds"] = {
+            "rebounds": values["team"]["rebounds"] - values["player"]["rebounds"],
+            "offensive_rebounds": values["team"]["offensive_rebounds"]
+            - values["player"]["offensive_rebounds"],
+            "defensive_rebounds": values["team"]["defensive_rebounds"]
+            - values["player"]["defensive_rebounds"],
+        }
+        if min(values["team_only_rebounds"].values()) < 0:
+            raise ValueError(f"final team rebound total below player sum for team {team_id}")
     return out
 
 
@@ -151,7 +199,10 @@ def _fetch_final(game_id: str) -> tuple[dict, dict]:
     url = RAW_URL.format(game_id=game_id)
     request = Request(
         url,
-        headers={"User-Agent": "NBA-V1-final-box-adjudication/1.0", "Accept": "application/json"},
+        headers={
+            "User-Agent": "NBA-V1-final-box-adjudication/2.0",
+            "Accept": "application/json",
+        },
     )
     with urlopen(request, timeout=60) as response:
         raw = response.read()
@@ -168,42 +219,53 @@ def _fetch_final(game_id: str) -> tuple[dict, dict]:
     return payload, receipt
 
 
-def _adjudicate_field(field: str, values: dict, pbp: dict) -> dict:
-    raw, team = values["raw"], values["team"]
-    if field in CORE_FIELDS:
-        final_value = float(pbp[field])
-        if final_value == raw and final_value != team:
-            decision = "RAW_PLAYER_RELEASE_CONFIRMED_TEAM_RELEASE_DIFFERS"
-        elif final_value == team and final_value != raw:
+def _adjudicate_field(field: str, values: dict, final: dict) -> dict:
+    raw = float(values["raw"])
+    team_release = float(values["team"])
+    final_player = float(final["player"][field])
+    final_team = float(final["team"][field])
+    raw_confirmed = raw == final_player
+    team_confirmed = team_release == final_team
+
+    if field in REBOUND_FIELDS:
+        team_only = float(final["team_only_rebounds"][field])
+        if raw_confirmed and team_confirmed:
+            decision = "FINAL_PLAYER_AND_TEAM_RELEASES_CONFIRMED_TEAM_REBOUND_ACCOUNTING"
+        elif not raw_confirmed and team_confirmed:
             decision = "TEAM_RELEASE_CONFIRMED_PLAYER_RELEASE_STALE"
-        elif final_value == raw == team:
-            decision = "BOTH_RELEASES_CONFIRMED"
+        elif raw_confirmed and not team_confirmed:
+            decision = "PLAYER_RELEASE_CONFIRMED_TEAM_RELEASE_STALE"
         else:
             decision = "UNRESOLVED"
-        return {**values, "final_pbp": final_value, "decision": decision}
+        return {
+            **values,
+            "final_player_box": final_player,
+            "final_team_box": final_team,
+            "final_team_only_rebounds": team_only,
+            "raw_player_release_confirmed": raw_confirmed,
+            "team_release_confirmed": team_confirmed,
+            "decision": decision,
+        }
 
-    mapping = {
-        "rebounds": ("player_rebounds", "team_rebounds"),
-        "offensive_rebounds": ("player_offensive_rebounds", "team_offensive_rebounds"),
-        "defensive_rebounds": ("player_defensive_rebounds", "team_defensive_rebounds"),
-    }
-    player_key, team_key = mapping[field]
-    player_final = float(pbp[player_key])
-    team_only = float(pbp[team_key])
-    total_final = player_final + team_only
-    if player_final == raw and total_final == team:
-        decision = "TEAM_REBOUND_ACCOUNTING_CONFIRMED"
-    elif player_final == raw and team_only == 0 and team != raw:
-        decision = "TEAM_RELEASE_DIFFERS_FROM_FINAL_PLAYER_REBOUNDS"
-    elif total_final == team and player_final != raw:
+    # Core counted stats have no legitimate team-only accounting bucket. If the
+    # final player sum and final team total disagree, the final box is internally
+    # inconsistent and the unit remains blocked even if one release matches.
+    if final_player != final_team:
+        decision = "UNRESOLVED_FINAL_BOX_INTERNAL_MISMATCH"
+    elif raw_confirmed and team_confirmed:
+        decision = "BOTH_RELEASES_CONFIRMED"
+    elif not raw_confirmed and team_confirmed:
         decision = "TEAM_RELEASE_CONFIRMED_PLAYER_RELEASE_STALE"
+    elif raw_confirmed and not team_confirmed:
+        decision = "PLAYER_RELEASE_CONFIRMED_TEAM_RELEASE_STALE"
     else:
         decision = "UNRESOLVED"
     return {
         **values,
-        "final_pbp_player": player_final,
-        "final_pbp_team_only": team_only,
-        "final_pbp_total": total_final,
+        "final_player_box": final_player,
+        "final_team_box": final_team,
+        "raw_player_release_confirmed": raw_confirmed,
+        "team_release_confirmed": team_confirmed,
         "decision": decision,
     }
 
@@ -213,30 +275,39 @@ def adjudicate(source_report: dict) -> dict:
     by_game: dict[str, tuple[dict, dict]] = {}
     rows = []
     stale_player_units = set()
+    stale_team_units = set()
     unresolved_units = set()
 
     for (game, team), fields in sorted(units.items()):
         if game not in by_game:
             payload, receipt = _fetch_final(game)
-            by_game[game] = (derive_pbp_team_stats(payload), receipt)
-        pbp_by_team, _ = by_game[game]
-        if team not in pbp_by_team:
-            raise ValueError(f"final PBP team {team} missing for game {game}")
+            by_game[game] = (derive_final_box_stats(payload), receipt)
+        final_by_team, _ = by_game[game]
+        if team not in final_by_team:
+            raise ValueError(f"final box team {team} missing for game {game}")
         decisions = {
-            field: _adjudicate_field(field, values, pbp_by_team[team])
+            field: _adjudicate_field(field, values, final_by_team[team])
             for field, values in sorted(fields.items())
         }
         decision_values = {detail["decision"] for detail in decisions.values()}
         if "TEAM_RELEASE_CONFIRMED_PLAYER_RELEASE_STALE" in decision_values:
             stale_player_units.add((game, team))
-        if "UNRESOLVED" in decision_values:
+        if "PLAYER_RELEASE_CONFIRMED_TEAM_RELEASE_STALE" in decision_values:
+            stale_team_units.add((game, team))
+        if any(value.startswith("UNRESOLVED") for value in decision_values):
             unresolved_units.add((game, team))
-        rows.append({"game_id_espn": game, "team_id_espn": team, "fields": decisions})
+        rows.append(
+            {
+                "game_id_espn": game,
+                "team_id_espn": team,
+                "fields": decisions,
+            }
+        )
 
     status = "PASS" if not unresolved_units else "FAIL"
     receipts = {game: receipt for game, (_, receipt) in sorted(by_game.items())}
     report = {
-        "schema_version": "nba_final_box_adjudication_v1",
+        "schema_version": "nba_final_box_adjudication_v2",
         "market_data": False,
         "status": status,
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -245,6 +316,10 @@ def adjudicate(source_report: dict) -> dict:
             {"game_id_espn": game, "team_id_espn": team}
             for game, team in sorted(stale_player_units)
         ],
+        "stale_team_release_units": [
+            {"game_id_espn": game, "team_id_espn": team}
+            for game, team in sorted(stale_team_units)
+        ],
         "unresolved_units": [
             {"game_id_espn": game, "team_id_espn": team}
             for game, team in sorted(unresolved_units)
@@ -252,8 +327,10 @@ def adjudicate(source_report: dict) -> dict:
         "game_payload_receipts": receipts,
         "adjudications": rows,
         "rule": (
-            "NO TOLERANCE: every release mismatch must be explained by final PBP; "
-            "player-release-stale units require model-history quarantine and rebuild"
+            "NO TOLERANCE: season-release mismatches are compared independently to "
+            "the final per-game player box and team box. Team-only rebound accounting "
+            "is explicit. Any stale player-release unit requires history quarantine "
+            "and model rebuild; unresolved final-box discrepancies block promotion."
         ),
     }
     report["receipt_sha256"] = sha256_bytes(canonical_json(report))
@@ -274,6 +351,7 @@ def main() -> None:
                 "status": report["status"],
                 "mismatch_game_team_units": report["mismatch_game_team_units"],
                 "stale_player_release_units": report["stale_player_release_units"],
+                "stale_team_release_units": report["stale_team_release_units"],
                 "unresolved_units": report["unresolved_units"],
                 "receipt_sha256": report["receipt_sha256"],
             }
