@@ -92,13 +92,37 @@ def _normalize_schedule(frame: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _field_reconciliation(merged: pd.DataFrame, field: str) -> dict:
+    player_col = f"player_{field}"
+    player = merged[player_col].astype(float)
+    team = merged[field].astype(float)
+    ok = np.isclose(player, team, atol=0, rtol=0)
+    delta = player - team
+    mismatch = merged.loc[~ok, ["game_id_espn", "team_id_espn", "season", player_col, field]].copy()
+    mismatch["delta_player_minus_team"] = delta.loc[~ok].astype(float)
+    mismatch = mismatch.sort_values(["season", "game_id_espn", "team_id_espn"])
+    by_season = {}
+    for season, group in mismatch.groupby("season", dropna=False):
+        by_season[str(int(season)) if pd.notna(season) else "null"] = int(len(group))
+    return {
+        "matches": int(ok.sum()),
+        "rows": int(len(ok)),
+        "rate": float(ok.mean()),
+        "mismatch_rows": int((~ok).sum()),
+        "max_abs_delta": float(delta.loc[~ok].abs().max()) if (~ok).any() else 0.0,
+        "mean_abs_delta_mismatches": float(delta.loc[~ok].abs().mean()) if (~ok).any() else 0.0,
+        "mismatches_by_season": by_season,
+        "mismatch_sample": mismatch.head(50).to_dict("records"),
+    }
+
+
 def reconcile(history: pd.DataFrame, team_box: pd.DataFrame, schedule: pd.DataFrame) -> dict:
     history = history.copy()
     for col in ("game_id_espn", "team_id_espn", "opponent_team_id_espn"):
         history[col] = history[col].astype("string")
     history["game_start_utc"] = pd.to_datetime(history.game_start_utc, utc=True, errors="raise")
 
-    grouped = history.groupby(["game_id_espn", "team_id_espn"], as_index=False).agg(
+    grouped = history.groupby(["season", "game_id_espn", "team_id_espn"], as_index=False).agg(
         **{f"player_{field}": (field, "sum") for field in RECON_FIELDS},
         player_team_score=("team_score", "first"),
         player_opponent_team_score=("opponent_team_score", "first"),
@@ -106,30 +130,27 @@ def reconcile(history: pd.DataFrame, team_box: pd.DataFrame, schedule: pd.DataFr
         game_start_utc=("game_start_utc", "first"),
     )
     t = team_box.rename(columns={"game_id": "game_id_espn", "team_id": "team_id_espn", "opponent_team_id": "team_box_opponent_team_id"})
-    merged = grouped.merge(t, on=["game_id_espn", "team_id_espn"], how="outer", indicator=True, validate="one_to_one")
+    merged = grouped.merge(t, on=["season", "game_id_espn", "team_id_espn"], how="outer", indicator=True, validate="one_to_one")
     if not (merged._merge == "both").all():
-        missing = merged.loc[merged._merge != "both", ["game_id_espn", "team_id_espn", "_merge"]].head(20).to_dict("records")
+        missing = merged.loc[merged._merge != "both", ["season", "game_id_espn", "team_id_espn", "_merge"]].head(20).to_dict("records")
         raise ValueError(f"team-box coverage mismatch: {missing}")
-    exact = {}
-    for field in RECON_FIELDS:
-        ok = np.isclose(merged[f"player_{field}"].astype(float), merged[field].astype(float), atol=0, rtol=0)
-        exact[field] = {"matches": int(ok.sum()), "rows": int(len(ok)), "rate": float(ok.mean())}
+    exact = {field: _field_reconciliation(merged, field) for field in RECON_FIELDS}
     score_ok = np.isclose(merged.player_team_score.astype(float), merged.team_score.astype(float), atol=0, rtol=0)
     opponent_score_ok = np.isclose(merged.player_opponent_team_score.astype(float), merged.opponent_team_score.astype(float), atol=0, rtol=0)
     opponent_id_ok = merged.opponent_team_id_espn.astype(str).eq(merged.team_box_opponent_team_id.astype(str))
 
     sched = schedule.rename(columns={"game_id": "game_id_espn"}).copy()
-    hist_games = history.groupby("game_id_espn", as_index=False).agg(
+    hist_games = history.groupby(["season", "game_id_espn"], as_index=False).agg(
         game_start_utc=("game_start_utc", "first"),
         teams=("team_id_espn", lambda s: tuple(sorted(set(map(str, s))))),
     )
     sched["teams"] = sched.apply(lambda r: tuple(sorted((str(r.home_team_id), str(r.away_team_id)))), axis=1)
-    schedule_ids = set(sched.game_id_espn.astype(str))
-    history_ids = set(hist_games.game_id_espn.astype(str))
+    schedule_ids = set(zip(sched.season.astype(int), sched.game_id_espn.astype(str)))
+    history_ids = set(zip(hist_games.season.astype(int), hist_games.game_id_espn.astype(str)))
     extra_schedule_ids = sorted(schedule_ids - history_ids)
-    sm = hist_games.merge(sched[["game_id_espn", "game_date_time", "teams"]], on="game_id_espn", how="left", suffixes=("_history", "_schedule"), indicator=True, validate="one_to_one")
+    sm = hist_games.merge(sched[["season", "game_id_espn", "game_date_time", "teams"]], on=["season", "game_id_espn"], how="left", suffixes=("_history", "_schedule"), indicator=True, validate="one_to_one")
     if not (sm._merge == "both").all():
-        missing = sm.loc[sm._merge != "both", ["game_id_espn", "_merge"]].head(20).to_dict("records")
+        missing = sm.loc[sm._merge != "both", ["season", "game_id_espn", "_merge"]].head(20).to_dict("records")
         raise ValueError(f"played-game schedule coverage mismatch: {missing}")
     team_identity_ok = sm.teams_history.eq(sm.teams_schedule)
     seconds = (pd.to_datetime(sm.game_start_utc, utc=True) - pd.to_datetime(sm.game_date_time, utc=True)).dt.total_seconds().abs()
@@ -143,7 +164,7 @@ def reconcile(history: pd.DataFrame, team_box: pd.DataFrame, schedule: pd.DataFr
         "played_schedule_games": int(len(sm)),
         "schedule_rows_total": int(len(sched)),
         "schedule_rows_without_played_box": int(len(extra_schedule_ids)),
-        "schedule_rows_without_played_box_sample": extra_schedule_ids[:20],
+        "schedule_rows_without_played_box_sample": [{"season": int(season), "game_id_espn": game_id} for season, game_id in extra_schedule_ids[:20]],
         "exact_core_fields": exact,
         "team_score_rate": float(score_ok.mean()),
         "opponent_team_score_rate": float(opponent_score_ok.mean()),
@@ -201,6 +222,14 @@ def run(history_path: str, seasons: list[int], cache: str, output: str, as_of: s
     reconciliation = reconcile(history, pd.concat(team_frames, ignore_index=True), pd.concat(schedule_frames, ignore_index=True))
     runtime_probe = runtime_espn_schema_probe(as_of)
     status = "PASS" if reconciliation["status"] == "PASS" and runtime_probe["status"] == "PASS" else "FAIL"
+    historical_receipt_input = {
+        "schema_version": "nba_historical_source_acceptance_v1",
+        "market_data": False,
+        "history_sha256": sha256_file(history_path),
+        "audit_assets": assets,
+        "independent_box_reconciliation": reconciliation,
+    }
+    historical_receipt_sha256 = sha256_bytes(canonical_json(historical_receipt_input))
     report = {
         "schema_version": "nba_source_acceptance_v1",
         "market_data": False,
@@ -208,9 +237,10 @@ def run(history_path: str, seasons: list[int], cache: str, output: str, as_of: s
         "canonical_runtime_identity": "ESPN_ID" if status == "PASS" else "NOT_ACCEPTED",
         "official_nba_id_crosswalk": "OPTIONAL_ENRICHMENT_GATE_NOT_BASE_V1_DEPENDENCY",
         "as_of_utc": as_of,
-        "history_sha256": sha256_file(history_path),
+        "history_sha256": historical_receipt_input["history_sha256"],
         "audit_assets": assets,
         "independent_box_reconciliation": reconciliation,
+        "historical_receipt_sha256": historical_receipt_sha256,
         "runtime_fixture_source": runtime_probe,
         "specialist_metrics_required_for_base_v1": False,
     }
@@ -228,7 +258,13 @@ def main():
     parser.add_argument("--as-of", required=True)
     args = parser.parse_args()
     report = run(args.history, args.seasons, args.cache, args.output, args.as_of)
-    print(json.dumps({"status": report["status"], "receipt_sha256": report["receipt_sha256"], "reconciliation": report["independent_box_reconciliation"], "runtime_fixture_source": report["runtime_fixture_source"]}))
+    print(json.dumps({
+        "status": report["status"],
+        "receipt_sha256": report["receipt_sha256"],
+        "historical_receipt_sha256": report["historical_receipt_sha256"],
+        "reconciliation": report["independent_box_reconciliation"],
+        "runtime_fixture_source": report["runtime_fixture_source"],
+    }))
 
 
 if __name__ == "__main__":
