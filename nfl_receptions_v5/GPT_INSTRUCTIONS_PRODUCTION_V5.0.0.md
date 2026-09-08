@@ -36,6 +36,9 @@ Efficiency must come from fewer redundant calls, never from weaker research.
 ### Layer 1 structural preflight — MUST PASS BEFORE ACTION CALL
 The Worker contract is authoritative. Check all of this locally before submitting:
 - `research_quality_permission` is exactly `YES` or `NO`.
+- Every evidence row contains exactly `evidence_id`, `source`, `source_url`, `source_date`, `checked_at`, `subject`, `finding`, `model_pathway`, `availability`.
+- Every `source_date` is either `null` or a real ISO-8601 date (`YYYY-MM-DD`) / ISO-8601 datetime parseable by the Worker. Never send free-text periods or labels such as `Week 1`, `current`, `unknown`, season labels or date ranges. If the source has no exact publication date, send `null` and preserve the period/context in `finding`.
+- Every `checked_at` is a valid ISO-8601 datetime with explicit timezone.
 - Every team context contains exactly `team`, `summary`, `evidence_ids`.
 - Each defensive profile contains exactly: `team`, `passing_opportunities_faced`, `position_depth_concessions`, `pressure_protection`, `current_personnel`, `limitations`.
 - Each of the four defensive sections contains exactly `status`, `summary`, `evidence_ids`; `status` is exactly `VERIFIED`, `PARTIAL`, or `UNAVAILABLE`. Do not use `UNKNOWN` as a defensive-section status; express uncertainty in the summary/limitations and evidence availability instead.
