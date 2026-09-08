@@ -34,10 +34,11 @@ export async function computeGameFreeze({research,qbaseArtifacts,priorSnapshots,
       outHeads[head]={qbase_model_version:qbaseArtifacts[head].model_version,promotion_receipt_sha256:qbaseArtifacts[head].promotion_receipt_sha256,prior_snapshot_sha256:hp.prior_snapshot_sha256,quant_input_receipt_sha256:scored.quant_input_receipt_sha256,transform_chain_sha256:scored.transform_chain_sha256,final_mean:scored.mean,dispersion_alpha:scored.dispersion_alpha,probability_grid:grid};
     }
     if(Object.keys(outHeads).length===0){exclusions.push({player_id:rp.player_id,player_name:rp.player_name,reason:['ROOKIE','NEW_TO_NBA'].includes(rp.role_state)?'NO_PROMOTED_PRIOR_COMP_TRANSLATION':'NO_SERVER_QBASE_PRIOR',missing_heads:heads});continue;}
-    const g=grade(rp);modeled.push({player_id:String(rp.player_id),player_name:String(rp.player_name),team:String(rp.team),availability:rp.availability,role_state:rp.role_state,projected_minutes:rp.projected_minutes,confidence:g.confidence,fragility:g.fragility,missing_heads:missing,heads:outHeads});
+    const g=grade(rp);modeled.push({player_id:String(rp.player_id),player_name:String(rp.player_name),team_id:String(rp.team_id),team:String(rp.team),availability:rp.availability,role_state:rp.role_state,projected_minutes:rp.projected_minutes,confidence:g.confidence,fragility:g.fragility,missing_heads:missing,heads:outHeads});
   }
   modeled.sort((a,b)=>(a.team+'\0'+a.player_name).localeCompare(b.team+'\0'+b.player_name));
-  const core={schema_version:'nba_game_freeze_v1',market_data:false,status:'FROZEN',game_id:research.game_id,slate_date_et:research.slate_date_et,run_mode:research.run_mode,frozen_at:frozenAt||new Date().toISOString(),research_receipt_sha256:await sha256Json(research),players:modeled,exclusions};
+  const fixture={season:Number(research.fixture.season),home_team:structuredClone(research.fixture.home_team),away_team:structuredClone(research.fixture.away_team),start_time_utc:String(research.fixture.start_time_utc)};
+  const core={schema_version:'nba_game_freeze_v1',market_data:false,status:'FROZEN',game_id:research.game_id,slate_date_et:research.slate_date_et,run_mode:research.run_mode,fixture,frozen_at:frozenAt||new Date().toISOString(),research_receipt_sha256:await sha256Json(research),players:modeled,exclusions};
   core.freeze_receipt_sha256=await sha256Json(core);return core;
 }
 
