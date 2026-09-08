@@ -41,7 +41,9 @@ Required service binding:
 - service: `nba-player-props-research-v1`
 
 Default variable:
-- `ODDS_API_REGIONS=us`
+- `ODDS_API_REGIONS=au`
+
+Use one Australian region by default because the production betting stack is Australian and each additional Odds API region multiplies credit usage. A request may explicitly override the region when required for a controlled acceptance/debug case.
 
 ## 3. Secrets
 
@@ -125,6 +127,7 @@ Research `/health` must show:
 Market `/health` must show:
 - `ok=true`;
 - `post_freeze_only=true`;
+- `default_regions=au`;
 - Research service binding true;
 - Market Durable Object binding true;
 - Odds API key configured true.
@@ -136,6 +139,8 @@ Before production acceptance confirm:
 - Market `/refresh` fails on an unfrozen run before any Odds API request.
 - Market service cannot change `frozen_at` or `freeze_receipt_sha256`.
 - manual screenshot refresh rejects a mismatched freeze receipt.
+- market observations predating `frozen_at` are rejected.
+- frozen player/head hashes are preserved through market evaluation.
 - manual/API markets cannot interpolate an unavailable frozen threshold.
 - invalidated games are excluded by fresh market grants.
 - runtime secrets do not appear in Git, response bodies or logs.
@@ -152,6 +157,6 @@ Run `PRODUCTION_ACCEPTANCE_PROMPT_V1.0.md` against one real future slate:
 7. Layer 4 ranking;
 8. Tracker model run;
 9. post-freeze Bet365 screenshot refresh;
-10. verify same `run_id`, `frozen_at`, `freeze_receipt_sha256`, no research rerun and no P_model mutation.
+10. verify same `run_id`, `frozen_at`, `freeze_receipt_sha256`, player/head hashes, no research rerun and no P_model mutation.
 
 Only after all steps pass may PR #20 be considered for merge and V1 labelled production-ready.
