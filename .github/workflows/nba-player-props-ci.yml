@@ -60,3 +60,15 @@ jobs:
         run: |
           git diff --exit-code origin/main...HEAD -- nbl_player_props_v1/
           echo 'NBA_V1_NBL_ISOLATION=PASS'
+      - name: Rebuild pinned historical inputs
+        run: |
+          python -m nba_player_props_v1.historical.build_history --manifest nba_player_props_v1/evidence/source_pins.json --cache /tmp/nba-source-cache --output /tmp/nba-source-rebuild --as-of 2026-09-08T16:00:00Z
+          python -c "import json; from pathlib import Path; actual=json.loads(Path('/tmp/nba-source-rebuild/historical_build_receipt.json').read_text()); expected=json.loads(Path('nba_player_props_v1/evidence/historical_build_receipt.json').read_text()); assert actual['normalized_sha256']==expected['normalized_sha256'], 'historical rebuild mismatch'"
+      - name: Probe official source connectivity (diagnostic, not acceptance)
+        run: python -m nba_player_props_v1.historical.probe_sources --output /tmp/nba-source-rebuild/specialist_probe.json
+      - name: Preserve source verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-source-verification-${{ github.run_id }}
+          path: /tmp/nba-source-rebuild/*.json

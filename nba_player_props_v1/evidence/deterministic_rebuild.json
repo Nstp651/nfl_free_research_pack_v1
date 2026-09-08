@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "input_mode": "same SHA-256-pinned raw assets, separate normalization builds",
+  "normalized_sha256": "b19e5ea32b9b257c57b9c4a16ced34b5d70a91608a99f042d2a34441705f933c",
+  "rows": 139809,
+  "fresh_upstream_redownload_verified": false
+}
