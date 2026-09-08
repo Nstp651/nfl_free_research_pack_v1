@@ -58,6 +58,8 @@ export function evaluateExactMarket(row,probabilityGrid){
   const nonPush=pWin+pLoss;
   const conditionalWin=nonPush>0?pWin/nonPush:null;
   const marketBreakEven=1/normalized.decimal_price;
+  const pushAdjustedMarketProbability=nonPush/normalized.decimal_price;
+  const pushAdjustedProbabilityEdge=pWin-pushAdjustedMarketProbability;
   const ev=pWin*(normalized.decimal_price-1)-pLoss;
   return {
     ...normalized,
@@ -67,6 +69,8 @@ export function evaluateExactMarket(row,probabilityGrid){
     conditional_win_probability:conditionalWin,
     market_break_even_probability:marketBreakEven,
     probability_edge:conditionalWin===null?null:conditionalWin-marketBreakEven,
+    push_adjusted_market_probability:pushAdjustedMarketProbability,
+    push_adjusted_probability_edge:pushAdjustedProbabilityEdge,
     fair_decimal_price:pWin>0?nonPush/pWin:null,
     ev_per_unit:ev,
     positive_ev:ev>0,
