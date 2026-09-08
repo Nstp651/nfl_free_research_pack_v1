@@ -23,6 +23,36 @@ from sklearn.preprocessing import StandardScaler
 from nba_player_props_v1.model.features import build_pregame_features, head_feature_columns
 from nba_player_props_v1.source_receipt import canonical_json, sha256_bytes, sha256_file
 
+# Numerical values far below this precision have no betting meaning but can differ by
+# tiny BLAS/solver reduction order across otherwise identical CI processes. Runtime
+# artifacts and challenge evidence are quantized before scoring so repeated builds from
+# the same accepted history are byte-identical rather than merely statistically equal.
+NUMERIC_DECIMALS = 10
+
+
+def _q(value: float) -> float:
+    return round(float(value), NUMERIC_DECIMALS)
+
+
+def _q_list(values) -> list[float]:
+    return [_q(v) for v in values]
+
+
+def _quantize_report(value):
+    if isinstance(value, dict):
+        return {k: _quantize_report(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_quantize_report(v) for v in value]
+    if isinstance(value, (np.floating, float)):
+        if not np.isfinite(float(value)):
+            raise ValueError("non-finite challenge value")
+        return _q(value)
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.bool_):
+        return bool(value)
+    return value
+
 
 def distribution(mean, alpha):
     mean = np.asarray(mean, dtype=float)
@@ -69,31 +99,42 @@ def cohorts(frame):
             ((frame.start_rate_l5 - frame.start_rate_l10).abs() >= .3)}
 
 
+def _score_glm_artifact(model, rows):
+    x = rows[model["features"]].to_numpy(float)
+    x = np.where(np.isnan(x), np.asarray(model["medians"], dtype=float), x)
+    z = (x - np.asarray(model["centers"], dtype=float)) / np.asarray(model["scales"], dtype=float)
+    coefficients = np.asarray(model["coefficients"], dtype=float)
+    # Deliberately avoid BLAS matrix multiplication here. The elementwise sum uses the
+    # exact exported, quantized parameters and is the runtime portability authority.
+    eta = np.sum(z * coefficients[None, :], axis=1) + float(model["intercept"])
+    return np.maximum(np.exp(eta), .01)
+
+
 def fit_candidate(train, head, kind):
     cols = list(head_feature_columns(head))
     y = train[head].to_numpy(float)
     if kind.startswith("shrunk"):
-        prior = float(y.mean())
+        prior = _q(y.mean())
+        model = {"family": "shrunk_count", "prior": prior, "prior_weight": 5}
         def predict(rows):
             history = np.minimum(rows.career_games_before.to_numpy(float), 10)
             recent = rows[f"{head}_l10"].fillna(prior).to_numpy(float)
             return np.maximum((recent * history + prior * 5) / (history + 5), .01)
-        model = {"family": "shrunk_count", "prior": prior, "prior_weight": 5}
     else:
         estimator = make_pipeline(SimpleImputer(strategy="median", keep_empty_features=True),
-            StandardScaler(), PoissonRegressor(alpha=1.0, max_iter=500, tol=1e-7))
+            StandardScaler(), PoissonRegressor(alpha=1.0, max_iter=500, tol=1e-9))
         estimator.fit(train[cols], y)
-        def predict(rows):
-            return np.maximum(estimator.predict(rows[cols]), .01)
         imputer, scaler, reg = estimator.steps[0][1], estimator.steps[1][1], estimator.steps[2][1]
         model = {"family": "regularized_poisson_glm", "features": cols,
-            "medians": imputer.statistics_.tolist(), "centers": scaler.mean_.tolist(),
-            "scales": scaler.scale_.tolist(), "coefficients": reg.coef_.tolist(),
-            "intercept": float(reg.intercept_)}
+            "medians": _q_list(imputer.statistics_), "centers": _q_list(scaler.mean_),
+            "scales": _q_list(scaler.scale_), "coefficients": _q_list(reg.coef_),
+            "intercept": _q(reg.intercept_), "numeric_precision_decimals": NUMERIC_DECIMALS}
+        def predict(rows):
+            return _score_glm_artifact(model, rows)
     mu = predict(train)
     # Training residual moment estimate only; never refit dispersion on a held-out fold.
     alpha = max(float(np.sum((y - mu) ** 2 - mu) / np.sum(mu ** 2)), 1e-8) if kind.endswith("nb") else 0.0
-    model["dispersion_alpha"] = alpha
+    model["dispersion_alpha"] = _q(alpha)
     return predict, model
 
 
@@ -103,10 +144,7 @@ def score_artifact(model, rows, head):
         history = np.minimum(rows.career_games_before.to_numpy(float), 10)
         recent = rows[f"{head}_l10"].fillna(model["prior"]).to_numpy(float)
         return np.maximum((recent * history + model["prior"] * 5) / (history + 5), .01)
-    x = rows[model["features"]].to_numpy(float)
-    x = np.where(np.isnan(x), np.asarray(model["medians"]), x)
-    z = (x - model["centers"]) / model["scales"]
-    return np.maximum(np.exp(z @ model["coefficients"] + model["intercept"]), .01)
+    return _score_glm_artifact(model, rows)
 
 
 def run_challenge(frame, head, *, validation_seasons=(2024, 2025), holdout=2026):
@@ -130,7 +168,8 @@ def run_challenge(frame, head, *, validation_seasons=(2024, 2025), holdout=2026)
                 "overall": probability_metrics(test[head], mu, model["dispersion_alpha"], thresholds),
                 "cohorts": {name: probability_metrics(test.loc[mask, head], mu[mask], model["dispersion_alpha"], thresholds)
                             for name, mask in cohorts(test).items()}})
-        reports[kind] = {"folds": folds, "validation_brier": float(np.mean([f["overall"]["brier_over"] for f in folds]))}
+        folds = _quantize_report(folds)
+        reports[kind] = {"folds": folds, "validation_brier": _q(np.mean([f["overall"]["brier_over"] for f in folds]))}
     baseline = reports["shrunk_poisson"]
     eligible = [k for k in kinds if all(
         reports[k]["folds"][i]["cohorts"][c]["brier_over"] <= baseline["folds"][i]["cohorts"][c]["brier_over"]
@@ -150,14 +189,16 @@ def run_challenge(frame, head, *, validation_seasons=(2024, 2025), holdout=2026)
                     for name, mask in cohorts(test).items()}}
     model["head"] = head
     model["trained_before_season"] = holdout
-    return {"head": head, "status": "EXPERIMENTAL_NOT_PROMOTED", "market_data": False,
+    report = {"head": head, "status": "EXPERIMENTAL_NOT_PROMOTED", "market_data": False,
         "selection_rule": "lowest_validation_brier_without_early_cohort_regression_vs_shrunk_poisson",
+        "numeric_precision_decimals": NUMERIC_DECIMALS,
         "threshold_grid": thresholds, "half_point_interpretation": "P(X > k+0.5) = P(X > k)",
         "candidates": reports, "validation_eligible": eligible, "selected_candidate": selected,
         "holdout": holdout_report, "runtime_score_reproduced": bool(np.allclose(mu, score_artifact(model, test, head), rtol=1e-12, atol=1e-12)),
         "candidate_artifact": model,
         "remaining_gates": ["source_acceptance", "specialist_feature_challenge", "holdout_cohort_promotion_review",
             "live_current_role_translation", "prior_competition_translation", "runtime_distribution_acceptance"]}
+    return _quantize_report(report)
 
 
 def main():
