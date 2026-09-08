@@ -17,4 +17,4 @@ tag = "v1"
 new_sqlite_classes = ["NbaMarketRun"]
 
 [vars]
-ODDS_API_REGIONS = "us"
+ODDS_API_REGIONS = "au"
