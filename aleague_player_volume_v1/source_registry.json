@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "model": "ALEAGUE_PLAYER_VOLUME_V1",
+  "sources": [
+    {
+      "id": "fbref_aleague",
+      "class": "AUTO_APPROVED_WITH_GUARDS",
+      "purpose": ["historical_player_shooting", "team_shooting", "opponent_shooting", "goalkeeper_priors"],
+      "runtime_dependency": false,
+      "notes": "Publish canonical repository assets; runtime consumes hashes/assets, not live FBref. Rate-limit/cache parser and fail closed on coverage/schema drift."
+    },
+    {
+      "id": "official_aleague_clubs",
+      "class": "AUTO_OR_RESEARCH_BY_ROUTE",
+      "purpose": ["fixtures", "squads", "injuries", "suspensions", "current_role", "coach_system"],
+      "runtime_dependency": false,
+      "notes": "Prefer official evidence for current availability and role. Automate only stable approved routes."
+    },
+    {
+      "id": "fotmob",
+      "class": "RESEARCH_ONLY",
+      "purpose": ["xg_xa_context", "shot_map_context", "box_touches", "chance_creation", "recent_role"],
+      "runtime_dependency": false,
+      "notes": "No unattended scraper in V1."
+    },
+    {
+      "id": "transfermarkt",
+      "class": "RESEARCH_ONLY",
+      "purpose": ["transfer_history", "prior_club", "prior_competition_context"],
+      "runtime_dependency": false,
+      "notes": "Research enrichment until a separately approved ingestion route exists."
+    },
+    {
+      "id": "licensed_advanced_feed",
+      "class": "LICENSED_OPTION",
+      "purpose": ["event_data", "shot_quality", "post_shot_xg", "pressure", "possession_value"],
+      "runtime_dependency": false,
+      "notes": "Optional future upgrade only with explicit approval; no V1 production dependency."
+    }
+  ]
+}
