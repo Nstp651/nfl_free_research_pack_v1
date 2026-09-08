@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -11,7 +12,7 @@ METRIC_STATUSES = {"AVAILABLE", "PARTIAL", "UNAVAILABLE", "BLOCKED", "NOT_RELIAB
 
 
 def canonical_json(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -62,12 +63,12 @@ def validate_source_receipt(receipt: dict[str, Any]) -> None:
             raise ValueError("duplicate upstream asset")
         seen.add(key)
         digest = row.get("sha256")
-        if not isinstance(digest, str) or len(digest) != 64:
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
             raise ValueError("invalid upstream asset sha256")
-        if not isinstance(row.get("bytes"), int) or row["bytes"] < 0:
+        if type(row.get("bytes")) is not int or row["bytes"] <= 0:
             raise ValueError("invalid upstream asset size")
     normalized = receipt.get("normalized_player_games")
-    if not isinstance(normalized, dict) or len(str(normalized.get("sha256", ""))) != 64:
+    if not isinstance(normalized, dict) or not re.fullmatch(r"[0-9a-f]{64}", str(normalized.get("sha256", ""))):
         raise ValueError("normalized player-game hash required")
     if not isinstance(normalized.get("rows"), int) or normalized["rows"] <= 0:
         raise ValueError("normalized player-game rows required")

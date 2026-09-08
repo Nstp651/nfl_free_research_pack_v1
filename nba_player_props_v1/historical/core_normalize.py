@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
+import numpy as np
 import pandas as pd
 
 CORE_INPUT_COLUMNS = (
@@ -70,8 +71,22 @@ def _minutes(value) -> float:
         return 0.0
     if isinstance(value, str) and ":" in value:
         minutes, seconds = value.split(":", 1)
+        if not 0 <= float(seconds) < 60 or float(minutes) < 0:
+            raise ValueError("invalid minutes clock")
         return float(minutes) + float(seconds) / 60.0
     return float(value)
+
+
+def _boolean(value) -> bool:
+    if pd.isna(value):
+        raise ValueError("missing boolean flag")
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    if value in (0, 1):
+        return bool(value)
+    if isinstance(value, str) and value.lower() in ("true", "false"):
+        return value.lower() == "true"
+    raise ValueError("invalid boolean flag")
 
 
 def _require_columns(frame: pd.DataFrame, columns: Iterable[str]) -> None:
@@ -104,13 +119,15 @@ def normalize_player_box(frame: pd.DataFrame) -> pd.DataFrame:
     out["game_start_utc"] = pd.to_datetime(out.pop("game_date_time"), utc=True, errors="raise")
     out["game_date_et"] = out["game_start_utc"].dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
     out["minutes"] = out["minutes"].map(_minutes).astype(float)
-    out["starter"] = out["starter"].fillna(False).astype(bool)
-    out["did_not_play"] = out["did_not_play"].fillna(False).astype(bool)
+    out["starter"] = out["starter"].map(_boolean)
+    out["did_not_play"] = out["did_not_play"].map(_boolean)
     out["is_home"] = out["home_away"].astype("string").str.lower().eq("home")
 
     for column in COUNT_COLUMNS:
         out[column] = pd.to_numeric(out[column], errors="raise")
 
+    if (~np.isfinite(out["minutes"]) | (out["minutes"] < 0) | (out["minutes"] > 65)).any():
+        raise ValueError("invalid minutes detected")
     out = out[(~out["did_not_play"]) & (out["minutes"] > 0)].copy()
     if out.empty:
         raise ValueError("no played player-games after normalization")
@@ -121,6 +138,19 @@ def normalize_player_box(frame: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("invalid minutes detected")
     if (out[list(COUNT_COLUMNS)] < 0).any().any():
         raise ValueError("negative count detected")
+    counts = out[list(COUNT_COLUMNS)].to_numpy(dtype=float)
+    if not np.isfinite(counts).all() or (counts != np.floor(counts)).any():
+        raise ValueError("counts must be finite non-negative integers")
+    for column in ("game_id_espn", "player_id_espn", "team_id_espn", "opponent_team_id_espn"):
+        if out[column].isna().any() or not out[column].str.fullmatch(r"[0-9]+").all():
+            raise ValueError("invalid canonical identity")
+    if (out["team_id_espn"] == out["opponent_team_id_espn"]).any():
+        raise ValueError("team cannot be its own opponent")
+    for made, attempted in (("field_goals_made", "field_goals_attempted"),
+                            ("free_throws_made", "free_throws_attempted"),
+                            ("three_point_field_goals_made", "three_point_field_goals_attempted")):
+        if (out[made] > out[attempted]).any():
+            raise ValueError("made shots exceed attempts")
     if (out["offensive_rebounds"] + out["defensive_rebounds"] != out["rebounds"]).any():
         raise ValueError("ORB + DRB != REB")
 
