@@ -1,0 +1,62 @@
+/** Market-blind NBA per-game research checkpoint contract. */
+const MARKET_KEY=/(?:odds|sportsbook|bookmaker|moneyline|spread|betting|price|market_line|over_under|player_assists_alternate|player_rebounds_alternate)/i;
+const RUN_MODES=new Set(['BOTH','ASSISTS_ONLY','REBOUNDS_ONLY']);
+const AVAIL=new Set(['ACTIVE','PROBABLE','QUESTIONABLE','DOUBTFUL','OUT','UNKNOWN']);
+const ROLE=new Set(['RETURNING_SAME','RETURNING_CHANGED','NEW_TO_TEAM','ROOKIE','NEW_TO_NBA','UNKNOWN']);
+const METRIC=new Set(['AVAILABLE','PARTIAL','UNAVAILABLE','BLOCKED','NOT_RELIABLE']);
+const EVIDENCE_TYPE=new Set(['DESCRIPTIVE','CAUSAL','STATUS','ROLE','ROTATION','LINEUP','TRANSACTION']);
+const ASSIST_FIELDS=['expected_assist_share','expected_team_assists','expected_possessions'];
+const REBOUND_FIELDS=['expected_rebound_share','expected_team_rebounds','expected_possessions'];
+export const need=(ok,msg)=>{if(!ok) throw new Error(msg);};
+export function requestedHeads(mode){mode=String(mode||'').toUpperCase();need(RUN_MODES.has(mode),'invalid run_mode');return mode==='BOTH'?['assists','rebounds']:(mode==='ASSISTS_ONLY'?['assists']:['rebounds']);}
+export function marketKeyHits(value,path='root',out=[]){
+  if(Array.isArray(value)) value.forEach((v,i)=>marketKeyHits(v,`${path}[${i}]`,out));
+  else if(value&&typeof value==='object') for(const [k,v] of Object.entries(value)){if(MARKET_KEY.test(k)) out.push(`${path}.${k}`);marketKeyHits(v,`${path}.${k}`,out);}
+  return out;
+}
+function iso(value,label){const t=Date.parse(String(value||''));need(Number.isFinite(t),`${label} timestamp invalid`);return t;}
+function numberIn(v,lo,hi,label){const n=Number(v);need(Number.isFinite(n)&&n>=lo&&n<=hi,`${label} invalid`);return n;}
+function evidenceRefs(refs,known,label){need(Array.isArray(refs)&&refs.length>0,`${label} evidence_ids required`);for(const id of refs) need(known.has(String(id)),`${label} unknown evidence ${id}`);}
+
+export function validateResearchCheckpoint(payload,nowMs=Date.now()){
+  need(payload&&typeof payload==='object'&&!Array.isArray(payload),'research checkpoint required');
+  need(payload.schema_version==='nba_game_research_v1','research schema mismatch');
+  need(payload.market_data===false,'Layers 0-2 must be market blind');
+  need(marketKeyHits(payload).length===0,'research market boundary failed');
+  const heads=requestedHeads(payload.run_mode);
+  need(/^\d{10}$/.test(String(payload.game_id||'')),'invalid game_id');
+  need(/^\d{4}-\d{2}-\d{2}$/.test(String(payload.slate_date_et||'')),'invalid slate_date_et');
+  need(payload.fixture&&typeof payload.fixture==='object','fixture context required');
+  need(String(payload.fixture.home_team||'')&&String(payload.fixture.away_team||''),'fixture teams required');
+  need(Number.isFinite(Date.parse(String(payload.fixture.start_time_utc||''))),'fixture start_time_utc invalid');
+
+  const evidence=payload.evidence;need(Array.isArray(evidence)&&evidence.length>0,'evidence required');
+  const known=new Set();
+  for(const row of evidence){
+    need(row&&typeof row==='object','invalid evidence row');const id=String(row.evidence_id||'');need(id&&!known.has(id),'invalid/duplicate evidence_id');known.add(id);
+    need(/^https:\/\//.test(String(row.url||'')),'evidence URL must be HTTPS');need(String(row.title||'').trim(),'evidence title required');
+    need(iso(row.checked_at,'checked_at')<=nowMs+1000,'evidence checked_at in future');if(row.published_at) need(iso(row.published_at,'published_at')<=nowMs+1000,'evidence published_at in future');
+    need(Number.isInteger(row.source_tier)&&row.source_tier>=0&&row.source_tier<=3,'invalid source_tier');need(EVIDENCE_TYPE.has(row.evidence_type),'invalid evidence_type');
+  }
+  evidenceRefs(payload.fixture.evidence_ids,known,'fixture');
+  const metrics=payload.specialist_metrics;need(metrics&&typeof metrics==='object'&&!Array.isArray(metrics),'specialist_metrics required');
+  for(const [name,row] of Object.entries(metrics)){need(name&&row&&METRIC.has(row.status),`invalid specialist metric ${name}`);if(row.status==='AVAILABLE') evidenceRefs(row.evidence_ids,known,`specialist ${name}`);}
+
+  const players=payload.players;need(Array.isArray(players)&&players.length>0,'relevant players required');const seen=new Set();
+  for(const [i,p] of players.entries()){
+    const id=String(p.player_id||'').trim();need(id&&!seen.has(id),`players[${i}] invalid/duplicate player_id`);seen.add(id);
+    need(String(p.player_name||'').trim()&&String(p.team||'').trim(),`players[${i}] identity/team required`);need(AVAIL.has(p.availability),`players[${i}] availability invalid`);need(ROLE.has(p.role_state),`players[${i}] role_state invalid`);
+    const m=p.projected_minutes||{};const lo=numberIn(m.low,0,53,`players[${i}] minutes.low`),mid=numberIn(m.mean,0,53,`players[${i}] minutes.mean`),hi=numberIn(m.high,0,53,`players[${i}] minutes.high`);need(lo<=mid&&mid<=hi,`players[${i}] minutes band invalid`);
+    numberIn(p.expected_starter_probability,0,1,`players[${i}] expected_starter_probability`);evidenceRefs(p.evidence_ids,known,`players[${i}]`);
+    need(p.confidence_inputs&&typeof p.confidence_inputs==='object',`players[${i}] confidence_inputs required`);need(p.fragility_inputs&&typeof p.fragility_inputs==='object',`players[${i}] fragility_inputs required`);
+    const ctx=p.stat_context;need(ctx&&typeof ctx==='object',`players[${i}] stat_context required`);
+    for(const head of heads){
+      const h=ctx[head];need(h&&typeof h==='object',`players[${i}] ${head} context required`);need(String(h.causal_pathway||'').trim(),`players[${i}] ${head} causal_pathway required`);evidenceRefs(h.evidence_ids,known,`players[${i}] ${head}`);
+      const opportunity=h.current_opportunity;need(opportunity&&typeof opportunity==='object',`players[${i}] ${head} current_opportunity required`);
+      const required=head==='assists'?ASSIST_FIELDS:REBOUND_FIELDS;
+      for(const key of required){const hiBound=key.includes('share')?1:(key==='expected_possessions'?130:80);numberIn(opportunity[key],0,hiBound,`players[${i}] ${head}.${key}`);}
+      evidenceRefs(opportunity.evidence_ids,known,`players[${i}] ${head}.current_opportunity`);
+    }
+  }
+  return {ok:true,player_count:players.length,evidence_count:evidence.length,heads};
+}
