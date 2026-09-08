@@ -10,7 +10,7 @@ def _history():
     for team, opp, score, opp_score, asts in (("1", "2", 100, 90, [2, 3]), ("2", "1", 90, 100, [1, 2])):
         for i, ast in enumerate(asts):
             rows.append({
-                "game_id_espn": "99", "team_id_espn": team, "opponent_team_id_espn": opp,
+                "season": 2026, "game_id_espn": "99", "team_id_espn": team, "opponent_team_id_espn": opp,
                 "game_start_utc": "2026-01-01T00:00:00Z", "player_id_espn": f"{team}{i}",
                 "assists": ast, "field_goals_made": 5 + i, "field_goals_attempted": 10 + i,
                 "three_point_field_goals_made": 2, "three_point_field_goals_attempted": 5,
@@ -50,6 +50,7 @@ def test_reconcile_passes_exact_independent_tables():
     assert result["schedule_team_identity_rate"] == 1.0
     assert result["team_score_rate"] == 1.0
     assert all(v["rate"] == 1.0 for v in result["exact_core_fields"].values())
+    assert all(v["mismatch_rows"] == 0 for v in result["exact_core_fields"].values())
 
 
 def test_reconcile_fails_material_box_disagreement():
@@ -58,3 +59,4 @@ def test_reconcile_fails_material_box_disagreement():
     result = reconcile(_history(), team, _schedule())
     assert result["status"] == "FAIL"
     assert result["exact_core_fields"]["assists"]["rate"] < 0.999
+    assert result["exact_core_fields"]["assists"]["mismatch_rows"] == 1
