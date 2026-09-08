@@ -1,0 +1,354 @@
+openapi: 3.1.0
+info:
+  title: NBA Assists + Rebounds V1 Research and Freeze Gateway
+  version: 1.0.0
+  description: Market-blind whole-slate NBA research, persistent 1-2 game checkpointing, server-authoritative QBASE scoring and immutable atomic P_model freeze.
+servers:
+  - url: https://nba-player-props-research-v1.nickarnott01.workers.dev
+paths:
+  /health:
+    get:
+      operationId: healthNbaPlayerPropsResearch
+      summary: Check NBA research/freeze Worker health.
+      responses:
+        '200': {description: Health response, content: {application/json: {schema: {$ref: '#/components/schemas/HealthResponse'}}}}
+  /v1/fixtures:
+    get:
+      operationId: listNbaPlayerPropsFixtures
+      summary: List sanitized not-yet-started NBA fixtures for one America/New_York league date.
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema: {type: string, format: date}
+      responses:
+        '200': {description: Sanitized fixture list, content: {application/json: {schema: {$ref: '#/components/schemas/FixtureList'}}}}
+  /v1/runs:
+    post:
+      operationId: startNbaPlayerPropsSlateRun
+      summary: Start one persistent whole-slate market-blind run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slate_date_et: {type: string, format: date}
+                run_mode: {type: string, enum: [BOTH, ASSISTS_ONLY, REBOUNDS_ONLY], default: BOTH}
+              required: [slate_date_et, run_mode]
+              additionalProperties: false
+      responses:
+        '200': {description: Run lock, content: {application/json: {schema: {$ref: '#/components/schemas/RunStatus'}}}}
+  /v1/runs/{run_id}:
+    get:
+      operationId: getNbaPlayerPropsSlateRun
+      summary: Recover exact persistent run status.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200': {description: Persistent run status, content: {application/json: {schema: {$ref: '#/components/schemas/RunStatus'}}}}
+  /v1/runs/{run_id}/research/next:
+    get:
+      operationId: getNbaPlayerPropsResearchBatch
+      summary: Return only the next 1-2 pending games and market-blind research seeds.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200': {description: Next server-enforced research batch, content: {application/json: {schema: {$ref: '#/components/schemas/ResearchBatch'}}}}
+  /v1/runs/{run_id}/research/checkpoint:
+    post:
+      operationId: checkpointNbaPlayerPropsResearch
+      summary: Persist completed market-blind research for the current 1-2 game batch.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                checkpoints:
+                  type: array
+                  minItems: 1
+                  maxItems: 2
+                  items: {$ref: '#/components/schemas/ResearchCheckpoint'}
+              required: [checkpoints]
+              additionalProperties: false
+      responses:
+        '200': {description: Updated checkpoint status, content: {application/json: {schema: {$ref: '#/components/schemas/RunStatus'}}}}
+  /v1/runs/{run_id}/freeze:
+    post:
+      operationId: freezeNbaPlayerPropsSlate
+      summary: Atomically compute and freeze the complete requested-head slate after RESEARCH_COMPLETE.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: false}
+      responses:
+        '200': {description: Immutable whole-slate freeze receipt, content: {application/json: {schema: {$ref: '#/components/schemas/FreezeSummary'}}}}
+    get:
+      operationId: getNbaPlayerPropsFreeze
+      summary: Retrieve the immutable frozen probability model and exact grids.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200': {description: Immutable frozen slate, content: {application/json: {schema: {$ref: '#/components/schemas/FreezeEnvelope'}}}}
+  /v1/runs/{run_id}/invalidate:
+    post:
+      operationId: invalidateNbaPlayerPropsFrozenScope
+      summary: Mark affected frozen games invalid after material late basketball news without mutating probabilities.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                game_ids: {type: array, minItems: 1, items: {type: string}}
+                reason: {type: string, minLength: 1}
+              required: [game_ids, reason]
+              additionalProperties: false
+      responses:
+        '200': {description: Frozen-but-invalidated status, content: {application/json: {schema: {$ref: '#/components/schemas/RunStatus'}}}}
+  /v1/runs/{run_id}/market-access:
+    get:
+      operationId: getNbaPlayerPropsMarketAccessGrant
+      summary: Return a post-freeze market-access grant. Fails before whole-slate freeze.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200': {description: Post-freeze grant, content: {application/json: {schema: {$ref: '#/components/schemas/MarketGrant'}}}}
+components:
+  parameters:
+    RunId:
+      name: run_id
+      in: path
+      required: true
+      schema: {type: string, minLength: 8}
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok: {type: boolean}
+        service: {type: string}
+        version: {type: string}
+        market_data: {type: boolean}
+        source_commit: {type: string}
+        source_commit_ready: {type: boolean}
+        durable_object_binding: {type: boolean}
+      required: [ok, service, version, market_data]
+      additionalProperties: true
+    Team:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+      required: [id, name]
+      additionalProperties: true
+    Fixture:
+      type: object
+      properties:
+        game_id: {type: string}
+        season: {type: integer}
+        start_time_utc: {type: string, format: date-time}
+        status: {type: string}
+        home_team: {$ref: '#/components/schemas/Team'}
+        away_team: {$ref: '#/components/schemas/Team'}
+      required: [game_id, season, start_time_utc, home_team, away_team]
+      additionalProperties: true
+    FixtureList:
+      type: object
+      properties:
+        schema_version: {type: string}
+        market_data: {type: boolean}
+        league_date_timezone: {type: string}
+        slate_date_et: {type: string, format: date}
+        source: {type: object, additionalProperties: true}
+        fixtures: {type: array, items: {$ref: '#/components/schemas/Fixture'}}
+      required: [market_data, slate_date_et, fixtures]
+      additionalProperties: true
+    RunStatus:
+      type: object
+      properties:
+        market_data: {type: boolean}
+        run_id: {type: string}
+        slate_date_et: {type: string, format: date}
+        run_mode: {type: string}
+        status: {type: string, enum: [RESEARCH_IN_PROGRESS, RESEARCH_COMPLETE, FROZEN, FROZEN_BUT_INVALIDATED]}
+        source_commit: {type: string}
+        eligible_game_ids: {type: array, items: {type: string}}
+        completed_game_ids: {type: array, items: {type: string}}
+        pending_count: {type: integer}
+        frozen_at: {type: [string, 'null'], format: date-time}
+        freeze_receipt_sha256: {type: [string, 'null']}
+      required: [run_id, status]
+      additionalProperties: true
+    ResearchSeed:
+      type: object
+      description: Server-owned current roster identities plus historical priors/QBASE baselines. Historical fields are priors, not current-role truth.
+      additionalProperties: true
+    ResearchBatch:
+      type: object
+      properties:
+        market_data: {type: boolean}
+        run_id: {type: string}
+        status: {type: string}
+        batch_game_ids: {type: array, minItems: 0, maxItems: 2, items: {type: string}}
+        pending_count: {type: integer}
+        next_batch_after_checkpoint: {type: boolean}
+        research_seeds: {type: array, items: {$ref: '#/components/schemas/ResearchSeed'}}
+      required: [market_data, run_id, status, batch_game_ids, research_seeds]
+      additionalProperties: true
+    Evidence:
+      type: object
+      properties:
+        evidence_id: {type: string}
+        url: {type: string, format: uri}
+        title: {type: string}
+        checked_at: {type: string, format: date-time}
+        published_at: {type: string, format: date-time}
+        source_tier: {type: integer, minimum: 0, maximum: 3}
+        evidence_type: {type: string, enum: [DESCRIPTIVE, CAUSAL, STATUS, ROLE, ROTATION, LINEUP, TRANSACTION]}
+      required: [evidence_id, url, title, checked_at, source_tier, evidence_type]
+      additionalProperties: false
+    MetricStatus:
+      type: object
+      properties:
+        status: {type: string, enum: [AVAILABLE, PARTIAL, UNAVAILABLE, BLOCKED, NOT_RELIABLE]}
+        evidence_ids: {type: array, items: {type: string}}
+        note: {type: string}
+      required: [status]
+      additionalProperties: true
+    MinutesBand:
+      type: object
+      properties:
+        low: {type: number, minimum: 0, maximum: 53}
+        mean: {type: number, minimum: 0, maximum: 53}
+        high: {type: number, minimum: 0, maximum: 53}
+      required: [low, mean, high]
+      additionalProperties: false
+    AssistsOpportunity:
+      type: object
+      properties:
+        expected_assist_share: {type: number, minimum: 0, maximum: 1}
+        expected_team_assists: {type: number, minimum: 0, maximum: 80}
+        expected_possessions: {type: number, minimum: 0, maximum: 130}
+        evidence_ids: {type: array, minItems: 1, items: {type: string}}
+      required: [expected_assist_share, expected_team_assists, expected_possessions, evidence_ids]
+      additionalProperties: false
+    ReboundsOpportunity:
+      type: object
+      properties:
+        expected_rebound_share: {type: number, minimum: 0, maximum: 1}
+        expected_team_rebounds: {type: number, minimum: 0, maximum: 80}
+        expected_possessions: {type: number, minimum: 0, maximum: 130}
+        evidence_ids: {type: array, minItems: 1, items: {type: string}}
+      required: [expected_rebound_share, expected_team_rebounds, expected_possessions, evidence_ids]
+      additionalProperties: false
+    AssistsContext:
+      type: object
+      properties:
+        causal_pathway: {type: string}
+        evidence_ids: {type: array, minItems: 1, items: {type: string}}
+        current_opportunity: {$ref: '#/components/schemas/AssistsOpportunity'}
+      required: [causal_pathway, evidence_ids, current_opportunity]
+      additionalProperties: false
+    ReboundsContext:
+      type: object
+      properties:
+        causal_pathway: {type: string}
+        evidence_ids: {type: array, minItems: 1, items: {type: string}}
+        current_opportunity: {$ref: '#/components/schemas/ReboundsOpportunity'}
+      required: [causal_pathway, evidence_ids, current_opportunity]
+      additionalProperties: false
+    ResearchPlayer:
+      type: object
+      properties:
+        player_id: {type: string}
+        player_name: {type: string}
+        team_id: {type: string}
+        team: {type: string}
+        availability: {type: string, enum: [ACTIVE, PROBABLE, QUESTIONABLE, DOUBTFUL, OUT, UNKNOWN]}
+        role_state: {type: string, enum: [RETURNING_SAME, RETURNING_CHANGED, NEW_TO_TEAM, ROOKIE, NEW_TO_NBA, UNKNOWN]}
+        projected_minutes: {$ref: '#/components/schemas/MinutesBand'}
+        expected_starter_probability: {type: number, minimum: 0, maximum: 1}
+        evidence_ids: {type: array, minItems: 1, items: {type: string}}
+        confidence_inputs: {type: object, additionalProperties: true}
+        fragility_inputs: {type: object, additionalProperties: true}
+        stat_context:
+          type: object
+          properties:
+            assists: {$ref: '#/components/schemas/AssistsContext'}
+            rebounds: {$ref: '#/components/schemas/ReboundsContext'}
+          additionalProperties: false
+      required: [player_id, player_name, team_id, team, availability, role_state, projected_minutes, expected_starter_probability, evidence_ids, confidence_inputs, fragility_inputs, stat_context]
+      additionalProperties: false
+    ResearchCheckpoint:
+      type: object
+      properties:
+        schema_version: {type: string, const: nba_game_research_v1}
+        market_data: {type: boolean, const: false}
+        run_mode: {type: string, enum: [BOTH, ASSISTS_ONLY, REBOUNDS_ONLY]}
+        game_id: {type: string}
+        slate_date_et: {type: string, format: date}
+        fixture:
+          type: object
+          properties:
+            season: {type: integer}
+            home_team: {$ref: '#/components/schemas/Team'}
+            away_team: {$ref: '#/components/schemas/Team'}
+            start_time_utc: {type: string, format: date-time}
+            evidence_ids: {type: array, minItems: 1, items: {type: string}}
+          required: [season, home_team, away_team, start_time_utc, evidence_ids]
+          additionalProperties: false
+        evidence: {type: array, minItems: 1, items: {$ref: '#/components/schemas/Evidence'}}
+        specialist_metrics:
+          type: object
+          additionalProperties: {$ref: '#/components/schemas/MetricStatus'}
+        players: {type: array, minItems: 1, items: {$ref: '#/components/schemas/ResearchPlayer'}}
+      required: [schema_version, market_data, run_mode, game_id, slate_date_et, fixture, evidence, specialist_metrics, players]
+      additionalProperties: false
+    FreezeSummary:
+      type: object
+      properties:
+        market_data: {type: boolean}
+        run_id: {type: string}
+        status: {type: string}
+        frozen_at: {type: string, format: date-time}
+        freeze_receipt_sha256: {type: string}
+        game_count: {type: integer}
+        player_count: {type: integer}
+        exclusion_count: {type: integer}
+      required: [run_id, status, frozen_at, freeze_receipt_sha256]
+      additionalProperties: true
+    FreezeEnvelope:
+      type: object
+      properties:
+        market_data: {type: boolean}
+        run_id: {type: string}
+        status: {type: string}
+        freeze: {type: object, additionalProperties: true}
+        invalidations: {type: array, items: {type: object, additionalProperties: true}}
+      required: [run_id, status, freeze]
+      additionalProperties: true
+    MarketGrant:
+      type: object
+      properties:
+        schema_version: {type: string}
+        run_id: {type: string}
+        slate_date_et: {type: string, format: date}
+        run_mode: {type: string}
+        frozen_at: {type: string, format: date-time}
+        freeze_receipt_sha256: {type: string}
+        allowed_game_ids: {type: array, items: {type: string}}
+        invalidated_game_ids: {type: array, items: {type: string}}
+        market_access_grant_sha256: {type: string}
+      required: [run_id, frozen_at, freeze_receipt_sha256, allowed_game_ids]
+      additionalProperties: true
