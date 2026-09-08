@@ -28,8 +28,10 @@ jobs:
         run: python -m compileall -q aleague_player_volume_v1
       - name: Python unit tests
         run: python -m unittest discover -s aleague_player_volume_v1/tests -v
-      - name: Worker integrity tests
+      - name: Research Worker integrity tests
         run: node --test aleague_player_volume_v1/worker/*.test.mjs
+      - name: Market Worker isolation tests
+        run: node --test aleague_player_volume_v1/market_worker/*.test.mjs
       - name: Market-blind import smoke test
         run: |
           python - <<'PY'
