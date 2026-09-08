@@ -1,85 +1,138 @@
 # NBA V1 takeover evidence
 
-Status: **BUILDING — NOT PRODUCTION READY. PR #20 remains draft.**
+Status: **PRODUCTION CANDIDATE — NOT PRODUCTION READY. PR #20 remains draft/unmerged.**
 
-The takeover audited handoff head `7072c43a42cb01b3b03c7a1fbabdd50651308973`,
-all 22 PR files and the NBL reference configuration. Both head workflows were
-successful. The PR contained no NBL changes. Deployment ownership is unchanged.
+This file records the current takeover state after source correction, quantitative promotion, runtime/Worker implementation and production-artifact authoring. NBL production remains unchanged.
 
-## Implemented and executed
+## Accepted source / historical state
 
-- SHA-256-pinned five-season historical builder with byte-count verification.
-- Finite/integer count, boolean flag, identity, minutes-clock and shot validation.
-- Explicit 30-franchise filtering: upstream All-Star games also use season type 2.
-- 139,809 accepted NBA player-games, seasons ending 2022–2026, with zero duplicate
-  ESPN player/game keys and complete timestamps. These are ESPN identities;
-  the official NBA crosswalk has NOT passed.
-- Two separate normalization builds from identical pinned cached inputs produced
-  `b19e5ea32b9b257c57b9c4a16ced34b5d70a91608a99f042d2a34441705f933c`.
-- Independent ASSISTS and REBOUNDS four-candidate temporal challenges: shrunk
-  Poisson/NB and regularized count GLM with Poisson/NB distributions.
-- Expanding 2024/2025 validation folds; 2026 held out from model selection.
-- Early-season, team-change, starter-change, low-history and role-proxy slices.
-- Deterministic parameter-export score checks, calibration bins, integer push
-  probabilities, count likelihood, Brier, bias, MAE, RMSE and interval coverage.
-- Read-only official-source probes and a non-promoted specialist metric registry.
+The pinned five-season build originally produced 139,809 validated NBA player-games with zero duplicate ESPN player/game keys and complete timestamps.
 
-## Candidate results, not promotion
+Independent source reconciliation plus final-box adjudication identified 14 inconsistent complete games. The production source gate removes the **entire game** for every adjudicated inconsistency; it never patches one player/stat or removes one team only.
 
-Both heads independently selected `glm_nb`. The distribution's dispersion is
-estimated on training residuals only. No sportsbook lines or prices were used.
+Corrected accepted history:
+- rows: **139,529**
+- rows removed: **280**
+- complete games removed: **14**
+- history SHA-256: `2e6926aa87ccebafbf938322f8facefeb54de63eb22f924dc2793afc61750b25`
+- deterministic source acceptance receipt: `ecb23250f2c9ec8e3ed6bfd72034d195fc39f97e93f24c8c14f66563c6937350`
 
-| 2026 holdout (28,462 player-games) | Assists | Rebounds |
-|---|---:|---:|
-| Candidate Brier, fixed count grid | 0.059140 | 0.052230 |
-| Shrunk Poisson baseline Brier | 0.061321 | 0.054296 |
-| Candidate count NLL | 1.796993 | 2.210086 |
-| Candidate MAE | 1.382406 | 1.952015 |
+The official NBA schedule endpoint remained HTTP-blocked in the source probes; the market-blind ESPN scoreboard source passed as the current fixture fallback. Player-tracking specialist endpoints were blocked/timed out and remain feature-gated rather than treated as zero or required for base V1.
 
-Brier values average a fixed head-specific grid, including low-probability tails;
-they are not directly comparable between heads and are not a betting-return test.
-Holdout evaluation uses rolling historical box features, not replayed current-news
-research. Specialist features, rookie translations and researched current-role
-transforms have not been validated. These artifacts are **experimental**, not live
-QBASE authority. No model-family reselection using the holdout is permitted.
+## Independent QBASE promotion
 
-## Failed or unpassed dependencies
+Both heads were rerun on corrected history under the locked temporal protocol:
+- expanding 2024/2025 validation folds;
+- 2026 untouched holdout;
+- no holdout model-family reselection;
+- early-season cohort non-regression requirement;
+- specialist metrics excluded unless separately promoted.
 
-1. Official current schedule returned HTTP 403 locally; the published tracking
-   example timed out. These are environment-specific probe results, not proof
-   that the sources never work. CI repeats probes from its own environment.
-2. Independent box reconciliation, official NBA identity crosswalk, current source
-   freshness and full specialist coverage remain unpassed. Other specialist fields
-   marked unavailable are absent from the audited core table; alternative sources
-   are explicitly not yet audited.
-3. Quantitative promotion remains blocked by source acceptance, specialist challenge,
-   holdout cohort review, researched current-role runtime scoring and controlled
-   prior-competition translation.
-4. Per the handoff, full persistent Worker implementation follows quantitative
-   promotion. No Research/Freeze Worker, live Market Worker, tracker acceptance or
-   production GPT artifacts were represented as completed in this tranche.
-5. No Cloudflare account tools are exposed in the takeover session. Plugin directory
-   search for Cloudflare returned no results. No Worker/account configuration was
-   changed. Cloudflare native Git must remain deployment owner.
-6. Live whole-slate Custom GPT acceptance and post-freeze screenshot refresh have
-   not run. Neither can be replaced by synthetic tests or merely green CI.
+Both selected `glm_nb` and passed `PROMOTED_CORE_V1` with no restricted cohorts.
 
-## Resume from this work
+### Assists
+- model version: `NBA_ASSISTS_QBASE_V1.0.0`
+- corrected-history holdout Brier ~0.05907 vs shrunk-Poisson baseline ~0.06126
+- corrected-history holdout NLL ~1.7959 vs baseline ~1.8540
+- holdout sample ~28.2k player-games
 
-Inspect the latest branch and the JSON evidence in `evidence/`. Finish source
-reconciliation and freshness from an environment with official source access.
-Review holdout cohorts against predeclared promotion criteria; do not tune against
-the holdout. Finish QBASE/current-role/prior-competition acceptance before implementing
-the persistent freeze runtime. Then complete market networking, tracker, schemas,
-GPT artifacts, Cloudflare verification and the real-slate/screenshot acceptance.
+### Rebounds
+- model version: `NBA_REBOUNDS_QBASE_V1.0.0`
+- corrected-history holdout Brier ~0.05217 vs baseline ~0.05424
+- corrected-history holdout NLL ~2.2089 vs baseline ~2.3026
+- holdout sample ~28.2k player-games
 
-Rebuild the pinned source with:
+These metrics are probability/count diagnostics on a fixed threshold grid, not betting-return claims.
 
-```bash
-python -m nba_player_props_v1.historical.build_history --manifest nba_player_props_v1/evidence/source_pins.json --cache /tmp/nba-source-cache --output /tmp/nba-source-rebuild --as-of 2026-09-08T16:00:00Z
-python -m nba_player_props_v1.model.challenge --history /tmp/nba-source-rebuild/player_games.csv --output /tmp/nba-challenge
-```
+## Reproducibility hardening
 
-CI now independently downloads pinned inputs and compares the normalized table hash.
-Its source-connectivity step is diagnostic: completing that step does not promote
-the source. The resulting JSON records actual blocked/successful HTTP outcomes.
+A subsequent audit found microscopic solver/BLAS differences across otherwise identical CI events. That was treated as an integrity issue rather than ignored.
+
+The current challenge pipeline now:
+- quantizes exported production numeric parameters to 10 decimal places;
+- scores validation/holdout from the exact exported parameters;
+- forces single-thread numerical libraries in CI;
+- reruns both complete temporal challenges twice;
+- byte-compares the two evidence JSON outputs;
+- only then permits QBASE promotion/runtime-asset staging;
+- commits runtime assets if and only if staged assets differ;
+- requires a generated promotion commit to reproduce with zero diff.
+
+The final bot-generated asset commit/follow-up CI still must be observed green before this gate is closed.
+
+## Implemented Research / Freeze runtime
+
+Implemented under `nba_player_props_v1/worker/`:
+- sanitized ESPN fixture source with canonical `America/New_York` league-date membership;
+- sanitized current roster/status/injury source;
+- exact deployment Git source pin;
+- manifest/file-SHA runtime asset loader;
+- deterministic player/team runtime prior pack;
+- season-aware player/team counts and trade detection via ESPN IDs;
+- market-blind research seed with player and team environment priors;
+- strict research checkpoint contract;
+- server-enforced 1–2 game queue;
+- persistent `NbaSlateRun` Durable Object;
+- exact fixture locks through every checkpoint;
+- server typed transforms only: runtime score, minutes, role opportunity, lineup dependency;
+- no client/free-form final mean path;
+- strict prior-competition translation framework with no universal fallback;
+- exact Poisson/NB2 count distributions and integer push grids;
+- atomic whole-slate freeze;
+- per-head `head_model_sha256`;
+- per-player `player_model_sha256`;
+- slate integrity index and immutable freeze receipt;
+- late-news `FROZEN_BUT_INVALIDATED` state without P_model mutation;
+- post-freeze market-access grant.
+
+Cloudflare config exists for Worker name `nba-player-props-research-v1` with `SLATE_RUNS -> NbaSlateRun` Durable Object.
+
+## Implemented Market runtime
+
+Implemented under `nba_player_props_v1/market_worker/`:
+- separate `NbaMarketRun` Durable Object;
+- Research Worker service binding;
+- fresh server market-access grant before any sportsbook request;
+- The Odds API NBA event discovery and exact frozen fixture resolution;
+- only four approved market keys;
+- Australian region default (`au`) to align the production bookmaker stack and minimize credits;
+- strict one-to-one frozen player mapping;
+- Overs-only ingestion;
+- current API snapshot replacement instead of stale-price accumulation;
+- post-freeze Bet365/manual screenshot snapshot replacement;
+- market capture time must be at/after `frozen_at`;
+- exact integer/half threshold lookup only, no interpolation;
+- current best exact price merge;
+- player/head hash binding through evaluation;
+- push-aware EV, push-adjusted market probability and tracker-compatible edge;
+- BEST SINGLE, Top 10 combined, Assists positives, Rebounds positives, NO BET.
+
+Cloudflare config exists for Worker name `nba-player-props-market-v1`, `MARKET_RUNS -> NbaMarketRun`, and service binding `RESEARCH_SERVICE -> nba-player-props-research-v1`.
+
+## Production GPT package implemented
+
+- `NBA_ASSISTS_REBOUNDS_4_LAYER_MASTER_PRODUCTION_V1.0.md`
+- `GPT_INSTRUCTIONS_PRODUCTION_V1.0.md`
+- `openapi_v1.yaml`
+- `market_openapi_v1.yaml`
+- `TRACKER_INTEGRATION_PRODUCTION_V1.0.md`
+- `LAUNCH_PROMPT_PRODUCTION_V1.0.md`
+- `INSTALL_PRODUCTION_V1.0.md`
+- `PRODUCTION_ACCEPTANCE_PROMPT_V1.0.md`
+
+The established shared Bet Tracker is reused; no new tracker database/Worker was introduced.
+
+## Still-unpassed release gates
+
+1. Final current branch CI must pass after the latest hash/market-region/integrity changes.
+2. CI must actually commit the four deterministic runtime assets and the generated promotion commit must rebuild byte-identically with zero diff.
+3. Cloudflare account deployment/configuration has not been executed from this session because the Cloudflare integration is not exposed to the current tool session. No account changes have been made.
+4. Research and Market Worker live health/bindings/secrets must be verified.
+5. One real future NBA ET slate must complete the entire server-enforced Layer 1 checkpoint loop.
+6. That same run must atomically freeze Layer 2 before any market access.
+7. Real The Odds API player props must resolve/evaluate through the Market Worker.
+8. Layer 4 global ranking must complete and the existing Bet Tracker model run must be written after ranking.
+9. A post-freeze Bet365/manual screenshot refresh must prove identical `run_id`, `frozen_at`, freeze receipt and frozen player/head hashes, with no Layer 1 rerun or P_model mutation.
+10. Only after all required live gates pass may PR #20 be considered for merge and V1 called production-ready.
+
+No green unit/CI suite, synthetic market test or documentation artifact substitutes for the live acceptance gates.
