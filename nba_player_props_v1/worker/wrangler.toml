@@ -1,0 +1,16 @@
+name = "nba-player-props-research-v1"
+main = "index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[durable_objects]
+bindings = [
+  { name = "SLATE_RUNS", class_name = "NbaSlateRun" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["NbaSlateRun"]
+
+[build]
+command = "if [ -f build_source_commit.mjs ]; then node build_source_commit.mjs; else node nba_player_props_v1/worker/build_source_commit.mjs; fi"
