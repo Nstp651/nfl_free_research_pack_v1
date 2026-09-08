@@ -406,7 +406,7 @@ components:
           $ref: '#/components/schemas/CurrentInformationState'
         research_quality_permission:
           type: string
-          enum: ["YES", "NO"]
+          pattern: '^(YES|NO)$'
         evidence:
           type: array
           minItems: 4
