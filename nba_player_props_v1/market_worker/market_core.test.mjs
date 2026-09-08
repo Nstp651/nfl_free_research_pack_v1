@@ -18,14 +18,19 @@ test('half-point market has no push and exact EV',()=>{
   const out=evaluateExactMarket(row(),grid);
   assert.equal(out.p_push,0);
   assert.ok(Math.abs(out.ev_per_unit-0.10)<1e-12);
+  assert.ok(Math.abs(out.push_adjusted_market_probability-0.5)<1e-12);
+  assert.ok(Math.abs(out.push_adjusted_probability_edge-0.05)<1e-12);
   assert.equal(out.positive_ev,true);
 });
 
-test('integer market is push-aware',()=>{
+test('integer market is push-aware with tracker-compatible edge',()=>{
   const out=evaluateExactMarket(row({threshold:5,decimal_price:2.1}),grid);
   assert.equal(out.p_push,0.20);
   assert.ok(Math.abs(out.ev_per_unit-0.04)<1e-12);
   assert.ok(Math.abs(out.conditional_win_probability-0.5)<1e-12);
+  assert.ok(Math.abs(out.push_adjusted_market_probability-(0.8/2.1))<1e-12);
+  assert.ok(Math.abs(out.push_adjusted_probability_edge-(0.4-0.8/2.1))<1e-12);
+  assert.ok(Math.abs(out.fair_decimal_price-2.0)<1e-12);
 });
 
 test('no interpolation is allowed',()=>{
