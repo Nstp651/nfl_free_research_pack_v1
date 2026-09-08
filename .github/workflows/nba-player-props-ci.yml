@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -36,7 +38,7 @@ jobs:
       - name: Install Python test dependencies
         run: pip install -r nba_player_props_v1/requirements.txt
       - name: Python contract tests
-        run: pytest -q nba_player_props_v1/tests
+        run: python -m pytest -q nba_player_props_v1/tests
       - name: Compile Python
         run: python -m compileall -q nba_player_props_v1
       - name: Worker and market integrity tests
