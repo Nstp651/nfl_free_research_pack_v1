@@ -52,6 +52,11 @@ PHYSICAL_FEATURES = (
     "sprint_count_full_tip",
 )
 
+# Goalkeepers are retained and validated in the source artifact, but they are not
+# members of the attacking-role feature universe. Their sparse/zero off-ball-run
+# rows must therefore never dilute the completeness gate for an attacking model.
+ATTACKING_EXCLUDED_POSITION_GROUPS = frozenset({"Goalkeeper"})
+
 RoleKey = tuple[str, str, str]
 
 
@@ -143,13 +148,20 @@ def build_role_profiles(
     passing: Mapping[RoleKey, Mapping[str, Any]],
     physical: Mapping[RoleKey, Mapping[str, Any]],
 ) -> tuple[list[Dict[str, Any]], Dict[str, Any]]:
-    """Join raw aggregate families by player-team-role without fitted composites."""
+    """Join raw aggregate families by player-team-role without fitted composites.
+
+    All rows are preserved in the output artifact. Coverage is reported two ways:
+    an all-role diagnostic and the production attacking-role completeness rate.
+    Only the latter is eligible for the attacking advanced-feature acceptance gate.
+    """
     keys = sorted(
         set(obr) | set(passing) | set(physical),
         key=lambda x: (int(x[0]) if x[0].isdigit() else x[0], x[1], x[2]),
     )
     profiles: list[Dict[str, Any]] = []
-    complete = 0
+    complete_all = 0
+    complete_attacking = 0
+    attacking_keys = [key for key in keys if key[2] not in ATTACKING_EXCLUDED_POSITION_GROUPS]
     players_with_multiple_roles: set[tuple[str, str]] = set()
     roles_per_player_team: Dict[tuple[str, str], set[str]] = {}
     for key in keys:
@@ -161,8 +173,11 @@ def build_role_profiles(
     for key in keys:
         sources = {"obr": obr.get(key), "passing": passing.get(key), "physical": physical.get(key)}
         present = [name for name, row in sources.items() if row is not None]
-        if len(present) == 3:
-            complete += 1
+        is_complete = len(present) == 3
+        if is_complete:
+            complete_all += 1
+            if key[2] not in ATTACKING_EXCLUDED_POSITION_GROUPS:
+                complete_attacking += 1
         anchor = next(row for row in sources.values() if row is not None)
         for name, row in sources.items():
             if row is None:
@@ -189,13 +204,25 @@ def build_role_profiles(
                 name: dict(row.get("features") or {}) if row else None
                 for name, row in sources.items()
             },
-            "model_use": "ROLE_FEATURE_RESEARCH_ONLY_UNTIL_VALIDATED",
+            "model_use": (
+                "SOURCE_VALIDATION_ONLY"
+                if key[2] in ATTACKING_EXCLUDED_POSITION_GROUPS
+                else "ROLE_FEATURE_RESEARCH_ONLY_UNTIL_VALIDATED"
+            ),
         })
-    coverage = complete / len(keys) if keys else 0.0
+
+    all_role_coverage = complete_all / len(keys) if keys else 0.0
+    attacking_coverage = complete_attacking / len(attacking_keys) if attacking_keys else 0.0
     return profiles, {
         "profiles": len(profiles),
-        "complete_three_family_profiles": complete,
-        "complete_join_rate": coverage,
+        "complete_three_family_profiles": complete_attacking,
+        "complete_join_rate": attacking_coverage,
+        "attacking_profiles": len(attacking_keys),
+        "attacking_complete_three_family_profiles": complete_attacking,
+        "attacking_complete_join_rate": attacking_coverage,
+        "excluded_non_attacking_profiles": len(keys) - len(attacking_keys),
+        "all_role_complete_three_family_profiles": complete_all,
+        "all_role_complete_join_rate": all_role_coverage,
         "player_team_identities": len(roles_per_player_team),
         "player_team_identities_with_multiple_roles": len(players_with_multiple_roles),
         "obr_rows": len(obr),
