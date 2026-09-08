@@ -73,11 +73,17 @@ jobs:
             --output /tmp/nba-source-rebuild/source_acceptance.json \
             --source-pins nba_player_props_v1/evidence/source_pins.json \
             --as-of 2026-09-08T16:00:00Z
-      - name: Adjudicate release mismatches against final PBP
+      - name: Adjudicate release mismatches against final boxes
         run: |
           python -m nba_player_props_v1.historical.final_box_adjudication \
             --source-report /tmp/nba-source-rebuild/source_acceptance.json \
             --output /tmp/nba-source-rebuild/final_box_adjudication.json
+      - name: Finalize source acceptance state
+        run: |
+          python -m nba_player_props_v1.historical.finalize_source_acceptance \
+            --candidate /tmp/nba-source-rebuild/source_acceptance.json \
+            --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
+            --output /tmp/nba-source-rebuild/source_acceptance_final.json
       - name: Audit raw player exclusions
         run: |
           python -m nba_player_props_v1.historical.player_exclusion_audit \
