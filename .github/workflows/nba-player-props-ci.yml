@@ -1,0 +1,60 @@
+name: NBA Player Props V1 CI
+
+on:
+  push:
+    branches: [feature/nba-player-props-v1]
+    paths:
+      - 'nba_player_props_v1/**'
+      - '.github/workflows/nba-player-props-ci.yml'
+  pull_request:
+    paths:
+      - 'nba_player_props_v1/**'
+      - '.github/workflows/nba-player-props-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nba-player-props-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: nba_player_props_v1/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Python test dependencies
+        run: pip install -r nba_player_props_v1/requirements.txt
+      - name: Python contract tests
+        run: pytest -q nba_player_props_v1/tests
+      - name: Compile Python
+        run: python -m compileall -q nba_player_props_v1
+      - name: Worker and market integrity tests
+        run: |
+          node --test nba_player_props_v1/worker/*.test.mjs
+          node --test nba_player_props_v1/market_worker/*.test.mjs
+      - name: Architecture boundary sanity
+        shell: bash
+        run: |
+          grep -q 'whole-slate' nba_player_props_v1/ARCHITECTURE.md
+          grep -q 'market_data=false' nba_player_props_v1/ARCHITECTURE.md
+          grep -q 'SportsDataverse' nba_player_props_v1/DATA_SOURCE_AUDIT.md
+          grep -q 'player_assists_alternate' nba_player_props_v1/DATA_SOURCE_AUDIT.md
+          grep -q 'player_rebounds_alternate' nba_player_props_v1/DATA_SOURCE_AUDIT.md
+          grep -q 'RESEARCH_COMPLETE' nba_player_props_v1/worker/slate_queue.js
+          grep -q 'Exact frozen threshold' nba_player_props_v1/market_worker/market_core.js
+      - name: NBL isolation guard
+        shell: bash
+        run: |
+          git diff --exit-code origin/main...HEAD -- nbl_player_props_v1/
+          echo 'NBA_V1_NBL_ISOLATION=PASS'
