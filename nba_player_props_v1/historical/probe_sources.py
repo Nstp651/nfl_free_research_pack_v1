@@ -1,4 +1,4 @@
-"""Read-only connectivity evidence; successful HTTP is never source acceptance."""
+"""Read-only source connectivity evidence; successful HTTP is never model promotion."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -9,7 +9,8 @@ from urllib.request import Request, urlopen
 from nba_player_props_v1.source_receipt import canonical_json, sha256_bytes
 
 URLS = {
-    "current_schedule": "https://cdn.nba.com/static/json/staticData/scheduleLeagueV2.json",
+    "official_schedule": "https://cdn.nba.com/static/json/staticData/scheduleLeagueV2.json",
+    "espn_scoreboard": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
     # Published nba_api endpoint example: connectivity only, NOT current freshness.
     "player_track_sample": "https://stats.nba.com/stats/boxscoreplayertrackv3?GameID=0021700807",
 }
@@ -24,22 +25,31 @@ def probe(item):
     name, url = item
     result = {"name": name, "url": url, "checked_at_utc": datetime.now(timezone.utc).isoformat()}
     try:
-        request = Request(url, headers={"User-Agent": "NBA-V1-source-audit/1.0", "Accept": "application/json"})
+        request = Request(url, headers={"User-Agent": "Mozilla/5.0 NBA-V1-source-audit/1.0", "Accept": "application/json"})
         with urlopen(request, timeout=25) as response:
             raw = response.read()
-            json.loads(raw)
+            payload = json.loads(raw)
             result.update(status="RECEIVED_JSON_NOT_ACCEPTED", http_status=response.status,
-                          bytes=len(raw), sha256=sha256_bytes(raw))
+                          bytes=len(raw), sha256=sha256_bytes(raw), root_type=type(payload).__name__)
     except Exception as exc:
         result.update(status="BLOCKED", error_type=type(exc).__name__, reason=str(exc))
     return result
+
+
+def current_fixture_decision(probes):
+    """Choose connectivity candidate only. Identity/schema/freshness acceptance remains separate."""
+    if probes["official_schedule"]["status"] != "BLOCKED":
+        return {"preferred": "official_schedule", "fallback": "espn_scoreboard", "status": "OFFICIAL_CONNECTIVITY_AVAILABLE"}
+    if probes["espn_scoreboard"]["status"] != "BLOCKED":
+        return {"preferred": "espn_scoreboard", "fallback": "official_schedule_reconciliation_when_available", "status": "NON_MARKET_FALLBACK_AVAILABLE"}
+    return {"preferred": None, "fallback": None, "status": "NO_CURRENT_FIXTURE_SOURCE_CONNECTIVITY"}
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    with ThreadPoolExecutor(max_workers=3) as pool:
         probes = dict(zip(URLS, pool.map(probe, URLS.items())))
     registry = {}
     for name in TRACK_METRICS + OTHER_METRICS:
@@ -53,12 +63,14 @@ def main():
             "identity_reconciliation": "NOT_VERIFIED", "current_season_freshness": "NOT_VERIFIED",
             "historical_consistency": "NOT_VERIFIED", "production_feature": False,
             "reason": "No accepted game-level historical/runtime enrichment dataset; never zero-impute as evidence"}
-    report = {"schema_version": "nba_specialist_probe_v1", "market_data": False,
-        "source_acceptance": "NOT_ACCEPTED", "probes": probes, "specialist_metrics": registry}
+    report = {"schema_version": "nba_specialist_probe_v2", "market_data": False,
+        "source_acceptance": "NOT_ACCEPTED", "probes": probes,
+        "current_fixture_connectivity": current_fixture_decision(probes),
+        "specialist_metrics": registry}
     report["receipt_sha256"] = sha256_bytes(canonical_json(report))
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_bytes(canonical_json(report) + b"\n")
-    print(json.dumps(probes))
+    print(json.dumps({"current_fixture_connectivity": report["current_fixture_connectivity"], "probes": probes}))
 
 
 if __name__ == "__main__":
