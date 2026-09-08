@@ -5,7 +5,8 @@ import csv
 import hashlib
 import io
 import math
-from typing import Any, Dict, Iterable, Mapping
+import re
+from typing import Any, Dict, Mapping
 
 from ..model_core import ModelIntegrityError
 
@@ -51,6 +52,8 @@ PHYSICAL_FEATURES = (
     "sprint_count_full_tip",
 )
 
+RoleKey = tuple[str, str, str]
+
 
 def git_blob_sha1(content: bytes) -> str:
     """Compute the Git object id for raw file bytes."""
@@ -77,16 +80,23 @@ def _num(value: Any) -> float | None:
     return number
 
 
-def _identity(row: Mapping[str, str]) -> tuple[str, str]:
+def _identity(row: Mapping[str, str]) -> RoleKey:
+    """SkillCorner aggregates are role-segmented, so position is part of identity.
+
+    A player may legitimately have multiple aggregate rows for one team when they
+    played materially different position groups. Keeping those rows separate is
+    preferable to averaging away the role signal we intend to study.
+    """
     player_id = str(row.get("player_id") or "").strip()
     team_id = str(row.get("team_id") or "").strip()
-    if not player_id or not team_id:
-        raise ModelIntegrityError("SkillCorner player_id/team_id required")
-    return player_id, team_id
+    position_group = str(row.get("position_group") or "").strip()
+    if not player_id or not team_id or not position_group:
+        raise ModelIntegrityError("SkillCorner player_id/team_id/position_group required")
+    return player_id, team_id, position_group
 
 
-def parse_aggregate(text: str, kind: str) -> Dict[tuple[str, str], Dict[str, Any]]:
-    """Parse one aggregate CSV into one row per player-team identity."""
+def parse_aggregate(text: str, kind: str) -> Dict[RoleKey, Dict[str, Any]]:
+    """Parse one aggregate CSV into one row per player-team-position identity."""
     if kind not in {"obr", "passing", "physical"}:
         raise ModelIntegrityError(f"unsupported SkillCorner aggregate kind {kind}")
     features = {"obr": OBR_FEATURES, "passing": PASSING_FEATURES, "physical": PHYSICAL_FEATURES}[kind]
@@ -96,7 +106,7 @@ def parse_aggregate(text: str, kind: str) -> Dict[tuple[str, str], Dict[str, Any
     missing = [field for field in ("player_id", "player_name", "team_id", "team_name", "position_group", *features) if field not in reader.fieldnames]
     if missing:
         raise ModelIntegrityError(f"SkillCorner {kind} missing fields {missing}")
-    out: Dict[tuple[str, str], Dict[str, Any]] = {}
+    out: Dict[RoleKey, Dict[str, Any]] = {}
     for raw in reader:
         competition = str(raw.get("competition_name") or "").strip()
         season = str(raw.get("season_name") or "").strip()
@@ -104,7 +114,7 @@ def parse_aggregate(text: str, kind: str) -> Dict[tuple[str, str], Dict[str, Any
             raise ModelIntegrityError(f"unexpected SkillCorner competition/season {competition} {season}")
         key = _identity(raw)
         if key in out:
-            raise ModelIntegrityError(f"duplicate SkillCorner {kind} identity {key}")
+            raise ModelIntegrityError(f"duplicate SkillCorner {kind} role identity {key}")
         minutes_field = "minutes_full_all" if kind == "physical" else "minutes"
         out[key] = {
             "source_player_id": key[0],
@@ -112,7 +122,7 @@ def parse_aggregate(text: str, kind: str) -> Dict[tuple[str, str], Dict[str, Any
             "player_name": str(raw.get("player_name") or "").strip(),
             "player_birthdate": str(raw.get("player_birthdate") or "").strip() or None,
             "team_name": str(raw.get("team_name") or "").strip(),
-            "position_group": str(raw.get("position_group") or "").strip(),
+            "position_group": key[2],
             "minutes": _num(raw.get(minutes_field)),
             "features": {field: _num(raw.get(field)) for field in features},
         }
@@ -121,15 +131,33 @@ def parse_aggregate(text: str, kind: str) -> Dict[tuple[str, str], Dict[str, Any
     return out
 
 
+def _profile_role_slug(position_group: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", position_group.casefold()).strip("_")
+    if not slug:
+        raise ModelIntegrityError("empty SkillCorner role slug")
+    return slug
+
+
 def build_role_profiles(
-    obr: Mapping[tuple[str, str], Mapping[str, Any]],
-    passing: Mapping[tuple[str, str], Mapping[str, Any]],
-    physical: Mapping[tuple[str, str], Mapping[str, Any]],
+    obr: Mapping[RoleKey, Mapping[str, Any]],
+    passing: Mapping[RoleKey, Mapping[str, Any]],
+    physical: Mapping[RoleKey, Mapping[str, Any]],
 ) -> tuple[list[Dict[str, Any]], Dict[str, Any]]:
-    """Join raw aggregate families without inventing a fitted composite score."""
-    keys = sorted(set(obr) | set(passing) | set(physical), key=lambda x: (int(x[0]) if x[0].isdigit() else x[0], x[1]))
+    """Join raw aggregate families by player-team-role without fitted composites."""
+    keys = sorted(
+        set(obr) | set(passing) | set(physical),
+        key=lambda x: (int(x[0]) if x[0].isdigit() else x[0], x[1], x[2]),
+    )
     profiles: list[Dict[str, Any]] = []
     complete = 0
+    players_with_multiple_roles: set[tuple[str, str]] = set()
+    roles_per_player_team: Dict[tuple[str, str], set[str]] = {}
+    for key in keys:
+        roles_per_player_team.setdefault((key[0], key[1]), set()).add(key[2])
+    for identity, roles in roles_per_player_team.items():
+        if len(roles) > 1:
+            players_with_multiple_roles.add(identity)
+
     for key in keys:
         sources = {"obr": obr.get(key), "passing": passing.get(key), "physical": physical.get(key)}
         present = [name for name, row in sources.items() if row is not None]
@@ -139,18 +167,22 @@ def build_role_profiles(
         for name, row in sources.items():
             if row is None:
                 continue
-            if row["player_name"] != anchor["player_name"] or row["team_name"] != anchor["team_name"]:
+            if (
+                row["player_name"] != anchor["player_name"]
+                or row["team_name"] != anchor["team_name"]
+                or row["position_group"] != anchor["position_group"]
+            ):
                 raise ModelIntegrityError(f"SkillCorner identity disagreement for {key} in {name}")
         profiles.append({
             "schema_version": "aleague_skillcorner_role_profile_v1",
-            "profile_id": f"skillcorner:{key[0]}:{key[1]}:2024-25",
+            "profile_id": f"skillcorner:{key[0]}:{key[1]}:{_profile_role_slug(key[2])}:2024-25",
             "season": "2024-25",
             "source_player_id": key[0],
             "source_team_id": key[1],
             "player_name": anchor["player_name"],
             "player_birthdate": anchor.get("player_birthdate"),
             "team_name": anchor["team_name"],
-            "position_group": anchor["position_group"],
+            "position_group": key[2],
             "source_presence": present,
             "minutes": {name: row.get("minutes") if row else None for name, row in sources.items()},
             "features": {
@@ -164,6 +196,8 @@ def build_role_profiles(
         "profiles": len(profiles),
         "complete_three_family_profiles": complete,
         "complete_join_rate": coverage,
+        "player_team_identities": len(roles_per_player_team),
+        "player_team_identities_with_multiple_roles": len(players_with_multiple_roles),
         "obr_rows": len(obr),
         "passing_rows": len(passing),
         "physical_rows": len(physical),
