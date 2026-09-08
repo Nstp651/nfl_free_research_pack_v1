@@ -167,15 +167,13 @@ def derive_final_box_stats(payload: dict) -> dict[str, dict]:
     for team_id, values in out.items():
         if "player" not in values or "team" not in values:
             raise ValueError(f"final box incomplete for team {team_id}")
-        values["team_only_rebounds"] = {
+        values["team_minus_player_rebounds"] = {
             "rebounds": values["team"]["rebounds"] - values["player"]["rebounds"],
             "offensive_rebounds": values["team"]["offensive_rebounds"]
             - values["player"]["offensive_rebounds"],
             "defensive_rebounds": values["team"]["defensive_rebounds"]
             - values["player"]["defensive_rebounds"],
         }
-        if min(values["team_only_rebounds"].values()) < 0:
-            raise ValueError(f"final team rebound total below player sum for team {team_id}")
     return out
 
 
@@ -200,7 +198,7 @@ def _fetch_final(game_id: str) -> tuple[dict, dict]:
     request = Request(
         url,
         headers={
-            "User-Agent": "NBA-V1-final-box-adjudication/2.0",
+            "User-Agent": "NBA-V1-final-box-adjudication/2.1",
             "Accept": "application/json",
         },
     )
@@ -228,9 +226,11 @@ def _adjudicate_field(field: str, values: dict, final: dict) -> dict:
     team_confirmed = team_release == final_team
 
     if field in REBOUND_FIELDS:
-        team_only = float(final["team_only_rebounds"][field])
-        if raw_confirmed and team_confirmed:
+        team_minus_player = float(final["team_minus_player_rebounds"][field])
+        if raw_confirmed and team_confirmed and team_minus_player >= 0:
             decision = "FINAL_PLAYER_AND_TEAM_RELEASES_CONFIRMED_TEAM_REBOUND_ACCOUNTING"
+        elif raw_confirmed and team_confirmed and team_minus_player < 0:
+            decision = "FINAL_BOX_INTERNAL_ACCOUNTING_MISMATCH_REBUILD_REQUIRED"
         elif not raw_confirmed and team_confirmed:
             decision = "TEAM_RELEASE_CONFIRMED_PLAYER_RELEASE_STALE"
         elif raw_confirmed and not team_confirmed:
@@ -241,16 +241,15 @@ def _adjudicate_field(field: str, values: dict, final: dict) -> dict:
             **values,
             "final_player_box": final_player,
             "final_team_box": final_team,
-            "final_team_only_rebounds": team_only,
+            "final_team_minus_player_rebounds": team_minus_player,
             "raw_player_release_confirmed": raw_confirmed,
             "team_release_confirmed": team_confirmed,
             "decision": decision,
         }
 
-    # Core counted stats have no legitimate team-only accounting bucket. If the
-    # final player sum and final team total disagree, the final box is internally
-    # inconsistent and the unit remains blocked even if one release matches.
-    if final_player != final_team:
+    if final_player != final_team and raw_confirmed and team_confirmed:
+        decision = "FINAL_BOX_INTERNAL_ACCOUNTING_MISMATCH_REBUILD_REQUIRED"
+    elif final_player != final_team:
         decision = "UNRESOLVED_FINAL_BOX_INTERNAL_MISMATCH"
     elif raw_confirmed and team_confirmed:
         decision = "BOTH_RELEASES_CONFIRMED"
@@ -276,6 +275,7 @@ def adjudicate(source_report: dict) -> dict:
     rows = []
     stale_player_units = set()
     stale_team_units = set()
+    rebuild_required_units = set()
     unresolved_units = set()
 
     for (game, team), fields in sorted(units.items()):
@@ -292,8 +292,11 @@ def adjudicate(source_report: dict) -> dict:
         decision_values = {detail["decision"] for detail in decisions.values()}
         if "TEAM_RELEASE_CONFIRMED_PLAYER_RELEASE_STALE" in decision_values:
             stale_player_units.add((game, team))
+            rebuild_required_units.add((game, team))
         if "PLAYER_RELEASE_CONFIRMED_TEAM_RELEASE_STALE" in decision_values:
             stale_team_units.add((game, team))
+        if "FINAL_BOX_INTERNAL_ACCOUNTING_MISMATCH_REBUILD_REQUIRED" in decision_values:
+            rebuild_required_units.add((game, team))
         if any(value.startswith("UNRESOLVED") for value in decision_values):
             unresolved_units.add((game, team))
         rows.append(
@@ -307,7 +310,7 @@ def adjudicate(source_report: dict) -> dict:
     status = "PASS" if not unresolved_units else "FAIL"
     receipts = {game: receipt for game, (_, receipt) in sorted(by_game.items())}
     report = {
-        "schema_version": "nba_final_box_adjudication_v2",
+        "schema_version": "nba_final_box_adjudication_v2_1",
         "market_data": False,
         "status": status,
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -320,6 +323,10 @@ def adjudicate(source_report: dict) -> dict:
             {"game_id_espn": game, "team_id_espn": team}
             for game, team in sorted(stale_team_units)
         ],
+        "rebuild_required_units": [
+            {"game_id_espn": game, "team_id_espn": team}
+            for game, team in sorted(rebuild_required_units)
+        ],
         "unresolved_units": [
             {"game_id_espn": game, "team_id_espn": team}
             for game, team in sorted(unresolved_units)
@@ -328,9 +335,10 @@ def adjudicate(source_report: dict) -> dict:
         "adjudications": rows,
         "rule": (
             "NO TOLERANCE: season-release mismatches are compared independently to "
-            "the final per-game player box and team box. Team-only rebound accounting "
-            "is explicit. Any stale player-release unit requires history quarantine "
-            "and model rebuild; unresolved final-box discrepancies block promotion."
+            "the final per-game player box and team box. Non-negative team-minus-player "
+            "rebound gaps are explicit team rebound accounting. Any stale player release "
+            "or internally inconsistent final box requires full-game history quarantine; "
+            "unresolved units block promotion."
         ),
     }
     report["receipt_sha256"] = sha256_bytes(canonical_json(report))
@@ -352,6 +360,7 @@ def main() -> None:
                 "mismatch_game_team_units": report["mismatch_game_team_units"],
                 "stale_player_release_units": report["stale_player_release_units"],
                 "stale_team_release_units": report["stale_team_release_units"],
+                "rebuild_required_units": report["rebuild_required_units"],
                 "unresolved_units": report["unresolved_units"],
                 "receipt_sha256": report["receipt_sha256"],
             }
