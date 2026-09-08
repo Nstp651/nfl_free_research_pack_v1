@@ -24,10 +24,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile
+      - name: Compile Python
         run: python -m compileall -q aleague_player_volume_v1
-      - name: Unit tests
+      - name: Python unit tests
         run: python -m unittest discover -s aleague_player_volume_v1/tests -v
+      - name: Worker integrity tests
+        run: node --test aleague_player_volume_v1/worker/*.test.mjs
       - name: Market-blind import smoke test
         run: |
           python - <<'PY'
