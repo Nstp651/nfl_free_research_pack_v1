@@ -25,6 +25,7 @@ def test_source_passes_when_every_player_release_mismatch_is_confirmed():
         "unresolved_units": [],
         "stale_player_release_units": [],
         "stale_team_release_units": [{"game_id_espn": "1", "team_id_espn": "4"}],
+        "rebuild_required_units": [],
         "adjudications": [{
             "fields": {
                 "assists": {
@@ -43,7 +44,7 @@ def test_source_passes_when_every_player_release_mismatch_is_confirmed():
     assert result["player_release_confirmed_fields"] == 2
 
 
-def test_stale_player_release_requires_rebuild_not_acceptance():
+def test_stale_player_release_requires_rebuild_then_passes_with_exact_quarantine():
     adjudication = {
         "market_data": False,
         "status": "PASS",
@@ -52,6 +53,7 @@ def test_stale_player_release_requires_rebuild_not_acceptance():
         "unresolved_units": [],
         "stale_player_release_units": [{"game_id_espn": "1", "team_id_espn": "4"}],
         "stale_team_release_units": [],
+        "rebuild_required_units": [{"game_id_espn": "1", "team_id_espn": "4"}],
         "adjudications": [{
             "fields": {
                 "assists": {
@@ -61,5 +63,41 @@ def test_stale_player_release_requires_rebuild_not_acceptance():
             }
         }],
     }
+    first = finalize_source_acceptance(_candidate(), adjudication)
+    assert first["status"] == "REBUILD_REQUIRED"
+
+    quarantine = {
+        "market_data": False,
+        "source_history_sha256": "a" * 64,
+        "adjudication_receipt_sha256": "d" * 64,
+        "quarantined_game_ids": ["1"],
+        "accepted_history_sha256": "e" * 64,
+        "receipt_sha256": "f" * 64,
+    }
+    final = finalize_source_acceptance(_candidate(), adjudication, quarantine)
+    assert final["status"] == "PASS"
+    assert final["history_sha256"] == "e" * 64
+
+
+def test_internal_final_box_mismatch_requires_full_game_rebuild():
+    adjudication = {
+        "market_data": False,
+        "status": "PASS",
+        "receipt_sha256": "d" * 64,
+        "mismatch_game_team_units": 1,
+        "unresolved_units": [],
+        "stale_player_release_units": [],
+        "stale_team_release_units": [],
+        "rebuild_required_units": [{"game_id_espn": "2", "team_id_espn": "3"}],
+        "adjudications": [{
+            "fields": {
+                "rebounds": {
+                    "decision": "FINAL_BOX_INTERNAL_ACCOUNTING_MISMATCH_REBUILD_REQUIRED",
+                    "raw_player_release_confirmed": True,
+                }
+            }
+        }],
+    }
     result = finalize_source_acceptance(_candidate(), adjudication)
     assert result["status"] == "REBUILD_REQUIRED"
+    assert result["rebuild_required_game_ids"] == ["2"]
