@@ -89,8 +89,8 @@ Allowed statuses:
 | secondary assists | PARTIAL pending gate | NBA player-track V3 exposes per-game secondary assists |
 | rebound chances O/D/total | PARTIAL pending gate | NBA player-track V3 exposes per-game chance counts |
 | potential assists | PARTIAL pending gate | official NBA tracking metric exists; endpoint/history/reliability must be proven |
-| time of possession | PARTIAL pending gate | official tracking metric exists; endpoint/history/reliability must be proven |
-| drives | PARTIAL pending gate | official tracking metric exists; endpoint/history/reliability must be proven |
+| time of possession | PARTIAL pending gate | official NBA tracking metric exists; endpoint/history/reliability must be proven |
+| drives | PARTIAL pending gate | official NBA tracking metric exists; endpoint/history/reliability must be proven |
 | box-outs | PARTIAL/UNRESOLVED | use only if a maintained official endpoint passes game-level historical coverage gates |
 | contested rebound chances | UNRESOLVED | distinguish actual contested/uncontested rebounds from chance fields; do not conflate |
 | PnR ball-handler role | NOT_RELIABLE for V1 QBASE until proven | play-type/Synergy-style data are not assumed freely/stably available |
@@ -203,9 +203,10 @@ NBA keys to request:
 - `player_rebounds`
 - `player_rebounds_alternate`
 
-The official quota formula is `10 × unique returned markets × regions`. Therefore four returned market keys in one region cost 40 credits per event. V1 budget policy:
+For the **current** event-odds endpoint, the official quota formula is `unique returned markets × regions`. Therefore four returned NBA prop keys in one region cost at most 4 credits per event; a 10-game slate is at most 40 credits before any targeted refreshes. The `10 ×` multiplier applies to historical event-odds, which this production market workflow does not need. V1 budget policy:
 
-- one canonical full-slate pull after global freeze;
+- obtain event IDs from the quota-free current events endpoint;
+- one canonical full-slate event-odds pull after global freeze;
 - default one required region, not multiple redundant regions;
 - record `x-requests-last`, `x-requests-used`, `x-requests-remaining` on every pull;
 - targeted refreshes only for shortlisted/requested games rather than blind repeated whole-slate refreshes;
