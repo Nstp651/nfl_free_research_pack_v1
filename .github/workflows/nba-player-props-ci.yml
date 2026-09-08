@@ -64,14 +64,16 @@ jobs:
         run: |
           python -m nba_player_props_v1.historical.build_history --manifest nba_player_props_v1/evidence/source_pins.json --cache /tmp/nba-source-cache --output /tmp/nba-source-rebuild --as-of 2026-09-08T16:00:00Z
           python -c "import json; from pathlib import Path; actual=json.loads(Path('/tmp/nba-source-rebuild/historical_build_receipt.json').read_text()); expected=json.loads(Path('nba_player_props_v1/evidence/historical_build_receipt.json').read_text()); assert actual['normalized_sha256']==expected['normalized_sha256'], 'historical rebuild mismatch'"
-      - name: Independent source acceptance candidate
+      - name: Independent source acceptance
         run: |
           python -m nba_player_props_v1.historical.source_acceptance \
             --history /tmp/nba-source-rebuild/player_games.csv \
             --seasons 2022 2023 2024 2025 2026 \
             --cache /tmp/nba-source-audit-cache \
             --output /tmp/nba-source-rebuild/source_acceptance.json \
+            --source-pins nba_player_props_v1/evidence/source_pins.json \
             --as-of 2026-09-08T16:00:00Z
+          python -c "import json; from pathlib import Path; r=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance.json').read_text()); assert r['status']=='PASS', f\"source acceptance failed: {r['status']}\""
       - name: Audit raw player exclusions
         run: |
           python -m nba_player_props_v1.historical.player_exclusion_audit \
