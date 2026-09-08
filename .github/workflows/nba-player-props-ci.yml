@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: nba-player-props-v1-${{ github.ref }}
@@ -111,9 +111,7 @@ jobs:
       - name: Re-run locked temporal challenges on accepted history
         run: |
           mkdir -p /tmp/nba-model-challenge
-          python -m nba_player_props_v1.model.challenge \
-            --history /tmp/nba-source-rebuild/player_games_accepted.csv \
-            --output /tmp/nba-model-challenge
+          python -m nba_player_props_v1.model.challenge --history /tmp/nba-source-rebuild/player_games_accepted.csv --output /tmp/nba-model-challenge
       - name: Independent Assists QBASE promotion
         run: |
           python -m nba_player_props_v1.model.promotion \
@@ -145,17 +143,42 @@ jobs:
               assert promoted['head'] == head
               assert promoted['source_acceptance_receipt_sha256'] == source['receipt_sha256']
               assert promoted['holdout_use_rule'] == 'PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
-              out[head] = {
-                  'status': promoted['status'],
-                  'model_version': promoted['model_version'],
-                  'selected_candidate': challenge['selected_candidate'],
-                  'promotion_receipt_sha256': promoted['promotion_receipt_sha256'],
-                  'history_sha256': source['history_sha256'],
-                  'restricted_cohorts': promoted['restricted_cohorts'],
-                  'holdout_overall': promoted['holdout_review']['overall'],
-              }
+              out[head] = {'status': promoted['status'], 'model_version': promoted['model_version'], 'selected_candidate': challenge['selected_candidate'], 'promotion_receipt_sha256': promoted['promotion_receipt_sha256'], 'history_sha256': source['history_sha256'], 'restricted_cohorts': promoted['restricted_cohorts'], 'holdout_overall': promoted['holdout_review']['overall']}
           print('NBA_QBASE_PROMOTION_SUMMARY=' + json.dumps(out, sort_keys=True, separators=(',', ':')))
           PY
+      - name: Build deterministic runtime prior pack
+        run: |
+          python -m nba_player_props_v1.model.runtime_prior_pack \
+            --history /tmp/nba-source-rebuild/player_games_accepted.csv \
+            --output /tmp/nba-source-rebuild/runtime_prior_pack.json
+          python -c "import json; from pathlib import Path; s=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text()); p=json.loads(Path('/tmp/nba-source-rebuild/runtime_prior_pack.json').read_text()); assert p['history_sha256']==s['history_sha256']; assert p['market_data'] is False"
+      - name: Stage deterministic runtime assets
+        run: |
+          mkdir -p nba_player_props_v1/data
+          cp /tmp/nba-source-rebuild/promoted_assists_qbase.json nba_player_props_v1/data/promoted_assists_qbase.json
+          cp /tmp/nba-source-rebuild/promoted_rebounds_qbase.json nba_player_props_v1/data/promoted_rebounds_qbase.json
+          cp /tmp/nba-source-rebuild/runtime_prior_pack.json nba_player_props_v1/data/runtime_prior_pack.json
+          python -m nba_player_props_v1.model.runtime_asset_manifest \
+            --source /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
+            --assists nba_player_props_v1/data/promoted_assists_qbase.json \
+            --rebounds nba_player_props_v1/data/promoted_rebounds_qbase.json \
+            --prior nba_player_props_v1/data/runtime_prior_pack.json \
+            --output nba_player_props_v1/data/manifest.json
+      - name: Verify promoted-asset commit is deterministic
+        if: github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Promote deterministic NBA V1 runtime assets')
+        run: git diff --exit-code -- nba_player_props_v1/data/
+      - name: Commit promoted runtime assets
+        if: github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Promote deterministic NBA V1 runtime assets')
+        run: |
+          if ! git diff --quiet -- nba_player_props_v1/data/; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add nba_player_props_v1/data/
+            git commit -m 'Promote deterministic NBA V1 runtime assets'
+            git push origin HEAD:feature/nba-player-props-v1
+          else
+            echo 'NBA_RUNTIME_ASSETS_ALREADY_CURRENT=PASS'
+          fi
       - name: Preserve source and promotion evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -164,3 +187,4 @@ jobs:
           path: |
             /tmp/nba-source-rebuild/*.json
             /tmp/nba-model-challenge/*.json
+            nba_player_props_v1/data/*.json
