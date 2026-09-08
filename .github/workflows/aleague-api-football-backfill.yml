@@ -33,7 +33,7 @@ jobs:
           fi
       - name: Backfill and validate
         run: |
-          python aleague_player_volume_v1/scripts/backfill_api_football.py \
+          python -m aleague_player_volume_v1.scripts.backfill_api_football \
             --season '${{ inputs.season }}' \
             --min-coverage-rate '${{ inputs.min_coverage_rate }}'
       - name: Upload canonical candidate pack

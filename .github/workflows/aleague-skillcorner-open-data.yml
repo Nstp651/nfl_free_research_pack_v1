@@ -8,6 +8,7 @@ on:
     paths:
       - 'aleague_player_volume_v1/ingest/skillcorner.py'
       - 'aleague_player_volume_v1/scripts/build_skillcorner_profiles.py'
+      - 'aleague_player_volume_v1/scripts/__init__.py'
       - '.github/workflows/aleague-skillcorner-open-data.yml'
 
 permissions:
@@ -22,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Build pinned SkillCorner role profiles
-        run: python aleague_player_volume_v1/scripts/build_skillcorner_profiles.py
+        run: python -m aleague_player_volume_v1.scripts.build_skillcorner_profiles
       - name: Upload advanced-data candidate pack
         uses: actions/upload-artifact@v4
         with:
