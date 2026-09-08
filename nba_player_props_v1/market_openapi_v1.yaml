@@ -26,7 +26,7 @@ paths:
             schema:
               type: object
               properties:
-                regions: {type: string, default: us, pattern: '^[a-z,]+$'}
+                regions: {type: string, default: au, pattern: '^[a-z,]+$'}
               additionalProperties: false
       responses:
         '200': {description: Current API snapshot and refreshed rankings, content: {application/json: {schema: {$ref: '#/components/schemas/RefreshResponse'}}}}
@@ -75,6 +75,7 @@ components:
         version: {type: string}
         post_freeze_only: {type: boolean}
         markets: {type: array, items: {type: string}}
+        default_regions: {type: string}
         research_service_binding: {type: boolean}
         durable_object_binding: {type: boolean}
         odds_api_key_configured: {type: boolean}
@@ -122,10 +123,14 @@ components:
         fair_decimal_price: {type: [number, 'null']}
         market_break_even_probability: {type: number}
         probability_edge: {type: [number, 'null']}
+        push_adjusted_market_probability: {type: number}
+        push_adjusted_probability_edge: {type: number}
         ev_per_unit: {type: number}
         confidence: {type: string}
         fragility: {type: string}
         model_mean: {type: number}
+        player_model_sha256: {type: string}
+        head_model_sha256: {type: string}
         freeze_receipt_sha256: {type: string}
       required: [game_id, player_id, player_name, stat_type, side, threshold, decimal_price, bookmaker, p_win, p_push, p_loss, ev_per_unit]
       additionalProperties: true
