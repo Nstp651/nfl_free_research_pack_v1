@@ -22,7 +22,7 @@ concurrency:
 jobs:
   integrity:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -84,6 +84,22 @@ jobs:
             --candidate /tmp/nba-source-rebuild/source_acceptance.json \
             --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
             --output /tmp/nba-source-rebuild/source_acceptance_final.json
+          python -c "import json; from pathlib import Path; r=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_final.json').read_text()); assert r['status'] in {'PASS','REBUILD_REQUIRED'}"
+      - name: Apply complete-game source quarantine
+        run: |
+          python -m nba_player_props_v1.historical.apply_stale_game_quarantine \
+            --history /tmp/nba-source-rebuild/player_games.csv \
+            --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
+            --output /tmp/nba-source-rebuild/player_games_accepted.csv \
+            --receipt /tmp/nba-source-rebuild/stale_game_quarantine_receipt.json
+      - name: Accept corrected model history
+        run: |
+          python -m nba_player_props_v1.historical.accept_quarantined_history \
+            --final-source /tmp/nba-source-rebuild/source_acceptance_final.json \
+            --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
+            --quarantine /tmp/nba-source-rebuild/stale_game_quarantine_receipt.json \
+            --output /tmp/nba-source-rebuild/source_acceptance_quarantined.json
+          python -c "import json; from pathlib import Path; r=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text()); assert r['status']=='PASS'"
       - name: Audit raw player exclusions
         run: |
           python -m nba_player_props_v1.historical.player_exclusion_audit \
@@ -92,9 +108,59 @@ jobs:
             --output /tmp/nba-source-rebuild/player_exclusion_audit.json
       - name: Probe official/specialist source connectivity
         run: python -m nba_player_props_v1.historical.probe_sources --output /tmp/nba-source-rebuild/specialist_probe.json
-      - name: Preserve source verification evidence
+      - name: Re-run locked temporal challenges on accepted history
+        run: |
+          mkdir -p /tmp/nba-model-challenge
+          python -m nba_player_props_v1.model.challenge \
+            --history /tmp/nba-source-rebuild/player_games_accepted.csv \
+            --output /tmp/nba-model-challenge
+      - name: Independent Assists QBASE promotion
+        run: |
+          python -m nba_player_props_v1.model.promotion \
+            --challenge /tmp/nba-model-challenge/assists_temporal_challenge.json \
+            --source-acceptance /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
+            --specialist-decision nba_player_props_v1/evidence/specialist_metric_decision.json \
+            --model-version NBA_ASSISTS_QBASE_V1.0.0 \
+            --output /tmp/nba-source-rebuild/promoted_assists_qbase.json
+      - name: Independent Rebounds QBASE promotion
+        run: |
+          python -m nba_player_props_v1.model.promotion \
+            --challenge /tmp/nba-model-challenge/rebounds_temporal_challenge.json \
+            --source-acceptance /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
+            --specialist-decision nba_player_props_v1/evidence/specialist_metric_decision.json \
+            --model-version NBA_REBOUNDS_QBASE_V1.0.0 \
+            --output /tmp/nba-source-rebuild/promoted_rebounds_qbase.json
+      - name: Verify independent promotion lineage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          source = json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text())
+          out = {}
+          for head in ('assists', 'rebounds'):
+              challenge = json.loads(Path(f'/tmp/nba-model-challenge/{head}_temporal_challenge.json').read_text())
+              promoted = json.loads(Path(f'/tmp/nba-source-rebuild/promoted_{head}_qbase.json').read_text())
+              assert challenge['normalized_history_sha256'] == source['history_sha256']
+              assert promoted['status'] == 'PROMOTED_CORE_V1'
+              assert promoted['head'] == head
+              assert promoted['source_acceptance_receipt_sha256'] == source['receipt_sha256']
+              assert promoted['holdout_use_rule'] == 'PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
+              out[head] = {
+                  'status': promoted['status'],
+                  'model_version': promoted['model_version'],
+                  'selected_candidate': challenge['selected_candidate'],
+                  'promotion_receipt_sha256': promoted['promotion_receipt_sha256'],
+                  'history_sha256': source['history_sha256'],
+                  'restricted_cohorts': promoted['restricted_cohorts'],
+                  'holdout_overall': promoted['holdout_review']['overall'],
+              }
+          print('NBA_QBASE_PROMOTION_SUMMARY=' + json.dumps(out, sort_keys=True, separators=(',', ':')))
+          PY
+      - name: Preserve source and promotion evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nba-source-verification-${{ github.run_id }}
-          path: /tmp/nba-source-rebuild/*.json
+          name: nba-v1-evidence-${{ github.run_id }}
+          path: |
+            /tmp/nba-source-rebuild/*.json
+            /tmp/nba-model-challenge/*.json
