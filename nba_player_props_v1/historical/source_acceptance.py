@@ -49,6 +49,13 @@ def _asset_for(season: int, dataset: str):
     return matches[0]
 
 
+def _first_column(frame: pd.DataFrame, candidates: tuple[str, ...], label: str) -> str:
+    hits = [name for name in candidates if name in frame.columns]
+    if not hits:
+        raise ValueError(f"{label} schema missing one of {list(candidates)}; columns={sorted(map(str, frame.columns))}")
+    return hits[0]
+
+
 def _normalize_team_box(frame: pd.DataFrame) -> pd.DataFrame:
     required = {"game_id", "season", "season_type", "team_id", "opponent_team_id", "team_score", "opponent_team_score", *RECON_FIELDS}
     missing = sorted(required.difference(frame.columns))
@@ -66,11 +73,16 @@ def _normalize_team_box(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def _normalize_schedule(frame: pd.DataFrame) -> pd.DataFrame:
-    required = {"game_id", "season", "season_type", "game_date_time", "home_team_id", "away_team_id"}
-    missing = sorted(required.difference(frame.columns))
+    core = {"game_id", "season", "season_type"}
+    missing = sorted(core.difference(frame.columns))
     if missing:
         raise ValueError(f"schedule schema missing {missing}")
-    out = frame.loc[:, sorted(required)].copy()
+    home_col = _first_column(frame, ("home_team_id", "home_id"), "schedule home team")
+    away_col = _first_column(frame, ("away_team_id", "away_id"), "schedule away team")
+    time_col = _first_column(frame, ("game_date_time", "date", "game_date"), "schedule start time")
+    out = frame.loc[:, ["game_id", "season", "season_type", home_col, away_col, time_col]].copy().rename(
+        columns={home_col: "home_team_id", away_col: "away_team_id", time_col: "game_date_time"}
+    )
     for col in ("game_id", "home_team_id", "away_team_id"):
         out[col] = out[col].astype("string")
     out = out[out.season_type.isin([2, 3]) & out.home_team_id.isin(NBA_ESPN_TEAMS) & out.away_team_id.isin(NBA_ESPN_TEAMS)].copy()
