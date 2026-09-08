@@ -118,16 +118,19 @@ def reconcile(history: pd.DataFrame, team_box: pd.DataFrame, schedule: pd.DataFr
     opponent_score_ok = np.isclose(merged.player_opponent_team_score.astype(float), merged.opponent_team_score.astype(float), atol=0, rtol=0)
     opponent_id_ok = merged.opponent_team_id_espn.astype(str).eq(merged.team_box_opponent_team_id.astype(str))
 
-    sched = schedule.rename(columns={"game_id": "game_id_espn"})
+    sched = schedule.rename(columns={"game_id": "game_id_espn"}).copy()
     hist_games = history.groupby("game_id_espn", as_index=False).agg(
         game_start_utc=("game_start_utc", "first"),
         teams=("team_id_espn", lambda s: tuple(sorted(set(map(str, s))))),
     )
     sched["teams"] = sched.apply(lambda r: tuple(sorted((str(r.home_team_id), str(r.away_team_id)))), axis=1)
-    sm = hist_games.merge(sched[["game_id_espn", "game_date_time", "teams"]], on="game_id_espn", how="outer", suffixes=("_history", "_schedule"), indicator=True, validate="one_to_one")
+    schedule_ids = set(sched.game_id_espn.astype(str))
+    history_ids = set(hist_games.game_id_espn.astype(str))
+    extra_schedule_ids = sorted(schedule_ids - history_ids)
+    sm = hist_games.merge(sched[["game_id_espn", "game_date_time", "teams"]], on="game_id_espn", how="left", suffixes=("_history", "_schedule"), indicator=True, validate="one_to_one")
     if not (sm._merge == "both").all():
         missing = sm.loc[sm._merge != "both", ["game_id_espn", "_merge"]].head(20).to_dict("records")
-        raise ValueError(f"schedule coverage mismatch: {missing}")
+        raise ValueError(f"played-game schedule coverage mismatch: {missing}")
     team_identity_ok = sm.teams_history.eq(sm.teams_schedule)
     seconds = (pd.to_datetime(sm.game_start_utc, utc=True) - pd.to_datetime(sm.game_date_time, utc=True)).dt.total_seconds().abs()
     time_ok = seconds <= 60
@@ -137,15 +140,20 @@ def reconcile(history: pd.DataFrame, team_box: pd.DataFrame, schedule: pd.DataFr
     return {
         "status": "PASS" if passed else "FAIL",
         "team_rows": int(len(merged)),
-        "schedule_games": int(len(sm)),
+        "played_schedule_games": int(len(sm)),
+        "schedule_rows_total": int(len(sched)),
+        "schedule_rows_without_played_box": int(len(extra_schedule_ids)),
+        "schedule_rows_without_played_box_sample": extra_schedule_ids[:20],
         "exact_core_fields": exact,
         "team_score_rate": float(score_ok.mean()),
         "opponent_team_score_rate": float(opponent_score_ok.mean()),
         "opponent_identity_rate": float(opponent_id_ok.mean()),
+        "played_schedule_coverage_rate": float((sm._merge == "both").mean()),
         "schedule_team_identity_rate": float(team_identity_ok.mean()),
         "schedule_start_time_within_60s_rate": float(time_ok.mean()),
         "schedule_start_time_max_abs_seconds": float(seconds.max()),
         "threshold": 0.999,
+        "directionality_rule": "ALL_PLAYED_GAMES_MUST_RECONCILE; UNPLAYED_SCHEDULE_ROWS_ARE_REPORTED_NOT_TREATED_AS_BOX_FAILURES",
     }
 
 
