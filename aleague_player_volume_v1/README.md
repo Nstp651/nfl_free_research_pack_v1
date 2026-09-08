@@ -2,22 +2,68 @@
 
 Status: active build on Platform V1. **Not production-ready.**
 
+Current canonical model version: `ALEAGUE_PLAYER_VOLUME_V1_0.3.0`.
+
 ## Locked product decision
-One market-blind A-League Men match engine with three coherent stat heads:
+
+One market-blind A-League Men attacking-volume engine with three coherent stat heads:
 
 1. `PLAYER_SHOTS` — primary
 2. `PLAYER_SHOTS_ON_TARGET` — primary
 3. `GOALKEEPER_SAVES` — secondary
 
-The shared latent object is attacking volume. The engine first estimates team shot environments, allocates shot opportunity to players, thins shots into shots on target, and converts the opponent's frozen shots-on-target environment into goalkeeper save opportunity.
+The shared latent object is attacking volume. The engine estimates each team shot environment, allocates shot opportunity to players, thins player shots into shots on target, reconstructs team SOT, then converts the **opponent's frozen SOT environment** into goalkeeper save opportunity.
 
-V1 does **not** include goalscorers, assists, passes, tackles, cards or corners. Those require distinct event-generation assumptions and are intentionally outside the first calibration surface.
+V1 intentionally excludes goalscorers, assists, passes, tackles, cards and corners.
 
 ## Production lifecycle
 
-`versioned source pack -> fixture/run lock -> current market-blind research -> research checkpoint -> deterministic P_model -> immutable freeze -> post-freeze market adapter -> exact edge/ranking -> receipts`
+`versioned source pack -> persistent fixture/run lock -> market-blind research -> research checkpoint -> deterministic quantitative inputs -> immutable model-input receipt -> atomic P_model freeze -> immutable freeze receipt -> physically separate market service -> exact EV/ranking`
 
-This module inherits `betting_platform_v1/ARCHITECTURE.md`. No A-League code may weaken shared source-lock, freeze, identity or market-blindness rules.
+This module inherits `betting_platform_v1/ARCHITECTURE.md`. No A-League code may weaken shared source-lock, fixture identity, checkpoint, freeze or market-blindness rules.
+
+## Two-Worker security boundary
+
+### Research / freeze Worker
+
+Cloudflare service name: `aleague-player-volume-research-v1`.
+
+Server-owned state machine:
+
+`NEW -> RESEARCH_COMPLETE -> FROZEN`
+
+Implemented routes:
+
+- `GET /health`
+- `POST /v1/runs`
+- `GET /v1/runs/{run_id}`
+- `POST /v1/runs/{run_id}/research`
+- `GET /v1/runs/{run_id}/research`
+- `POST /v1/runs/{run_id}/freeze`
+- `GET /v1/runs/{run_id}/model-inputs`
+- `GET /v1/runs/{run_id}/frozen`
+
+A run locks the exact deployment source commit plus pack/QBASE/advanced revisions. Research may be replaced only before freeze. The Worker computes P_model itself; a client cannot submit a finished probability artifact.
+
+At freeze the Worker persists two independent receipts:
+
+- `model_input_receipt_sha256` — exact quantitative inputs that created P_model;
+- `freeze_receipt_sha256` — exact immutable probability artifact.
+
+That preserves future exact-replay evidence rather than merely storing the final probabilities.
+
+### Market Worker
+
+Cloudflare service name: `aleague-player-volume-market-v1`.
+
+Implemented routes:
+
+- `GET /health`
+- `POST /v1/evaluate`
+
+The market Worker accepts a `run_id` and market rows only. It retrieves the immutable freeze one-way through a Cloudflare service binding to the research Worker, verifies the freeze receipt and every head hash, and then evaluates prices. The research Worker has no route or binding back to market data.
+
+OpenAPI deployment templates live under `openapi/`. Their server host is intentionally a placeholder until Cloudflare deployment has produced the final URLs.
 
 ## Market plan
 
@@ -27,81 +73,130 @@ The probability engine is sportsbook-agnostic. Post-freeze adapters may accept:
 - Odds API rows only if a relevant A-League player market is actually supported at runtime;
 - other explicitly approved post-freeze sources.
 
-A market source can never create or alter P_model. Only exact frozen player/stat/threshold combinations are eligible; no probability interpolation is permitted after market access. The evaluator supports milestone markets, half-point totals and integer push lines from exact frozen count probabilities. Default selection policy is `AT_LEAST` / `OVER`.
+A market source can never create or alter P_model. Only exact frozen player/stat/threshold combinations are eligible; no post-market probability interpolation is allowed. The evaluator supports milestones, half-point totals and integer push lines, best-price deduplication and joint ranking of Shots/SOT/Saves. Default selection policy is `AT_LEAST` / `OVER`; UNDER is available for audit but not recommended by default.
 
 ## Data plan
 
 ### Core structured outcome rail
-- **API-Football / API-Sports** is the primary machine-ingested candidate for fixtures, team shots/SOT, player minutes/shots/SOT and goalkeeper saves. A-League Men is league id `188`.
+
+- **API-Football / API-Sports** is the primary structured-feed candidate for fixtures, team shots/SOT, player minutes/shots/SOT and goalkeeper saves. A-League Men is league id `188`.
 - Completed fixture details are requested in batches of up to 20 IDs where provider coverage supports embedded statistics/player blocks.
-- Raw provider payloads are never the runtime contract. They are normalized into canonical event rows, reconciled, hashed and published as a versioned research pack.
-- Free-plan historical depth is never assumed; a coverage gate must prove the seasons available before a backtest is accepted.
+- Raw provider payloads are normalized, reconciled, hash-addressed and published as canonical assets.
+- Historical depth is never assumed. A live coverage probe must prove accessible seasons before real backtests are accepted.
 
 ### Open advanced layer
-- **SkillCorner Open Data** is an approved MIT-licensed advanced-data source. Its 2024/25 A-League release provides ten tracking matches plus season-level Physical, Off-Ball Runs and Passing aggregates.
-- V1 derives a pinned advanced-role profile from these aggregates for feature discovery, role similarity and prior-competition/current-role research.
-- The open sample is not large enough to justify fitted production coefficients by itself.
+
+- **SkillCorner Open Data** is an approved MIT-licensed advanced-data source pinned to commit `c1e17a0cc3e07e1774b52d929c1a0b85115143fc`.
+- A-League role profiles preserve player + team + position-group identity rather than averaging multi-role players together.
+- Goalkeeper rows remain source-validated but are excluded from the attacking advanced-feature completeness denominator.
+- The live pinned build passes the unchanged 90% attacking three-family completeness gate.
+- SkillCorner remains research/feature-discovery support until any fitted advanced coefficient demonstrates out-of-sample value.
 
 ### Current-information research
-- Official A-Leagues/club sources are preferred for fixture confirmation, squads, availability, suspensions, transfers, expected XI and coaching/system change.
-- FotMob and Transfermarkt remain research-only enrichment unless an explicitly approved access route is added.
+
+- Official A-Leagues/club sources are preferred for fixtures, squads, availability, suspensions, transfers, expected XI and coaching/system changes.
+- FotMob and Transfermarkt remain research-only enrichment unless an approved access route is added.
 - FBref is research/reconciliation only and is not an automated predictive database dependency.
 
 See `SOURCE_POLICY.md`, `source_registry.json` and `ADVANCED_DATA.md`.
 
-## V1 quantitative heads
+## Quantitative construction
 
 ### Team shot environment
-Estimate each team's expected shots before player allocation using leakage-safe own attacking volume, opponent shots allowed, home/away, current-role evidence and lineup/system adjustments.
+
+Estimate expected team shots from leakage-safe own attacking volume, opponent shots allowed and current role/system evidence.
 
 ### Player shots
-Historical player evidence is represented as a per-90 shot propensity. Current projected minutes enter once at run time:
 
 `weight_i = qbase_shots_per90_i * projected_minutes_i/90 * role_multiplier_i`
 
-Weights are normalized to the frozen team shot environment with an explicit unmodelled/bench bucket. Count variance uses a calibrated Negative Binomial parameterization.
+Player weights plus an explicit unmodelled bucket are normalized to the complete frozen team shot mean. Minutes therefore enter only once.
 
-### Player shots on target
-Model `P(SoT | shot)` with hierarchical shrinkage plus evidence-supported current-role/shot-quality adjustments. Player SOT mean is generated from the player's frozen shot process, not entered independently.
+### Player SOT
+
+`mu_sot_i = mu_shots_i * P(SOT | shot)_i`
+
+SOT cannot be entered as an unrelated mean.
 
 ### Goalkeeper saves
-Goalkeeper saves are generated from the **opponent's frozen team SOT mean** and a shrunk `P(save | SoT)` estimate. This preserves cross-head coherence.
 
-## Implemented build foundation
+`mu_saves_gk = opponent_team_sot_mean * P(save | SOT)_gk * projected_minutes/90`
 
-- deterministic Negative Binomial count ladders and shrinkage primitives;
-- leakage-safe pre-match team/player/keeper QBASE builders;
-- canonical API-Football parsing, reconciliation and hash-locked publication helpers;
-- market-blind current-research contract;
-- coherent atomic multi-head freeze and receipts;
-- strict screenshot/manual market-row normalization;
-- exact post-freeze pricing, push-aware EV, best-price deduplication and cross-head ranking;
-- pinned SkillCorner advanced-role profile builder;
-- dedicated CI/integration workflows.
+Saves therefore remain coherent with the opponent attacking process.
+
+Count variance currently uses NB2 and is challenged against a same-mean Poisson baseline in historical validation.
+
+## Historical validation architecture
+
+Three evidence levels are deliberately separated.
+
+### 1. Conditional distribution replay
+
+Uses the realised target appearance set only to decide which distributions are scored. All parameters/minutes priors are pre-target. This may calibrate distributions and dispersion, but **cannot** prove player-selection edge or production readiness.
+
+### 2. Persisted pre-match participant replay
+
+Uses a hash-addressed snapshot captured strictly before kickoff for participant inclusion, availability and projected minutes. DNP/no-provider-appearance rows are recorded as void/unsettled rather than fake zero-count losses. Current implementation uses neutral historical role multipliers, so this is stronger selection evidence but still cannot prove final V1 edge.
+
+### 3. Exact model-input replay
+
+Every live production freeze now persists the exact pre-freeze quantitative inputs and their receipt. This is the required forward-going rail for exact reproduction of role multipliers, SOT adjustments, team environments, save rates and confidence/fragility from historical live runs.
+
+## Pre-registered backtest gates
+
+Before seeing the real holdout, V1 registered these initial acceptance thresholds:
+
+- minimum observations: Shots `500`, SOT `500`, Saves `150`;
+- maximum threshold ECE: `0.07`;
+- maximum absolute mean-bias ratio: `0.12`;
+- minimum NLL improvement versus independent baseline: `0.5%`;
+- minimum milestone-Brier improvement versus independent baseline: `0.2%`;
+- NB2 may not regress versus same-mean Poisson by more than `0.2%` on NLL or milestone Brier.
+
+Any later threshold change requires an explicit model-version change and written rationale; the holdout may not be used to tune the gate after the fact.
+
+## Implemented and CI-verified
+
+- [x] deterministic NB2 count ladders and shrinkage primitives
+- [x] leakage-safe player/team/keeper QBASE builders
+- [x] API-Football parser, reconciliation and hash-locked publication machinery
+- [x] quota-conscious batch historical backfill workflow
+- [x] pinned SkillCorner advanced-role builder and live open-data acceptance
+- [x] market-blind research contract
+- [x] coherent atomic multi-head freeze
+- [x] immutable model-input and probability receipts
+- [x] persistent Durable Object run/checkpoint/freeze state machine
+- [x] physically separate post-freeze market service and one-way binding design
+- [x] manual/screenshot market normalization
+- [x] exact push-aware pricing, best-price dedupe and cross-head ranking
+- [x] leakage-safe backtest/calibration engine with training-only dispersion selection
+- [x] conditional historical replay with production-use block
+- [x] persisted pre-match participant snapshot contract and participant replay
+- [x] research + market Worker Node tests inside the A-League CI suite
+- [x] OpenAPI deployment templates
 
 These are implementation milestones, **not production acceptance**.
 
-## Required acceptance gates
+## Remaining production acceptance gates
 
-- [ ] live API-Football source probe confirms required A-League coverage and accessible historical seasons
-- [ ] source ingestion produces canonical, hashed A-League outcome assets
-- [ ] stable API-Football / SkillCorner / current-roster identity bridge
-- [ ] historical reconstruction for at least two completed seasons where permitted coverage allows
-- [ ] rolling priors generated without future leakage on real data
-- [ ] advanced SkillCorner role profiles built and coverage-audited
-- [ ] player minutes/role scenario contract validated on real fixtures
-- [ ] team-shot and player-allocation out-of-sample backtest
-- [ ] SOT conditional calibration backtest
-- [ ] goalkeeper saves calibration backtest
-- [ ] distribution-family challenge (NB2 vs credible alternatives) passes
-- [ ] market-blind research checkpoint Worker
-- [ ] immutable multi-head freeze Worker with durable persistence
-- [ ] physically separate post-freeze market Worker
-- [ ] screenshot/manual market adapter live acceptance
-- [ ] Odds API capability probe/adaptor remains fail-closed where A-League player props are unsupported
-- [ ] repository CI PASS on production head
-- [ ] Cloudflare deployment health PASS
-- [ ] clean Custom GPT schema import
-- [ ] live future-fixture end-to-end acceptance
+- [ ] live API-Football probe confirms required A-League fields and accessible historical seasons
+- [ ] real canonical API-Football outcome assets published with coverage PASS
+- [ ] stable provider/current-roster identity bridge on real data
+- [ ] at least two completed seasons reconstructed if permitted coverage allows
+- [ ] real-data rolling-prior leakage audit PASS
+- [ ] real-data minutes/role scenario validation PASS
+- [ ] team-shot/player-allocation holdout PASS
+- [ ] SOT calibration holdout PASS
+- [ ] goalkeeper saves calibration holdout PASS
+- [ ] NB2 distribution-family challenge PASS
+- [ ] historical pre-match lineup/research snapshots sufficient for selection replay, or an explicitly documented limitation remains
+- [ ] exact model-input replay acceptance once persisted live-run history exists
+- [ ] research/freeze Worker deployed and live health PASS
+- [ ] market Worker deployed with one-way service binding and live health PASS
+- [ ] manual/screenshot post-freeze market acceptance PASS
+- [ ] Odds API A-League player-prop capability probe remains fail-closed if unsupported
+- [ ] production-head repository CI PASS
+- [ ] final OpenAPI hosts generated and clean Custom GPT schema import PASS
+- [ ] live future-fixture end-to-end acceptance PASS
 
-No production-ready claim is permitted before every applicable gate passes.
+**No production-ready claim is permitted before every applicable production gate passes.**
