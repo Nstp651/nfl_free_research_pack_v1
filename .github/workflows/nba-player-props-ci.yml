@@ -22,7 +22,13 @@ concurrency:
 jobs:
   integrity:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 35
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+      VECLIB_MAXIMUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -112,6 +118,13 @@ jobs:
         run: |
           mkdir -p /tmp/nba-model-challenge
           python -m nba_player_props_v1.model.challenge --history /tmp/nba-source-rebuild/player_games_accepted.csv --output /tmp/nba-model-challenge
+      - name: Prove temporal challenge byte reproducibility
+        run: |
+          mkdir -p /tmp/nba-model-challenge-repeat
+          python -m nba_player_props_v1.model.challenge --history /tmp/nba-source-rebuild/player_games_accepted.csv --output /tmp/nba-model-challenge-repeat
+          cmp /tmp/nba-model-challenge/assists_temporal_challenge.json /tmp/nba-model-challenge-repeat/assists_temporal_challenge.json
+          cmp /tmp/nba-model-challenge/rebounds_temporal_challenge.json /tmp/nba-model-challenge-repeat/rebounds_temporal_challenge.json
+          echo 'NBA_QBASE_BYTE_REPRODUCIBILITY=PASS'
       - name: Independent Assists QBASE promotion
         run: |
           python -m nba_player_props_v1.model.promotion \
@@ -143,6 +156,7 @@ jobs:
               assert promoted['head'] == head
               assert promoted['source_acceptance_receipt_sha256'] == source['receipt_sha256']
               assert promoted['holdout_use_rule'] == 'PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
+              assert challenge['numeric_precision_decimals'] == 10
               out[head] = {'status': promoted['status'], 'model_version': promoted['model_version'], 'selected_candidate': challenge['selected_candidate'], 'promotion_receipt_sha256': promoted['promotion_receipt_sha256'], 'history_sha256': source['history_sha256'], 'restricted_cohorts': promoted['restricted_cohorts'], 'holdout_overall': promoted['holdout_review']['overall']}
           print('NBA_QBASE_PROMOTION_SUMMARY=' + json.dumps(out, sort_keys=True, separators=(',', ':')))
           PY
@@ -166,11 +180,14 @@ jobs:
             --output nba_player_props_v1/data/manifest.json
       - name: Verify promoted-asset commit is deterministic
         if: github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Promote deterministic NBA V1 runtime assets')
-        run: git diff --exit-code -- nba_player_props_v1/data/
+        run: |
+          git diff --exit-code -- nba_player_props_v1/data/
+          test -z "$(git status --porcelain --untracked-files=all -- nba_player_props_v1/data/)"
+          echo 'NBA_RUNTIME_ASSET_REBUILD=BYTE_IDENTICAL'
       - name: Commit promoted runtime assets
         if: github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Promote deterministic NBA V1 runtime assets')
         run: |
-          if ! git diff --quiet -- nba_player_props_v1/data/; then
+          if [ -n "$(git status --porcelain --untracked-files=all -- nba_player_props_v1/data/)" ]; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add nba_player_props_v1/data/
@@ -187,4 +204,5 @@ jobs:
           path: |
             /tmp/nba-source-rebuild/*.json
             /tmp/nba-model-challenge/*.json
+            /tmp/nba-model-challenge-repeat/*.json
             nba_player_props_v1/data/*.json
