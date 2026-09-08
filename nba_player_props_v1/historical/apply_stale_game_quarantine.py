@@ -20,19 +20,19 @@ def apply_quarantine(history_path: str, adjudication_path: str, output_path: str
         },
     )
     adjudication = json.loads(Path(adjudication_path).read_text())
-    stale_units = adjudication.get("stale_player_release_units") or []
-    game_ids = sorted({str(row["game_id_espn"]) for row in stale_units})
+    rebuild_units = adjudication.get("rebuild_required_units") or adjudication.get("stale_player_release_units") or []
+    game_ids = sorted({str(row["game_id_espn"]) for row in rebuild_units})
     if not game_ids:
-        raise ValueError("no stale player-release games to quarantine")
+        raise ValueError("no rebuild-required games to quarantine")
 
     before_rows = len(history)
     before_games = history.game_id_espn.nunique()
     removed = history[history.game_id_espn.isin(game_ids)].copy()
     accepted = history[~history.game_id_espn.isin(game_ids)].copy()
     if removed.empty:
-        raise ValueError("adjudicated stale games were absent from history")
+        raise ValueError("adjudicated rebuild-required games were absent from history")
     if set(removed.game_id_espn.astype(str)) != set(game_ids):
-        raise ValueError("not every stale game was present in history")
+        raise ValueError("not every rebuild-required game was present in history")
 
     # Remove full games, never one team only: this preserves opponent/team temporal symmetry.
     for game_id, group in removed.groupby("game_id_espn"):
@@ -49,12 +49,13 @@ def apply_quarantine(history_path: str, adjudication_path: str, output_path: str
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     accepted.to_csv(output_path, index=False, lineterminator="\n", float_format="%.12g")
     receipt = {
-        "schema_version": "nba_stale_game_quarantine_v1",
+        "schema_version": "nba_source_rebuild_game_quarantine_v2",
         "market_data": False,
         "source_history_sha256": sha256_file(history_path),
         "adjudication_receipt_sha256": adjudication.get("receipt_sha256"),
-        "quarantine_rule": "REMOVE_ENTIRE_GAME_FOR_ANY_FINAL_BOX_CONFIRMED_STALE_PLAYER_RELEASE_UNIT",
-        "stale_player_release_units": stale_units,
+        "quarantine_rule": "REMOVE_ENTIRE_GAME_FOR_ANY_FINAL_BOX_REBUILD_REQUIRED_UNIT",
+        "rebuild_required_units": rebuild_units,
+        "stale_player_release_units": adjudication.get("stale_player_release_units") or [],
         "quarantined_game_ids": game_ids,
         "rows_before": before_rows,
         "rows_removed": len(removed),
