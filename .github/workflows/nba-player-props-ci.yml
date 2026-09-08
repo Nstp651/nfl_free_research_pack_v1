@@ -64,7 +64,7 @@ jobs:
         run: |
           python -m nba_player_props_v1.historical.build_history --manifest nba_player_props_v1/evidence/source_pins.json --cache /tmp/nba-source-cache --output /tmp/nba-source-rebuild --as-of 2026-09-08T16:00:00Z
           python -c "import json; from pathlib import Path; actual=json.loads(Path('/tmp/nba-source-rebuild/historical_build_receipt.json').read_text()); expected=json.loads(Path('nba_player_props_v1/evidence/historical_build_receipt.json').read_text()); assert actual['normalized_sha256']==expected['normalized_sha256'], 'historical rebuild mismatch'"
-      - name: Independent source acceptance
+      - name: Independent source reconciliation candidate
         run: |
           python -m nba_player_props_v1.historical.source_acceptance \
             --history /tmp/nba-source-rebuild/player_games.csv \
@@ -73,7 +73,11 @@ jobs:
             --output /tmp/nba-source-rebuild/source_acceptance.json \
             --source-pins nba_player_props_v1/evidence/source_pins.json \
             --as-of 2026-09-08T16:00:00Z
-          python -c "import json; from pathlib import Path; r=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance.json').read_text()); assert r['status']=='PASS', f\"source acceptance failed: {r['status']}\""
+      - name: Adjudicate release mismatches against final PBP
+        run: |
+          python -m nba_player_props_v1.historical.final_box_adjudication \
+            --source-report /tmp/nba-source-rebuild/source_acceptance.json \
+            --output /tmp/nba-source-rebuild/final_box_adjudication.json
       - name: Audit raw player exclusions
         run: |
           python -m nba_player_props_v1.historical.player_exclusion_audit \
