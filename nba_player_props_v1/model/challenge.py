@@ -7,8 +7,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import platform
+
+# The fitted GLM is an offline promotion input, so its floating-point execution must be
+# portable across GitHub runner CPU models. Force one OpenBLAS dynamic-arch kernel on
+# x86_64 and one numerical thread BEFORE NumPy/SciPy are imported. Runtime scoring is
+# JS and does not depend on this training-only environment contract.
+for _thread_env in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+    os.environ[_thread_env] = "1"
+if platform.machine().lower() in {"x86_64", "amd64"}:
+    os.environ["OPENBLAS_CORETYPE"] = "Haswell"
 
 import numpy as np
 import pandas as pd
@@ -23,12 +33,9 @@ from sklearn.preprocessing import StandardScaler
 from nba_player_props_v1.model.features import build_pregame_features, head_feature_columns
 from nba_player_props_v1.source_receipt import canonical_json, sha256_bytes, sha256_file
 
-# Numerical values far below this precision have no betting meaning but can differ by
-# tiny BLAS/solver reduction order across otherwise identical CI runners. Nine decimal
-# places is deliberately below the observed cross-run 10th-decimal jitter while still
-# orders of magnitude finer than any material player-prop probability/price decision.
-# Runtime artifacts and challenge evidence are quantized before scoring so repeated
-# builds from the same accepted history are canonical across runner CPU implementations.
+# Numerical values far below this precision have no betting meaning. Nine decimals is
+# retained as an extra serialization guard; the primary portability control is the
+# fixed single-thread OpenBLAS execution contract above.
 NUMERIC_DECIMALS = 9
 
 
@@ -219,7 +226,8 @@ def main():
         report = run_challenge(frame, head)
         report["normalized_history_sha256"] = sha256_file(args.history)
         report["environment"] = {"python": platform.python_version(), "numpy": np.__version__,
-            "pandas": pd.__version__, "scipy": scipy.__version__, "sklearn": sklearn_version}
+            "pandas": pd.__version__, "scipy": scipy.__version__, "sklearn": sklearn_version,
+            "openblas_coretype": os.environ.get("OPENBLAS_CORETYPE"), "numeric_threads": 1}
         report["receipt_sha256"] = sha256_bytes(canonical_json(report))
         (out / f"{head}_temporal_challenge.json").write_bytes(canonical_json(report) + b"\n")
         print(head, report["selected_candidate"], report["holdout"]["overall"], flush=True)
