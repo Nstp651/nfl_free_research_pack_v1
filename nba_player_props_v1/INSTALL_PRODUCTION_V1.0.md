@@ -70,15 +70,17 @@ Required committed files:
 The committed assets are produced by the independent promotion chain. Production CI is deliberately non-mutating. Every CI run must:
 1. use the exact pinned Python/numeric environment in `requirements.txt` plus pinned CI Python/Node versions;
 2. rebuild accepted corrected history from pinned source receipts;
-3. canonicalize exported quantitative evidence at 9 decimal places to remove observed cross-run 10th-decimal BLAS/CPU jitter without changing model family, selection or betting-significant precision;
-4. reproduce the temporal challenge twice byte-for-byte;
-5. independently re-run Assists promotion;
-6. independently re-run Rebounds promotion;
-7. rebuild the runtime prior pack and manifest;
-8. require all four rebuilt files to be byte-identical to committed runtime assets;
-9. run both Worker configs through `wrangler@4.128.0 deploy --dry-run`;
-10. enforce Research, Market and NBA Tracker Action contracts, including GPT Instructions under 8,000 bytes;
-11. fail rather than commit or silently replace any drifted asset.
+3. before NumPy/SciPy import, force one numerical thread and `OPENBLAS_CORETYPE=Haswell` on x86_64/amd64 so GLM training uses one deterministic OpenBLAS dynamic-architecture kernel across GitHub runner CPU models;
+4. retain 9-decimal canonical serialization as a secondary guard against immaterial floating-point noise; it is not the primary cross-run reproducibility mechanism;
+5. record the fixed-kernel/thread contract in challenge evidence;
+6. reproduce the temporal challenge twice byte-for-byte;
+7. independently re-run Assists promotion;
+8. independently re-run Rebounds promotion;
+9. rebuild the runtime prior pack and manifest;
+10. require all four rebuilt files to be byte-identical to committed runtime assets;
+11. run both Worker configs through `wrangler@4.128.0 deploy --dry-run`;
+12. enforce Research, Market and NBA Tracker Action contracts, including GPT Instructions under 8,000 bytes;
+13. fail rather than commit or silently replace any drifted asset.
 
 This prevents package/runner drift or GitHub bot commits from becoming a second promotion/deployment owner. Research runtime verifies:
 `deployment Git commit -> manifest -> exact raw file SHA -> promotion/prior lineage`.
