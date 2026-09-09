@@ -54,7 +54,7 @@ def test_normalizes_played_rows_and_drops_market_fields():
 def test_rejects_rebound_identity_failure():
     bad = frame()
     bad.loc[0, "rebounds"] = 7
-    with pytest.raises(ValueError, match="ORB \+ DRB"):
+    with pytest.raises(ValueError, match=r"ORB \+ DRB"):
         normalize_player_box(bad)
 
 
