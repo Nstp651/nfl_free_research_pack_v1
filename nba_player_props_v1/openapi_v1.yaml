@@ -60,6 +60,7 @@ paths:
     post:
       operationId: checkpointNbaPlayerPropsResearch
       summary: Persist completed market-blind research for the current 1-2 game batch.
+      description: An exact retry of an already-persisted checkpoint batch is idempotent and returns the existing state. A changed retry or a mix of persisted and new game IDs is rejected.
       parameters:
         - $ref: '#/components/parameters/RunId'
       requestBody:
@@ -82,6 +83,7 @@ paths:
     post:
       operationId: freezeNbaPlayerPropsSlate
       summary: Atomically compute and freeze the complete requested-head slate after RESEARCH_COMPLETE.
+      description: Once frozen, repeated POST requests are idempotent and return the original frozen_at and freeze_receipt_sha256 without recomputing P_model, including after a later frozen-scope invalidation.
       parameters:
         - $ref: '#/components/parameters/RunId'
       requestBody:
@@ -192,7 +194,7 @@ components:
       additionalProperties: true
     ResearchSeed:
       type: object
-      description: Server-owned current roster identities plus historical priors/QBASE baselines. Historical fields are priors, not current-role truth.
+      description: Server-owned current roster identities plus historical player/team/opponent priors and QBASE baselines. Historical fields are priors, not current-role truth.
       additionalProperties: true
     ResearchBatch:
       type: object
@@ -229,28 +231,41 @@ components:
     MinutesBand:
       type: object
       properties:
-        low: {type: number, minimum: 0, maximum: 53}
-        mean: {type: number, minimum: 0, maximum: 53}
-        high: {type: number, minimum: 0, maximum: 53}
+        low: {type: number, minimum: 0, maximum: 48}
+        mean: {type: number, minimum: 0, maximum: 48}
+        high: {type: number, minimum: 0, maximum: 48}
       required: [low, mean, high]
+      additionalProperties: false
+    RoleResearch:
+      type: object
+      properties:
+        rotation_role: {type: string, minLength: 4}
+        hierarchy_and_competition: {type: string, minLength: 4}
+        lineup_dependencies: {type: string, minLength: 4}
+        role_breakpoints: {type: string, minLength: 4}
+        change_summary: {type: string, minLength: 4}
+        evidence_ids: {type: array, minItems: 1, items: {type: string}}
+      required: [rotation_role, hierarchy_and_competition, lineup_dependencies, role_breakpoints, change_summary, evidence_ids]
       additionalProperties: false
     AssistsOpportunity:
       type: object
       properties:
         expected_assist_share: {type: number, minimum: 0, maximum: 1}
         expected_team_assists: {type: number, minimum: 0, maximum: 80}
+        expected_opponent_assists_allowed: {type: number, minimum: 0, maximum: 80}
         expected_possessions: {type: number, minimum: 0, maximum: 130}
         evidence_ids: {type: array, minItems: 1, items: {type: string}}
-      required: [expected_assist_share, expected_team_assists, expected_possessions, evidence_ids]
+      required: [expected_assist_share, expected_team_assists, expected_opponent_assists_allowed, expected_possessions, evidence_ids]
       additionalProperties: false
     ReboundsOpportunity:
       type: object
       properties:
         expected_rebound_share: {type: number, minimum: 0, maximum: 1}
         expected_team_rebounds: {type: number, minimum: 0, maximum: 80}
+        expected_opponent_rebounds_allowed: {type: number, minimum: 0, maximum: 80}
         expected_possessions: {type: number, minimum: 0, maximum: 130}
         evidence_ids: {type: array, minItems: 1, items: {type: string}}
-      required: [expected_rebound_share, expected_team_rebounds, expected_possessions, evidence_ids]
+      required: [expected_rebound_share, expected_team_rebounds, expected_opponent_rebounds_allowed, expected_possessions, evidence_ids]
       additionalProperties: false
     AssistsContext:
       type: object
@@ -280,6 +295,7 @@ components:
         projected_minutes: {$ref: '#/components/schemas/MinutesBand'}
         expected_starter_probability: {type: number, minimum: 0, maximum: 1}
         evidence_ids: {type: array, minItems: 1, items: {type: string}}
+        role_research: {$ref: '#/components/schemas/RoleResearch'}
         confidence_inputs: {type: object, additionalProperties: true}
         fragility_inputs: {type: object, additionalProperties: true}
         stat_context:
@@ -288,7 +304,7 @@ components:
             assists: {$ref: '#/components/schemas/AssistsContext'}
             rebounds: {$ref: '#/components/schemas/ReboundsContext'}
           additionalProperties: false
-      required: [player_id, player_name, team_id, team, availability, role_state, projected_minutes, expected_starter_probability, evidence_ids, confidence_inputs, fragility_inputs, stat_context]
+      required: [player_id, player_name, team_id, team, availability, role_state, projected_minutes, expected_starter_probability, evidence_ids, role_research, confidence_inputs, fragility_inputs, stat_context]
       additionalProperties: false
     ResearchCheckpoint:
       type: object
