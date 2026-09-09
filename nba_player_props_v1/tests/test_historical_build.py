@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 import pandas as pd
@@ -29,6 +30,38 @@ def test_pinned_asset_tamper_rejected(tmp_path):
     (tmp_path / digest).write_bytes(b"corrupt")
     with pytest.raises(ValueError, match="hash mismatch"):
         fetch_asset({"sha256": digest, "bytes": 7}, tmp_path)
+
+
+def test_exact_allowlisted_transport_variant_is_accepted(tmp_path):
+    primary = b"old-rds-bytes"
+    candidate = b"new-rds-bytes"
+    primary_sha = hashlib.sha256(primary).hexdigest()
+    candidate_sha = hashlib.sha256(candidate).hexdigest()
+    # fetch_asset uses the primary hash as its download-cache path; emulate an upstream
+    # byte variant already fetched into that path.
+    (tmp_path / primary_sha).write_bytes(candidate)
+    _, receipt = fetch_asset({
+        "sha256": primary_sha,
+        "bytes": len(primary),
+        "allowed_transport_variants": [{"sha256": candidate_sha, "bytes": len(candidate)}],
+    }, tmp_path)
+    assert receipt["sha256"] == candidate_sha
+    assert receipt["bytes"] == len(candidate)
+    assert receipt["transport_pin_status"] == "ALLOWLISTED_TRANSPORT_VARIANT"
+    assert receipt["primary_pin_sha256"] == primary_sha
+
+
+def test_non_allowlisted_transport_variant_still_fails_closed(tmp_path):
+    primary = b"old-rds-bytes"
+    unknown = b"unknown-rds-bytes"
+    primary_sha = hashlib.sha256(primary).hexdigest()
+    (tmp_path / primary_sha).write_bytes(unknown)
+    with pytest.raises(ValueError, match="pinned upstream bytes/hash mismatch"):
+        fetch_asset({
+            "sha256": primary_sha,
+            "bytes": len(primary),
+            "allowed_transport_variants": [{"sha256": "b" * 64, "bytes": 123}],
+        }, tmp_path)
 
 
 def test_future_source_rejected():
