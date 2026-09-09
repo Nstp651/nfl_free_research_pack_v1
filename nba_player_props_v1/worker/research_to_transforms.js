@@ -18,15 +18,17 @@ export function buildTransformsFromResearch(artifact,researchPlayer){
   if(artifact.head==='assists'){
     const share=finite(opportunity.expected_assist_share,'expected_assist_share');
     const team=finite(opportunity.expected_team_assists,'expected_team_assists');
+    const opponent=finite(opportunity.expected_opponent_assists_allowed,'expected_opponent_assists_allowed');
     transforms.push({type:'ROLE_OPPORTUNITY_RECOMPUTE',inputs:{assist_share_l5:share,assist_share_l10:share,team_assists_l5:team,team_assists_l10:team}});
     const poss=finite(opportunity.expected_possessions,'expected_possessions');
-    transforms.push({type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_possessions_l5:poss,team_possessions_l10:poss}});
+    transforms.push({type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_possessions_l5:poss,team_possessions_l10:poss,opponent_assists_allowed_l5:opponent,opponent_assists_allowed_l10:opponent}});
   }else{
     const share=finite(opportunity.expected_rebound_share,'expected_rebound_share');
     const team=finite(opportunity.expected_team_rebounds,'expected_team_rebounds');
+    const opponent=finite(opportunity.expected_opponent_rebounds_allowed,'expected_opponent_rebounds_allowed');
     transforms.push({type:'ROLE_OPPORTUNITY_RECOMPUTE',inputs:{rebound_share_l5:share,rebound_share_l10:share,team_rebounds_l5:team,team_rebounds_l10:team}});
     const poss=finite(opportunity.expected_possessions,'expected_possessions');
-    transforms.push({type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_possessions_l5:poss,team_possessions_l10:poss}});
+    transforms.push({type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_possessions_l5:poss,team_possessions_l10:poss,opponent_rebounds_allowed_l5:opponent,opponent_rebounds_allowed_l10:opponent}});
   }
   return transforms;
 }
