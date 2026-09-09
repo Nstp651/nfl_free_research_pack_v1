@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: nba-player-props-v1-${{ github.ref }}
@@ -166,36 +166,23 @@ jobs:
             --history /tmp/nba-source-rebuild/player_games_accepted.csv \
             --output /tmp/nba-source-rebuild/runtime_prior_pack.json
           python -c "import json; from pathlib import Path; s=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text()); p=json.loads(Path('/tmp/nba-source-rebuild/runtime_prior_pack.json').read_text()); assert p['history_sha256']==s['history_sha256']; assert p['market_data'] is False"
-      - name: Stage deterministic runtime assets
+      - name: Verify committed runtime assets are byte-identical
         run: |
-          mkdir -p nba_player_props_v1/data
-          cp /tmp/nba-source-rebuild/promoted_assists_qbase.json nba_player_props_v1/data/promoted_assists_qbase.json
-          cp /tmp/nba-source-rebuild/promoted_rebounds_qbase.json nba_player_props_v1/data/promoted_rebounds_qbase.json
-          cp /tmp/nba-source-rebuild/runtime_prior_pack.json nba_player_props_v1/data/runtime_prior_pack.json
+          cmp /tmp/nba-source-rebuild/promoted_assists_qbase.json nba_player_props_v1/data/promoted_assists_qbase.json
+          cmp /tmp/nba-source-rebuild/promoted_rebounds_qbase.json nba_player_props_v1/data/promoted_rebounds_qbase.json
+          cmp /tmp/nba-source-rebuild/runtime_prior_pack.json nba_player_props_v1/data/runtime_prior_pack.json
+          mkdir -p /tmp/nba-runtime-assets
+          cp /tmp/nba-source-rebuild/promoted_assists_qbase.json /tmp/nba-runtime-assets/promoted_assists_qbase.json
+          cp /tmp/nba-source-rebuild/promoted_rebounds_qbase.json /tmp/nba-runtime-assets/promoted_rebounds_qbase.json
+          cp /tmp/nba-source-rebuild/runtime_prior_pack.json /tmp/nba-runtime-assets/runtime_prior_pack.json
           python -m nba_player_props_v1.model.runtime_asset_manifest \
             --source /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
-            --assists nba_player_props_v1/data/promoted_assists_qbase.json \
-            --rebounds nba_player_props_v1/data/promoted_rebounds_qbase.json \
-            --prior nba_player_props_v1/data/runtime_prior_pack.json \
-            --output nba_player_props_v1/data/manifest.json
-      - name: Verify promoted-asset commit is deterministic
-        if: github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Promote deterministic NBA V1 runtime assets')
-        run: |
-          git diff --exit-code -- nba_player_props_v1/data/
-          test -z "$(git status --porcelain --untracked-files=all -- nba_player_props_v1/data/)"
+            --assists /tmp/nba-runtime-assets/promoted_assists_qbase.json \
+            --rebounds /tmp/nba-runtime-assets/promoted_rebounds_qbase.json \
+            --prior /tmp/nba-runtime-assets/runtime_prior_pack.json \
+            --output /tmp/nba-runtime-assets/manifest.json
+          cmp /tmp/nba-runtime-assets/manifest.json nba_player_props_v1/data/manifest.json
           echo 'NBA_RUNTIME_ASSET_REBUILD=BYTE_IDENTICAL'
-      - name: Commit promoted runtime assets
-        if: github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Promote deterministic NBA V1 runtime assets')
-        run: |
-          if [ -n "$(git status --porcelain --untracked-files=all -- nba_player_props_v1/data/)" ]; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add nba_player_props_v1/data/
-            git commit -m 'Promote deterministic NBA V1 runtime assets'
-            git push origin HEAD:feature/nba-player-props-v1
-          else
-            echo 'NBA_RUNTIME_ASSETS_ALREADY_CURRENT=PASS'
-          fi
       - name: Preserve source and promotion evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -205,4 +192,5 @@ jobs:
             /tmp/nba-source-rebuild/*.json
             /tmp/nba-model-challenge/*.json
             /tmp/nba-model-challenge-repeat/*.json
+            /tmp/nba-runtime-assets/*.json
             nba_player_props_v1/data/*.json
