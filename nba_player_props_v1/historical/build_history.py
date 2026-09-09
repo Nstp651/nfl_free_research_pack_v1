@@ -44,7 +44,12 @@ def fetch_asset(asset, cache):
         path.write_bytes(raw)
     digest, size = sha256_file(path), path.stat().st_size
     if expected and (digest != expected or size != asset["bytes"]):
-        raise ValueError("pinned upstream bytes/hash mismatch")
+        raise ValueError(
+            "pinned upstream bytes/hash mismatch: "
+            f"dataset={asset.get('dataset')} season={asset.get('season_end_year')} "
+            f"url={asset.get('url')} expected_bytes={asset.get('bytes')} actual_bytes={size} "
+            f"expected_sha256={expected} actual_sha256={digest}"
+        )
     addressed = cache / digest
     if not addressed.exists():
         addressed.write_bytes(path.read_bytes())
