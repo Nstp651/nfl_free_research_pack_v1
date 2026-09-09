@@ -42,6 +42,11 @@ const headAllowed = {
 };
 
 function setIfPresent(out, artifact, key, value, lo, hi) { if (artifact.features.includes(key)) out[key] = clamp(value, lo, hi, key); }
+function featureStats(artifact,key){const i=artifact.features.indexOf(key);need(i>=0,`unsupported promoted feature ${key}`);const center=finite(artifact.centers[i]),scale=Math.abs(Number(artifact.scales[i]));need(center!==null&&Number.isFinite(scale)&&scale>0,`invalid promoted feature statistics ${key}`);return {center,scale};}
+function minimumShiftFloor(key){if(key.includes('share')||key.includes('rate'))return .05;if(key.includes('possessions'))return 8;if(key.startsWith('team_')||key.startsWith('opponent_'))return 6;if(key.startsWith('minutes_'))return 6;return 4;}
+function empiricalTransformValue(artifact,baseFeatures,key,raw,lo,hi){
+  const n=clamp(raw,lo,hi,key),{center,scale}=featureStats(artifact,key);const envelopeLo=Math.max(lo,center-6*scale),envelopeHi=Math.min(hi,center+6*scale);need(n>=envelopeLo-1e-12&&n<=envelopeHi+1e-12,`${key} outside promoted training envelope`);const base=finite(baseFeatures[key]);if(base!==null){const maxShift=Math.max(4*scale,minimumShiftFloor(key));need(Math.abs(n-base)<=maxShift+1e-12,`${key} change exceeds promoted transform envelope`);}return n;
+}
 
 export function applyTypedTransform(artifact, baseFeatures, transform) {
   validateQbaseArtifact(artifact);
@@ -62,23 +67,24 @@ export function applyTypedTransform(artifact, baseFeatures, transform) {
   if (type === 'ROLE_OPPORTUNITY_RECOMPUTE') {
     need(transform.inputs && typeof transform.inputs === 'object', 'role inputs required');
     const allowed = new Set([...sharedAllowed, ...headAllowed[artifact.head]]);
+    const accepted={};
     for (const [k, raw] of Object.entries(transform.inputs)) {
       need(allowed.has(k) && artifact.features.includes(k), `unsupported role feature ${k}`);
       let lo = 0, hi = 100;
       if (k.includes('share') || k.includes('rate') || k === 'starter_prev' || k === 'team_changed_since_last_game') hi = 1;
       if (k.includes('per_min')) hi = 2;
       if (k.startsWith('minutes_')) hi = 48;
-      out[k] = clamp(raw, lo, hi, k);
+      out[k] = empiricalTransformValue(artifact,baseFeatures,k,raw,lo,hi);accepted[k]=out[k];
     }
-    return { features: out, transform_receipt: { type, inputs: transform.inputs } };
+    return { features: out, transform_receipt: { type, inputs: accepted, empirical_guardrail:'PROMOTED_CENTER_6SD_AND_BASE_SHIFT_4SD' } };
   }
   if (type === 'LINEUP_DEPENDENCY_RECOMPUTE') {
     need(transform.inputs && typeof transform.inputs === 'object', 'lineup inputs required');
     const allowed = artifact.head === 'assists'
       ? new Set(['team_assists_l5','team_assists_l10','opponent_assists_allowed_l5','opponent_assists_allowed_l10','team_possessions_l5','team_possessions_l10'])
       : new Set(['team_rebounds_l5','team_rebounds_l10','opponent_rebounds_allowed_l5','opponent_rebounds_allowed_l10','team_possessions_l5','team_possessions_l10']);
-    for (const [k, raw] of Object.entries(transform.inputs)) { need(allowed.has(k) && artifact.features.includes(k), `unsupported lineup feature ${k}`); out[k] = clamp(raw, 0, 160, k); }
-    return { features: out, transform_receipt: { type, inputs: transform.inputs } };
+    const accepted={};for (const [k, raw] of Object.entries(transform.inputs)) { need(allowed.has(k) && artifact.features.includes(k), `unsupported lineup feature ${k}`); out[k] = empiricalTransformValue(artifact,baseFeatures,k,raw,0,160);accepted[k]=out[k]; }
+    return { features: out, transform_receipt: { type, inputs: accepted, empirical_guardrail:'PROMOTED_CENTER_6SD_AND_BASE_SHIFT_4SD' } };
   }
   throw new Error(`unsupported transform ${type}`);
 }
