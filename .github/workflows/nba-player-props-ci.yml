@@ -35,12 +35,12 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.14'
           cache: pip
           cache-dependency-path: nba_player_props_v1/requirements.txt
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.2'
       - name: Install Python test dependencies
         run: pip install -r nba_player_props_v1/requirements.txt
       - name: Python contract tests
@@ -51,6 +51,12 @@ jobs:
         run: |
           node --test nba_player_props_v1/worker/*.test.mjs
           node --test nba_player_props_v1/market_worker/*.test.mjs
+      - name: Cloudflare Worker deployment dry runs
+        run: |
+          npx --yes wrangler@4.128.0 deploy --dry-run --config nba_player_props_v1/worker/wrangler.toml
+          git checkout -- nba_player_props_v1/worker/source_commit.generated.js
+          npx --yes wrangler@4.128.0 deploy --dry-run --config nba_player_props_v1/market_worker/wrangler.toml
+          echo 'NBA_CLOUDFLARE_DRY_RUNS=PASS'
       - name: Architecture boundary sanity
         shell: bash
         run: |
@@ -61,6 +67,49 @@ jobs:
           grep -q 'player_rebounds_alternate' nba_player_props_v1/DATA_SOURCE_AUDIT.md
           grep -q 'RESEARCH_COMPLETE' nba_player_props_v1/worker/slate_queue.js
           grep -q 'Exact frozen threshold' nba_player_props_v1/market_worker/market_core.js
+          grep -q 'refresh_request_id' nba_player_props_v1/market_openapi_v1.yaml
+      - name: Custom GPT Action and Instructions sanity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          checks={
+            'nba_player_props_v1/openapi_v1.yaml':[
+              'https://nba-player-props-research-v1.nickarnott01.workers.dev',
+              'operationId: healthNbaPlayerPropsResearch',
+              'operationId: listNbaPlayerPropsFixtures',
+              'operationId: startNbaPlayerPropsSlateRun',
+              'operationId: getNbaPlayerPropsResearchBatch',
+              'operationId: checkpointNbaPlayerPropsResearch',
+              'operationId: freezeNbaPlayerPropsSlate',
+              'operationId: invalidateNbaPlayerPropsFrozenScope',
+              'request_id',
+            ],
+            'nba_player_props_v1/market_openapi_v1.yaml':[
+              'https://nba-player-props-market-v1.nickarnott01.workers.dev',
+              'operationId: healthNbaPlayerPropsMarket',
+              'operationId: refreshNbaPlayerPropsOddsApi',
+              'operationId: refreshNbaPlayerPropsManualMarkets',
+              'refresh_request_id',
+              'default: au',
+            ],
+            'nba_player_props_v1/TRACKER_INTEGRATION_PRODUCTION_V1.0.md':[
+              'schema (currently `2.1.0`',
+              'model_name=Nick NBA Assists + Rebounds',
+              'createModelRun',
+              'recordBet',
+            ],
+          }
+          for path,tokens in checks.items():
+              text=Path(path).read_text()
+              missing=[token for token in tokens if token not in text]
+              assert not missing,(path,missing)
+          instructions=Path('nba_player_props_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.0.md').read_bytes()
+          assert len(instructions) < 8000, len(instructions)
+          text=instructions.decode()
+          for token in ('RESEARCH_COMPLETE','refresh_request_id','NO BET','FROZEN','recordBet'):
+              assert token in text,token
+          print('NBA_CUSTOM_GPT_CONTRACT_GATE=PASS',len(instructions))
+          PY
       - name: NBL isolation guard
         shell: bash
         run: |
@@ -146,19 +195,19 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          source = json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text())
-          out = {}
-          for head in ('assists', 'rebounds'):
-              challenge = json.loads(Path(f'/tmp/nba-model-challenge/{head}_temporal_challenge.json').read_text())
-              promoted = json.loads(Path(f'/tmp/nba-source-rebuild/promoted_{head}_qbase.json').read_text())
-              assert challenge['normalized_history_sha256'] == source['history_sha256']
-              assert promoted['status'] == 'PROMOTED_CORE_V1'
-              assert promoted['head'] == head
-              assert promoted['source_acceptance_receipt_sha256'] == source['receipt_sha256']
-              assert promoted['holdout_use_rule'] == 'PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
-              assert challenge['numeric_precision_decimals'] == 10
-              out[head] = {'status': promoted['status'], 'model_version': promoted['model_version'], 'selected_candidate': challenge['selected_candidate'], 'promotion_receipt_sha256': promoted['promotion_receipt_sha256'], 'history_sha256': source['history_sha256'], 'restricted_cohorts': promoted['restricted_cohorts'], 'holdout_overall': promoted['holdout_review']['overall']}
-          print('NBA_QBASE_PROMOTION_SUMMARY=' + json.dumps(out, sort_keys=True, separators=(',', ':')))
+          source=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text())
+          out={}
+          for head in ('assists','rebounds'):
+              challenge=json.loads(Path(f'/tmp/nba-model-challenge/{head}_temporal_challenge.json').read_text())
+              promoted=json.loads(Path(f'/tmp/nba-source-rebuild/promoted_{head}_qbase.json').read_text())
+              assert challenge['normalized_history_sha256']==source['history_sha256']
+              assert promoted['status']=='PROMOTED_CORE_V1'
+              assert promoted['head']==head
+              assert promoted['source_acceptance_receipt_sha256']==source['receipt_sha256']
+              assert promoted['holdout_use_rule']=='PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
+              assert challenge['numeric_precision_decimals']==10
+              out[head]={'status':promoted['status'],'model_version':promoted['model_version'],'selected_candidate':challenge['selected_candidate'],'promotion_receipt_sha256':promoted['promotion_receipt_sha256'],'history_sha256':source['history_sha256'],'restricted_cohorts':promoted['restricted_cohorts'],'holdout_overall':promoted['holdout_review']['overall']}
+          print('NBA_QBASE_PROMOTION_SUMMARY='+json.dumps(out,sort_keys=True,separators=(',',':')))
           PY
       - name: Build deterministic runtime prior pack
         run: |
