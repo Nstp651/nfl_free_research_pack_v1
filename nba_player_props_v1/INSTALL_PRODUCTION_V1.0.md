@@ -67,19 +67,20 @@ Required committed files:
 - `nba_player_props_v1/data/runtime_prior_pack.json`
 - `nba_player_props_v1/data/manifest.json`
 
-The committed assets were produced by the independent promotion chain. Production CI is deliberately non-mutating. Every CI run must:
-1. use the exact pinned Python/numeric environment in `requirements.txt` plus the pinned CI Python/Node versions;
+The committed assets are produced by the independent promotion chain. Production CI is deliberately non-mutating. Every CI run must:
+1. use the exact pinned Python/numeric environment in `requirements.txt` plus pinned CI Python/Node versions;
 2. rebuild accepted corrected history from pinned source receipts;
-3. reproduce the temporal challenge twice byte-for-byte;
-4. independently re-run Assists promotion;
-5. independently re-run Rebounds promotion;
-6. rebuild the runtime prior pack and manifest;
-7. require all four rebuilt files to be byte-identical to committed runtime assets;
-8. run both Worker configs through `wrangler@4.128.0 deploy --dry-run`;
-9. enforce the Action/GPT contract, including GPT Instructions under 8,000 bytes;
-10. fail rather than commit or silently replace any drifted asset.
+3. canonicalize exported quantitative evidence at 9 decimal places to remove observed cross-run 10th-decimal BLAS/CPU jitter without changing model family, selection or betting-significant precision;
+4. reproduce the temporal challenge twice byte-for-byte;
+5. independently re-run Assists promotion;
+6. independently re-run Rebounds promotion;
+7. rebuild the runtime prior pack and manifest;
+8. require all four rebuilt files to be byte-identical to committed runtime assets;
+9. run both Worker configs through `wrangler@4.128.0 deploy --dry-run`;
+10. enforce Research, Market and NBA Tracker Action contracts, including GPT Instructions under 8,000 bytes;
+11. fail rather than commit or silently replace any drifted asset.
 
-This prevents package drift or GitHub bot commits from becoming a second promotion/deployment owner. Research runtime verifies:
+This prevents package/runner drift or GitHub bot commits from becoming a second promotion/deployment owner. Research runtime verifies:
 `deployment Git commit -> manifest -> exact raw file SHA -> promotion/prior lineage`.
 
 Do not deploy a Worker whose `/health` source commit points to a Git commit without the exact committed runtime assets.
@@ -107,20 +108,26 @@ Schema: `market_openapi_v1.yaml`
 Base URL must resolve to the live Market Worker.  
 Configure Bearer/API-key auth to send `Authorization: Bearer <ACTION_TOKEN>` if enabled.
 
-Every genuine Odds API or manual screenshot observation gets a new `refresh_request_id`. Reuse a refresh_request_id only after an uncertain/lost response for the exact same operation. A current API retry must replay the persisted snapshot without another Odds API call/credit spend; a superseded request ID is rejected.
+Every genuine Odds API or manual screenshot observation gets a new `refresh_request_id`. Reuse a refresh_request_id only after an uncertain/lost response for the exact same operation. A current API retry must replay the persisted snapshot without another Odds API call/credit spend; a superseded or payload-conflicting request ID is rejected.
 
 ### Bet Tracker Action
-Use the existing production Bet Tracker Action/schema already used by Nick's production betting GPTs. Do not fork tracker storage for NBA.
+Schema: `tracker_openapi_v1.yaml`  
+This is an NBA-specific Action contract over Nick's **existing** production Bet Tracker at `nick-betting-api`; it does not create or fork tracker storage.
+
+Configure `X-GPT-Action-Key` using the existing Bet Tracker Action secret.
+
+The NBA schema is deliberately narrower than the shared backend:
+- `sport=nba` only;
+- `league=nba` only;
+- `model_name=Nick NBA Assists + Rebounds`;
+- `model_version=1.0`;
+- Assists/Rebounds selections only;
+- `side=over` only;
+- `bet_type=single` and exactly one leg for wager logging.
 
 Required preflight expectation:
 - tracker `status=ok`;
 - current tracker schema (currently 2.1.0 in the established workflow).
-
-NBA identity:
-- `sport=nba`
-- `league=nba`
-- `model_name=Nick NBA Assists + Rebounds`
-- `model_version=1.0`
 
 ## 6. Cloudflare health acceptance
 
@@ -149,14 +156,15 @@ Before production acceptance confirm:
 - research checkpoints require evidence-bound role audit and current opponent assists/rebounds environment.
 - research-driven quantitative role/opportunity/lineup values are constrained by the promoted empirical transform envelope.
 - Market `/refresh` fails on an unfrozen run before any Odds API request.
-- exact API refresh retry replays without a second Odds API call; superseded refresh_request_id reuse is rejected.
-- manual screenshot exact retry does not create duplicate snapshot history.
+- exact API refresh retry replays without a second Odds API call; superseded or payload-conflicting refresh_request_id reuse is rejected.
+- manual screenshot exact retry does not create duplicate snapshot history; changed payload under the same refresh ID is rejected.
 - Market service cannot change `frozen_at` or `freeze_receipt_sha256`.
 - manual screenshot refresh rejects a mismatched freeze receipt.
 - market observations predating `frozen_at` are rejected.
 - frozen player/head hashes are preserved through market evaluation.
 - manual/API markets cannot interpolate an unavailable frozen threshold.
 - invalidated games are excluded by fresh market grants.
+- Tracker Action cannot submit non-NBA identity, Unders or multi-leg bets.
 - runtime secrets do not appear in Git, response bodies or logs.
 
 ## 8. Live acceptance sequence
@@ -169,7 +177,7 @@ Run `PRODUCTION_ACCEPTANCE_PROMPT_V1.0.md` against one real future slate:
 5. atomic freeze plus immutable retry check;
 6. real Odds API refresh plus no-double-spend retry control;
 7. Layer 4 ranking;
-8. Tracker model run;
+8. one shared-Tracker NBA model run;
 9. post-freeze Bet365 screenshot refresh plus idempotent write retry;
 10. verify same `run_id`, `frozen_at`, `freeze_receipt_sha256`, player/head hashes, no research rerun and no P_model mutation.
 
