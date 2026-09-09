@@ -53,8 +53,8 @@ For each relevant player prove role_research contains evidence-bound rotation_ro
 - Confirm no sportsbook price was accessed before the successful freeze.
 - If evidence shows pre-freeze price access, FAIL acceptance.
 
-6. LAYER 3 — REAL ODDS API
-- Refresh through the installed Market Action only after freeze.
+6. LAYER 3 — REAL ODDS API + MARKET IDEMPOTENCY
+- Create one new stable market refresh_request_id and refresh through the installed Market Action only after freeze.
 - Use Australian region coverage by default unless an explicit accepted override is needed.
 - Confirm the Market Worker received the server market-access grant.
 - Confirm exact one-to-one frozen fixture -> Odds API event resolution.
@@ -62,6 +62,9 @@ For each relevant player prove role_research contains evidence-bound rotation_ro
 - Confirm Overs only are ranked.
 - Confirm any market observation captured before frozen_at is rejected.
 - Capture market snapshot receipt / quota metadata.
+- Retry the EXACT same refresh_request_id once and prove `replayed=true`, identical current API snapshot identity, and no second Odds API request/quota spend.
+- Confirm a genuinely new price pull requires a NEW refresh_request_id.
+- Confirm a superseded old refresh_request_id cannot be reused ambiguously.
 
 7. LAYER 4
 - Produce BEST SINGLE or NO BET.
@@ -88,7 +91,8 @@ For each relevant player prove role_research contains evidence-bound rotation_ro
 10. BET365 / MANUAL SCREENSHOT ACCEPTANCE
 If current post-freeze sportsbook screenshot(s) are attached to this acceptance run:
 - extract every clearly visible valid Assists/Rebounds Over quote;
-- ingest them through refreshNbaPlayerPropsManualMarkets using SAME run_id and exact freeze_receipt_sha256;
+- create a NEW manual refresh_request_id and ingest through refreshNbaPlayerPropsManualMarkets using SAME run_id and exact freeze_receipt_sha256;
+- retry that exact manual refresh_request_id once and prove `replayed=true` with no duplicate snapshot/history write;
 - rerun Layer 3/4 only;
 - prove run_id unchanged;
 - prove frozen_at unchanged;
@@ -111,10 +115,10 @@ Return explicit PASS / FAIL for every gate above, plus:
 - Rebounds QBASE version/receipt
 - frozen_at
 - freeze_receipt_sha256
-- Odds API snapshot receipt and event-resolution count
+- Odds API refresh_request_id, snapshot receipt and event-resolution count
 - Layer 4 BEST SINGLE / NO BET
 - Tracker model_run_id and model_selection_ids
-- screenshot refresh receipt if completed
+- manual refresh_request_id/screenshot refresh receipt if completed
 - NBL isolation status
 
 Do not merge PR #20 and do not call NBA V1 production-ready unless EVERY required gate, including the screenshot refresh gate, has actually passed.
