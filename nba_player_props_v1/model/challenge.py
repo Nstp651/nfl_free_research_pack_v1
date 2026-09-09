@@ -24,10 +24,12 @@ from nba_player_props_v1.model.features import build_pregame_features, head_feat
 from nba_player_props_v1.source_receipt import canonical_json, sha256_bytes, sha256_file
 
 # Numerical values far below this precision have no betting meaning but can differ by
-# tiny BLAS/solver reduction order across otherwise identical CI processes. Runtime
-# artifacts and challenge evidence are quantized before scoring so repeated builds from
-# the same accepted history are byte-identical rather than merely statistically equal.
-NUMERIC_DECIMALS = 10
+# tiny BLAS/solver reduction order across otherwise identical CI runners. Nine decimal
+# places is deliberately below the observed cross-run 10th-decimal jitter while still
+# orders of magnitude finer than any material player-prop probability/price decision.
+# Runtime artifacts and challenge evidence are quantized before scoring so repeated
+# builds from the same accepted history are canonical across runner CPU implementations.
+NUMERIC_DECIMALS = 9
 
 
 def _q(value: float) -> float:
