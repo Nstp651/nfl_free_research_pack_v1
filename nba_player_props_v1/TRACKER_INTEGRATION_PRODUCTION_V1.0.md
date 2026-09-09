@@ -2,6 +2,8 @@
 
 NBA V1 reuses Nick's existing production Bet Tracker. No new tracker database or Worker is introduced.
 
+Custom GPT Action schema: `tracker_openapi_v1.yaml`. It points to the existing `nick-betting-api` service and deliberately narrows the shared backend to NBA identity, Assists/Rebounds, Over selections and single-wager logging only.
+
 ## Preflight
 Require tracker health before starting an operational run:
 - `status=ok`;
@@ -14,6 +16,8 @@ Tracker health is bookkeeping preflight and contains no sportsbook price input t
 - `league=nba`
 - `model_name=Nick NBA Assists + Rebounds`
 - `model_version=1.0`
+
+The NBA Action schema rejects non-NBA identity. It does not broaden or alter the shared tracker backend.
 
 ## When to create a model run
 Call tracker `createModelRun` exactly once **after the first completed Layer 4 ranking**.
@@ -49,6 +53,8 @@ For stored Assists selections:
 For stored Rebounds selections:
 - `market_family=rebounds`
 - `market_key=player_rebounds`
+
+The NBA Action schema permits `side=over` only.
 
 Each selection should preserve:
 - exact game/event identity;
@@ -104,5 +110,7 @@ Use the existing `model_selection_id`.
 - exactly one leg
 - new request ID for each genuinely distinct accepted wager
 - reuse request ID only for identical failed/uncertain write retry.
+
+The NBA Action schema rejects multi-leg/multi bet types even if the shared tracker backend supports them for other models.
 
 Never log a recommendation as a wager. Never fabricate a selection ID. If no stored selection matches the confirmed wager, stop and surface the mismatch rather than creating an unrelated canonical model run.
