@@ -14,7 +14,8 @@ const MARKET_TO_HEAD=Object.freeze({
 
 export function normalizeIdentity(value){
   return String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
-    .replace(/\b(jr|sr|ii|iii|iv)\b\.?/g,'').replace(/[^a-z0-9]+/g,'').trim();
+    .replace(/\blos angeles\b/g,'la').replace(/\b(jr|sr|ii|iii|iv)\b\.?/g,'')
+    .replace(/[^a-z0-9]+/g,'').trim();
 }
 
 export function validateGrantAgainstFreeze(grant,freeze){
