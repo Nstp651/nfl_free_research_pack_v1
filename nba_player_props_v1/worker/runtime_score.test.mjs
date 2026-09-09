@@ -21,17 +21,19 @@ test('minutes recompute changes model features, not mean directly', async()=>{
   assert.ok(scored.mean>0); assert.equal(scored.transform_receipts[0].type,'MINUTES_RECOMPUTE');
 });
 
-test('role recompute is whitelist and bounded',()=>{
+test('role recompute is whitelist, absolute bounded and empirically bounded',()=>{
   assert.throws(()=>applyTypedTransform(artifact,base,{type:'ROLE_OPPORTUNITY_RECOMPUTE',inputs:{arbitrary_mean:9}}),/unsupported role feature/);
   assert.throws(()=>applyTypedTransform(artifact,base,{type:'ROLE_OPPORTUNITY_RECOMPUTE',inputs:{assist_share_l5:1.5}}),/must be in/);
+  assert.throws(()=>applyTypedTransform(artifact,base,{type:'ROLE_OPPORTUNITY_RECOMPUTE',inputs:{assist_share_l5:.95}}),/promoted training envelope|promoted transform envelope/);
   const r=applyTypedTransform(artifact,base,{type:'ROLE_OPPORTUNITY_RECOMPUTE',inputs:{assists_l5:7,assist_share_l5:.3}});
-  assert.equal(r.features.assists_l5,7); assert.equal(r.features.assist_share_l5,.3);
+  assert.equal(r.features.assists_l5,7); assert.equal(r.features.assist_share_l5,.3);assert.equal(r.transform_receipt.empirical_guardrail,'PROMOTED_CENTER_6SD_AND_BASE_SHIFT_4SD');
 });
 
-test('lineup dependency transform is head specific',()=>{
-  const r=applyTypedTransform(artifact,base,{type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_assists_l5:28,opponent_assists_allowed_l5:27}});
-  assert.equal(r.features.team_assists_l5,28);
+test('lineup dependency transform is head specific and opponent aware',()=>{
+  const r=applyTypedTransform(artifact,base,{type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_assists_l5:28,opponent_assists_allowed_l5:27,team_possessions_l5:103}});
+  assert.equal(r.features.team_assists_l5,28);assert.equal(r.features.opponent_assists_allowed_l5,27);assert.equal(r.features.team_possessions_l5,103);
   assert.throws(()=>applyTypedTransform(artifact,base,{type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_rebounds_l5:50}}),/unsupported lineup feature/);
+  assert.throws(()=>applyTypedTransform(artifact,base,{type:'LINEUP_DEPENDENCY_RECOMPUTE',inputs:{team_possessions_l5:140}}),/promoted training envelope|promoted transform envelope/);
 });
 
 test('free-form transform and invalid head artifact are rejected', async()=>{
