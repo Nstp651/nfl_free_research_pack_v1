@@ -18,8 +18,14 @@ export function createSlateRun({runId,slateDateEt,runMode,eligibleGameIds,fixtur
 }
 export function getResearchBatch(state,batchSize=2){need(state&&['RESEARCH_IN_PROGRESS','RESEARCH_COMPLETE'].includes(state.status),'run is not research-active');return nextResearchBatch(state.eligible_game_ids,state.completed_game_ids,batchSize);}
 export async function checkpointResearch(state,checkpoints,nowMs=Date.now()){
-  need(state.status==='RESEARCH_IN_PROGRESS','research checkpoint not allowed in current state');need(Array.isArray(checkpoints)&&checkpoints.length>=1&&checkpoints.length<=2,'checkpoint must contain 1-2 games');const ids=checkpoints.map(x=>String(x.game_id));validateCheckpointOrder(state.eligible_game_ids,state.completed_game_ids,ids);const next=clone(state);
-  for(const payload of checkpoints){validateResearchCheckpoint(payload,nowMs);need(payload.slate_date_et===state.slate_date_et,'checkpoint slate date mismatch');need(payload.run_mode===state.run_mode,'checkpoint run mode mismatch');const lock=state.fixture_locks[payload.game_id];need(lock,'checkpoint fixture lock missing');checkpointMatchesLock(payload,lock);need(!next.research_checkpoints[payload.game_id],'duplicate persisted checkpoint');const receipt=await sha256Json(payload);next.research_checkpoints[payload.game_id]={payload:clone(payload),research_receipt_sha256:receipt,checkpointed_at:new Date(nowMs).toISOString()};next.completed_game_ids.push(String(payload.game_id));}
+  need(Array.isArray(checkpoints)&&checkpoints.length>=1&&checkpoints.length<=2,'checkpoint must contain 1-2 games');const ids=checkpoints.map(x=>String(x.game_id));need(new Set(ids).size===ids.length,'checkpoint duplicate game_id');
+  const existing=ids.map(id=>state.research_checkpoints?.[id]||null);if(existing.some(Boolean)){
+    need(existing.every(Boolean),'cannot mix retried and new research checkpoints');
+    for(let i=0;i<checkpoints.length;i++){const payload=checkpoints[i],lock=state.fixture_locks[payload.game_id];need(lock,'checkpoint fixture lock missing');validateResearchCheckpoint(payload,nowMs);checkpointMatchesLock(payload,lock);const receipt=await sha256Json(payload);need(receipt===existing[i].research_receipt_sha256,`checkpoint retry payload changed ${payload.game_id}`);}
+    return clone(state);
+  }
+  need(state.status==='RESEARCH_IN_PROGRESS','research checkpoint not allowed in current state');validateCheckpointOrder(state.eligible_game_ids,state.completed_game_ids,ids);const next=clone(state);
+  for(const payload of checkpoints){validateResearchCheckpoint(payload,nowMs);need(payload.slate_date_et===state.slate_date_et,'checkpoint slate date mismatch');need(payload.run_mode===state.run_mode,'checkpoint run mode mismatch');const lock=state.fixture_locks[payload.game_id];need(lock,'checkpoint fixture lock missing');checkpointMatchesLock(payload,lock);const receipt=await sha256Json(payload);next.research_checkpoints[payload.game_id]={payload:clone(payload),research_receipt_sha256:receipt,checkpointed_at:new Date(nowMs).toISOString()};next.completed_game_ids.push(String(payload.game_id));}
   next.status=researchStatus(next.eligible_game_ids,next.completed_game_ids);return next;
 }
 export async function freezeSlateRun(state,{qbaseArtifacts,priorsByGame,frozenAt}={}){
