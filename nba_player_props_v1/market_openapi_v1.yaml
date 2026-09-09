@@ -16,17 +16,19 @@ paths:
     post:
       operationId: refreshNbaPlayerPropsOddsApi
       summary: Refresh current Odds API player-prop prices for the already-frozen eligible slate and rerun Layer 4.
-      description: The Worker obtains a fresh server market-access grant before making any sportsbook request. Only player_assists, player_assists_alternate, player_rebounds and player_rebounds_alternate are requested. Overs only are ranked.
+      description: The Worker obtains a fresh server market-access grant before making any sportsbook request. Only player_assists, player_assists_alternate, player_rebounds and player_rebounds_alternate are requested. Overs only are ranked. Reuse the same refresh_request_id only for an exact retry after an uncertain/lost response; the Worker replays the current persisted snapshot without another Odds API call.
       parameters:
         - $ref: '#/components/parameters/RunId'
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
+                refresh_request_id: {$ref: '#/components/schemas/RefreshRequestId'}
                 regions: {type: string, default: au, pattern: '^[a-z,]+$'}
+              required: [refresh_request_id]
               additionalProperties: false
       responses:
         '200': {description: Current API snapshot and refreshed rankings, content: {application/json: {schema: {$ref: '#/components/schemas/RefreshResponse'}}}}
@@ -34,6 +36,7 @@ paths:
     post:
       operationId: refreshNbaPlayerPropsManualMarkets
       summary: Replace the current manual sportsbook screenshot snapshot and rerun Layer 4 without changing P_model.
+      description: Reuse refresh_request_id only to replay the exact same uncertain/lost write. Reusing an ID after its snapshot has been superseded is rejected.
       parameters:
         - $ref: '#/components/parameters/RunId'
       requestBody:
@@ -67,6 +70,12 @@ components:
       required: true
       schema: {type: string, minLength: 8}
   schemas:
+    RefreshRequestId:
+      type: string
+      minLength: 8
+      maxLength: 128
+      pattern: '^[A-Za-z0-9_.:-]+$'
+      description: Stable idempotency key for one exact market observation attempt. Generate a new value for every genuine new price refresh; reuse only after an uncertain/lost response.
     Health:
       type: object
       properties:
@@ -97,12 +106,13 @@ components:
     ManualRefreshRequest:
       type: object
       properties:
+        refresh_request_id: {$ref: '#/components/schemas/RefreshRequestId'}
         source_type: {type: string, enum: [BET365_SCREENSHOT, MANUAL_SPORTSBOOK_SCREENSHOT]}
         captured_at: {type: string, format: date-time, description: Actual post-freeze screenshot/ingestion capture time.}
         evidence_id: {type: string, minLength: 1}
         freeze_receipt_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
         quotes: {type: array, minItems: 1, items: {$ref: '#/components/schemas/ManualQuote'}}
-      required: [source_type, captured_at, evidence_id, freeze_receipt_sha256, quotes]
+      required: [refresh_request_id, source_type, captured_at, evidence_id, freeze_receipt_sha256, quotes]
       additionalProperties: false
     RankedSelection:
       type: object
@@ -161,7 +171,13 @@ components:
         run_id: {type: string}
         layer: {type: string}
         freeze_receipt_sha256: {type: string}
-        refresh: {type: object, additionalProperties: true}
+        refresh:
+          type: object
+          properties:
+            refresh_request_id: {$ref: '#/components/schemas/RefreshRequestId'}
+            replayed: {type: boolean}
+          required: [refresh_request_id, replayed]
+          additionalProperties: true
         rankings: {$ref: '#/components/schemas/Rankings'}
       required: [run_id, freeze_receipt_sha256, refresh, rankings]
       additionalProperties: true
@@ -171,7 +187,13 @@ components:
         run_id: {type: string}
         layer: {type: string}
         freeze_receipt_sha256: {type: string}
-        manual_snapshot: {type: object, additionalProperties: true}
+        manual_snapshot:
+          type: object
+          properties:
+            refresh_request_id: {$ref: '#/components/schemas/RefreshRequestId'}
+            replayed: {type: boolean}
+          required: [refresh_request_id, replayed]
+          additionalProperties: true
         rankings: {$ref: '#/components/schemas/Rankings'}
       required: [run_id, freeze_receipt_sha256, manual_snapshot, rankings]
       additionalProperties: true
