@@ -82,7 +82,7 @@ function quotaHeaders(response){
 
 async function getJson(url,fetchImpl){const res=await fetchImpl(url,{headers:{accept:'application/json','user-agent':'nba-player-props-market-v1/1.0'},signal:AbortSignal.timeout(15000)});const quota=quotaHeaders(res);const text=await res.text();need(res.ok,`Odds API request failed ${res.status}: ${text.slice(0,200)}`);return {value:JSON.parse(text),quota};}
 
-export async function fetchOddsApiSlate({apiKey,freeze,grant,regions='us',fetchImpl=fetch,capturedAt=new Date().toISOString()}){
+export async function fetchOddsApiSlate({apiKey,freeze,grant,regions='au',fetchImpl=fetch,capturedAt=new Date().toISOString()}){
   need(String(apiKey||'').trim(),'ODDS_API_KEY required');validateGrantAgainstFreeze(grant,freeze);need(/^[a-z,]+$/.test(String(regions||'')),'Odds API regions invalid');
   const eventUrl=new URL(`${API_ROOT}/sports/${SPORT}/events`);eventUrl.searchParams.set('apiKey',apiKey);eventUrl.searchParams.set('dateFormat','iso');
   const eventResponse=await getJson(eventUrl,fetchImpl);const resolved=resolveOddsEvents(freeze,grant,eventResponse.value);const gameById=new Map(freeze.games.map(g=>[String(g.game_id),g]));const quotes=[],issues=[],quota=[];
