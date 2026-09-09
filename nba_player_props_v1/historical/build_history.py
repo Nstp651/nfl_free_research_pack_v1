@@ -1,13 +1,14 @@
 """Content-addressed SportsDataverse build. Discovery never implies acceptance.
 
-Capture pins once, then rebuild with --manifest: changed upstream bytes fail closed.
-Raw source tables never become model features; only the normalizer allowlist does.
+Capture pins once, then rebuild with --manifest. Raw transport drift is accepted only
+when an exact allowlisted byte-count/SHA variant is present; the normalized-history
+SHA remains the semantic authority. Raw source tables never become model features;
+only the normalizer allowlist does.
 """
 from __future__ import annotations
 
 import argparse
 from dataclasses import asdict
-from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
@@ -29,31 +30,64 @@ def competition_filter(frame):
                  frame.team_id_espn.isin(NBA_ESPN_TEAMS) &
                  frame.opponent_team_id_espn.isin(NBA_ESPN_TEAMS)].copy()
 
+
 def write_json(path, value):
     Path(path).write_bytes(canonical_json(value) + b"\n")
+
+
+def _transport_variants(asset):
+    variants = []
+    primary_sha = str(asset.get("sha256") or "")
+    primary_bytes = asset.get("bytes")
+    if primary_sha:
+        if len(primary_sha) != 64 or not isinstance(primary_bytes, int) or primary_bytes <= 0:
+            raise ValueError("invalid primary transport pin")
+        variants.append({"sha256": primary_sha, "bytes": primary_bytes, "status": "PRIMARY_PIN"})
+    for raw in asset.get("allowed_transport_variants") or []:
+        digest = str(raw.get("sha256") or "")
+        size = raw.get("bytes")
+        if len(digest) != 64 or not isinstance(size, int) or size <= 0:
+            raise ValueError("invalid allowed transport variant")
+        variants.append({"sha256": digest, "bytes": size, "status": "ALLOWLISTED_TRANSPORT_VARIANT"})
+    pairs = [(x["sha256"], x["bytes"]) for x in variants]
+    if len(set(pairs)) != len(pairs):
+        raise ValueError("duplicate transport variant pin")
+    return variants
 
 
 def fetch_asset(asset, cache):
     cache = Path(cache)
     cache.mkdir(parents=True, exist_ok=True)
-    expected = asset.get("sha256")
+    variants = _transport_variants(asset)
+    primary = variants[0] if variants else None
+    expected = primary["sha256"] if primary else None
     path = cache / (expected or f"{asset['dataset']}_{asset['season_end_year']}.rds")
     if not path.exists():
         with urlopen(asset["url"], timeout=120) as response:
             raw = response.read()
         path.write_bytes(raw)
     digest, size = sha256_file(path), path.stat().st_size
-    if expected and (digest != expected or size != asset["bytes"]):
+    matched = next((x for x in variants if x["sha256"] == digest and x["bytes"] == size), None)
+    if variants and not matched:
+        expected_text = ",".join(f"{x['bytes']}:{x['sha256']}" for x in variants)
         raise ValueError(
             "pinned upstream bytes/hash mismatch: "
             f"dataset={asset.get('dataset')} season={asset.get('season_end_year')} "
-            f"url={asset.get('url')} expected_bytes={asset.get('bytes')} actual_bytes={size} "
-            f"expected_sha256={expected} actual_sha256={digest}"
+            f"url={asset.get('url')} allowed_variants={expected_text} "
+            f"actual_bytes={size} actual_sha256={digest}"
         )
     addressed = cache / digest
     if not addressed.exists():
         addressed.write_bytes(path.read_bytes())
-    return addressed, {**asset, "sha256": digest, "bytes": size}
+    receipt = {
+        **asset,
+        "sha256": digest,
+        "bytes": size,
+        "transport_pin_status": matched["status"] if matched else "UNPINNED_DISCOVERY",
+        "primary_pin_sha256": primary["sha256"] if primary else None,
+        "primary_pin_bytes": primary["bytes"] if primary else None,
+    }
+    return addressed, receipt
 
 
 def normalized_bytes(frame):
@@ -106,7 +140,7 @@ def build(manifest, cache, output, *, as_of, builder_commit):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     (output / "player_games.csv").write_bytes(raw)
-    pins = {"schema_version": "nba_source_pins_v1", "assets": assets}
+    pins = {"schema_version": manifest.get("schema_version", "nba_source_pins_v1"), "assets": assets}
     write_json(output / "source_pins.json", pins)
     receipt = {"schema_version": "nba_historical_build_v1", "market_data": False,
         "builder_commit": builder_commit, "as_of_utc": as_of,
