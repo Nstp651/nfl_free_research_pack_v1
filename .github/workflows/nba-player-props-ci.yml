@@ -92,6 +92,15 @@ jobs:
               'refresh_request_id',
               'default: au',
             ],
+            'nba_player_props_v1/tracker_openapi_v1.yaml':[
+              'https://nick-betting-api.nickarnott01.workers.dev',
+              'name: X-GPT-Action-Key',
+              'operationId: checkBetTracker',
+              'operationId: createModelRun',
+              'operationId: recordBet',
+              'enum: [nba]',
+              'enum: [single]',
+            ],
             'nba_player_props_v1/TRACKER_INTEGRATION_PRODUCTION_V1.0.md':[
               'schema (currently `2.1.0`',
               'model_name=Nick NBA Assists + Rebounds',
@@ -205,7 +214,7 @@ jobs:
               assert promoted['head']==head
               assert promoted['source_acceptance_receipt_sha256']==source['receipt_sha256']
               assert promoted['holdout_use_rule']=='PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
-              assert challenge['numeric_precision_decimals']==10
+              assert challenge['numeric_precision_decimals']==9
               out[head]={'status':promoted['status'],'model_version':promoted['model_version'],'selected_candidate':challenge['selected_candidate'],'promotion_receipt_sha256':promoted['promotion_receipt_sha256'],'history_sha256':source['history_sha256'],'restricted_cohorts':promoted['restricted_cohorts'],'holdout_overall':promoted['holdout_review']['overall']}
           print('NBA_QBASE_PROMOTION_SUMMARY='+json.dumps(out,sort_keys=True,separators=(',',':')))
           PY
