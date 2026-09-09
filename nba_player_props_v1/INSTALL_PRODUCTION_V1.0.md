@@ -61,25 +61,28 @@ No additional paid data vendor is required for base V1.
 
 ## 4. Runtime model assets
 
-Required committed files after successful CI promotion:
+Required committed files:
 - `nba_player_props_v1/data/promoted_assists_qbase.json`
 - `nba_player_props_v1/data/promoted_rebounds_qbase.json`
 - `nba_player_props_v1/data/runtime_prior_pack.json`
 - `nba_player_props_v1/data/manifest.json`
 
-The CI promotion chain must:
-1. rebuild accepted history;
-2. reproduce the challenge twice byte-for-byte;
-3. independently promote Assists and Rebounds;
-4. build runtime prior pack;
-5. stage the four files;
-6. commit them only when changed;
-7. on the generated promotion commit, rebuild and require zero diff.
+The committed assets were produced by the independent promotion chain. Production CI is now deliberately **non-mutating**. Every CI run must:
+1. rebuild accepted corrected history from pinned receipts;
+2. reproduce the temporal challenge twice byte-for-byte;
+3. independently re-run Assists promotion;
+4. independently re-run Rebounds promotion;
+5. rebuild the runtime prior pack;
+6. rebuild the runtime manifest;
+7. require all four rebuilt files to be byte-identical to the committed runtime assets;
+8. fail rather than commit or silently replace any drifted asset.
 
-Research runtime then verifies:
+This prevents GitHub Actions bot commits from becoming a second deployment/promotion owner and makes one Git commit a fully verifiable production input.
+
+Research runtime verifies:
 `deployment Git commit -> manifest -> exact raw file SHA -> promotion/prior lineage`.
 
-Do not deploy a Worker whose `/health` source commit points to a Git commit without these runtime assets.
+Do not deploy a Worker whose `/health` source commit points to a Git commit without the exact committed runtime assets.
 
 ## 5. Custom GPT
 
@@ -96,6 +99,8 @@ Instructions:
 Schema: `openapi_v1.yaml`  
 Base URL must resolve to the live Research Worker.  
 Configure Bearer/API-key auth to send `Authorization: Bearer <ACTION_TOKEN>` if the Worker secret is enabled.
+
+The GPT must preserve the Research start `request_id` and use exact-payload retry semantics for start/checkpoint/freeze recovery. This is separate from any Bet Tracker idempotency key.
 
 ### Market Action
 Schema: `market_openapi_v1.yaml`  
@@ -136,6 +141,11 @@ Market `/health` must show:
 
 Before production acceptance confirm:
 - Research endpoint rejects sportsbook/market fields in checkpoints.
+- a stable start request_id is deterministic/idempotent and cannot silently create a duplicate run after a lost response.
+- an exact persisted checkpoint retry is idempotent; a changed retry or mixed old/new batch is rejected.
+- repeated freeze returns the original immutable `frozen_at`, receipt and P_model without recomputation.
+- research checkpoints require evidence-bound role audit and current opponent assists/rebounds environment.
+- research-driven quantitative role/opportunity/lineup values are constrained by the promoted empirical transform envelope.
 - Market `/refresh` fails on an unfrozen run before any Odds API request.
 - Market service cannot change `frozen_at` or `freeze_receipt_sha256`.
 - manual screenshot refresh rejects a mismatched freeze receipt.
@@ -150,9 +160,9 @@ Before production acceptance confirm:
 Run `PRODUCTION_ACCEPTANCE_PROMPT_V1.0.md` against one real future slate:
 1. preflight;
 2. ET fixture slate;
-3. new persistent run;
-4. all 1–2 game research checkpoints;
-5. atomic freeze;
+3. idempotent new persistent run lock;
+4. all 1–2 game research checkpoints with persisted receipts and retry control;
+5. atomic freeze plus immutable retry check;
 6. real Odds API refresh;
 7. Layer 4 ranking;
 8. Tracker model run;
