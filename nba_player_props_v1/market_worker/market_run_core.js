@@ -4,12 +4,14 @@ import { normalizeIdentity, validateGrantAgainstFreeze } from './odds_api_client
 
 const need=(ok,msg)=>{if(!ok) throw new Error(msg);};
 const HASH64=/^[0-9a-f]{64}$/;
+const REQUEST_ID=/^[A-Za-z0-9_.:-]{8,128}$/;
 const clone=v=>structuredClone(v);
 
 function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
 async function sha256Json(v){const b=new TextEncoder().encode(JSON.stringify(canonical(v))),h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function freezeIdentity(freeze){return {slate_date_et:freeze.slate_date_et,run_mode:freeze.run_mode,frozen_at:freeze.frozen_at,freeze_receipt_sha256:freeze.freeze_receipt_sha256};}
 function sameFreeze(a,b){return a?.slate_date_et===b?.slate_date_et&&a?.run_mode===b?.run_mode&&a?.frozen_at===b?.frozen_at&&a?.freeze_receipt_sha256===b?.freeze_receipt_sha256;}
+function refreshId(value,label='refresh_request_id'){const id=String(value||'').trim();need(REQUEST_ID.test(id),`${label} invalid`);return id;}
 
 export async function createMarketRun({runId,freeze,grant,createdAt=new Date().toISOString()}){
   need(String(runId||'').trim(),'run_id required');validateGrantAgainstFreeze(grant,freeze);need(grant.run_id===runId,'grant run_id mismatch');
@@ -21,12 +23,20 @@ export function reconcileMarketGrant(state,freeze,grant){
   validateGrantAgainstFreeze(grant,freeze);need(grant.run_id===state.run_id,'grant run_id drift');need(sameFreeze(state.freeze_identity,freezeIdentity(freeze)),'market run frozen identity drift');const next=clone(state);next.current_grant=clone(grant);return next;
 }
 
+export function marketRefreshReplay(state,kind,requestId){
+  need(['api','manual'].includes(kind),'refresh replay kind invalid');const id=refreshId(requestId);const current=kind==='api'?state.current_api_snapshot:state.current_manual_snapshot;const history=kind==='api'?state.api_refresh_history:state.manual_refresh_history;
+  if(current?.refresh_request_id===id)return {replayed:true,snapshot:clone(current)};
+  need(!(history||[]).some(x=>x.refresh_request_id===id),`${kind} refresh_request_id already belongs to a superseded snapshot`);
+  return null;
+}
+
 function allowedSet(state){return new Set((state.current_grant?.allowed_game_ids||[]).map(String));}
 function validateSnapshotFreeze(state,snapshot){need(snapshot&&snapshot.freeze_receipt_sha256===state.freeze_identity.freeze_receipt_sha256,'market snapshot freeze receipt mismatch');const captured=Date.parse(String(snapshot.captured_at||'')),frozen=Date.parse(String(state.freeze_identity.frozen_at||''));need(Number.isFinite(captured),'market snapshot captured_at invalid');need(Number.isFinite(frozen)&&captured>=frozen,'market snapshot predates frozen P_model');}
 
-export async function applyApiSnapshot(state,snapshot){
+export async function applyApiSnapshot(state,snapshot,{refreshRequestId}={}){
+  const requestId=refreshId(refreshRequestId);need(!marketRefreshReplay(state,'api',requestId),'api refresh request already persisted');
   validateSnapshotFreeze(state,snapshot);need(snapshot.schema_version==='nba_odds_api_refresh_v1'&&snapshot.source==='ODDS_API','Odds API snapshot invalid');need(Array.isArray(snapshot.quotes),'Odds API quotes required');const allowed=allowedSet(state);for(const q of snapshot.quotes)need(allowed.has(String(q.game_id)),`Odds API quote outside current market grant ${q.game_id}`);
-  const copy=clone(snapshot);copy.snapshot_sha256=await sha256Json(snapshot);const next=clone(state);if(next.current_api_snapshot)next.api_refresh_history.push({captured_at:next.current_api_snapshot.captured_at,snapshot_sha256:next.current_api_snapshot.snapshot_sha256,quote_count:next.current_api_snapshot.quotes.length,issue_count:(next.current_api_snapshot.issues||[]).length});next.current_api_snapshot=copy;next.state_receipt_sha256=await sha256Json({...next,state_receipt_sha256:undefined});return next;
+  const copy=clone(snapshot);copy.refresh_request_id=requestId;copy.snapshot_sha256=await sha256Json(copy);const next=clone(state);if(next.current_api_snapshot)next.api_refresh_history.push({refresh_request_id:next.current_api_snapshot.refresh_request_id,captured_at:next.current_api_snapshot.captured_at,snapshot_sha256:next.current_api_snapshot.snapshot_sha256,quote_count:next.current_api_snapshot.quotes.length,issue_count:(next.current_api_snapshot.issues||[]).length});next.current_api_snapshot=copy;next.state_receipt_sha256=await sha256Json({...next,state_receipt_sha256:undefined});return next;
 }
 
 function gamePlayerIndex(freeze,gameId){
@@ -44,7 +54,7 @@ export function normalizeManualQuotes(freeze,state,{source_type,captured_at,evid
 }
 
 export async function applyManualSnapshot(state,freeze,body){
-  need(body.freeze_receipt_sha256===state.freeze_identity.freeze_receipt_sha256,'manual refresh freeze receipt mismatch');const quotes=normalizeManualQuotes(freeze,state,body);const snapshot={schema_version:'nba_manual_market_refresh_v1',source_type:String(body.source_type),captured_at:String(body.captured_at),evidence_id:String(body.evidence_id),freeze_receipt_sha256:String(body.freeze_receipt_sha256),quotes};validateSnapshotFreeze(state,snapshot);snapshot.snapshot_sha256=await sha256Json(snapshot);const next=clone(state);if(next.current_manual_snapshot)next.manual_refresh_history.push({captured_at:next.current_manual_snapshot.captured_at,snapshot_sha256:next.current_manual_snapshot.snapshot_sha256,quote_count:next.current_manual_snapshot.quotes.length,evidence_id:next.current_manual_snapshot.evidence_id});next.current_manual_snapshot=snapshot;next.state_receipt_sha256=await sha256Json({...next,state_receipt_sha256:undefined});return next;
+  const requestId=refreshId(body.refresh_request_id);need(!marketRefreshReplay(state,'manual',requestId),'manual refresh request already persisted');need(body.freeze_receipt_sha256===state.freeze_identity.freeze_receipt_sha256,'manual refresh freeze receipt mismatch');const quotes=normalizeManualQuotes(freeze,state,body);const snapshot={schema_version:'nba_manual_market_refresh_v1',source_type:String(body.source_type),refresh_request_id:requestId,captured_at:String(body.captured_at),evidence_id:String(body.evidence_id),freeze_receipt_sha256:String(body.freeze_receipt_sha256),quotes};validateSnapshotFreeze(state,snapshot);snapshot.snapshot_sha256=await sha256Json(snapshot);const next=clone(state);if(next.current_manual_snapshot)next.manual_refresh_history.push({refresh_request_id:next.current_manual_snapshot.refresh_request_id,captured_at:next.current_manual_snapshot.captured_at,snapshot_sha256:next.current_manual_snapshot.snapshot_sha256,quote_count:next.current_manual_snapshot.quotes.length,evidence_id:next.current_manual_snapshot.evidence_id});next.current_manual_snapshot=snapshot;next.state_receipt_sha256=await sha256Json({...next,state_receipt_sha256:undefined});return next;
 }
 
 function probabilityIndex(freeze){const out=new Map();for(const game of freeze.games||[])for(const p of game.players||[]){need(HASH64.test(String(p.player_model_sha256||'')),`ranking frozen player hash missing ${p.player_id}`);for(const [head,h] of Object.entries(p.heads||{})){need(HASH64.test(String(h.head_model_sha256||'')),`ranking frozen head hash missing ${p.player_id}.${head}`);out.set(`${game.game_id}|${p.player_id}|${head}`,{game,player:p,head:h});}}return out;}
@@ -55,4 +65,4 @@ export function rankCurrentMarket(state,freeze){
   const positives=rankPositiveEdges(evaluated),assists=positives.filter(x=>x.stat_type==='assists'),rebounds=positives.filter(x=>x.stat_type==='rebounds');return {schema_version:'nba_layer4_rankings_v1',run_id:state.run_id,slate_date_et:freeze.slate_date_et,run_mode:freeze.run_mode,frozen_at:freeze.frozen_at,freeze_receipt_sha256:freeze.freeze_receipt_sha256,market_snapshot:{api_snapshot_sha256:state.current_api_snapshot?.snapshot_sha256||null,manual_snapshot_sha256:state.current_manual_snapshot?.snapshot_sha256||null},decision:positives.length?'BEST_SINGLE':'NO_BET',best_single:positives[0]||null,top_10_combined:positives.slice(0,10),assists_positive:assists,rebounds_positive:rebounds,all_evaluated:evaluated,issues:[...(state.current_api_snapshot?.issues||[]),...issues]};
 }
 
-export function marketStateSummary(state){return {schema_version:state.schema_version,run_id:state.run_id,freeze_identity:state.freeze_identity,current_grant:{allowed_game_ids:state.current_grant?.allowed_game_ids||[],invalidated_game_ids:state.current_grant?.invalidated_game_ids||[]},current_api_snapshot:state.current_api_snapshot?{captured_at:state.current_api_snapshot.captured_at,snapshot_sha256:state.current_api_snapshot.snapshot_sha256,quote_count:state.current_api_snapshot.quotes.length}:null,current_manual_snapshot:state.current_manual_snapshot?{captured_at:state.current_manual_snapshot.captured_at,snapshot_sha256:state.current_manual_snapshot.snapshot_sha256,quote_count:state.current_manual_snapshot.quotes.length,evidence_id:state.current_manual_snapshot.evidence_id}:null,api_refresh_count:state.api_refresh_history.length+(state.current_api_snapshot?1:0),manual_refresh_count:state.manual_refresh_history.length+(state.current_manual_snapshot?1:0),state_receipt_sha256:state.state_receipt_sha256};}
+export function marketStateSummary(state){return {schema_version:state.schema_version,run_id:state.run_id,freeze_identity:state.freeze_identity,current_grant:{allowed_game_ids:state.current_grant?.allowed_game_ids||[],invalidated_game_ids:state.current_grant?.invalidated_game_ids||[]},current_api_snapshot:state.current_api_snapshot?{refresh_request_id:state.current_api_snapshot.refresh_request_id,captured_at:state.current_api_snapshot.captured_at,snapshot_sha256:state.current_api_snapshot.snapshot_sha256,quote_count:state.current_api_snapshot.quotes.length}:null,current_manual_snapshot:state.current_manual_snapshot?{refresh_request_id:state.current_manual_snapshot.refresh_request_id,captured_at:state.current_manual_snapshot.captured_at,snapshot_sha256:state.current_manual_snapshot.snapshot_sha256,quote_count:state.current_manual_snapshot.quotes.length,evidence_id:state.current_manual_snapshot.evidence_id}:null,api_refresh_count:state.api_refresh_history.length+(state.current_api_snapshot?1:0),manual_refresh_count:state.manual_refresh_history.length+(state.current_manual_snapshot?1:0),state_receipt_sha256:state.state_receipt_sha256};}
