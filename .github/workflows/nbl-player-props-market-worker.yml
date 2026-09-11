@@ -31,14 +31,17 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Contract tests
         working-directory: nbl_player_props_v1/market_worker
-        run: node --test index.test.mjs
+        run: node --test *.test.mjs
       - name: Market boundary sanity
         shell: bash
         run: |
           grep -q "P_MODEL_STATUS must be FROZEN" nbl_player_props_v1/market_worker/index.js
           grep -q "expected_freeze_receipt_sha256 required" nbl_player_props_v1/market_worker/index.js
           grep -q "p_model_mutated:false" nbl_player_props_v1/market_worker/index.js
+          grep -q 'operationId: fetchNblPlayerPropsOddsApi' nbl_player_props_v1/market_openapi_v1.yaml
           grep -q 'operationId: evaluateNblPlayerPropsMarkets' nbl_player_props_v1/market_openapi_v1.yaml
+          grep -q 'basketball_nbl' nbl_player_props_v1/market_worker/index.js
+          grep -q 'ODDS_API_KEY' nbl_player_props_v1/market_worker/index.js
           grep -q 'nbl-player-props-market-v1.nickarnott01.workers.dev' nbl_player_props_v1/market_openapi_v1.yaml
           grep -q 'name = "nbl-player-props-market-v1"' nbl_player_props_v1/market_worker/wrangler.toml
       - name: Wrangler dry run

@@ -10,3 +10,7 @@ RESEARCH_BASE = "https://nbl-player-props-research-v1.nickarnott01.workers.dev"
 [[services]]
 binding = "RESEARCH"
 service = "nbl-player-props-research-v1"
+
+# Live Odds API retrieval is optional at deploy time so screenshot evaluation remains
+# available even before the secret is installed. For automated post-freeze retrieval,
+# configure ODDS_API_KEY as an encrypted Cloudflare Worker secret. Never commit it.

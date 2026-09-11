@@ -43,9 +43,12 @@ Expected server:
 
 Expected operations:
 - `healthNblPlayerPropsMarket`
+- `fetchNblPlayerPropsOddsApi`
 - `evaluateNblPlayerPropsMarkets`
 
-The Market Action cannot create or mutate P_model; it evaluates post-freeze observations only.
+`fetchNblPlayerPropsOddsApi` is post-freeze only. It verifies the exact immutable freeze before any Odds API request, resolves the exact `basketball_nbl` event and requests assists/rebounds plus alternate ladders. If alternates are rejected it can fall back to base assists/rebounds. Screenshot/public-web observations continue through `evaluateNblPlayerPropsMarkets`.
+
+The Market Action cannot create or mutate P_model.
 
 ## Action 3 — Nick Bet Tracker
 Create a third Action using:
@@ -88,6 +91,7 @@ Market Worker:
 - Wrangler project: `nbl-player-props-market-v1`
 - production Worker-to-Worker transport uses Cloudflare Service Binding `RESEARCH` -> `nbl-player-props-research-v1`.
 - `RESEARCH_BASE` is retained only as a local/test fallback.
+- configure `ODDS_API_KEY` as an encrypted Cloudflare Worker secret for automated live retrieval. Never commit the key. The Worker still deploys and supports screenshot evaluation when the secret is absent; `/health` reports `odds_api_fetch_configured=false`.
 
 Production deployment is owned by Cloudflare Git integration. GitHub workflows verify source/contracts and Wrangler dry-run; do not create a competing deployment owner.
 
@@ -99,12 +103,14 @@ Require all before calling V1.0 production-ready:
 4. Market Worker verification + Wrangler dry-run pass;
 5. Cloudflare production deployments are healthy;
 6. Research Action imports cleanly;
-7. Market Action imports cleanly;
+7. Market Action imports cleanly and exposes live Odds API retrieval;
 8. Tracker Action imports cleanly and `checkBetTracker` returns schema 2.1.0;
 9. one live future-fixture E2E completes fixture -> run -> research checkpoint -> BOTH freeze -> immutable retry -> frozen-player hash retrieval;
-10. one post-freeze market acceptance completes with exact freeze receipt and per-player hash binding;
-11. a pre-freeze market attempt and a market observation timestamped before freeze are rejected;
-12. one real later user-confirmed wager can be recorded using the existing `model_selection_id` without changing P_model.
+10. returning-player projection sanity rejects a Cotton-style opening-season stable-role extrapolation outside the server envelope;
+11. one post-freeze Odds API support test returns an explicit support state, and any returned rows bind to the same freeze;
+12. one post-freeze screenshot market acceptance completes with exact freeze receipt and per-player hash binding;
+13. a pre-freeze market attempt and a market observation timestamped before freeze are rejected;
+14. one real later user-confirmed wager can be recorded using the existing `model_selection_id` without changing P_model.
 
 ## First run
 Use `LAUNCH_PROMPT_PRODUCTION_V1.0.md` in a brand-new chat and replace the fixture placeholders.
