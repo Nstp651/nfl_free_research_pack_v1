@@ -109,6 +109,9 @@ components:
         decimal_price: {type: number, exclusiveMinimum: 1}
         bookmaker: {type: string}
       required: [game_id, stat_type, threshold, decimal_price, bookmaker]
+      anyOf:
+        - required: [player_id]
+        - required: [player_name]
       additionalProperties: false
     ManualRefreshRequest:
       type: object
