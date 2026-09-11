@@ -1,0 +1,61 @@
+name: NBA Player Props Deploy Contract CI
+
+on:
+  push:
+    branches: [feature/nba-player-props-v1]
+    paths:
+      - 'nba_player_props_v1/scripts/**'
+      - 'nba_player_props_v1/POST_DEPLOY_PREFLIGHT.md'
+      - 'nba_player_props_v1/INSTALL_PRODUCTION_V1.0.md'
+      - 'nba_player_props_v1/PRODUCTION_ACCEPTANCE_PROMPT_V1.0.md'
+      - 'nba_player_props_v1/openapi_v1.yaml'
+      - 'nba_player_props_v1/market_openapi_v1.yaml'
+      - 'nba_player_props_v1/tracker_openapi_v1.yaml'
+      - 'nba_player_props_v1/worker/wrangler.toml'
+      - 'nba_player_props_v1/market_worker/wrangler.toml'
+      - '.github/workflows/nba-player-props-deploy-contract-ci.yml'
+  pull_request:
+    paths:
+      - 'nba_player_props_v1/scripts/**'
+      - 'nba_player_props_v1/POST_DEPLOY_PREFLIGHT.md'
+      - 'nba_player_props_v1/INSTALL_PRODUCTION_V1.0.md'
+      - 'nba_player_props_v1/PRODUCTION_ACCEPTANCE_PROMPT_V1.0.md'
+      - 'nba_player_props_v1/openapi_v1.yaml'
+      - 'nba_player_props_v1/market_openapi_v1.yaml'
+      - 'nba_player_props_v1/tracker_openapi_v1.yaml'
+      - 'nba_player_props_v1/worker/wrangler.toml'
+      - 'nba_player_props_v1/market_worker/wrangler.toml'
+      - '.github/workflows/nba-player-props-deploy-contract-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+      - name: Preflight harness syntax
+        run: node --check nba_player_props_v1/scripts/post_deploy_preflight.mjs
+      - name: Preflight harness unit tests
+        run: node --test nba_player_props_v1/scripts/*.test.mjs
+      - name: Deployment contract sanity
+        run: |
+          grep -q 'EXPECTED_SOURCE_COMMIT' nba_player_props_v1/POST_DEPLOY_PREFLIGHT.md
+          grep -q 'RESEARCH_MARKET_ACCESS_GRANT' nba_player_props_v1/POST_DEPLOY_PREFLIGHT.md
+          grep -q 'SLATE_RUNS' nba_player_props_v1/worker/wrangler.toml
+          grep -q 'MARKET_RUNS' nba_player_props_v1/market_worker/wrangler.toml
+          grep -q 'RESEARCH_SERVICE' nba_player_props_v1/market_worker/wrangler.toml
+          grep -q 'ODDS_API_REGIONS = "au"' nba_player_props_v1/market_worker/wrangler.toml
+          grep -q 'tracker_openapi_v1.yaml' nba_player_props_v1/INSTALL_PRODUCTION_V1.0.md
+      - name: Action endpoint ownership sanity
+        run: |
+          grep -q 'nba-player-props-research-v1.nickarnott01.workers.dev' nba_player_props_v1/openapi_v1.yaml
+          grep -q 'nba-player-props-market-v1.nickarnott01.workers.dev' nba_player_props_v1/market_openapi_v1.yaml
+          grep -q 'nick-betting-api.nickarnott01.workers.dev' nba_player_props_v1/tracker_openapi_v1.yaml
+          echo 'NBA_DEPLOY_CONTRACT=PASS'
