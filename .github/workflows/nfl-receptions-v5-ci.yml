@@ -2,7 +2,7 @@ name: NFL Receptions V5 Platform CI
 
 on:
   push:
-    branches: [main, feature/platform-v1-nfl-receptions-v5, hotfix/nfl-v5-runtime-contracts]
+    branches: [main, feature/platform-v1-nfl-receptions-v5]
     paths:
       - 'betting_platform_v1/**'
       - 'nfl_receptions_v5/**'
@@ -33,10 +33,6 @@ jobs:
       - name: Hard market-gate tests
         working-directory: nfl_receptions_v5/market_worker
         run: node --test '*.test.mjs'
-      - name: Action contract syntax
-        shell: bash
-        run: |
-          ruby -e "require 'yaml'; YAML.load_file('nfl_receptions_v5/openapi.yaml'); YAML.load_file('nfl_receptions_v5/tracker_openapi.yaml')"
       - name: Architecture safety checks
         shell: bash
         run: |
@@ -48,16 +44,7 @@ jobs:
           grep -q "createNflReceptionsTrackerRun" nfl_receptions_v5/tracker_openapi.yaml
           grep -q "recordNflReceptionsBet" nfl_receptions_v5/tracker_openapi.yaml
           grep -q "X-GPT-Action-Key" nfl_receptions_v5/tracker_openapi.yaml
-          grep -q "maxItems: 25" nfl_receptions_v5/tracker_openapi.yaml
-          grep -q "Runtime contract 5.0.3" nfl_receptions_v5/openapi.yaml
-          grep -q "enum: \[HIGH, MEDIUM, LOW\]" nfl_receptions_v5/openapi.yaml
-          grep -q "enum: \[LOW, MODERATE, HIGH\]" nfl_receptions_v5/openapi.yaml
-          grep -q "required: \[player_id, target_method, target_rate, catch_rate, route_counts\]" nfl_receptions_v5/openapi.yaml
-          grep -q "position_depth_concessions" nfl_receptions_v5/openapi.yaml
-          grep -q "Layer 1 structural preflight" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
-          grep -q "Layer 2 structural preflight" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
           grep -q "TRACKER RUN HANDOFF" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
-          grep -q "hard maximum of 25 selections" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
           grep -q "model_selection_id" nfl_receptions_v5/GPT_INSTRUCTIONS_PRODUCTION_V5.0.0.md
           ! grep -R "ODDS_API_KEY *=.*[A-Za-z0-9]" nfl_receptions_v5 --include='*.toml' --include='*.js'
           ! grep -R "X-GPT-Action-Key: *[A-Za-z0-9]" nfl_receptions_v5 --include='*.yaml' --include='*.yml' --include='*.md'

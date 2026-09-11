@@ -1,0 +1,254 @@
+name: NBA Player Props V1 CI
+
+on:
+  push:
+    branches: [feature/nba-player-props-v1]
+    paths:
+      - 'nba_player_props_v1/**'
+      - '.github/workflows/nba-player-props-ci.yml'
+  pull_request:
+    paths:
+      - 'nba_player_props_v1/**'
+      - '.github/workflows/nba-player-props-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nba-player-props-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+      VECLIB_MAXIMUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.14'
+          cache: pip
+          cache-dependency-path: nba_player_props_v1/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+      - name: Install Python test dependencies
+        run: pip install -r nba_player_props_v1/requirements.txt
+      - name: Python contract tests
+        run: python -m pytest -q nba_player_props_v1/tests
+      - name: Compile Python
+        run: python -m compileall -q nba_player_props_v1
+      - name: Worker and market integrity tests
+        run: |
+          node --test nba_player_props_v1/worker/*.test.mjs
+          node --test nba_player_props_v1/market_worker/*.test.mjs
+      - name: Cloudflare Worker deployment dry runs
+        run: |
+          npx --yes wrangler@4.128.0 deploy --dry-run --config nba_player_props_v1/worker/wrangler.toml
+          git checkout -- nba_player_props_v1/worker/source_commit.generated.js
+          npx --yes wrangler@4.128.0 deploy --dry-run --config nba_player_props_v1/market_worker/wrangler.toml
+          echo 'NBA_CLOUDFLARE_DRY_RUNS=PASS'
+      - name: Architecture boundary sanity
+        shell: bash
+        run: |
+          grep -q 'whole-slate' nba_player_props_v1/ARCHITECTURE.md
+          grep -q 'market_data=false' nba_player_props_v1/ARCHITECTURE.md
+          grep -q 'SportsDataverse' nba_player_props_v1/DATA_SOURCE_AUDIT.md
+          grep -q 'player_assists_alternate' nba_player_props_v1/DATA_SOURCE_AUDIT.md
+          grep -q 'player_rebounds_alternate' nba_player_props_v1/DATA_SOURCE_AUDIT.md
+          grep -q 'RESEARCH_COMPLETE' nba_player_props_v1/worker/slate_queue.js
+          grep -q 'Exact frozen threshold' nba_player_props_v1/market_worker/market_core.js
+          grep -q 'refresh_request_id' nba_player_props_v1/market_openapi_v1.yaml
+      - name: Custom GPT Action and Instructions sanity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          checks={
+            'nba_player_props_v1/openapi_v1.yaml':[
+              'https://nba-player-props-research-v1.nickarnott01.workers.dev',
+              'operationId: healthNbaPlayerPropsResearch',
+              'operationId: listNbaPlayerPropsFixtures',
+              'operationId: startNbaPlayerPropsSlateRun',
+              'operationId: getNbaPlayerPropsResearchBatch',
+              'operationId: checkpointNbaPlayerPropsResearch',
+              'operationId: freezeNbaPlayerPropsSlate',
+              'operationId: invalidateNbaPlayerPropsFrozenScope',
+              'request_id',
+            ],
+            'nba_player_props_v1/market_openapi_v1.yaml':[
+              'https://nba-player-props-market-v1.nickarnott01.workers.dev',
+              'operationId: healthNbaPlayerPropsMarket',
+              'operationId: refreshNbaPlayerPropsOddsApi',
+              'operationId: refreshNbaPlayerPropsManualMarkets',
+              'refresh_request_id',
+              'default: au',
+            ],
+            'nba_player_props_v1/tracker_openapi_v1.yaml':[
+              'https://nick-betting-api.nickarnott01.workers.dev',
+              'name: X-GPT-Action-Key',
+              'operationId: checkBetTracker',
+              'operationId: createModelRun',
+              'operationId: recordBet',
+              'enum: [nba]',
+              'enum: [single]',
+            ],
+            'nba_player_props_v1/TRACKER_INTEGRATION_PRODUCTION_V1.0.md':[
+              'schema (currently `2.1.0`',
+              'model_name=Nick NBA Assists + Rebounds',
+              'createModelRun',
+              'recordBet',
+            ],
+          }
+          for path,tokens in checks.items():
+              text=Path(path).read_text()
+              missing=[token for token in tokens if token not in text]
+              assert not missing,(path,missing)
+          instructions=Path('nba_player_props_v1/GPT_INSTRUCTIONS_PRODUCTION_V1.0.md').read_bytes()
+          assert len(instructions) < 8000, len(instructions)
+          text=instructions.decode()
+          for token in ('RESEARCH_COMPLETE','refresh_request_id','NO BET','FROZEN','recordBet'):
+              assert token in text,token
+          print('NBA_CUSTOM_GPT_CONTRACT_GATE=PASS',len(instructions))
+          PY
+      - name: NBL isolation guard
+        shell: bash
+        run: |
+          git diff --exit-code origin/main...HEAD -- nbl_player_props_v1/
+          echo 'NBA_V1_NBL_ISOLATION=PASS'
+      - name: Rebuild pinned historical inputs
+        run: |
+          python -m nba_player_props_v1.historical.build_history --manifest nba_player_props_v1/evidence/source_pins.json --cache /tmp/nba-source-cache --output /tmp/nba-source-rebuild --as-of 2026-09-08T16:00:00Z
+          python -c "import json; from pathlib import Path; actual=json.loads(Path('/tmp/nba-source-rebuild/historical_build_receipt.json').read_text()); expected=json.loads(Path('nba_player_props_v1/evidence/historical_build_receipt.json').read_text()); assert actual['normalized_sha256']==expected['normalized_sha256'], 'historical rebuild mismatch'"
+      - name: Independent source reconciliation candidate
+        run: |
+          python -m nba_player_props_v1.historical.source_acceptance \
+            --history /tmp/nba-source-rebuild/player_games.csv \
+            --seasons 2022 2023 2024 2025 2026 \
+            --cache /tmp/nba-source-audit-cache \
+            --output /tmp/nba-source-rebuild/source_acceptance.json \
+            --source-pins nba_player_props_v1/evidence/source_pins.json \
+            --as-of 2026-09-08T16:00:00Z
+      - name: Adjudicate release mismatches against final boxes
+        run: |
+          python -m nba_player_props_v1.historical.final_box_adjudication \
+            --source-report /tmp/nba-source-rebuild/source_acceptance.json \
+            --output /tmp/nba-source-rebuild/final_box_adjudication.json
+      - name: Finalize source acceptance state
+        run: |
+          python -m nba_player_props_v1.historical.finalize_source_acceptance \
+            --candidate /tmp/nba-source-rebuild/source_acceptance.json \
+            --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
+            --output /tmp/nba-source-rebuild/source_acceptance_final.json
+          python -c "import json; from pathlib import Path; r=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_final.json').read_text()); assert r['status'] in {'PASS','REBUILD_REQUIRED'}"
+      - name: Apply complete-game source quarantine
+        run: |
+          python -m nba_player_props_v1.historical.apply_stale_game_quarantine \
+            --history /tmp/nba-source-rebuild/player_games.csv \
+            --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
+            --output /tmp/nba-source-rebuild/player_games_accepted.csv \
+            --receipt /tmp/nba-source-rebuild/stale_game_quarantine_receipt.json
+      - name: Accept corrected model history
+        run: |
+          python -m nba_player_props_v1.historical.accept_quarantined_history \
+            --final-source /tmp/nba-source-rebuild/source_acceptance_final.json \
+            --adjudication /tmp/nba-source-rebuild/final_box_adjudication.json \
+            --quarantine /tmp/nba-source-rebuild/stale_game_quarantine_receipt.json \
+            --output /tmp/nba-source-rebuild/source_acceptance_quarantined.json
+          python -c "import json; from pathlib import Path; r=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text()); assert r['status']=='PASS'"
+      - name: Audit raw player exclusions
+        run: |
+          python -m nba_player_props_v1.historical.player_exclusion_audit \
+            --seasons 2022 2023 2024 2025 2026 \
+            --cache /tmp/nba-player-exclusion-cache \
+            --output /tmp/nba-source-rebuild/player_exclusion_audit.json
+      - name: Probe official/specialist source connectivity
+        run: python -m nba_player_props_v1.historical.probe_sources --output /tmp/nba-source-rebuild/specialist_probe.json
+      - name: Re-run locked temporal challenges on accepted history
+        run: |
+          mkdir -p /tmp/nba-model-challenge
+          python -m nba_player_props_v1.model.challenge --history /tmp/nba-source-rebuild/player_games_accepted.csv --output /tmp/nba-model-challenge
+      - name: Prove temporal challenge byte reproducibility
+        run: |
+          mkdir -p /tmp/nba-model-challenge-repeat
+          python -m nba_player_props_v1.model.challenge --history /tmp/nba-source-rebuild/player_games_accepted.csv --output /tmp/nba-model-challenge-repeat
+          cmp /tmp/nba-model-challenge/assists_temporal_challenge.json /tmp/nba-model-challenge-repeat/assists_temporal_challenge.json
+          cmp /tmp/nba-model-challenge/rebounds_temporal_challenge.json /tmp/nba-model-challenge-repeat/rebounds_temporal_challenge.json
+          echo 'NBA_QBASE_BYTE_REPRODUCIBILITY=PASS'
+      - name: Independent Assists QBASE promotion
+        run: |
+          python -m nba_player_props_v1.model.promotion \
+            --challenge /tmp/nba-model-challenge/assists_temporal_challenge.json \
+            --source-acceptance /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
+            --specialist-decision nba_player_props_v1/evidence/specialist_metric_decision.json \
+            --model-version NBA_ASSISTS_QBASE_V1.0.0 \
+            --output /tmp/nba-source-rebuild/promoted_assists_qbase.json
+      - name: Independent Rebounds QBASE promotion
+        run: |
+          python -m nba_player_props_v1.model.promotion \
+            --challenge /tmp/nba-model-challenge/rebounds_temporal_challenge.json \
+            --source-acceptance /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
+            --specialist-decision nba_player_props_v1/evidence/specialist_metric_decision.json \
+            --model-version NBA_REBOUNDS_QBASE_V1.0.0 \
+            --output /tmp/nba-source-rebuild/promoted_rebounds_qbase.json
+      - name: Verify independent promotion lineage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          source=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text())
+          out={}
+          for head in ('assists','rebounds'):
+              challenge=json.loads(Path(f'/tmp/nba-model-challenge/{head}_temporal_challenge.json').read_text())
+              promoted=json.loads(Path(f'/tmp/nba-source-rebuild/promoted_{head}_qbase.json').read_text())
+              assert challenge['normalized_history_sha256']==source['history_sha256']
+              assert promoted['status']=='PROMOTED_CORE_V1'
+              assert promoted['head']==head
+              assert promoted['source_acceptance_receipt_sha256']==source['receipt_sha256']
+              assert promoted['holdout_use_rule']=='PASS_FAIL_REVIEW_ONLY_NO_MODEL_FAMILY_RESELECTION'
+              assert challenge['numeric_precision_decimals']==9
+              out[head]={'status':promoted['status'],'model_version':promoted['model_version'],'selected_candidate':challenge['selected_candidate'],'promotion_receipt_sha256':promoted['promotion_receipt_sha256'],'history_sha256':source['history_sha256'],'restricted_cohorts':promoted['restricted_cohorts'],'holdout_overall':promoted['holdout_review']['overall']}
+          print('NBA_QBASE_PROMOTION_SUMMARY='+json.dumps(out,sort_keys=True,separators=(',',':')))
+          PY
+      - name: Build deterministic runtime prior pack
+        run: |
+          python -m nba_player_props_v1.model.runtime_prior_pack \
+            --history /tmp/nba-source-rebuild/player_games_accepted.csv \
+            --output /tmp/nba-source-rebuild/runtime_prior_pack.json
+          python -c "import json; from pathlib import Path; s=json.loads(Path('/tmp/nba-source-rebuild/source_acceptance_quarantined.json').read_text()); p=json.loads(Path('/tmp/nba-source-rebuild/runtime_prior_pack.json').read_text()); assert p['history_sha256']==s['history_sha256']; assert p['market_data'] is False"
+      - name: Verify committed runtime assets are byte-identical
+        run: |
+          cmp /tmp/nba-source-rebuild/promoted_assists_qbase.json nba_player_props_v1/data/promoted_assists_qbase.json
+          cmp /tmp/nba-source-rebuild/promoted_rebounds_qbase.json nba_player_props_v1/data/promoted_rebounds_qbase.json
+          cmp /tmp/nba-source-rebuild/runtime_prior_pack.json nba_player_props_v1/data/runtime_prior_pack.json
+          mkdir -p /tmp/nba-runtime-assets
+          cp /tmp/nba-source-rebuild/promoted_assists_qbase.json /tmp/nba-runtime-assets/promoted_assists_qbase.json
+          cp /tmp/nba-source-rebuild/promoted_rebounds_qbase.json /tmp/nba-runtime-assets/promoted_rebounds_qbase.json
+          cp /tmp/nba-source-rebuild/runtime_prior_pack.json /tmp/nba-runtime-assets/runtime_prior_pack.json
+          python -m nba_player_props_v1.model.runtime_asset_manifest \
+            --source /tmp/nba-source-rebuild/source_acceptance_quarantined.json \
+            --assists /tmp/nba-runtime-assets/promoted_assists_qbase.json \
+            --rebounds /tmp/nba-runtime-assets/promoted_rebounds_qbase.json \
+            --prior /tmp/nba-runtime-assets/runtime_prior_pack.json \
+            --output /tmp/nba-runtime-assets/manifest.json
+          cmp /tmp/nba-runtime-assets/manifest.json nba_player_props_v1/data/manifest.json
+          echo 'NBA_RUNTIME_ASSET_REBUILD=BYTE_IDENTICAL'
+      - name: Preserve source and promotion evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-v1-evidence-${{ github.run_id }}
+          path: |
+            /tmp/nba-source-rebuild/*.json
+            /tmp/nba-model-challenge/*.json
+            /tmp/nba-model-challenge-repeat/*.json
+            /tmp/nba-runtime-assets/*.json
+            nba_player_props_v1/data/*.json
