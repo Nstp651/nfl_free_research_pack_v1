@@ -71,7 +71,7 @@ paths:
   /tracker/bets:
     post:
       operationId: recordBet
-      x-openai-isConsequential: false
+      x-openai-isConsequential: true
       summary: Record one user-confirmed NBA single wager.
       description: Record only after Nick explicitly confirms the exact stored selection, bookmaker, accepted odds and stake. The leg must reference an existing model_selection_id returned by createModelRun.
       requestBody:
