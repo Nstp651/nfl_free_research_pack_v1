@@ -5,6 +5,8 @@ info:
   description: Post-freeze-only Odds API and manual sportsbook screenshot ingestion plus exact-threshold Layer 4 ranking. This service never creates or mutates P_model.
 servers:
   - url: https://nba-player-props-market-v1.nickarnott01.workers.dev
+security:
+  - bearerAuth: []
 paths:
   /health:
     get:
@@ -63,6 +65,11 @@ paths:
       responses:
         '200': {description: Market state summary, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
   parameters:
     RunId:
       name: run_id
