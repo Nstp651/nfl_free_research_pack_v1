@@ -22,7 +22,7 @@ paths:
     post:
       operationId: fetchNblPlayerPropsOddsApi
       summary: After freeze, retrieve live NBL assists/rebounds props from The Odds API and evaluate them against the immutable frozen model.
-      description: Verifies the exact frozen run and receipt before any Odds API call. Resolves the exact NBL event, requests assists/rebounds and alternate ladders in one event-scoped request, normalizes best prices and evaluates exact frozen thresholds. If alternate markets are rejected, it retries base assists/rebounds only. Never mutates P_model.
+      description: Verifies the exact frozen run and receipt before any Odds API call. Resolves the exact NBL event and first requests assists, rebounds and alternate ladders in one event-scoped request. If The Odds API rejects the bundle because one or more keys are unsupported, the Worker probes each requested key individually so partial NBL support is detected precisely. Never mutates P_model.
       requestBody:
         required: true
         content:
@@ -78,10 +78,15 @@ paths:
                   markets_used:
                     type: array
                     items: {type: string}
-                  alternate_fallback_attempted: {type: boolean}
+                  markets_unsupported:
+                    type: array
+                    items: {type: string}
+                  fallback_probed_individually: {type: boolean}
                   quota:
-                    type: object
-                    additionalProperties: true
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
                   market_records_received: {type: integer}
                   evaluation:
                     $ref: '#/components/schemas/EvaluationResponse'
