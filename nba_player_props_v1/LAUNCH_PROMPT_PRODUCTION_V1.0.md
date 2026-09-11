@@ -17,9 +17,9 @@ Complete:
 6. Require immutable P_model freeze before any sportsbook access.
 7. Run the post-freeze Odds API gateway for standard and alternate Assists/Rebounds Overs using the Australian market region by default.
 8. Complete Layer 4 global ranking: BEST SINGLE, Top 10 combined positives, assists positives, rebounds positives, or NO BET.
-9. Create the Bet Tracker model run only after completed Layer 4.
+9. If Layer 4 has actionable positive-edge selections, create exactly one Bet Tracker model run using those selections only and a mandatory stable tracker request_id. If Layer 4 is NO BET, do not fabricate a selection and do not create a tracker model run; report the tracker skip. If a later price refresh creates the first actionable positive edge, create the one tracker run then using the same immutable freeze.
 
-No prices before freeze. No interpolation. No manual final-mean overrides. Do not work around server empirical transform guardrails. No forced bet. No staking advice. Do not log an actual wager unless I later explicitly confirm the exact selection, bookmaker, accepted odds and stake.
+No prices before freeze. No interpolation. No manual final-mean overrides. Do not work around server empirical transform guardrails. No forced bet. No staking advice. `recordBet` is consequential: do not log an actual wager unless I later explicitly confirm the exact stored selection, bookmaker, accepted odds and stake.
 
 Complete automatically without pausing unless execution genuinely cannot continue.
 ```
