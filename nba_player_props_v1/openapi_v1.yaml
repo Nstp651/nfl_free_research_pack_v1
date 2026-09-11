@@ -5,6 +5,8 @@ info:
   description: Market-blind whole-slate NBA research, persistent 1-2 game checkpointing, server-authoritative QBASE scoring and immutable atomic P_model freeze.
 servers:
   - url: https://nba-player-props-research-v1.nickarnott01.workers.dev
+security:
+  - bearerAuth: []
 paths:
   /health:
     get:
@@ -130,6 +132,11 @@ paths:
       responses:
         '200': {description: Post-freeze grant, content: {application/json: {schema: {$ref: '#/components/schemas/MarketGrant'}}}}
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
   parameters:
     RunId:
       name: run_id
