@@ -64,6 +64,18 @@ jobs:
           grep -q 'type: apiKey' nba_player_props_v1/tracker_openapi_v1.yaml
           grep -q 'name: X-GPT-Action-Key' nba_player_props_v1/tracker_openapi_v1.yaml
           echo 'NBA_ACTION_AUTH_CONTRACT=PASS'
+      - name: Tracker write consequence contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('nba_player_props_v1/tracker_openapi_v1.yaml').read_text()
+          model=text.split('operationId: createModelRun',1)[1].split('operationId: recordBet',1)[0]
+          bet=text.split('operationId: recordBet',1)[1]
+          assert 'x-openai-isConsequential: false' in model
+          assert 'x-openai-isConsequential: true' in bet
+          assert 'enum: [single]' in bet
+          print('NBA_TRACKER_WRITE_CONSEQUENCE=PASS')
+          PY
       - name: Action endpoint ownership sanity
         run: |
           grep -q 'nba-player-props-research-v1.nickarnott01.workers.dev' nba_player_props_v1/openapi_v1.yaml
