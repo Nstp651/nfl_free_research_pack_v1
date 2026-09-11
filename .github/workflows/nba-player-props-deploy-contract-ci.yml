@@ -53,6 +53,17 @@ jobs:
           grep -q 'RESEARCH_SERVICE' nba_player_props_v1/market_worker/wrangler.toml
           grep -q 'ODDS_API_REGIONS = "au"' nba_player_props_v1/market_worker/wrangler.toml
           grep -q 'tracker_openapi_v1.yaml' nba_player_props_v1/INSTALL_PRODUCTION_V1.0.md
+      - name: Action authentication contract
+        run: |
+          for schema in nba_player_props_v1/openapi_v1.yaml nba_player_props_v1/market_openapi_v1.yaml; do
+            grep -q '^security:$' "$schema"
+            grep -q 'bearerAuth' "$schema"
+            grep -q 'type: http' "$schema"
+            grep -q 'scheme: bearer' "$schema"
+          done
+          grep -q 'type: apiKey' nba_player_props_v1/tracker_openapi_v1.yaml
+          grep -q 'name: X-GPT-Action-Key' nba_player_props_v1/tracker_openapi_v1.yaml
+          echo 'NBA_ACTION_AUTH_CONTRACT=PASS'
       - name: Action endpoint ownership sanity
         run: |
           grep -q 'nba-player-props-research-v1.nickarnott01.workers.dev' nba_player_props_v1/openapi_v1.yaml
