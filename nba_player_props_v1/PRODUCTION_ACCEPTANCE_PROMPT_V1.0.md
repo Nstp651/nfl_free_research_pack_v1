@@ -12,8 +12,8 @@ This is an acceptance run, not a demonstration. Do not use synthetic fixtures, s
 Acceptance requirements:
 
 1. PREFLIGHT
-- Research health PASS: market_data=false, Durable Object available, source_commit_ready=true.
-- Market health PASS: post_freeze_only=true, Research service binding available, Market Durable Object available, Odds API key configured.
+- Research health PASS: authenticated Action, market_data=false, Durable Object available, source_commit_ready=true and exact deployed source commit.
+- Market health PASS: authenticated Action, post_freeze_only=true, Research service binding available, Market Durable Object available, Odds API key configured, default region=au.
 - Bet Tracker health PASS on current production schema.
 
 2. LAYER 0 / RUN LOCK + START IDEMPOTENCY
@@ -73,14 +73,21 @@ For each relevant player prove role_research contains evidence-bound rotation_ro
 - Verify ranked selections retain exact frozen player/head hashes and freeze receipt.
 
 8. BET TRACKER
-- Create exactly one model run AFTER completed Layer 4 with:
-  sport=nba
-  league=nba
-  model_name=Nick NBA Assists + Rebounds
-  model_version=1.0
-- Preserve original frozen_at / freeze receipt and returned model_selection_ids.
-- For integer lines preserve push-adjusted fair/market math and P_push.
-- Do NOT log an actual wager.
+If the first completed Layer 4 has one or more actionable positive-edge selections:
+- create exactly one model run using actionable positive-edge selections only;
+- use a mandatory stable tracker request_id derived from immutable run/freeze identity;
+- sport=nba, league=nba, model_name=Nick NBA Assists + Rebounds, model_version=1.0;
+- preserve original frozen_at/freeze receipt, exact player/market/side/threshold identity, integrated book/price, fair odds, rank/play and returned model_selection_ids;
+- for integer lines preserve push-adjusted fair/market math and P_push.
+
+If Layer 4 is NO BET:
+- do NOT fabricate a selection;
+- do NOT create a tracker model run;
+- explicitly report TRACKER_SKIPPED_NO_ACTIONABLE_SELECTIONS.
+
+If a later post-freeze price refresh creates the first actionable positive edge, create the one tracker model run then using the SAME immutable freeze identity and that first actionable market snapshot.
+
+Do NOT log an actual wager during production acceptance.
 
 9. LATE-NEWS IMMUTABILITY CONTROL
 - After freeze, demonstrate that an invalidation event can mark an affected game FROZEN_BUT_INVALIDATED without changing frozen probabilities, frozen_at or freeze_receipt_sha256.
@@ -90,7 +97,7 @@ For each relevant player prove role_research contains evidence-bound rotation_ro
 
 10. BET365 / MANUAL SCREENSHOT ACCEPTANCE
 If current post-freeze sportsbook screenshot(s) are attached to this acceptance run:
-- extract every clearly visible valid Assists/Rebounds Over quote;
+- extract every clearly visible valid Assists/Rebounds Over quote with exact frozen player identity;
 - create a NEW manual refresh_request_id and ingest through refreshNbaPlayerPropsManualMarkets using SAME run_id and exact freeze_receipt_sha256;
 - retry that exact manual refresh_request_id once and prove `replayed=true` with no duplicate snapshot/history write;
 - rerun Layer 3/4 only;
@@ -117,7 +124,7 @@ Return explicit PASS / FAIL for every gate above, plus:
 - freeze_receipt_sha256
 - Odds API refresh_request_id, snapshot receipt and event-resolution count
 - Layer 4 BEST SINGLE / NO BET
-- Tracker model_run_id and model_selection_ids
+- tracker outcome: model_run_id/model_selection_ids OR TRACKER_SKIPPED_NO_ACTIONABLE_SELECTIONS
 - manual refresh_request_id/screenshot refresh receipt if completed
 - NBL isolation status
 
