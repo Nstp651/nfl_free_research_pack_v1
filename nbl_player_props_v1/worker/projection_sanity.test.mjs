@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {researchPriority,projectionAnchor,projectionSanity} from './projection_sanity.js';
+
+const cotton={last_team:'Adelaide 36ers',features:{player_minutes_mean_3:41.4944,player_minutes_mean_5:39.25,player_minutes_mean_10:35.2817,player_assists_mean_3:11,player_assists_mean_5:9.2,player_assists_mean_10:7.2,player_assists_per_min_mean_5:.2346311503,player_assists_per_min_mean_10:.1935369576}};
+
+test('priority deepens established rotation and team changes',()=>{assert.equal(researchPriority(cotton,'Adelaide 36ers').research_priority,'DEEP');assert.equal(researchPriority({...cotton,last_team:'Perth Wildcats'},'Adelaide 36ers').research_priority_reason,'TEAM_CHANGE');assert.equal(researchPriority(null,'x').research_priority_reason,'NO_NBL_PRIOR');});
+test('robust anchor excludes volatile 3-game raw mean from center',()=>{const a=projectionAnchor(cotton,'assists',38);assert.ok(a.robust_anchor>7&&a.robust_anchor<9.5);assert.equal(a.recent_peak,11);});
+test('opening stable-role guard catches Cotton-style 11.97 assist extrapolation',()=>{const s=projectionSanity({playerName:'Bryce Cotton',stat:'assists',method:'QBASE_MINUTES_RECOMPUTE',mean:11.97,priorPlayer:cotton,projectedMinutes:38,seasonGamesPrior:0,confidence:'B',fragility:'MEDIUM'});assert.equal(s.status,'FAIL');assert.match(s.error,/stable-role ceiling/);});
+test('reasonable stable mean passes',()=>{const s=projectionSanity({playerName:'Bryce Cotton',stat:'assists',method:'QBASE_RUNTIME_SCORE',mean:9.5,priorPlayer:cotton,projectedMinutes:38,seasonGamesPrior:0,confidence:'B',fragility:'MEDIUM'});assert.equal(s.status,'PASS');});
+test('large evidence role split requires high fragility and non-A confidence',()=>{let s=projectionSanity({playerName:'Bryce Cotton',stat:'assists',method:'EMPIRICAL_ROLE_SPLIT',mean:12.2,priorPlayer:cotton,projectedMinutes:38,seasonGamesPrior:0,confidence:'B',fragility:'MEDIUM'});assert.equal(s.status,'FAIL');assert.match(s.error,/HIGH fragility/);s=projectionSanity({playerName:'Bryce Cotton',stat:'assists',method:'EMPIRICAL_ROLE_SPLIT',mean:12.2,priorPlayer:cotton,projectedMinutes:38,seasonGamesPrior:0,confidence:'B',fragility:'HIGH'});assert.equal(s.status,'PASS');});
