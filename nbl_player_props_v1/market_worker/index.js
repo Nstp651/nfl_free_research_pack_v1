@@ -1,16 +1,26 @@
-/** Post-freeze NBL assists/rebounds market evaluator.
+/** Post-freeze NBL assists/rebounds market gateway.
  *
- * This Worker never owns or computes P_model. It accepts market observations only
- * after the research Worker reports an immutable FROZEN run, fetches exact frozen
- * probability grids from that run, verifies the freeze receipt and per-player hash,
- * and computes EV.
+ * Two responsibilities only:
+ * 1) evaluate user/public market observations against one immutable frozen run;
+ * 2) after freeze verification, optionally fetch live Odds API NBL props and
+ *    immediately evaluate them against that same frozen run.
+ *
+ * This Worker never owns, computes, or mutates P_model.
  */
 const DEFAULT_RESEARCH_BASE='https://nbl-player-props-research-v1.nickarnott01.workers.dev';
+const ODDS_HOST='https://api.the-odds-api.com';
+const ODDS_SPORT='basketball_nbl';
+const DEFAULT_ODDS_MARKETS=['player_assists','player_rebounds','player_assists_alternate','player_rebounds_alternate'];
+const BASE_ODDS_MARKETS=['player_assists','player_rebounds'];
+const ALLOWED_ODDS_MARKETS=new Set(DEFAULT_ODDS_MARKETS);
 const ALLOWED_SOURCES=new Set(['odds_api','screenshot','public_web']);
 const ALLOWED_STATS=new Set(['assists','rebounds']);
 const ALLOWED_SIDES=new Set(['over','under']);
 const CONF_RANK={A:0,B:1,C:2};
 const FRAG_RANK={LOW:0,MEDIUM:1,HIGH:2};
+const KICKOFF_TOLERANCE_MS=30*60*1000;
+const MAX_UPSTREAM_CHARS=8_000_000;
+const MAX_MARKETS=250;
 
 const response=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'*'}});
 const need=(condition,message)=>{if(!condition)throw new Error(message);};
@@ -21,7 +31,8 @@ function canonicalValue(v){if(Array.isArray(v))return v.map(canonicalValue);if(v
 export async function sha256Json(value){const bytes=new TextEncoder().encode(JSON.stringify(canonicalValue(value)));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function exactKeys(obj,allowed,label){need(obj&&typeof obj==='object'&&!Array.isArray(obj),`${label} must be an object`);for(const key of Object.keys(obj))need(allowed.includes(key),`${label} unexpected field ${key}`);}
 function researchBase(env){const raw=String(env?.RESEARCH_BASE||DEFAULT_RESEARCH_BASE).replace(/\/+$/,'');need(/^https:\/\/[a-z0-9.-]+$/i.test(raw),'RESEARCH_BASE invalid');return raw;}
-async function getJson(url,env){const init={headers:{accept:'application/json','user-agent':'nbl-market-eval/1.0'},signal:AbortSignal.timeout(15_000)};const res=env?.RESEARCH&&typeof env.RESEARCH.fetch==='function'?await env.RESEARCH.fetch(new Request(url,init)):await fetch(url,init);const text=await res.text();need(text.length<4_000_000,'Research response too large');let body;try{body=JSON.parse(text);}catch{throw new Error(`Research response invalid JSON (${res.status})`);}need(res.ok,`Research Worker ${res.status}: ${body?.error||'request failed'}`);return body;}
+async function readJsonResponse(res,label){const text=await res.text();need(text.length<MAX_UPSTREAM_CHARS,`${label} response too large`);let body;try{body=JSON.parse(text);}catch{throw new Error(`${label} invalid JSON (${res.status})`);}return {body,text};}
+async function getJson(url,env){const init={headers:{accept:'application/json','user-agent':'nbl-market-v1/1.1'},signal:AbortSignal.timeout(15_000)};const res=env?.RESEARCH&&typeof env.RESEARCH.fetch==='function'?await env.RESEARCH.fetch(new Request(url,init)):await fetch(url,init);const {body}=await readJsonResponse(res,'Research response');need(res.ok,`Research Worker ${res.status}: ${body?.error||'request failed'}`);return body;}
 
 function validateMarket(row,index){
   exactKeys(row,['fixture_id','player_id','player_name','stat_type','side','threshold','decimal_price','bookmaker','captured_at','source_type'],`markets[${index}]`);
@@ -49,6 +60,11 @@ function dedupeResolved(rows){
   }
   return [...best.values()];
 }
+function dedupeRawRows(rows){
+  const best=new Map();
+  for(const row of rows){const key=[normName(row.player_name),row.stat_type,row.side,row.threshold].join('|'),old=best.get(key);if(!old||row.decimal_price>old.decimal_price||(row.decimal_price===old.decimal_price&&row.bookmaker.toLowerCase()<old.bookmaker.toLowerCase()))best.set(key,row);}
+  return [...best.values()];
+}
 function findLine(grid,threshold){
   const integer=Math.abs(threshold-Math.round(threshold))<=1e-9;const rows=integer?grid?.integer_push_grid:grid?.half_point_grid;need(Array.isArray(rows),'Frozen probability grid missing');const found=rows.filter(r=>Math.abs(Number(r.line)-threshold)<=1e-9);need(found.length===1,`Exact frozen threshold ${threshold} unavailable`);return found[0];
 }
@@ -58,9 +74,14 @@ function evaluateRow(row,frozenPlayer,freeze){
 }
 function ranking(a,b){return b.ev_per_unit-a.ev_per_unit||(CONF_RANK[a.confidence]??99)-(CONF_RANK[b.confidence]??99)||(FRAG_RANK[a.fragility]??99)-(FRAG_RANK[b.fragility]??99)||a.stat_type.localeCompare(b.stat_type)||a.player_name.localeCompare(b.player_name)||a.threshold-b.threshold||a.bookmaker.localeCompare(b.bookmaker);}
 
-async function evaluate(input,env){
-  exactKeys(input,['run_id','expected_freeze_receipt_sha256','markets'],'request');const runId=String(input.run_id||'');need(/^[a-f0-9]{64}$/.test(runId),'run_id invalid');const expected=String(input.expected_freeze_receipt_sha256||'');need(hash64(expected),'expected_freeze_receipt_sha256 required');need(Array.isArray(input.markets)&&input.markets.length>0&&input.markets.length<=250,'markets must contain 1-250 rows');
-  const base=researchBase(env),run=await getJson(`${base}/v1/match-runs/${runId}`,env);need(run.status==='FROZEN'&&run.freeze?.status==='FROZEN','P_MODEL_STATUS must be FROZEN before market evaluation');const freeze=run.freeze;need(hash64(freeze.freeze_receipt_sha256)&&freeze.freeze_receipt_sha256===expected,'Freeze receipt mismatch');const frozenAtMs=Date.parse(String(freeze.frozen_at||''));need(Number.isFinite(frozenAtMs),'Frozen timestamp invalid');
+async function loadFrozenRun(input,env){
+  const runId=String(input.run_id||'');need(/^[a-f0-9]{64}$/.test(runId),'run_id invalid');const expected=String(input.expected_freeze_receipt_sha256||'');need(hash64(expected),'expected_freeze_receipt_sha256 required');
+  const base=researchBase(env),run=await getJson(`${base}/v1/match-runs/${runId}`,env);need(run.status==='FROZEN'&&run.freeze?.status==='FROZEN','P_MODEL_STATUS must be FROZEN before market evaluation');const freeze=run.freeze;need(hash64(freeze.freeze_receipt_sha256)&&freeze.freeze_receipt_sha256===expected,'Freeze receipt mismatch');const frozenAtMs=Date.parse(String(freeze.frozen_at||''));need(Number.isFinite(frozenAtMs),'Frozen timestamp invalid');return {runId,expected,base,run,freeze,frozenAtMs};
+}
+
+export async function evaluate(input,env){
+  exactKeys(input,['run_id','expected_freeze_receipt_sha256','markets'],'request');need(Array.isArray(input.markets)&&input.markets.length>0&&input.markets.length<=MAX_MARKETS,`markets must contain 1-${MAX_MARKETS} rows`);
+  const state=await loadFrozenRun(input,env),{runId,expected,base,freeze,frozenAtMs}=state;
   const validated=input.markets.map(validateMarket);for(const row of validated){need(row.fixture_id===String(freeze.fixture_id),'Market fixture does not match frozen fixture');need(Date.parse(row.captured_at)>=frozenAtMs,'Market observation predates P_model freeze');}
   const pIndex=playerIndexes(freeze),resolved=dedupeResolved(validated.map(row=>({row,summary:resolvePlayer(pIndex,row)}))),cache=new Map(),evaluated=[];
   for(const {row,summary} of resolved){const key=String(summary.player_key);let full=cache.get(key);if(!full){const fetched=await getJson(`${base}/v1/match-runs/${runId}/players/${encodeURIComponent(key)}`,env);need(fetched.freeze_receipt_sha256===expected&&fetched.frozen_at===freeze.frozen_at,'Frozen player receipt/timestamp mismatch');need(fetched.player_model_sha256===summary.player_model_sha256,'Frozen player hash receipt mismatch');full=fetched.player;need(full&&typeof full==='object','Frozen player response missing');need(await sha256Json(full)===summary.player_model_sha256,'Frozen player payload hash mismatch');cache.set(key,full);}evaluated.push(evaluateRow(row,full,freeze));}
@@ -68,6 +89,40 @@ async function evaluate(input,env){
   return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:runId,fixture_id:freeze.fixture_id,freeze_receipt_sha256:expected,frozen_at:freeze.frozen_at,market_records_received:input.markets.length,market_records_evaluated:evaluated.length,evaluated,positive_edges:positives,best_single:positives[0]||null,no_forced_bet:positives.length===0};
 }
 
-export default {async fetch(request,env){try{if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type'}});const url=new URL(request.url);if(request.method==='GET'&&url.pathname==='/health')return response({ok:true,service:'nbl-player-props-market-v1',version:'1.0.0',market_data:true,research_base:researchBase(env),supported_stats:['assists','rebounds'],supported_sources:['odds_api','screenshot','public_web']});if(request.method==='POST'&&url.pathname==='/v1/evaluate'){const raw=await request.text();need(raw.length<=300_000,'Request too large');return response(await evaluate(JSON.parse(raw),env));}return response({error:'Not found'},404);}catch(error){return response({market_data:true,p_model_mutated:false,error:error.message},422);}}};
+function oddsQuota(res){return {requests_remaining:res.headers.get('x-requests-remaining'),requests_used:res.headers.get('x-requests-used'),requests_last:res.headers.get('x-requests-last')};}
+async function oddsFetch(url,label){const res=await fetch(url,{headers:{accept:'application/json','user-agent':'nbl-market-v1/1.1'},signal:AbortSignal.timeout(15_000),cf:{cacheTtl:label==='Odds events'?240:25,cacheEverything:true}});const {body}=await readJsonResponse(res,label);return {res,body,quota:oddsQuota(res)};}
+async function fetchOddsEvents(env){
+  need(env?.ODDS_API_KEY,'ODDS_API_KEY is not configured');const q=new URLSearchParams({apiKey:env.ODDS_API_KEY,dateFormat:'iso'});const out=await oddsFetch(`${ODDS_HOST}/v4/sports/${ODDS_SPORT}/events?${q}`,'Odds events');need(out.res.ok,`Odds events unavailable (${out.res.status})`);need(Array.isArray(out.body),'Odds events returned invalid payload');return out;
+}
+export function resolveOddsEvent(events,fixture){
+  const home=normName(fixture?.home_team?.name),away=normName(fixture?.away_team?.name),tip=Date.parse(String(fixture?.start_time||''));need(home&&away&&Number.isFinite(tip),'Frozen fixture identity incomplete');
+  const matches=(Array.isArray(events)?events:[]).filter(e=>e&&normName(e.home_team)===home&&normName(e.away_team)===away&&Number.isFinite(Date.parse(e.commence_time))&&Math.abs(Date.parse(e.commence_time)-tip)<=KICKOFF_TOLERANCE_MS);
+  need(matches.length===1,`Expected exactly one Odds API event for frozen fixture; found ${matches.length}`);need(String(matches[0].id||'').trim(),'Odds API event id missing');return matches[0];
+}
+function requestedOddsMarkets(input){const raw=input.markets===undefined?DEFAULT_ODDS_MARKETS:input.markets;need(Array.isArray(raw)&&raw.length>0&&raw.length<=4,'Odds API markets must contain 1-4 supported keys');const out=[...new Set(raw.map(String))];for(const key of out)need(ALLOWED_ODDS_MARKETS.has(key),`Unsupported Odds API market ${key}`);return out;}
+async function fetchEventOdds(env,event,markets){
+  const q=new URLSearchParams({apiKey:env.ODDS_API_KEY,regions:'au',markets:markets.join(','),oddsFormat:'decimal',dateFormat:'iso'});return oddsFetch(`${ODDS_HOST}/v4/sports/${ODDS_SPORT}/events/${encodeURIComponent(event.id)}/odds?${q}`,'Odds props');
+}
+function oddsErrorCode(body){return String(body?.error_code||body?.code||'').toUpperCase();}
+function marketStat(key){if(key==='player_assists'||key==='player_assists_alternate')return'assists';if(key==='player_rebounds'||key==='player_rebounds_alternate')return'rebounds';return null;}
+export function normalizeOddsRows(raw,event,fixtureId,capturedAt){
+  need(raw&&String(raw.id||'')===String(event.id),'Odds event response identity mismatch');need(normName(raw.home_team)===normName(event.home_team)&&normName(raw.away_team)===normName(event.away_team),'Odds event teams mismatch');need(Number.isFinite(Date.parse(raw.commence_time))&&Math.abs(Date.parse(raw.commence_time)-Date.parse(event.commence_time))<=KICKOFF_TOLERANCE_MS,'Odds event tipoff mismatch');
+  const rows=[];for(const book of Array.isArray(raw.bookmakers)?raw.bookmakers:[]){for(const market of Array.isArray(book.markets)?book.markets:[]){const stat=marketStat(String(market?.key||''));if(!stat)continue;for(const o of Array.isArray(market.outcomes)?market.outcomes:[]){const side=String(o?.name||'').toLowerCase();if(!ALLOWED_SIDES.has(side)||typeof o?.description!=='string'||!finite(o?.price)||Number(o.price)<=1||!finite(o?.point))continue;const threshold=Number(o.point);if(threshold<0||threshold>40||Math.abs(threshold*2-Math.round(threshold*2))>1e-9)continue;rows.push({fixture_id:String(fixtureId),player_id:null,player_name:String(o.description).trim(),stat_type:stat,side,threshold,decimal_price:Number(o.price),bookmaker:String(book.title||book.key||'Unknown'),captured_at:capturedAt,source_type:'odds_api'});}}}
+  return dedupeRawRows(rows);
+}
 
-export {evaluate,normName};
+export async function fetchAndEvaluateOddsApi(input,env){
+  exactKeys(input,['run_id','expected_freeze_receipt_sha256','markets'],'request');const state=await loadFrozenRun(input,env);if(!env?.ODDS_API_KEY)return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:state.runId,fixture_id:state.freeze.fixture_id,freeze_receipt_sha256:state.expected,frozen_at:state.freeze.frozen_at,odds_api_support:'NOT_CONFIGURED',message:'ODDS_API_KEY is not configured on the Market Worker',market_records_received:0,evaluation:null};
+  const requested=requestedOddsMarkets(input);const events=await fetchOddsEvents(env);let event;try{event=resolveOddsEvent(events.body,state.run.lock?.fixture||state.freeze.fixture);}catch(error){return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:state.runId,fixture_id:state.freeze.fixture_id,freeze_receipt_sha256:state.expected,frozen_at:state.freeze.frozen_at,odds_api_support:'EVENT_NOT_FOUND',message:error.message,quota:events.quota,market_records_received:0,evaluation:null};}
+  let props=await fetchEventOdds(env,event,requested),usedMarkets=requested,altFallback=false;
+  if(!props.res.ok&&oddsErrorCode(props.body)==='INVALID_MARKET'&&requested.some(x=>x.endsWith('_alternate'))){usedMarkets=requested.filter(x=>BASE_ODDS_MARKETS.includes(x));if(usedMarkets.length){altFallback=true;props=await fetchEventOdds(env,event,usedMarkets);}}
+  if(!props.res.ok){const code=oddsErrorCode(props.body);if(code==='INVALID_MARKET')return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:state.runId,fixture_id:state.freeze.fixture_id,freeze_receipt_sha256:state.expected,frozen_at:state.freeze.frozen_at,odds_api_support:'UNSUPPORTED_MARKET',message:String(props.body?.message||props.body?.error||`Odds API rejected requested NBL player markets (${props.res.status})`),event:{event_id:event.id,home_team:event.home_team,away_team:event.away_team,commence_time:event.commence_time},markets_requested:requested,markets_attempted:usedMarkets,alternate_fallback_attempted:altFallback,quota:props.quota,market_records_received:0,evaluation:null};throw new Error(`Odds props unavailable (${props.res.status}): ${String(props.body?.message||props.body?.error||'request failed')}`);}
+  const capturedAt=new Date().toISOString();need(Date.parse(capturedAt)>=state.frozenAtMs,'Odds API capture unexpectedly predates freeze');const rows=normalizeOddsRows(props.body,event,state.freeze.fixture_id,capturedAt);
+  if(rows.length===0)return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:state.runId,fixture_id:state.freeze.fixture_id,freeze_receipt_sha256:state.expected,frozen_at:state.freeze.frozen_at,odds_api_support:'SUPPORTED_EMPTY',event:{event_id:event.id,home_team:event.home_team,away_team:event.away_team,commence_time:event.commence_time},markets_requested:requested,markets_used:usedMarkets,alternate_fallback_attempted:altFallback,quota:props.quota,market_records_received:0,evaluation:null};
+  need(rows.length<=MAX_MARKETS,`Odds API normalized market rows exceed ${MAX_MARKETS}; narrow market request`);const evaluation=await evaluate({run_id:state.runId,expected_freeze_receipt_sha256:state.expected,markets:rows},env);
+  return {market_data:true,p_model_mutated:false,p_model_status:'FROZEN',run_id:state.runId,fixture_id:state.freeze.fixture_id,freeze_receipt_sha256:state.expected,frozen_at:state.freeze.frozen_at,odds_api_support:'SUPPORTED_WITH_ROWS',event:{event_id:event.id,home_team:event.home_team,away_team:event.away_team,commence_time:event.commence_time},markets_requested:requested,markets_used:usedMarkets,alternate_fallback_attempted:altFallback,quota:props.quota,market_records_received:rows.length,evaluation};
+}
+
+export default {async fetch(request,env){try{if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type'}});const url=new URL(request.url);if(request.method==='GET'&&url.pathname==='/health')return response({ok:true,service:'nbl-player-props-market-v1',version:'1.1.0',market_data:true,research_base:researchBase(env),supported_stats:['assists','rebounds'],supported_sources:['odds_api','screenshot','public_web'],odds_api_sport:ODDS_SPORT,odds_api_fetch_configured:Boolean(env?.ODDS_API_KEY),odds_api_markets:DEFAULT_ODDS_MARKETS});if(request.method==='POST'&&url.pathname==='/v1/evaluate'){const raw=await request.text();need(raw.length<=300_000,'Request too large');return response(await evaluate(JSON.parse(raw),env));}if(request.method==='POST'&&url.pathname==='/v1/fetch-odds-api'){const raw=await request.text();need(raw.length<=50_000,'Request too large');return response(await fetchAndEvaluateOddsApi(JSON.parse(raw),env));}return response({error:'Not found'},404);}catch(error){return response({market_data:true,p_model_mutated:false,error:error.message},422);}}};
+
+export {normName,dedupeRawRows};
