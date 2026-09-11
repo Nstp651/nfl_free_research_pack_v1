@@ -29,8 +29,8 @@ paths:
     post:
       operationId: createModelRun
       x-openai-isConsequential: false
-      summary: Store one completed frozen NBA slate model run.
-      description: Call exactly once after the first completed Layer 4 ranking. Stable request_id retries are idempotent. This is bookkeeping only and must never feed Layers 1-2.
+      summary: Store one completed frozen NBA slate model run with actionable positive-edge selections.
+      description: Call exactly once after the first completed Layer 4 ranking only when at least one actionable positive-edge selection exists. Stable request_id retries are idempotent. If Layer 4 is NO BET, do not fabricate a selection and do not create a tracker model run.
       requestBody:
         required: true
         content:
@@ -156,8 +156,8 @@ components:
     ModelSelectionInput:
       type: object
       properties:
-        selection_name: {type: string}
-        player_name: {type: string}
+        selection_name: {type: string, minLength: 1}
+        player_name: {type: string, minLength: 1}
         team_name: {type: string}
         market_family:
           type: string
@@ -168,7 +168,7 @@ components:
         side:
           type: string
           enum: [over]
-        threshold: {type: number}
+        threshold: {type: number, minimum: 0, multipleOf: 0.5}
         p_model:
           type: number
           exclusiveMinimum: 0
@@ -180,18 +180,18 @@ components:
         market_price_at_integration:
           type: number
           exclusiveMinimum: 1
-        market_bookmaker_at_integration: {type: string}
+        market_bookmaker_at_integration: {type: string, minLength: 1}
         p_market_at_integration:
           type: number
           minimum: 0
           maximum: 1
         edge_at_integration: {type: number}
         ranking_score: {type: number}
-        final_rank: {type: integer}
+        final_rank: {type: integer, minimum: 1}
         final_play: {type: boolean}
         key_assumptions: {type: string}
         notes: {type: string}
-      required: [selection_name, market_family, p_model]
+      required: [selection_name, player_name, market_family, market_key, side, threshold, p_model, fair_odds, market_price_at_integration, market_bookmaker_at_integration, final_rank, final_play]
       additionalProperties: false
     CreateModelRunRequest:
       type: object
@@ -230,7 +230,7 @@ components:
           maxItems: 250
           items:
             $ref: '#/components/schemas/ModelSelectionInput'
-      required: [sport, league, model_name, model_version, fixture, selections]
+      required: [request_id, sport, league, model_name, model_version, fixture, selections]
       additionalProperties: false
     ModelSelectionStored:
       type: object
@@ -270,7 +270,7 @@ components:
     RecordBetLeg:
       type: object
       properties:
-        model_selection_id: {type: string}
+        model_selection_id: {type: string, minLength: 1}
         execution_leg_odds:
           type: number
           exclusiveMinimum: 1
@@ -282,7 +282,7 @@ components:
         request_id:
           type: string
           pattern: '^[A-Za-z0-9_-]{8,80}$'
-        bookmaker: {type: string}
+        bookmaker: {type: string, minLength: 1}
         bet_type:
           type: string
           enum: [single]
@@ -307,7 +307,7 @@ components:
           maxItems: 1
           items:
             $ref: '#/components/schemas/RecordBetLeg'
-      required: [bookmaker, bet_type, stake, accepted_odds, legs]
+      required: [request_id, bookmaker, bet_type, stake, accepted_odds, legs]
       additionalProperties: false
     RecordedBetLeg:
       type: object
