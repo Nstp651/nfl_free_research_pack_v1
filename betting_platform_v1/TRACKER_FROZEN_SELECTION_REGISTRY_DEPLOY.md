@@ -15,6 +15,8 @@ Allow any exact NFL Receptions V5 frozen ladder point to be attached to the exis
 ## Backend patch
 Apply `betting_platform_v1/TRACKER_FROZEN_SELECTION_REGISTRY_PATCH_V1.js` to the existing `nick-betting-api` Worker.
 
+Then apply `betting_platform_v1/TRACKER_FROZEN_SELECTION_REGISTRY_COMPAT_V1_1.js` by replacing only `findExistingFrozenNflSelection()` from the base registry module with the compatibility version. This is required because existing tracker rows may store the ladder integer threshold (for example `6` for 6+ receptions) while the ensure Action sends the exact sportsbook half-point (`5.5`). Both representations must resolve to the same existing selection ID.
+
 Add the documented route before the Worker's GET-only odds/event guard:
 
 `POST /tracker/model-runs/{runId}/selections/ensure`
@@ -58,7 +60,7 @@ It remains below the Custom GPT 8,000-character instruction limit.
 
 ## Acceptance
 PASS only if all are true:
-- existing top-25 selection returns the existing ID idempotently;
+- existing top-25 selection returns the existing ID idempotently, including legacy integer-threshold storage versus the equivalent sportsbook half-point;
 - missing-but-frozen exact selection returns `201` and a new model_selection_id;
 - repeating that request returns the same ID with `200`;
 - wrong freeze receipt is rejected;
