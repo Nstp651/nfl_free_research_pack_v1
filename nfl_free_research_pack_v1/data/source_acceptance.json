@@ -1,10 +1,10 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-11T18:39:44.131973+00:00",
-  "build_commit": "8f0866e6f999f0eb0564c00daa35292d6e336f06",
+  "tested_at_utc": "2026-09-12T00:41:09.488021+00:00",
+  "build_commit": "8bd819218105cb0d2dd36acc3f59daf1bd354be4",
   "python": "3.12.14",
-  "workflow_run_id": "34634419921",
+  "workflow_run_id": "34662385136",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
