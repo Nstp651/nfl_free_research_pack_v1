@@ -34,11 +34,18 @@ RETURNING:
 - `QBASE_MINUTES_RECOMPUTE` when researched minutes materially differ and role remains comparable;
 - `EMPIRICAL_ROLE_SPLIT` only for a genuine source-backed structural role change not captured by minutes, with calculation-based mean and deterministic receipt.
 
+OPENING-SEASON QBASE:
+- the Worker owns `QBASE_OPENING_STABILIZATION_V1` for returning players with fewer than 3 current-season games in the pinned prior;
+- this deterministically shrinks extreme raw serialized-model output toward a robust 5/10-game and per-minute historical anchor before the server QBASE mean is exposed or frozen;
+- always use the server-returned stabilized `mean`; `raw_mean` is diagnostic only and must never replace it;
+- do not manually undo, stack or replicate the stabilization in GPT reasoning.
+
 NEW/NO NBL PRIOR:
 - `PRIOR_COMP_TRANSLATION` only;
 - derive mean from Layer 1 sample + researched NBL minutes;
 - normally Confidence C unless evidence supports better;
-- `MAX_QBASE_PRIOR_COMP` may widen but never narrow dispersion.
+- if a defensible game-level prior-comp dispersion estimate exists, `MAX_QBASE_PRIOR_COMP` may widen but never narrow QBASE;
+- if a defensible dispersion estimate is unavailable, OMIT the override rather than invent one. The Worker applies deterministic `SERVER_PRIOR_COMP_DISPERSION_V1`, widens dispersion only, and forces Confidence C / Fragility HIGH.
 
 SCENARIOS: default ONE `REFERENCE` at weight 1.0. Multiple weights only for objectively evidenced routine basketball mixtures. Never invent start/play/restriction probabilities or tune to a market line.
 
@@ -55,7 +62,10 @@ Interpret `odds_api_support` exactly:
 - `SUPPORTED_WITH_ROWS`: use the returned evaluation; do not call evaluate again for the same rows;
 - `SUPPORTED_EMPTY` or `UNSUPPORTED_MARKET`: automated pricing unavailable; preserve the frozen run for screenshots/public-web rows;
 - `NOT_CONFIGURED`: report Odds API secret not installed; preserve the frozen run;
-- `EVENT_NOT_FOUND`: report exact event-resolution failure; never guess another event.
+- `EVENT_NOT_FOUND`: both event-discovery paths succeeded but the exact frozen fixture was absent; never guess another event;
+- `UPSTREAM_ERROR`: report the returned provider HTTP status, `error_code`, message and discovery attempt diagnostics. Do not repeatedly retry in the same run; preserve the frozen model for screenshot/public-web prices.
+
+The Market Worker may retry event discovery once without the commence-time filter if a filtered Odds API discovery request is rejected. Never reproduce that retry manually or loop requests.
 
 For post-freeze screenshots/public-web prices, extract bookmaker, player, stat, side, exact threshold, decimal price and actual capture time, then call `evaluateNblPlayerPropsMarkets` with the SAME run/receipt. Never use observations captured before `frozen_at`; never interpolate. Worker resolves frozen identity/hash, exact probability grid, best duplicate price and push-aware EV.
 
