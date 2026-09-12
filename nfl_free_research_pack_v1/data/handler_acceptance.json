@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-12T06:40:23.566Z",
+  "tested_at_utc": "2026-09-12T12:40:03.650Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/e8a98ff2a2ceed519dad476da684c7cb8f7d08b7/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/59073f50b46de2ed71b909c5602445e17f275ab3/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 1,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "ca704d91645eede3",
+      "pack_revision": "c42ce0d0fafb0527",
       "fixture": {
         "game_id": "2026_01_NE_SEA",
         "season": 2026,
@@ -222,7 +222,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 511958,
+            "rows": 514127,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "f1bb2b44ba83c6d8",
+      "pack_revision": "5ed0fdac0f40e51e",
       "fixture": {
         "game_id": "2026_01_SF_LA",
         "season": 2026,
@@ -288,8 +288,8 @@
           "bytes": 43566
         },
         {
-          "chars": 55204,
-          "bytes": 55238
+          "chars": 55186,
+          "bytes": 55220
         },
         {
           "chars": 10045,
@@ -468,7 +468,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 511958,
+            "rows": 514127,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -525,7 +525,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-12T06:40:18.660844+00:00",
+      "last_checked_at_utc": "2026-09-12T12:39:57.323867+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
