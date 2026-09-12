@@ -39,6 +39,7 @@ paths:
   /v1/match-runs:
     post:
       operationId: startNblPlayerPropsMatchRun
+      x-openai-isConsequential: false
       summary: Start one immutable market-blind NBL matchup run.
       requestBody:
         required: true
@@ -102,6 +103,7 @@ paths:
                 $ref: '#/components/schemas/ResearchSeedResponse'
     post:
       operationId: checkpointNblPlayerPropsResearch
+      x-openai-isConsequential: false
       summary: Persist completed current-information research before quantitative freeze.
       parameters:
         - name: run_id
@@ -126,6 +128,7 @@ paths:
   /v1/match-runs/{run_id}/compute:
     post:
       operationId: computeNblPlayerPropsFreeze
+      x-openai-isConsequential: false
       summary: Serverize quantitative projections and atomically freeze every requested player/stat head.
       description: Returning-player QBASE and minutes scenarios are recomputed by the Worker. New-to-NBL players require explicit prior-competition translation. Market data is forbidden.
       parameters:
