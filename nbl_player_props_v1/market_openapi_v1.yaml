@@ -1,15 +1,15 @@
 openapi: 3.1.0
 info:
   title: NBL Player Props Market Gateway
-  version: 1.1.0
-  description: Post-freeze NBL assists/rebounds market retrieval and evaluation. Live Odds API access and all supplied market rows are rejected until the exact research run is immutably frozen.
+  version: 1.1.1
+  description: Post-freeze NBL assists/rebounds market retrieval and evaluation. Market access is rejected until the exact research run is immutably frozen.
 servers:
   - url: https://nbl-player-props-market-v1.nickarnott01.workers.dev
 paths:
   /health:
     get:
       operationId: healthNblPlayerPropsMarket
-      summary: Check NBL market gateway health and whether Odds API live retrieval is configured.
+      summary: Check market gateway health and Odds API configuration.
       responses:
         '200':
           description: Market gateway health.
@@ -17,12 +17,26 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  ok: {type: boolean}
+                  service: {type: string}
+                  version: {type: string}
+                  market_group: {type: string}
+                  sport_key: {type: string}
+                  region: {type: string}
+                  markets:
+                    type: array
+                    items: {type: string}
+                  configured: {type: boolean}
+                  odds_api_configured: {type: boolean}
+                  research_transport: {type: string}
+                  note: {type: string}
                 additionalProperties: true
   /v1/fetch-odds-api:
     post:
       operationId: fetchNblPlayerPropsOddsApi
-      summary: After freeze, retrieve live NBL assists/rebounds props from The Odds API and evaluate them against the immutable frozen model.
-      description: Verifies the exact frozen run and receipt before any Odds API call. Resolves the exact NBL event and first requests assists, rebounds and alternate ladders in one event-scoped request. If The Odds API rejects the bundle because one or more keys are unsupported, the Worker probes each requested key individually so partial NBL support is detected precisely. Never mutates P_model.
+      summary: Fetch live NBL assists/rebounds props after freeze and evaluate them.
+      description: Verifies the frozen run and receipt before any Odds API call. Resolves the exact NBL event, requests the selected prop markets, probes unsupported keys individually when needed, and evaluates valid rows without mutating P_model.
       requestBody:
         required: true
         content:
@@ -52,7 +66,7 @@ paths:
               additionalProperties: false
       responses:
         '200':
-          description: Live Odds API support status and, when rows exist, frozen-model evaluation.
+          description: Live Odds API support status and frozen-model evaluation when valid rows exist.
           content:
             application/json:
               schema:
@@ -71,6 +85,12 @@ paths:
                   message: {type: string}
                   event:
                     type: object
+                    properties:
+                      id: {type: string}
+                      sport_key: {type: string}
+                      commence_time: {type: string}
+                      home_team: {type: string}
+                      away_team: {type: string}
                     additionalProperties: true
                   markets_requested:
                     type: array
@@ -86,6 +106,10 @@ paths:
                     type: array
                     items:
                       type: object
+                      properties:
+                        requests_remaining: {type: [string, 'null']}
+                        requests_used: {type: [string, 'null']}
+                        requests_last: {type: [string, 'null']}
                       additionalProperties: true
                   market_records_received: {type: integer}
                   evaluation:
@@ -98,6 +122,8 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  error: {type: string}
                 additionalProperties: true
   /v1/evaluate:
     post:
@@ -138,6 +164,8 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  error: {type: string}
                 additionalProperties: true
 components:
   schemas:
