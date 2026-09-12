@@ -1,0 +1,312 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Nick NFL Receptions V5 Bet Tracker",
+    "version": "1.0.3-builder.1",
+    "description": "GPT Builder-safe NFL Receptions V5 tracker contract. Keeps the initial tracker handoff compact at 25 selections, but can server-verify and register any exact frozen ladder point on demand before a user-confirmed wager is recorded."
+  },
+  "servers": [
+    {"url": "https://nick-betting-api.nickarnott01.workers.dev"}
+  ],
+  "security": [
+    {"apiKeyAuth": []}
+  ],
+  "paths": {
+    "/tracker/health": {
+      "get": {
+        "operationId": "checkBetTracker",
+        "x-openai-isConsequential": false,
+        "summary": "Check production bet tracker health",
+        "responses": {
+          "200": {"description": "Tracker health", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TrackerHealth"}}}},
+          "401": {"description": "Unauthorized", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/tracker/model-runs": {
+      "post": {
+        "operationId": "createNflReceptionsTrackerRun",
+        "x-openai-isConsequential": false,
+        "summary": "Record a completed frozen NFL Receptions V5 run",
+        "description": "Call once after Layer 3/4. Send only the deterministic actionable ranked board, maximum 25 selections. Never send the entire frozen ladder.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateModelRunRequest"}}}},
+        "responses": {
+          "200": {"description": "Existing idempotent model run", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateModelRunResponse"}}}},
+          "201": {"description": "New model run recorded", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateModelRunResponse"}}}},
+          "400": {"description": "Invalid payload", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "401": {"description": "Unauthorized", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "request_id conflict", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/tracker/model-runs/{model_run_id}/selections/ensure": {
+      "post": {
+        "operationId": "ensureNflReceptionsFrozenSelection",
+        "x-openai-isConsequential": false,
+        "summary": "Ensure an exact frozen NFL reception selection exists in the tracker run",
+        "description": "Use when a user-confirmed or supplemental-bookmaker NFL reception prop is backed by the immutable V5 P_model but was not included in the initial top-25 tracker handoff. The server verifies the supplied V5 run, freeze receipt, player and exact half-point threshold directly against the frozen Control Worker. It never trusts caller-supplied P_model and never creates a new tracker model run.",
+        "parameters": [
+          {"name": "model_run_id", "in": "path", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 180}}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/EnsureFrozenSelectionRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Existing exact frozen selection", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EnsureFrozenSelectionResponse"}}}},
+          "201": {"description": "Exact frozen selection registered", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EnsureFrozenSelectionResponse"}}}},
+          "400": {"description": "Invalid request", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "401": {"description": "Unauthorized", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "404": {"description": "Tracker model run not found", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "Tracker/source freeze binding conflict", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Frozen player or exact ladder point could not be verified", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "502": {"description": "Frozen Control Worker unavailable", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/tracker/bets": {
+      "post": {
+        "operationId": "recordNflReceptionsBet",
+        "x-openai-isConsequential": false,
+        "summary": "Record a user-confirmed NFL Receptions wager",
+        "description": "Call only after the user explicitly confirms placement. Every leg must reference a tracker model_selection_id. If the exact frozen selection was not in the initial handoff, call ensureNflReceptionsFrozenSelection first and use the returned model_selection_id.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RecordBetRequest"}}}},
+        "responses": {
+          "200": {"description": "Existing idempotent bet", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RecordBetResponse"}}}},
+          "201": {"description": "Bet recorded", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RecordBetResponse"}}}},
+          "400": {"description": "Invalid bet payload", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "401": {"description": "Unauthorized", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "404": {"description": "Model selection not found", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "request_id conflict", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      },
+      "get": {
+        "operationId": "listNflReceptionsTrackedBets",
+        "x-openai-isConsequential": false,
+        "summary": "List tracked bets",
+        "parameters": [
+          {"name": "status", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "bookmaker", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "bet_type", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "limit", "in": "query", "required": false, "schema": {"type": "integer", "minimum": 1, "maximum": 500, "default": 100}}
+        ],
+        "responses": {
+          "200": {"description": "Tracked bets", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TrackedBetsResponse"}}}}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-GPT-Action-Key"}
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "message": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "upstream_status": {"anyOf": [{"type": "integer"}, {"type": "null"}]}
+        },
+        "additionalProperties": true
+      },
+      "TrackerHealth": {
+        "type": "object",
+        "properties": {
+          "service": {"type": "string"},
+          "status": {"type": "string"},
+          "api_version": {"type": "string"},
+          "schema_version": {"type": "string"},
+          "database_binding": {"type": "string"},
+          "current_unit_size": {"type": "number"}
+        },
+        "additionalProperties": true
+      },
+      "ModelSelectionInput": {
+        "type": "object",
+        "required": ["selection_name", "market_family", "p_model", "final_play"],
+        "properties": {
+          "selection_name": {"type": "string"},
+          "player_name": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "team_name": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "market_family": {"type": "string", "enum": ["nfl_receptions"]},
+          "market_key": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "side": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "threshold": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "p_model": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "fair_odds": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "confidence": {"anyOf": [{"type": "number"}, {"type": "null"}], "description": "Legacy numeric tracker field; leave null for NFL V5."},
+          "market_price_at_integration": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "market_bookmaker_at_integration": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "p_market_at_integration": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+          "edge_at_integration": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "ranking_score": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "final_rank": {"anyOf": [{"type": "integer"}, {"type": "null"}]},
+          "final_play": {"type": "boolean"},
+          "key_assumptions": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "notes": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+        },
+        "additionalProperties": false
+      },
+      "CreateModelRunRequest": {
+        "type": "object",
+        "required": ["sport", "league", "model_name", "fixture", "selections"],
+        "properties": {
+          "request_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9_-]{8,80}$"}, {"type": "null"}]},
+          "sport": {"type": "string", "enum": ["nfl"]},
+          "league": {"type": "string", "enum": ["nfl"]},
+          "model_name": {"type": "string", "enum": ["NFL Receptions V5"]},
+          "model_version": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "season": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "round_week": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "fixture_date": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "home_team": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "away_team": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "fixture": {"type": "string"},
+          "timing_mode": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "frozen_at": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "research_state": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "notes": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "selections": {"type": "array", "minItems": 1, "maxItems": 25, "items": {"$ref": "#/components/schemas/ModelSelectionInput"}}
+        },
+        "additionalProperties": false
+      },
+      "ModelSelectionStored": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "selection_name": {"type": "string"},
+          "player_name": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "market_family": {"type": "string"},
+          "threshold": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "p_model": {"type": "number"},
+          "final_rank": {"anyOf": [{"type": "integer"}, {"type": "null"}]},
+          "final_play": {"anyOf": [{"type": "integer"}, {"type": "boolean"}, {"type": "null"}]}
+        },
+        "additionalProperties": true
+      },
+      "CreateModelRunResponse": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "idempotent": {"type": "boolean"},
+          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "model_run_id": {"type": "string"},
+          "selection_count": {"type": "integer"},
+          "selections": {"type": "array", "maxItems": 25, "items": {"$ref": "#/components/schemas/ModelSelectionStored"}}
+        },
+        "additionalProperties": true
+      },
+      "EnsureFrozenSelectionRequest": {
+        "type": "object",
+        "required": ["v5_run_id", "freeze_receipt_sha256", "player_id", "threshold"],
+        "properties": {
+          "v5_run_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "freeze_receipt_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "player_id": {"type": "string", "pattern": "^[A-Z0-9_-]{3,64}$"},
+          "threshold": {"type": "number", "minimum": 0.5, "maximum": 19.5, "description": "Exact sportsbook reception line; must be x.5. Example 4.5 corresponds to frozen 5+ ladder probability."}
+        },
+        "additionalProperties": false
+      },
+      "EnsureFrozenSelectionResponse": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "idempotent": {"type": "boolean"},
+          "model_run_id": {"type": "string"},
+          "model_selection_id": {"type": "string"},
+          "v5_run_id": {"type": "string"},
+          "freeze_receipt_sha256": {"type": "string"},
+          "player_id": {"type": "string"},
+          "player_name": {"type": "string"},
+          "team_name": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "threshold": {"type": "number"},
+          "ladder_key": {"type": "integer"},
+          "p_model": {"type": "number"},
+          "fair_odds": {"type": "number"}
+        },
+        "additionalProperties": true
+      },
+      "RecordBetLeg": {
+        "type": "object",
+        "required": ["model_selection_id"],
+        "properties": {
+          "model_selection_id": {"type": "string"},
+          "execution_leg_odds": {"anyOf": [{"type": "number"}, {"type": "null"}]}
+        },
+        "additionalProperties": false
+      },
+      "RecordBetRequest": {
+        "type": "object",
+        "required": ["bookmaker", "bet_type", "stake", "accepted_odds", "legs"],
+        "properties": {
+          "request_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9_-]{8,80}$"}, {"type": "null"}]},
+          "bookmaker": {"type": "string"},
+          "bet_type": {"type": "string", "enum": ["single"]},
+          "stake": {"type": "number", "exclusiveMinimum": 0},
+          "accepted_odds": {"type": "number", "exclusiveMinimum": 1},
+          "unboosted_odds": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "promo_label": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "bookmaker_bet_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "placed_at": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "notes": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "legs": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/components/schemas/RecordBetLeg"}}
+        },
+        "additionalProperties": false
+      },
+      "RecordedBetLeg": {
+        "type": "object",
+        "properties": {
+          "id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "leg_number": {"anyOf": [{"type": "integer"}, {"type": "null"}]},
+          "model_selection_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "model_run_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "selection_name": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "fixture": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+        },
+        "additionalProperties": true
+      },
+      "RecordBetResponse": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "idempotent": {"type": "boolean"},
+          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "bet_ticket_id": {"type": "string"},
+          "bookmaker": {"type": "string"},
+          "bet_type": {"type": "string"},
+          "stake": {"type": "number"},
+          "accepted_odds": {"type": "number"},
+          "unit_size": {"type": "number"},
+          "units_staked": {"type": "number"},
+          "legs": {"type": "array", "items": {"$ref": "#/components/schemas/RecordedBetLeg"}}
+        },
+        "additionalProperties": true
+      },
+      "TrackedBetSummary": {
+        "type": "object",
+        "properties": {
+          "id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "bookmaker": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "stake": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "accepted_odds": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "status": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+        },
+        "additionalProperties": true
+      },
+      "TrackedBetsResponse": {
+        "type": "object",
+        "properties": {
+          "count": {"type": "integer"},
+          "bets": {"type": "array", "items": {"$ref": "#/components/schemas/TrackedBetSummary"}}
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}
