@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assembleFeatureVector,normName,projectedMinutesScore,returningPlayerBaseline,scoreQbase} from './runtime_score.js';
+import {assembleFeatureVector,normName,projectedMinutesScore,returningPlayerBaseline,scoreQbase,stabilizeOpeningScore} from './runtime_score.js';
 
 function artifact(stat='assists'){
   const features=['player_games_prior','player_season_games_prior','player_minutes_mean_3','player_minutes_mean_5','player_minutes_mean_10','player_start_rate_5','player_start_rate_10','player_days_rest','team_games_prior','team_season_games_prior','team_days_rest','opponent_days_rest','team_points_mean_5','opponent_points_allowed_mean_5','home_flag'];
@@ -11,6 +11,15 @@ const fixture={start_time:'2026-09-10T10:00:00Z',home_team:{name:'Sydney Kings'}
 
 test('serialized QBASE score is deterministic and minutes recomputation is model-native',async()=>{
   const a=artifact();const base=await scoreQbase(a,{player_minutes_mean_3:30});assert.ok(Math.abs(base.mean-2*Math.exp(.6))<1e-12);assert.match(base.quant_input_receipt_sha256,/^[0-9a-f]{64}$/);const moved=await projectedMinutesScore(a,{player_minutes_mean_3:30,player_minutes_mean_5:29,player_minutes_mean_10:28},35);assert.ok(moved.mean>base.mean);assert.equal(moved.method,'QBASE_MINUTES_RECOMPUTE');
+});
+
+test('opening-season stabilization prevents hot short-window carryover from becoming the server baseline',async()=>{
+  const a={...artifact('assists'),stat_type:'assists'};
+  const features={player_season_games_prior:0,player_minutes_mean_5:38,player_minutes_mean_10:38,player_assists_mean_5:9.2,player_assists_mean_10:7.2,player_assists_per_min_mean_5:0.23463115029491996,player_assists_per_min_mean_10:0.193536957594806};
+  const base={mean:13.364,quant_input_receipt_sha256:'a'.repeat(64),resolved_features:features};
+  const out=await stabilizeOpeningScore(a,base,features);
+  assert.equal(out.opening_stabilization.applied,true);assert.equal(out.raw_mean,13.364);assert.ok(out.mean<10);assert.ok(out.mean>7);assert.notEqual(out.quant_input_receipt_sha256,base.quant_input_receipt_sha256);assert.match(out.quant_input_receipt_sha256,/^[0-9a-f]{64}$/);
+  const established=await stabilizeOpeningScore(a,base,{...features,player_season_games_prior:3});assert.equal(established.mean,13.364);assert.equal(established.opening_stabilization.applied,false);
 });
 
 test('next-fixture feature assembly resets season counts and binds opponent/home',()=>{
