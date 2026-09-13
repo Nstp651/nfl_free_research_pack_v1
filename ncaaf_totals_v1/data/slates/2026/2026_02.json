@@ -16,9 +16,9 @@
             "adj_net": 0.1333863738705092,
             "adj_off_epa": 0.2616682029123584,
             "adj_st_epa": 0.1275821826245334,
-            "fei_def": 0.8751186651980687,
-            "fei_net": -1.0582384711226185,
-            "fei_off": -0.1831198059245497
+            "fei_def": 0.8751186651980879,
+            "fei_net": -1.0582384711226147,
+            "fei_off": -0.1831198059245268
           },
           "summary": {
             "EPAplay_def": 0.3053461888530215,
@@ -105,9 +105,9 @@
             "adj_net": -0.073951628215999,
             "adj_off_epa": -0.0463423763874137,
             "adj_st_epa": 0.2666612889752733,
-            "fei_def": 0.4132109216161704,
+            "fei_def": 0.4132109216162131,
             "fei_net": 0.0,
-            "fei_off": 0.4132109216161704
+            "fei_off": 0.4132109216162131
           },
           "summary": {
             "EPAplay_def": -0.0669274841036115,
@@ -290,9 +290,9 @@
             "adj_net": -0.592530876516795,
             "adj_off_epa": -0.1981888492427505,
             "adj_st_epa": 0.9109117214362282,
-            "fei_def": 1.1008507762163282,
-            "fei_net": -1.7017806633417898,
-            "fei_off": -0.6009298871254616
+            "fei_def": 1.1008507762163535,
+            "fei_net": -1.7017806633417956,
+            "fei_off": -0.6009298871254419
           },
           "summary": {
             "EPAplay_def": 0.29241429907935,
@@ -357,7 +357,7 @@
       "fixture": {
         "away_id": "2483",
         "away_team": "Oregon",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "197",
         "home_team": "Oklahoma State",
@@ -379,9 +379,9 @@
             "adj_net": 0.4467519639754425,
             "adj_off_epa": 0.1973855505522945,
             "adj_st_epa": 0.0,
-            "fei_def": -0.8969330302199383,
-            "fei_net": 2.826273502749351,
-            "fei_off": 1.9293404725294123
+            "fei_def": -0.8969330302199302,
+            "fei_net": 2.8262735027493746,
+            "fei_off": 1.9293404725294443
           },
           "summary": {
             "EPAplay_def": -0.495741715033849,
@@ -452,9 +452,9 @@
             "adj_net": 1.3461205036095034,
             "adj_off_epa": 0.0,
             "adj_st_epa": -2.2459869121442084,
-            "fei_def": 0.3555352940371167,
-            "fei_net": -0.926615889573838,
-            "fei_off": -0.5710805955367213
+            "fei_def": 0.3555352940371452,
+            "fei_net": -0.9266158895738396,
+            "fei_off": -0.5710805955366944
           },
           "summary": {
             "EPAplay_def": 0.1314593255519867,
@@ -519,7 +519,7 @@
       "fixture": {
         "away_id": "265",
         "away_team": "Washington State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2306",
         "home_team": "Kansas State",
@@ -632,7 +632,7 @@
       "fixture": {
         "away_id": "295",
         "away_team": "Old Dominion",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "259",
         "home_team": "Virginia Tech",
@@ -745,7 +745,7 @@
       "fixture": {
         "away_id": "9",
         "away_team": "Arizona State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "245",
         "home_team": "Texas A&M",
@@ -767,9 +767,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 0.3128504183278429,
-            "fei_def": -0.96336694397501,
-            "fei_net": 1.0493847172001995,
-            "fei_off": 0.0860177732251893
+            "fei_def": -0.9633669439749616,
+            "fei_net": 1.0493847172001756,
+            "fei_off": 0.0860177732252139
           },
           "summary": {
             "EPAplay_def": -0.5893886254893409,
@@ -883,7 +883,7 @@
       "fixture": {
         "away_id": "2026",
         "away_team": "App State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "151",
         "home_team": "East Carolina",
@@ -905,9 +905,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 1.6658138632844048,
-            "fei_def": 1.0838287753713638,
-            "fei_net": -1.3254535642824292,
-            "fei_off": -0.2416247889110653
+            "fei_def": 1.083828775371386,
+            "fei_net": -1.3254535642824354,
+            "fei_off": -0.2416247889110494
           },
           "summary": {
             "EPAplay_def": 0.1477668455129937,
@@ -979,9 +979,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.23909442126054,
-            "fei_def": 0.4456348406864252,
-            "fei_net": 0.5184361008042171,
-            "fei_off": 0.9640709414906424
+            "fei_def": 0.4456348406864457,
+            "fei_net": 0.5184361008042178,
+            "fei_off": 0.9640709414906634
           },
           "summary": {
             "EPAplay_def": 0.1102868016019012,
@@ -1046,7 +1046,7 @@
       "fixture": {
         "away_id": "154",
         "away_team": "Wake Forest",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "2509",
         "home_team": "Purdue",
@@ -1117,9 +1117,9 @@
             "adj_net": -0.0004516269841678,
             "adj_off_epa": -0.1146012508845559,
             "adj_st_epa": 1.8383256048033791,
-            "fei_def": -0.4847359293059639,
-            "fei_net": 0.5966423423469445,
-            "fei_off": 0.1119064130409805
+            "fei_def": -0.4847359293059351,
+            "fei_net": 0.5966423423469313,
+            "fei_off": 0.1119064130409961
           },
           "summary": {
             "EPAplay_def": -0.168491598331567,
@@ -1184,7 +1184,7 @@
       "fixture": {
         "away_id": "58",
         "away_team": "South Florida",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "349",
         "home_team": "Army",
@@ -1255,9 +1255,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 2.1529902317290177,
-            "fei_def": -0.969742281973342,
-            "fei_net": 2.3112701251769527,
-            "fei_off": 1.3415278432036106
+            "fei_def": -0.9697422819733272,
+            "fei_net": 2.3112701251769523,
+            "fei_off": 1.3415278432036253
           },
           "summary": {
             "EPAplay_def": -0.6200397312641144,
@@ -1322,7 +1322,7 @@
       "fixture": {
         "away_id": "213",
         "away_team": "Penn State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "218",
         "home_team": "Temple",
@@ -1393,9 +1393,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.3435336897700869,
-            "fei_def": -1.0025173063429196,
-            "fei_net": 1.6035652231246964,
-            "fei_off": 0.6010479167817768
+            "fei_def": -1.0025173063428956,
+            "fei_net": 1.6035652231246962,
+            "fei_off": 0.6010479167818007
           },
           "summary": {
             "EPAplay_def": -0.2393930123911963,
@@ -1460,7 +1460,7 @@
       "fixture": {
         "away_id": "201",
         "away_team": "Oklahoma",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "130",
         "home_team": "Michigan",
@@ -1482,9 +1482,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 0.3800414230809557,
-            "fei_def": 1.1772564445015197,
-            "fei_net": 0.50228749810644,
-            "fei_off": 1.6795439426079597
+            "fei_def": 1.1772564445015423,
+            "fei_net": 0.5022874981064307,
+            "fei_off": 1.6795439426079732
           },
           "summary": {
             "EPAplay_def": -0.2978523419453547,
@@ -1556,9 +1556,9 @@
             "adj_net": -0.1728840740814617,
             "adj_off_epa": -0.0121393090006019,
             "adj_st_epa": -0.4141477990760459,
-            "fei_def": 1.0417421149197386,
-            "fei_net": -0.775595873178257,
-            "fei_off": 0.2661462417414816
+            "fei_def": 1.041742114919765,
+            "fei_net": -0.7755958731782581,
+            "fei_off": 0.2661462417415069
           },
           "summary": {
             "EPAplay_def": 0.3788882760064943,
@@ -1623,7 +1623,7 @@
       "fixture": {
         "away_id": "98",
         "away_team": "Western Kentucky",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "61",
         "home_team": "Georgia",
@@ -1694,9 +1694,9 @@
             "adj_net": -0.2567847517254514,
             "adj_off_epa": -0.0886952761414833,
             "adj_st_epa": 0.0094027457207597,
-            "fei_def": 1.1360736725097047,
-            "fei_net": -1.239362132279027,
-            "fei_off": -0.1032884597693221
+            "fei_def": 1.1360736725097285,
+            "fei_net": -1.2393621322790245,
+            "fei_off": -0.103288459769296
           },
           "summary": {
             "EPAplay_def": 0.3678374436556124,
@@ -1761,7 +1761,7 @@
       "fixture": {
         "away_id": "25",
         "away_team": "California",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "183",
         "home_team": "Syracuse",
@@ -1874,7 +1874,7 @@
       "fixture": {
         "away_id": "2636",
         "away_team": "UTSA",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "326",
         "home_team": "Texas State",
@@ -1896,9 +1896,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -1.282856163741554,
-            "fei_def": 2.168246373890901,
-            "fei_net": -3.3321858812877663,
-            "fei_off": -1.163939507396865
+            "fei_def": 2.168246373890925,
+            "fei_net": -3.332185881287794,
+            "fei_off": -1.1639395073968686
           },
           "summary": {
             "EPAplay_def": 0.771843129938299,
@@ -2012,7 +2012,7 @@
       "fixture": {
         "away_id": "120",
         "away_team": "Maryland",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "41",
         "home_team": "UConn",
@@ -2125,7 +2125,7 @@
       "fixture": {
         "away_id": "150",
         "away_team": "Duke",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "356",
         "home_team": "Illinois",
@@ -2147,9 +2147,9 @@
             "adj_net": -0.5734000097518495,
             "adj_off_epa": -0.5734000097518495,
             "adj_st_epa": -1.3128219593181265,
-            "fei_def": 0.7102410516536044,
-            "fei_net": 0.8049594190777967,
-            "fei_off": 1.515200470731401
+            "fei_def": 0.7102410516536184,
+            "fei_net": 0.8049594190778,
+            "fei_off": 1.5152004707314184
           },
           "summary": {
             "EPAplay_def": 0.170509031567818,
@@ -2221,9 +2221,9 @@
             "adj_net": -0.1441827999576946,
             "adj_off_epa": -0.0752900635564554,
             "adj_st_epa": -3.2174120108926423,
-            "fei_def": -0.7917638636476914,
-            "fei_net": -0.4159802876289247,
-            "fei_off": -1.207744151276616
+            "fei_def": -0.7917638636476921,
+            "fei_net": -0.4159802876289008,
+            "fei_off": -1.207744151276593
           },
           "summary": {
             "EPAplay_def": -0.1404289275896353,
@@ -2292,7 +2292,7 @@
       "fixture": {
         "away_id": "2199",
         "away_team": "Eastern Michigan",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "127",
         "home_team": "Michigan State",
@@ -2314,9 +2314,9 @@
             "adj_net": -0.0602765070413014,
             "adj_off_epa": -0.0144512780174636,
             "adj_st_epa": 1.9534628927777369,
-            "fei_def": 0.2984460892258864,
-            "fei_net": 0.4449649406985256,
-            "fei_off": 0.7434110299244121
+            "fei_def": 0.2984460892259103,
+            "fei_net": 0.4449649406985244,
+            "fei_off": 0.7434110299244348
           },
           "summary": {
             "EPAplay_def": 0.0359066688432926,
@@ -2430,7 +2430,7 @@
       "fixture": {
         "away_id": "328",
         "away_team": "Utah State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "264",
         "home_team": "Washington",
@@ -2452,9 +2452,9 @@
             "adj_net": -1.3461205036095003,
             "adj_off_epa": -1.3461205036095003,
             "adj_st_epa": 0.8755120386749662,
-            "fei_def": -0.5710805955367269,
-            "fei_net": 0.9266158895738514,
-            "fei_off": 0.3555352940371246
+            "fei_def": -0.5710805955367246,
+            "fei_net": 0.9266158895738664,
+            "fei_off": 0.3555352940371417
           },
           "summary": {
             "EPAplay_def": -0.275269527868791,
@@ -2568,7 +2568,7 @@
       "fixture": {
         "away_id": "2116",
         "away_team": "UCF",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "221",
         "home_team": "Pittsburgh",
@@ -2590,9 +2590,9 @@
             "adj_net": -0.4757437924615573,
             "adj_off_epa": -0.2030068929832404,
             "adj_st_epa": 2.82289441427292,
-            "fei_def": 0.3146233381053426,
-            "fei_net": 1.449350144139018,
-            "fei_off": 1.763973482244361
+            "fei_def": 0.3146233381053614,
+            "fei_net": 1.4493501441390102,
+            "fei_off": 1.7639734822443716
           },
           "summary": {
             "EPAplay_def": -0.0268574029791588,
@@ -2706,7 +2706,7 @@
       "fixture": {
         "away_id": "242",
         "away_team": "Rice",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "87",
         "home_team": "Notre Dame",
@@ -2728,9 +2728,9 @@
             "adj_net": 0.1385713263944123,
             "adj_off_epa": 0.2017641696288458,
             "adj_st_epa": 0.6134977216591594,
-            "fei_def": 0.0930581770981645,
-            "fei_net": 0.9761443032516494,
-            "fei_off": 1.069202480349814
+            "fei_def": 0.093058177098205,
+            "fei_net": 0.9761443032516376,
+            "fei_off": 1.0692024803498428
           },
           "summary": {
             "EPAplay_def": -0.0984679185098311,
@@ -2802,9 +2802,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.4689652297510756,
-            "fei_def": 2.3017751476410853,
-            "fei_net": -2.64154221123496,
-            "fei_off": -0.3397670635938745
+            "fei_def": 2.3017751476410924,
+            "fei_net": -2.6415422112349543,
+            "fei_off": -0.3397670635938618
           },
           "summary": {
             "EPAplay_def": 0.6775171115994454,
@@ -2869,7 +2869,7 @@
       "fixture": {
         "away_id": "2433",
         "away_team": "UL Monroe",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "5",
         "home_team": "UAB",
@@ -2891,9 +2891,9 @@
             "adj_net": 0.5734000097518399,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.6844216305692835,
-            "fei_def": 1.515200470731373,
-            "fei_net": -0.8049594190777771,
-            "fei_off": 0.7102410516535962
+            "fei_def": 1.5152004707314046,
+            "fei_net": -0.8049594190777832,
+            "fei_off": 0.7102410516536214
           },
           "summary": {
             "EPAplay_def": 0.4899155980064755,
@@ -2965,9 +2965,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.0698977287133078,
-            "fei_def": -0.339767063593919,
-            "fei_net": 2.6415422112349765,
-            "fei_off": 2.3017751476410573
+            "fei_def": -0.3397670635939013,
+            "fei_net": 2.6415422112350018,
+            "fei_off": 2.3017751476411004
           },
           "summary": {
             "EPAplay_def": -0.115461379289627,
@@ -3032,7 +3032,7 @@
       "fixture": {
         "away_id": "344",
         "away_team": "Mississippi State",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "135",
         "home_team": "Minnesota",
@@ -3103,9 +3103,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 1.6737745503654238,
-            "fei_def": -0.2416247889110646,
-            "fei_net": 1.3254535642824326,
-            "fei_off": 1.083828775371368
+            "fei_def": -0.241624788911039,
+            "fei_net": 1.3254535642824332,
+            "fei_off": 1.0838287753713942
           },
           "summary": {
             "EPAplay_def": -0.3295326901645195,
@@ -3170,7 +3170,7 @@
       "fixture": {
         "away_id": "333",
         "away_team": "Alabama",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "96",
         "home_team": "Kentucky",
@@ -3283,7 +3283,7 @@
       "fixture": {
         "away_id": "12",
         "away_team": "Arizona",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "252",
         "home_team": "BYU",
@@ -3354,9 +3354,9 @@
             "adj_net": -0.0156640690204285,
             "adj_off_epa": -0.0461270374882192,
             "adj_st_epa": -2.3624759114682217,
-            "fei_def": 0.4193801187456613,
-            "fei_net": -0.5209982178147013,
-            "fei_off": -0.10161809906904
+            "fei_def": 0.4193801187455984,
+            "fei_net": -0.5209982178146295,
+            "fei_off": -0.1016180990690311
           },
           "summary": {
             "EPAplay_def": -0.0060546192857954,
@@ -3425,7 +3425,7 @@
       "fixture": {
         "away_id": "2439",
         "away_team": "UNLV",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "249",
         "home_team": "North Texas",
@@ -3447,9 +3447,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.3620823787248641,
-            "fei_def": 1.899049349148051,
-            "fei_net": -1.064545333014855,
-            "fei_off": 0.8345040161331958
+            "fei_def": 1.899049349148067,
+            "fei_net": -1.0645453330148664,
+            "fei_off": 0.8345040161332002
           },
           "summary": {
             "EPAplay_def": 0.5629817929532793,
@@ -3563,7 +3563,7 @@
       "fixture": {
         "away_id": "48",
         "away_team": "Delaware",
-        "completed": false,
+        "completed": true,
         "fbs_game": true,
         "home_id": "238",
         "home_team": "Vanderbilt",
@@ -3698,9 +3698,9 @@
             "adj_net": 0.0004516269841722,
             "adj_off_epa": -0.1141496239003847,
             "adj_st_epa": -1.0303040716662062,
-            "fei_def": 0.1119064130409706,
-            "fei_net": -0.5966423423469635,
-            "fei_off": -0.4847359293059928
+            "fei_def": 0.1119064130409976,
+            "fei_net": -0.5966423423469751,
+            "fei_off": -0.4847359293059775
           },
           "summary": {
             "EPAplay_def": -0.1588667498694526,
@@ -3772,9 +3772,9 @@
             "adj_net": 0.0762996352464039,
             "adj_off_epa": 0.1579057059726728,
             "adj_st_epa": 0.4933902238166204,
-            "fei_def": 0.5155155196431165,
-            "fei_net": 0.9795037336599336,
-            "fei_off": 1.49501925330305
+            "fei_def": 0.5155155196431489,
+            "fei_net": 0.9795037336600056,
+            "fei_off": 1.4950192533031543
           },
           "summary": {
             "EPAplay_def": 0.0531410770756857,
@@ -3865,9 +3865,9 @@
             "adj_net": 0.5925308765167896,
             "adj_off_epa": 0.3943420272740457,
             "adj_st_epa": -0.2814451630432945,
-            "fei_def": -0.600929887125478,
-            "fei_net": 1.7017806633418326,
-            "fei_off": 1.1008507762163546
+            "fei_def": -0.6009298871254666,
+            "fei_net": 1.7017806633418364,
+            "fei_off": 1.1008507762163695
           },
           "summary": {
             "EPAplay_def": -0.3951270381609599,
@@ -3939,9 +3939,9 @@
             "adj_net": -0.2309192378577988,
             "adj_off_epa": -0.1813526256938961,
             "adj_st_epa": -2.0176041211331017,
-            "fei_def": 0.6814512837741091,
-            "fei_net": -1.4137189271515775,
-            "fei_off": -0.7322676433774684
+            "fei_def": 0.6814512837741329,
+            "fei_net": -1.413718927151574,
+            "fei_off": -0.732267643377441
           },
           "summary": {
             "EPAplay_def": 0.1583892928831505,
@@ -4028,9 +4028,9 @@
             "adj_net": -0.3020166160214999,
             "adj_off_epa": -0.0317671943464875,
             "adj_st_epa": -0.3983613202899538,
-            "fei_def": 1.2431459010597612,
-            "fei_net": -0.7889961684002927,
-            "fei_off": 0.4541497326594684
+            "fei_def": 1.243145901059779,
+            "fei_net": -0.7889961684002875,
+            "fei_off": 0.4541497326594914
           },
           "summary": {
             "EPAplay_def": 0.4038336211687898,
@@ -4215,9 +4215,9 @@
             "adj_net": -0.4467519639754402,
             "adj_off_epa": -0.249366413423151,
             "adj_st_epa": -0.5961653563990249,
-            "fei_def": 1.9293404725293848,
-            "fei_net": -2.8262735027493444,
-            "fei_off": -0.8969330302199592
+            "fei_def": 1.92934047252939,
+            "fei_net": -2.82627350274933,
+            "fei_off": -0.8969330302199402
           },
           "summary": {
             "EPAplay_def": 0.4441144227981567,
@@ -4302,9 +4302,9 @@
             "adj_net": 0.0128465336697886,
             "adj_off_epa": 0.1466681266900664,
             "adj_st_epa": 0.362847281136706,
-            "fei_def": 0.8291178041007805,
-            "fei_net": 0.3321043876847778,
-            "fei_off": 1.1612221917855583
+            "fei_def": 0.8291178041008033,
+            "fei_net": 0.3321043876847732,
+            "fei_off": 1.1612221917855765
           },
           "summary": {
             "EPAplay_def": 0.2577514061704278,
@@ -4440,9 +4440,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.8925223622336044,
-            "fei_def": 1.3415278432036706,
-            "fei_net": -2.311270125176996,
-            "fei_off": -0.969742281973325
+            "fei_def": 1.341527843203679,
+            "fei_net": -2.311270125176971,
+            "fei_off": -0.969742281973292
           },
           "summary": {
             "EPAplay_def": 0.4662590460343794,
@@ -4578,9 +4578,9 @@
             "adj_net": 0.3020166160214958,
             "adj_off_epa": 0.2702494216750105,
             "adj_st_epa": -0.1261753830923689,
-            "fei_def": 0.4541497326594674,
-            "fei_net": 0.7889961684003199,
-            "fei_off": 1.2431459010597874
+            "fei_def": 0.4541497326594866,
+            "fei_net": 0.788996168400329,
+            "fei_off": 1.2431459010598156
           },
           "summary": {
             "EPAplay_def": -0.0159364663637601,
@@ -4829,9 +4829,9 @@
             "adj_net": 0.0406498756563447,
             "adj_off_epa": 0.0168058199630229,
             "adj_st_epa": 0.5266407132218438,
-            "fei_def": -0.2385422734238234,
-            "fei_net": 0.0813876644811431,
-            "fei_off": -0.1571546089426803
+            "fei_def": -0.2385422734238107,
+            "fei_net": 0.0813876644811467,
+            "fei_off": -0.1571546089426639
           },
           "summary": {
             "EPAplay_def": -0.014794560149312,
@@ -4967,9 +4967,9 @@
             "adj_net": 0.2567847517254503,
             "adj_off_epa": 0.1680894755839659,
             "adj_st_epa": 1.6295367568801002,
-            "fei_def": -0.1032884597693158,
-            "fei_net": 1.2393621322789992,
-            "fei_off": 1.1360736725096834
+            "fei_def": -0.1032884597692979,
+            "fei_net": 1.2393621322790094,
+            "fei_off": 1.1360736725097114
           },
           "summary": {
             "EPAplay_def": -0.1256183020250741,
@@ -5105,9 +5105,9 @@
             "adj_net": 0.1508631407435403,
             "adj_off_epa": 0.2088656695521767,
             "adj_st_epa": -0.665702675772691,
-            "fei_def": -0.4573950990220404,
-            "fei_net": 1.399327205437852,
-            "fei_off": 0.9419321064158116
+            "fei_def": -0.457395099022023,
+            "fei_net": 1.3993272054378632,
+            "fei_off": 0.9419321064158402
           },
           "summary": {
             "EPAplay_def": -0.4663581711550553,
@@ -5243,9 +5243,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 2.187712850807701,
-            "fei_def": 3.5549801293059318,
-            "fei_net": -3.359684612645103,
-            "fei_off": 0.1952955166608281
+            "fei_def": 3.554980129305945,
+            "fei_net": -3.359684612645098,
+            "fei_off": 0.1952955166608472
           },
           "summary": {
             "EPAplay_def": 1.0095936230250768,
@@ -5381,9 +5381,9 @@
             "adj_net": -0.1508631407435036,
             "adj_off_epa": 0.0580025288086729,
             "adj_st_epa": 1.3968133791729964,
-            "fei_def": 0.9419321064158196,
-            "fei_net": -1.3993272054378778,
-            "fei_off": -0.4573950990220584
+            "fei_def": 0.941932106415838,
+            "fei_net": -1.399327205437873,
+            "fei_off": -0.4573950990220351
           },
           "summary": {
             "EPAplay_def": 0.2377492962699187,
@@ -5519,9 +5519,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 0.4797608057727572,
-            "fei_def": -0.6395484821259705,
-            "fei_net": 1.0709415915072396,
-            "fei_off": 0.4313931093812689
+            "fei_def": -0.639548482125936,
+            "fei_net": 1.0709415915072256,
+            "fei_off": 0.4313931093812895
           },
           "summary": {
             "EPAplay_def": -0.4266422894203437,
@@ -5657,9 +5657,9 @@
             "adj_net": 0.4833333106429831,
             "adj_off_epa": 0.3978074007374105,
             "adj_st_epa": -1.71482570042935,
-            "fei_def": 1.0104503550718202,
-            "fei_net": -0.1824633830581339,
-            "fei_off": 0.8279869720136863
+            "fei_def": 1.0104503550718538,
+            "fei_net": -0.1824633830581492,
+            "fei_off": 0.8279869720137045
           },
           "summary": {
             "EPAplay_def": 0.3138759438605869,
@@ -5731,9 +5731,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 0.2074893937891668,
-            "fei_def": -0.3451763052834135,
-            "fei_net": 1.6068113871593082,
-            "fei_off": 1.2616350818758946
+            "fei_def": -0.3451763052833879,
+            "fei_net": 1.6068113871593055,
+            "fei_off": 1.2616350818759177
           },
           "summary": {
             "EPAplay_def": -0.4092682834904073,
@@ -5820,9 +5820,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 0.0,
-            "fei_def": -1.1639395073969037,
-            "fei_net": 3.332185881287749,
-            "fei_off": 2.1682463738908453
+            "fei_def": -1.1639395073968553,
+            "fei_net": 3.332185881287728,
+            "fei_off": 2.168246373890873
           },
           "summary": {
             "EPAplay_def": -0.5711460464767047,
@@ -5958,9 +5958,9 @@
             "adj_net": -0.2000852472158884,
             "adj_off_epa": -0.0303195700748128,
             "adj_st_epa": 0.4672790195927964,
-            "fei_def": 0.7595836632637509,
-            "fei_net": -0.4965993380941887,
-            "fei_off": 0.2629843251695621
+            "fei_def": 0.7595836632637702,
+            "fei_net": -0.4965993380941857,
+            "fei_off": 0.2629843251695845
           },
           "summary": {
             "EPAplay_def": 0.3591039743688371,
@@ -6096,9 +6096,9 @@
             "adj_net": -0.118220573455975,
             "adj_off_epa": 0.0585938069647025,
             "adj_st_epa": -0.0604802034725589,
-            "fei_def": 0.4118698447436636,
-            "fei_net": 0.3557577189969295,
-            "fei_off": 0.7676275637405932
+            "fei_def": 0.4118698447436854,
+            "fei_net": 0.3557577189969346,
+            "fei_off": 0.76762756374062
           },
           "summary": {
             "EPAplay_def": 0.2598746307750246,
@@ -6170,9 +6170,9 @@
             "adj_net": 0.2309192378578028,
             "adj_off_epa": 0.0495666121639056,
             "adj_st_epa": 0.5141671001980859,
-            "fei_def": -0.7322676433774673,
-            "fei_net": 1.4137189271515676,
-            "fei_off": 0.6814512837741002
+            "fei_def": -0.7322676433774592,
+            "fei_net": 1.413718927151577,
+            "fei_off": 0.681451283774118
           },
           "summary": {
             "EPAplay_def": -0.3443049201369285,
@@ -6392,9 +6392,9 @@
             "adj_net": -0.4163173416738935,
             "adj_off_epa": -0.3023058632986152,
             "adj_st_epa": 0.3474804801670015,
-            "fei_def": 1.198315932757923,
-            "fei_net": -1.990290965397134,
-            "fei_off": -0.791975032639211
+            "fei_def": 1.1983159327579471,
+            "fei_net": -1.9902909653971137,
+            "fei_off": -0.7919750326391662
           },
           "summary": {
             "EPAplay_def": 0.0464775017623243,
@@ -6452,9 +6452,9 @@
             "adj_net": 0.1391780517243184,
             "adj_off_epa": 0.0,
             "adj_st_epa": -0.3955898724361313,
-            "fei_def": 0.0907795076521814,
-            "fei_net": -1.4120225200961882,
-            "fei_off": -1.3212430124440069
+            "fei_def": 0.0907795076522117,
+            "fei_net": -1.412022520096193,
+            "fei_off": -1.321243012443981
           },
           "summary": {
             "EPAplay_def": 0.2843519653846968,
@@ -6590,9 +6590,9 @@
             "adj_net": 0.0659886660516335,
             "adj_off_epa": 0.1689168564108306,
             "adj_st_epa": 0.7527625246374611,
-            "fei_def": 1.0351506363843574,
-            "fei_net": 1.5881490353671772,
-            "fei_off": 2.6232996717515347
+            "fei_def": 1.03515063638437,
+            "fei_net": 1.5881490353671814,
+            "fei_off": 2.6232996717515515
           },
           "summary": {
             "EPAplay_def": 0.006791438331309,
@@ -6664,9 +6664,9 @@
             "adj_net": 0.0,
             "adj_off_epa": 0.0,
             "adj_st_epa": 0.656581709789252,
-            "fei_def": 1.1269957372831456,
-            "fei_net": -0.4968993121699091,
-            "fei_off": 0.6300964251132365
+            "fei_def": 1.1269957372831676,
+            "fei_net": -0.4968993121699111,
+            "fei_off": 0.6300964251132565
           },
           "summary": {
             "EPAplay_def": 0.2399925905831006,
@@ -6753,9 +6753,9 @@
             "adj_net": -0.1436189577767979,
             "adj_off_epa": -0.1688266138078943,
             "adj_st_epa": -1.3077108161010755,
-            "fei_def": 0.5428653631355599,
-            "fei_net": -1.9210627659309472,
-            "fei_off": -1.3781974027953874
+            "fei_def": 0.5428653631355975,
+            "fei_net": -1.9210627659308772,
+            "fei_off": -1.37819740279528
           },
           "summary": {
             "EPAplay_def": 0.0704305056378106,
@@ -6823,14 +6823,14 @@
       }
     }
   ],
-  "generated_at_utc": "2026-09-12T18:30:31.047223+00:00",
-  "last_checked_at_utc": "2026-09-12T18:30:31.047223+00:00",
+  "generated_at_utc": "2026-09-13T00:38:00.727278+00:00",
+  "last_checked_at_utc": "2026-09-13T00:38:00.727278+00:00",
   "limitations": [
     "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
     "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
   ],
   "market_data": false,
-  "pack_revision": "f03d1de10445ec5c",
+  "pack_revision": "e670f88db2ab5097",
   "schema_version": "0.1.0",
   "season": 2026,
   "slate_id": "2026_02",
@@ -6847,7 +6847,7 @@
       "asset": "cfb_ratings_weekly_2025.csv",
       "asset_updated_at": "2026-09-07T23:26:52Z",
       "bytes": 408479,
-      "release_updated_at": "2026-09-12T14:03:56Z",
+      "release_updated_at": "2026-09-13T00:37:40Z",
       "sha256": "f73d2439e37a3bbb1276b8d7f152eed02246242b752139aed129c820a871ab76",
       "tag": "cfb_ratings_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2025.csv"
@@ -6856,35 +6856,35 @@
       "asset": "cfb_team_summaries_weekly_2025.csv",
       "asset_updated_at": "2026-09-07T23:27:52Z",
       "bytes": 8571021,
-      "release_updated_at": "2026-09-12T14:04:28Z",
+      "release_updated_at": "2026-09-12T20:41:22Z",
       "sha256": "de3206419b30255a09f64a416b6bf5f3cd7d5c2209751fb33ab11e89e5ac2700",
       "tag": "cfb_team_summaries_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2025.csv"
     },
     "ratings": {
       "asset": "cfb_ratings_weekly_2026.csv",
-      "asset_updated_at": "2026-09-12T14:03:53Z",
-      "bytes": 238817,
-      "release_updated_at": "2026-09-12T14:03:56Z",
-      "sha256": "b6404481fe66ac510e41991fa628437e1fb5cbdade74af7f4457773589b7a914",
+      "asset_updated_at": "2026-09-13T00:37:37Z",
+      "bytes": 350576,
+      "release_updated_at": "2026-09-13T00:37:40Z",
+      "sha256": "6ddc0d4e62339a9c9bc927496b5460e219593961d3d403911113655fc0291750",
       "tag": "cfb_ratings_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_ratings_weekly/cfb_ratings_weekly_2026.csv"
     },
     "schedule": {
       "asset": "cfb_schedules_2026.csv.gz",
-      "asset_updated_at": "2026-09-12T14:02:06Z",
-      "bytes": 70839,
-      "release_updated_at": "2026-09-12T14:02:09Z",
-      "sha256": "74730cc07680ea7865c2085233e1d53c7386e224ef98fd8ca43a2c139a06fd70",
+      "asset_updated_at": "2026-09-13T00:35:45Z",
+      "bytes": 72679,
+      "release_updated_at": "2026-09-13T00:35:48Z",
+      "sha256": "c58112275b188d1522a53c42f30a4799bb38b35c13f793223cd670e42ac500ce",
       "tag": "cfb_schedules",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_schedules/cfb_schedules_2026.csv.gz"
     },
     "weekly": {
       "asset": "cfb_team_summaries_weekly_2026.csv",
-      "asset_updated_at": "2026-09-12T14:04:25Z",
-      "bytes": 4645306,
-      "release_updated_at": "2026-09-12T14:04:28Z",
-      "sha256": "d91db8694cae4bb8004d647e08e6967a1052e8cac328cb382b31204defbde9b8",
+      "asset_updated_at": "2026-09-12T20:41:19Z",
+      "bytes": 5615542,
+      "release_updated_at": "2026-09-12T20:41:22Z",
+      "sha256": "b7c913a096c4ec596eb00ee1b9cece90356e83e380d6632cdb8165ce4bfe6273",
       "tag": "cfb_team_summaries_weekly",
       "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2026.csv"
     }
