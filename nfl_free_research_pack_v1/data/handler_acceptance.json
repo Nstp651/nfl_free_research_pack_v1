@@ -1,8 +1,8 @@
 {
-  "tested_at_utc": "2026-09-13T00:42:19.905Z",
+  "tested_at_utc": "2026-09-13T06:42:56.351Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/ef1b21efbb58e0c702c674d24eaf42ab5d9ff958/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/5238332509eefa9cf7e91c72c06660d7deac411e/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 1,
   "games": [
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "5ed0fdac0f40e51e",
+      "pack_revision": "76dd9fbdf688fe12",
       "fixture": {
         "game_id": "2026_01_SF_LA",
         "season": 2026,
@@ -269,31 +269,31 @@
         "home_team": "LA",
         "stadium": "Melbourne Cricket Ground",
         "roof": "dome",
-        "surface": "matrixturf",
+        "surface": "grass",
         "location": "Neutral"
       },
       "total_players": 42,
       "pages": 5,
       "page_sizes": [
         {
-          "chars": 40235,
-          "bytes": 40259
+          "chars": 40230,
+          "bytes": 40254
         },
         {
-          "chars": 51419,
-          "bytes": 51453
+          "chars": 51414,
+          "bytes": 51448
         },
         {
-          "chars": 43536,
-          "bytes": 43566
+          "chars": 43531,
+          "bytes": 43561
         },
         {
-          "chars": 55186,
-          "bytes": 55220
+          "chars": 55181,
+          "bytes": 55215
         },
         {
-          "chars": 10045,
-          "bytes": 10047
+          "chars": 10040,
+          "bytes": 10042
         }
       ],
       "players_by_team": {
@@ -525,7 +525,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-13T00:42:14.176200+00:00",
+      "last_checked_at_utc": "2026-09-13T06:42:50.403676+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
