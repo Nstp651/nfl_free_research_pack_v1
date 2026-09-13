@@ -112,12 +112,19 @@ export function validateResearchContext(c){
   }
   return c;
 }
+function thresholdList(value,label){requireThat(Array.isArray(value)&&value.every(x=>Number.isInteger(x)&&x>=1),`${label} must contain positive integers`);const out=[...value].sort((a,b)=>a-b);requireThat(new Set(out).size===out.length,`${label} contains duplicates`);return out;}
+function validateThresholdPolicy(value,maxCount){
+  requireThat(value&&value.schema_version==='nbl_threshold_validation_v1','threshold validation policy unavailable');
+  const direct=thresholdList(value.direct_validated_thresholds,'direct thresholds'),supported=thresholdList(value.tail_supported_thresholds,'tail-supported thresholds'),extreme=thresholdList(value.extreme_tail_thresholds,'extreme-tail thresholds'),eligible=thresholdList(value.best_single_eligible_thresholds,'BEST SINGLE thresholds'),classes=[...direct,...supported,...extreme];
+  requireThat(direct.length>0,'direct threshold range empty');requireThat(new Set(classes).size===classes.length,'threshold validation classes overlap');requireThat(classes.sort((a,b)=>a-b).length===maxCount&&classes.every((x,i)=>x===i+1),'threshold validation classes must partition probability grid');const accepted=new Set([...direct,...supported]);requireThat(eligible.every(x=>accepted.has(x)),'BEST SINGLE thresholds must be validated or supported');requireThat(HASH64.test(String(value.evidence_sha256||'')),'threshold validation evidence receipt invalid');return {...value,direct_validated_thresholds:direct,tail_supported_thresholds:supported,extreme_tail_thresholds:extreme,best_single_eligible_thresholds:eligible};
+}
 function qbaseContract(a,stat){
   requireThat(a&&a.market_data===false&&marketKeyHits(a).length===0,`${stat} QBASE market boundary failed`);
   requireThat(a.stat_type===stat,`${stat} QBASE stat mismatch`);
   const alpha=Number(a.walk_forward?.nb2_alpha_oos),max=Number(a.probability_contract?.max_count);
   requireThat(Number.isFinite(alpha)&&alpha>0,`${stat} QBASE alpha invalid`);requireThat(Number.isInteger(max)&&max>=5&&max<=60,`${stat} QBASE max_count invalid`);
-  return {stat_type:stat,model_name:a.model_name,model_version:a.model_version,feature_schema:a.feature_schema,dispersion_alpha:alpha,max_count:max};
+  const thresholdValidation=validateThresholdPolicy(a.probability_contract?.threshold_validation_policy,max);
+  return {stat_type:stat,model_name:a.model_name,model_version:a.model_version,feature_schema:a.feature_schema,dispersion_alpha:alpha,max_count:max,threshold_validation_policy:thresholdValidation};
 }
 function serverAttestation(head,key,stat){
   const source=String(head.server_qbase_source||'').toUpperCase();

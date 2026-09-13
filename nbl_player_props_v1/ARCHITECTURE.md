@@ -17,7 +17,7 @@ One Layer 0/1 pass prevents duplicated research while separate Layer 2 distribut
 
 `immutable free data assets -> exact fixture/run lock -> current basketball research -> research checkpoint -> server QBASE/current-role scenarios -> atomic requested-head freeze -> immutable receipt + per-player hashes -> separate post-freeze market gateway -> exact EV mapping -> no-forced-bet ranking`
 
-The Custom GPT orchestrates research and Actions. It is not trusted as the sole integrity layer.
+The Custom GPT orchestrates research and Actions. It is not trusted as the sole integrity layer. QBASE metadata owns the evidence-derived threshold policy; the freeze propagates it without changing probabilities, and the Market Worker owns deterministic tail classification, grading and BEST SINGLE eligibility.
 
 ---
 
@@ -182,6 +182,8 @@ This correctly allows an ID-bearing API row and name-only Bet365 screenshot row 
 Only exact frozen integer/half-point thresholds are evaluated. No interpolation.
 
 Integer lines use explicit push-aware EV.
+
+Every evaluated row includes `threshold_validation`, deterministic `grade`, `best_single_eligible` and a nullable deterministic exclusion reason. Raw positive-EV ranking remains EV-first. `EXTREME_TAIL` rows stay visible but cannot displace the highest eligible validated play as BEST SINGLE.
 
 ---
 

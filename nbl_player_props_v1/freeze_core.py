@@ -21,12 +21,14 @@ from typing import Any
 
 try:
     from .model.distribution import probability_grid
+    from .market_ranking import validate_threshold_policy
     from .research_contract import (
         player_key, research_player_map, requested_heads, validate_research_context,
     )
     from .source_client import market_key_hits
 except ImportError:  # pragma: no cover - CLI/local import compatibility
     from model.distribution import probability_grid
+    from market_ranking import validate_threshold_policy
     from research_contract import player_key, research_player_map, requested_heads, validate_research_context
     from source_client import market_key_hits
 
@@ -80,6 +82,7 @@ def _qbase_contract(artifact: dict[str, Any], stat: str) -> dict[str, Any]:
         raise ValueError(f"{stat} QBASE dispersion must be positive")
     if max_count < 5 or max_count > 60:
         raise ValueError(f"{stat} QBASE max_count invalid")
+    threshold_policy = validate_threshold_policy(prob.get("threshold_validation_policy"), max_count)
     return {
         "stat_type": stat,
         "model_name": artifact.get("model_name"),
@@ -87,6 +90,7 @@ def _qbase_contract(artifact: dict[str, Any], stat: str) -> dict[str, Any]:
         "feature_schema": artifact.get("feature_schema"),
         "dispersion_alpha": alpha,
         "max_count": max_count,
+        "threshold_validation_policy": threshold_policy,
         "qbase_sha256": sha256_json(artifact),
     }
 

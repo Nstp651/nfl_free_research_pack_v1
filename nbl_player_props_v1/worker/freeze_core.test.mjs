@@ -22,7 +22,8 @@ function research(){return {
   fixture_context:{status:'scheduled',source_ids:['official']},
   players:[{player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',availability_status:'ACTIVE',availability_source_ids:['official'],projected_minutes:{low:27,mean:30,high:33,source_ids:['official','report']},role:{state:'RETURNING_CHANGED',creation_role:'PRIMARY',frontcourt_role:'GUARD',source_ids:['report']},stat_context:{assists:{source_ids:['report'],notes:['Primary creator role researched']},rebounds:{source_ids:['report'],notes:['Guard rebound role researched']}}}]
 };}
-function qbase(stat){return {model_name:`${stat} q`,model_version:'0.1.0',feature_schema:'nbl_player_pregame_v1',stat_type:stat,market_data:false,walk_forward:{nb2_alpha_oos:0.2},probability_contract:{max_count:stat==='assists'?20:30}};}
+function thresholdPolicy(max){return {schema_version:'nbl_threshold_validation_v1',direct_validated_thresholds:Array.from({length:max},(_,i)=>i+1),tail_supported_thresholds:[],extreme_tail_thresholds:[],best_single_eligible_thresholds:Array.from({length:max},(_,i)=>i+1),evidence_sha256:'f'.repeat(64)};}
+function qbase(stat){const max=stat==='assists'?20:30;return {model_name:`${stat} q`,model_version:'0.1.0',feature_schema:'nbl_player_pregame_v1',stat_type:stat,market_data:false,walk_forward:{nb2_alpha_oos:0.2},probability_contract:{max_count:max,threshold_validation_policy:thresholdPolicy(max)}};}
 function runtimeHead(qbaseMean,mean,confidence,fragility,scenarioReceipt){return {
   qbase_mean:qbaseMean,server_qbase_source:'SERVER_QBASE_RUNTIME_SCORE',server_qbase_receipt_sha256:H.server,server_player_prior_key:'testguard',confidence,fragility,
   scenarios:[{id:'base',weight:1,mean,method:'QBASE_RUNTIME_SCORE',evidence_source_ids:['report'],assumptions:[],quant_input_receipt_sha256:scenarioReceipt}]

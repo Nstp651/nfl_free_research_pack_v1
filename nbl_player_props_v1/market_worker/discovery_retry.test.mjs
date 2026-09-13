@@ -1,8 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fetchEventsDiscovery} from './index_v130.js';
+import worker,{fetchEventsDiscovery} from './index_v130.js';
 
 const fixture={start_time:'2026-09-19T09:30:00Z',home_team:{name:'Melbourne United'},away_team:{name:'Adelaide 36ers'}};
+
+test('production health advertises the tail-risk guardrail contract',async()=>{
+  const response=await worker.fetch(new Request('https://market.example/health'),{}),body=await response.json();
+  assert.equal(body.version,'1.4.0');
+  assert.equal(body.threshold_validation,'nbl_threshold_validation_v1');
+  assert.equal(body.best_single_guardrails,true);
+});
 
 test('filtered discovery uses Odds API second-precision commence time format',async()=>{
   const original=globalThis.fetch;const calls=[];

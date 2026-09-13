@@ -36,6 +36,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 from distribution import brier_at_least, estimate_nb_alpha  # noqa: E402
 from features import build_feature_frame, feature_columns  # noqa: E402
+from tail_policy import build_tail_audit, canonical_sha256  # noqa: E402
 
 MODEL_VERSION = "0.1.0"
 FEATURE_SCHEMA = "nbl_player_pregame_v1"
@@ -213,6 +214,27 @@ def train_head(raw: pd.DataFrame, head: str, source_receipt: dict[str, Any] | No
     source_hash = None
     if source_receipt is not None:
         source_hash = hashlib.sha256(json.dumps(source_receipt, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    tail_audit = build_tail_audit(
+        preds["actual"].to_numpy(float),
+        preds["pred"].to_numpy(float),
+        float(best["nb2_alpha_oos"]),
+        HEAD_CONFIG[head]["thresholds"],
+        HEAD_CONFIG[head]["max_count"],
+    )
+    tail_evidence = {
+        "stat_type": head,
+        "model_version": MODEL_VERSION,
+        "selected_family": family,
+        "selected_regularization_alpha": alpha,
+        "nb2_alpha_oos": float(best["nb2_alpha_oos"]),
+        "thresholds_used_for_selection": HEAD_CONFIG[head]["thresholds"],
+        "oos_first_season": int(preds["season_start"].min()),
+        "oos_last_season": int(preds["season_start"].max()),
+        "oos_n": int(len(preds)),
+        "policy": tail_audit["policy"],
+        "threshold_metrics": tail_audit["threshold_metrics"],
+    }
+    tail_audit["policy"]["evidence_sha256"] = canonical_sha256(tail_evidence)
     artifact = {
         "model_name": f"Nick NBL {head.upper()} QBASE",
         "model_version": MODEL_VERSION,
@@ -240,6 +262,7 @@ def train_head(raw: pd.DataFrame, head: str, source_receipt: dict[str, Any] | No
             "half_point_props": "no push",
             "integer_props": "explicit exact-count push probability",
             "at_least_ladders": True,
+            "threshold_validation_policy": tail_audit["policy"],
         },
         "source_receipt_sha256": source_hash,
         "notes": [

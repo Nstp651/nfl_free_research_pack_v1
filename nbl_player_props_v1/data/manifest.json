@@ -1,5 +1,5 @@
 {
-  "asset_revision": "0fa2b4b8619acfc43a3d",
+  "asset_revision": "4b56726c10f95a08a453",
   "integrity": {
     "market_data": false,
     "qbase_retraining_is_explicit_only": true,
@@ -14,17 +14,19 @@
   },
   "qbase": {
     "assists": {
-      "canonical_sha256": "8e714c693f0a1eddfd3989c6717f120079ec3fa0e1c42e1eaf5c1d670d265eab",
-      "file_sha256": "4a71800c37f735f90858b70054aa042f65a1510ee4c081ca5dde2f76741c4714",
+      "canonical_sha256": "2b9a5318ccd17d0f418bad98e0c2559b4f331e0aeaac7555a64e82af7366a961",
+      "file_sha256": "d406b9afe98e6e5b495f3496e5f1fb9bfa4c9c1095f4b41e5671db3696b79f13",
       "model_version": "0.1.0",
       "path": "model/qbase_assists_v0.1.0.json",
+      "threshold_validation_evidence_sha256": "a77126faacc0304962060b76caae79a358de2723d10210c2be3ff67adcd0d446",
       "training_source_receipt_sha256": "431d62c430236e56188413a2d4d164e29fc99d69b51b060124ead762b6408812"
     },
     "rebounds": {
-      "canonical_sha256": "61e8e4792e7376f6d0f70b832e1ea7e3bea928c6e4e7acf512851185a1d7086f",
-      "file_sha256": "cd83dce0b8641aab145735f8e36dc7f6e575b58f5327b9c00a9e4b3d140c46fb",
+      "canonical_sha256": "028c7670da50a6518bd73c36a4cf99fbf2bcb33dd73f0bc0c416bcdedc8a56d2",
+      "file_sha256": "e4c02ec001a8eafd779cc905fec7d1e709c4ba6ad5553b01ae7153078d13292c",
       "model_version": "0.1.0",
       "path": "model/qbase_rebounds_v0.1.0.json",
+      "threshold_validation_evidence_sha256": "2c00c2a254a53695565a92348eee25057adb56024e263313ea443e947dae9357",
       "training_source_receipt_sha256": "431d62c430236e56188413a2d4d164e29fc99d69b51b060124ead762b6408812"
     }
   },

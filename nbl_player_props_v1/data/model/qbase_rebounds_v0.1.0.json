@@ -19,6 +19,76 @@
     "half_point_props": "no push",
     "integer_props": "explicit exact-count push probability",
     "max_count": 30,
+    "threshold_validation_policy": {
+      "best_single_eligible_thresholds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "classification_is_consecutive_above_direct_ceiling": true,
+      "direct_reliability_criteria": {
+        "calibration_ratio_maximum": 1.35,
+        "calibration_ratio_minimum": 0.75,
+        "minimum_brier_skill_vs_constant_prevalence": 0.05,
+        "minimum_observed_events": 250,
+        "minimum_predicted_events": 250.0
+      },
+      "direct_validated_thresholds": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "evidence_sha256": "2c00c2a254a53695565a92348eee25057adb56024e263313ea443e947dae9357",
+      "extreme_tail_thresholds": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "schema_version": "nbl_threshold_validation_v1",
+      "tail_support_criteria": {
+        "calibration_ratio_maximum": 2.0,
+        "calibration_ratio_minimum": 0.5,
+        "maximum_absolute_calibration_error": 0.01,
+        "minimum_brier_skill_vs_constant_prevalence": 0.0,
+        "minimum_observed_events": 250,
+        "minimum_predicted_events": 250.0
+      },
+      "tail_supported_thresholds": [
+        1,
+        2,
+        13
+      ]
+    },
     "thresholds_used_for_selection": [
       3,
       4,

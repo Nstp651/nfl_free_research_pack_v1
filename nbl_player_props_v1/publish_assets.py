@@ -14,6 +14,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from market_ranking import validate_threshold_policy
+
 SCHEMA_VERSION = "nbl_runtime_assets_v1"
 
 
@@ -50,6 +52,11 @@ def validate_qbase(value: dict[str, Any], stat: str) -> None:
         raise ValueError(f"{stat} QBASE Brier gate failed")
     if float(wf.get("nb2_alpha_oos", 0)) <= 0:
         raise ValueError(f"{stat} QBASE dispersion gate failed")
+    probability_contract = value.get("probability_contract") or {}
+    validate_threshold_policy(
+        probability_contract.get("threshold_validation_policy"),
+        int(probability_contract.get("max_count", 0)),
+    )
 
 
 def publish(assists_path: str | Path, rebounds_path: str | Path, prior_path: str | Path,
@@ -95,10 +102,12 @@ def publish(assists_path: str | Path, rebounds_path: str | Path, prior_path: str
             "assists": {
                 "path": model_files["assists"], "canonical_sha256": qhash["assists"], "file_sha256": qfile["assists"],
                 "model_version": assists["model_version"], "training_source_receipt_sha256": assists.get("source_receipt_sha256"),
+                "threshold_validation_evidence_sha256": assists["probability_contract"]["threshold_validation_policy"]["evidence_sha256"],
             },
             "rebounds": {
                 "path": model_files["rebounds"], "canonical_sha256": qhash["rebounds"], "file_sha256": qfile["rebounds"],
                 "model_version": rebounds["model_version"], "training_source_receipt_sha256": rebounds.get("source_receipt_sha256"),
+                "threshold_validation_evidence_sha256": rebounds["probability_contract"]["threshold_validation_policy"]["evidence_sha256"],
             },
         },
         "prior_snapshot": {

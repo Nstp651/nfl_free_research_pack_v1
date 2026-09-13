@@ -74,6 +74,7 @@ def research_context():
 
 
 def qbase(stat: str):
+    max_count = 20 if stat == "assists" else 30
     return {
         "model_name": f"Nick NBL {stat.upper()} QBASE",
         "model_version": "0.1.0",
@@ -81,7 +82,17 @@ def qbase(stat: str):
         "stat_type": stat,
         "market_data": False,
         "walk_forward": {"nb2_alpha_oos": 0.25},
-        "probability_contract": {"max_count": 20 if stat == "assists" else 30},
+        "probability_contract": {
+            "max_count": max_count,
+            "threshold_validation_policy": {
+                "schema_version": "nbl_threshold_validation_v1",
+                "direct_validated_thresholds": list(range(1, max_count + 1)),
+                "tail_supported_thresholds": [],
+                "extreme_tail_thresholds": [],
+                "best_single_eligible_thresholds": list(range(1, max_count + 1)),
+                "evidence_sha256": "f" * 64,
+            },
+        },
     }
 
 
