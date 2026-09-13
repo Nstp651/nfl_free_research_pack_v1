@@ -16,9 +16,11 @@ from typing import Any, Iterable
 try:
     from .freeze_core import validate_frozen_matchup
     from .market_adapters import MarketRecord, best_price
+    from .market_ranking import classify_market_threshold, rank_guardrails
 except ImportError:  # pragma: no cover
     from freeze_core import validate_frozen_matchup
     from market_adapters import MarketRecord, best_price
+    from market_ranking import classify_market_threshold, rank_guardrails
 
 CONF_RANK = {"A": 0, "B": 1, "C": 2}
 FRAG_RANK = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
@@ -82,6 +84,14 @@ def _map_record(frozen: dict[str, Any], index: dict[tuple[str, str], dict[str, A
     market_break_even = 1.0 / price
     fair_price = non_push / p_win if p_win > 0 else math.inf
     probability_edge = conditional_win - market_break_even if math.isfinite(conditional_win) else math.nan
+    confidence = str(head.get("confidence") or "C")
+    fragility = str(head.get("fragility") or "HIGH")
+    guardrails = rank_guardrails(
+        ev,
+        confidence,
+        fragility,
+        classify_market_threshold(head, record.threshold),
+    )
     return {
         **record.to_dict(),
         "frozen_player_name": player.get("player_name"),
@@ -95,8 +105,9 @@ def _map_record(frozen: dict[str, Any], index: dict[tuple[str, str], dict[str, A
         "fair_decimal_price": fair_price,
         "ev_per_unit": ev,
         "positive_ev": bool(ev > 0),
-        "confidence": str(head.get("confidence") or "C"),
-        "fragility": str(head.get("fragility") or "HIGH"),
+        "confidence": confidence,
+        "fragility": fragility,
+        **guardrails,
         "freeze_receipt_sha256": frozen.get("freeze_receipt_sha256"),
         "frozen_at": frozen.get("frozen_at"),
     }
@@ -110,8 +121,8 @@ def evaluate_markets(
 ) -> dict[str, Any]:
     """Evaluate exact post-freeze markets and return positive-edge ranking.
 
-    Ranking is EV-first. Confidence/fragility are deterministic tie-breaks only;
-    V1 does not invent an undocumented risk-adjustment multiplier.
+    Raw positive-edge ranking remains EV-first. BEST SINGLE is the highest raw-EV
+    row that passes deterministic validation, confidence, fragility and grade gates.
     """
     validate_frozen_matchup(frozen)
     before = copy.deepcopy(frozen)
@@ -138,6 +149,7 @@ def evaluate_markets(
     positives = [row for row in evaluated if row["positive_ev"]]
     for rank, row in enumerate(positives, start=1):
         row["positive_edge_rank"] = rank
+    best_single = next((row for row in positives if row["best_single_eligible"]), None)
     return {
         "fixture_id": frozen.get("fixture_id"),
         "freeze_receipt_sha256": frozen.get("freeze_receipt_sha256"),
@@ -145,6 +157,6 @@ def evaluate_markets(
         "market_records_evaluated": len(evaluated),
         "evaluated": evaluated,
         "positive_edges": positives,
-        "best_single": positives[0] if positives else None,
-        "no_forced_bet": not bool(positives),
+        "best_single": best_single,
+        "no_forced_bet": best_single is None,
     }

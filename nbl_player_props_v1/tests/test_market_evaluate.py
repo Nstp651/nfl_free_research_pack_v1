@@ -15,6 +15,15 @@ from market_adapters import MarketRecord  # noqa: E402
 from market_evaluate import evaluate_markets  # noqa: E402
 from distribution import probability_grid  # noqa: E402
 
+ASSISTS_POLICY = {
+    "schema_version": "nbl_threshold_validation_v1",
+    "direct_validated_thresholds": list(range(2, 10)),
+    "tail_supported_thresholds": [1],
+    "extreme_tail_thresholds": list(range(10, 21)),
+    "best_single_eligible_thresholds": list(range(1, 10)),
+    "evidence_sha256": "e" * 64,
+}
+
 
 def frozen():
     core = {
@@ -37,6 +46,7 @@ def frozen():
                     "assists": {
                         "confidence": "B",
                         "fragility": "LOW",
+                        "qbase_anchor": {"max_count": 20, "threshold_validation_policy": ASSISTS_POLICY},
                         "probability_grid": probability_grid(5.0, 0.2, 20),
                     }
                 },
@@ -68,6 +78,9 @@ def test_half_point_ev_uses_exact_frozen_probability_and_does_not_mutate_model()
     row = result["evaluated"][0]
     assert row["p_push"] == 0.0
     assert row["ev_per_unit"] == pytest.approx(row["p_win"] * 2.1 - 1.0)
+    assert row["threshold_validation"] == "DIRECT_VALIDATED"
+    assert row["grade"] in {"A+", "A", "B+", "B", "C+", "PASS"}
+    assert row["best_single_eligible"] is True
     assert f == before
 
 
@@ -103,3 +116,31 @@ def test_no_positive_edge_means_no_forced_bet():
     assert result["positive_edges"] == []
     assert result["best_single"] is None
     assert result["no_forced_bet"] is True
+
+
+def test_extreme_tail_remains_ranked_but_direct_selection_is_best_single():
+    result = evaluate_markets(frozen(), [
+        market(threshold=11.5, price=100.0, book="Tail Book"),
+        market(threshold=8.5, price=8.0, book="Direct Book"),
+    ])
+    assert result["positive_edges"][0]["threshold"] == 11.5
+    assert result["positive_edges"][0]["threshold_validation"] == "EXTREME_TAIL"
+    assert result["positive_edges"][0]["best_single_eligible"] is False
+    assert result["positive_edges"][0]["best_single_exclusion_reason"] == "EXTREME_TAIL"
+    assert result["best_single"]["threshold"] == 8.5
+
+
+def test_confidence_c_high_fragility_grade_is_repeatable_and_ineligible():
+    f = frozen()
+    head = f["players"][0]["heads"]["assists"]
+    head["confidence"] = "C"
+    head["fragility"] = "HIGH"
+    core = {key: value for key, value in f.items() if key != "freeze_receipt_sha256"}
+    f = {**core, "freeze_receipt_sha256": sha256_json(core)}
+    row = market(threshold=4.5, price=10.0)
+    first = evaluate_markets(f, [row])["evaluated"][0]
+    second = evaluate_markets(f, [row])["evaluated"][0]
+    assert first == second
+    assert first["grade"] == "PASS"
+    assert first["best_single_eligible"] is False
+    assert first["best_single_exclusion_reason"] == "CONFIDENCE_C"

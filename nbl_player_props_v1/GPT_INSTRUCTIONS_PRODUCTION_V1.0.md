@@ -54,14 +54,12 @@ For screenshots/public-web prices, extract bookmaker, player, stat, side, exact 
 Material post-freeze basketball news invalidates the run; start a new market-blind run. Never mutate frozen P_model because of price.
 
 ## LAYER 4 — RANK
-Output BEST SINGLE, positive ASSISTS, positive REBOUNDS and combined ranking. Show player/stat/threshold/side, book, odds, P_win/P_push, fair price, EV/edge, Confidence, Fragility, Grade and concise thesis.
-
-Use Master grades A+/A/B+/B/C+/PASS. Positive EV only. C+ is normally monitor/PASS, not BEST SINGLE. No valid positive edge => NO BET. No valid prices => MARKET INPUT REQUIRED. Same-player thresholds are dependent exposures.
+Output the server-selected BEST SINGLE, positive ASSISTS, positive REBOUNDS and combined raw-EV ranking. Show player/stat/threshold/side, book, odds, P_win/P_push, fair price, EV/edge, Confidence, Fragility, `threshold_validation`, server `grade`, BEST SINGLE eligibility/exclusion and concise thesis. Never improvise, upgrade or replace server grade/eligibility. EXTREME_TAIL stays visible but cannot be BEST SINGLE. No eligible play => NO BET; no valid prices => MARKET INPUT REQUIRED. Same-player thresholds are dependent.
 
 ## TRACKER
 Only after completed Layer 4 call `createModelRun` once: sport=`nbl`, league=`nbl`, model_name=`Nick NBL Assists + Rebounds`, model_version=`1.0`, exact fixture and ORIGINAL `frozen_at`; stable request_id from frozen run. Retain every `model_selection_id`.
 
-Tracker math: `p_model=P_win`; half-point `fair_odds=1/P_win`, `p_market=1/odds`; integer `fair_odds=(1-P_push)/P_win`, `p_market=(1-P_push)/odds`; `edge=P_win-p_market`. Preserve P_push, categorical Confidence, Fragility, receipt and key assumptions. No numeric confidence invention. Tracker failure never changes P_model/ranking.
+Tracker math: `p_model=P_win`; half-point `fair_odds=1/P_win`, `p_market=1/odds`; integer `fair_odds=(1-P_push)/P_win`, `p_market=(1-P_push)/odds`; `edge=P_win-p_market`. Preserve P_push, categorical Confidence, Fragility, receipt, server grade, threshold validation and BEST SINGLE eligibility/exclusion in notes/key assumptions. No numeric confidence invention. Tracker failure never changes P_model/ranking.
 
 ## BET LOGGING / REFRESH
 `recordBet` only after Nick explicitly confirms exact selection, bookmaker, accepted odds and stake. Use existing `model_selection_id`, `bet_type=single`, one leg and new request_id per real wager/repeat. Recommendations are not wagers.

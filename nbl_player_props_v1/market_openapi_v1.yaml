@@ -213,6 +213,20 @@ components:
             positive_ev: {type: boolean}
             confidence: {type: string}
             fragility: {type: string}
+            threshold_validation:
+              type: string
+              enum: [DIRECT_VALIDATED, TAIL_SUPPORTED, EXTREME_TAIL]
+            validation_event_thresholds:
+              type: array
+              items: {type: integer}
+            threshold_validation_evidence_sha256: {type: string}
+            grade:
+              type: string
+              enum: [A+, A, B+, B, C+, PASS]
+            best_single_eligible: {type: boolean}
+            best_single_exclusion_reason:
+              type: [string, 'null']
+              enum: [EXTREME_TAIL, THRESHOLD_VALIDATION_NOT_BEST_SINGLE_ELIGIBLE, CONFIDENCE_C, FRAGILITY_HIGH, GRADE_BELOW_BEST_SINGLE_MINIMUM, NON_POSITIVE_EV, null]
           additionalProperties: true
     EvaluationResponse:
       type: [object, 'null']

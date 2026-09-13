@@ -50,6 +50,8 @@ Expected operations:
 
 The Market Action cannot create or mutate P_model.
 
+After the tail-risk patch, replace the Market Action schema because evaluated rows now expose server grade, threshold validation and BEST SINGLE eligibility. The Research and Tracker Action schemas are unchanged.
+
 ## Action 3 — Nick Bet Tracker
 Create a third Action using:
 - `tracker_openapi_v1.yaml`
@@ -95,6 +97,8 @@ Market Worker:
 
 Production deployment is owned by Cloudflare Git integration. GitHub workflows verify source/contracts and Wrangler dry-run; do not create a competing deployment owner.
 
+The tail-risk patch requires both Research and Market Workers to redeploy from the merged commit: Research propagates QBASE threshold metadata into new freezes, while Market grades/ranks it and retains exact old-QBASE-hash compatibility for already-frozen runs. It does not require binding, secret, route or domain changes.
+
 ## Acceptance before use
 Require all before calling V1.0 production-ready:
 1. repository unit/integrity tests pass;
@@ -111,6 +115,7 @@ Require all before calling V1.0 production-ready:
 12. one post-freeze screenshot market acceptance completes with exact freeze receipt and per-player hash binding;
 13. a pre-freeze market attempt and a market observation timestamped before freeze are rejected;
 14. one real later user-confirmed wager can be recorded using the existing `model_selection_id` without changing P_model.
+15. one direct positive edge is BEST SINGLE while a higher-EV assists 12+ row remains ranked as `EXTREME_TAIL`, grade-capped, ineligible, and leaves `p_model_mutated=false`.
 
 ## First run
 Use `LAUNCH_PROMPT_PRODUCTION_V1.0.md` in a brand-new chat and replace the fixture placeholders.

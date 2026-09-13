@@ -315,6 +315,34 @@ For integer lines the same formula is used with explicit push probability; push 
 ## 4.1 Positive-edge ranking
 Rank by expected value, with Confidence and Fragility as reliability/tie-break context rather than a reason to manufacture an edge.
 
+Every evaluated market receives a server-authoritative `threshold_validation` derived from frozen QBASE metadata. A half-point line uses its single at-least event threshold; an integer line uses both adjacent at-least thresholds required for the win/push/loss partition and takes the weaker classification.
+
+- `DIRECT_VALIDATED`: the temporal-OOS ladder passes the direct reliability gate (at least 250 observed and predicted events, Brier skill at least 0.05, predicted/observed frequency ratio 0.75–1.35) and lies in the consecutive directly validated selection range.
+- `TAIL_SUPPORTED`: outside that direct range but supported by the documented temporal-OOS tail gate. It is BEST SINGLE eligible only when its exact event threshold(s) are listed as eligible in frozen metadata.
+- `EXTREME_TAIL`: insufficient empirical reliability. It remains visible and EV-ranked but is never BEST SINGLE.
+
+The shipped V0.1.0 audit produces direct ranges of 2+–9+ for assists and 3+–12+ for rebounds. Rebounds 13+ is `TAIL_SUPPORTED` but not BEST SINGLE eligible; assists 10+ and above and rebounds 14+ and above are `EXTREME_TAIL`. Lower supported thresholds are recorded in the artifact policy. These ranges are evidence metadata, not arbitrary market caps, and may change only through a reproducible temporal-OOS audit.
+
+## 4.2 Deterministic grade
+
+The server assigns grade from raw EV bands: A+ at 25%+, A at 15%+, B+ at 10%+, B at 5%+, C+ at 2%+, otherwise PASS. It then applies the weakest applicable ceiling:
+
+| Confidence / Fragility | Grade ceiling |
+|---|---|
+| A / LOW | A+ |
+| A / MEDIUM | A |
+| A / HIGH | B |
+| B / LOW | A |
+| B / MEDIUM | B+ |
+| B / HIGH | C+ |
+| C / LOW | B |
+| C / MEDIUM | C+ |
+| C / HIGH | PASS |
+
+Tail ceilings are A+ for `DIRECT_VALIDATED`, A for BEST-SINGLE-supported `TAIL_SUPPORTED`, B for other `TAIL_SUPPORTED`, and C+ for `EXTREME_TAIL`. Grade never changes P_model, Confidence or Fragility.
+
+BEST SINGLE requires positive EV, an eligible event threshold, Confidence A/B, Fragility LOW/MEDIUM and final grade B or better. The first raw-EV-ranked selection meeting every rule is BEST SINGLE. If none qualifies, return no BEST SINGLE while preserving all positive edges and their deterministic exclusion reasons.
+
 For BOTH mode report:
 1. BEST SINGLE across assists + rebounds;
 2. ranked assists positive edges;
@@ -323,13 +351,13 @@ For BOTH mode report:
 
 If no market is positive EV, output NO BET.
 
-## 4.2 No mutation after market
+## 4.3 No mutation after market
 Once market access occurs, no frozen mean, scenario, minutes assumption, probability, confidence or fragility may be changed.
 
 If material basketball information appears after freeze—injury, scratch, starter/rotation change, minutes restriction, major role news—invalidate the run and start a new market-blind run. Do not reprice the existing frozen model in response to the sportsbook.
 
-## 4.3 Bet tracking
-Model ranking is not placement. Record a bet in Nick's tracker only after Nick explicitly confirms the bet/book/price/stake was placed.
+## 4.4 Bet tracking
+Model ranking is not placement. Tracker model-selection notes/key assumptions must preserve server grade, threshold validation and BEST SINGLE eligibility/exclusion. Record a bet only after Nick explicitly confirms the bet/book/price/stake was placed.
 
 ---
 

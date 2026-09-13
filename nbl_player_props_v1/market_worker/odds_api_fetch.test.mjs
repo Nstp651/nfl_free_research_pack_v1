@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import {evaluate,fetchAndEvaluateOddsApi,resolveOddsEvent,normalizeOddsRows,sha256Json} from './index.js';
 
 const RUN='a'.repeat(64),RECEIPT='b'.repeat(64),FROZEN_AT='2026-09-11T09:51:10.890Z';
+const assistPolicy={schema_version:'nbl_threshold_validation_v1',direct_validated_thresholds:[2,3,4,5,6,7,8,9],tail_supported_thresholds:[1],extreme_tail_thresholds:[10,11,12,13,14,15,16,17,18,19,20],best_single_eligible_thresholds:[1,2,3,4,5,6,7,8,9],evidence_sha256:'1'.repeat(64)};
+const reboundPolicy={schema_version:'nbl_threshold_validation_v1',direct_validated_thresholds:[3,4,5,6,7,8,9,10,11,12],tail_supported_thresholds:[1,2,13],extreme_tail_thresholds:[14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],best_single_eligible_thresholds:[1,2,3,4,5,6,7,8,9,10,11,12],evidence_sha256:'2'.repeat(64)};
 const frozenPlayer={player_id:'p1',player_name:'Test Guard',team:'Adelaide 36ers',heads:{
-  assists:{confidence:'B',fragility:'LOW',probability_grid:{half_point_grid:[{line:4.5,over:.55,push:0,under:.45}],integer_push_grid:[{line:5,over:.35,push:.2,under:.45}]}},
-  rebounds:{confidence:'C',fragility:'MEDIUM',probability_grid:{half_point_grid:[{line:5.5,over:.4,push:0,under:.6}],integer_push_grid:[{line:6,over:.25,push:.15,under:.6}]}}
+  assists:{confidence:'B',fragility:'LOW',qbase_anchor:{max_count:20,threshold_validation_policy:assistPolicy},probability_grid:{max_count:20,half_point_grid:[{line:4.5,over:.55,push:0,under:.45}],integer_push_grid:[{line:5,over:.35,push:.2,under:.45}]}},
+  rebounds:{confidence:'C',fragility:'MEDIUM',qbase_anchor:{max_count:30,threshold_validation_policy:reboundPolicy},probability_grid:{max_count:30,half_point_grid:[{line:5.5,over:.4,push:0,under:.6}],integer_push_grid:[{line:6,over:.25,push:.15,under:.6}]}}
 }};
 const PLAYER_HASH=await sha256Json(frozenPlayer);
 const fixture={id:'fixture-1',start_time:'2026-09-19T09:30:00Z',home_team:{id:'h',name:'Melbourne United'},away_team:{id:'a',name:'Adelaide 36ers'}};

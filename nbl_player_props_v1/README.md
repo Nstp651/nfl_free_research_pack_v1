@@ -60,6 +60,8 @@ Latest validated candidate evidence from CI:
 
 Both selected Poisson mean models with temporal-OOS NB2 dispersion. Model-family selection is driven by temporal threshold calibration first, then count error; sophistication is never preferred narratively.
 
+The reproducible V0.1.0 tail audit narrows strong direct validation to 2+–9+ assists and 3+–12+ rebounds. Rebounds 13+ has secondary tail support but is not BEST SINGLE eligible; assists 10+ and rebounds 14+ begin the evidence-defined extreme-tail ranges. Full observed/predicted frequency, Brier skill and calibration evidence is in `TAIL_VALIDATION_AUDIT_V0.1.0.md` and `evidence/qbase_tail_validation_v0.1.0.json`.
+
 ## Source / leakage policy
 Layers 0-2 never read sportsbook odds, lines, prices, betting consensus or betting-derived features.
 

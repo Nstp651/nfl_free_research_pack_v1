@@ -11,6 +11,7 @@ from publish_assets import canonical_sha, publish  # noqa: E402
 
 
 def qbase(stat: str):
+    max_count = 20
     return {
         "model_name": stat,
         "model_version": "0.1.0",
@@ -18,7 +19,17 @@ def qbase(stat: str):
         "market_data": False,
         "source_receipt_sha256": "a" * 64,
         "walk_forward": {"overall": {"n": 6000}, "brier_at_least": {"mean": 0.1}, "nb2_alpha_oos": 0.2},
-        "probability_contract": {"max_count": 20},
+        "probability_contract": {
+            "max_count": max_count,
+            "threshold_validation_policy": {
+                "schema_version": "nbl_threshold_validation_v1",
+                "direct_validated_thresholds": list(range(1, max_count + 1)),
+                "tail_supported_thresholds": [],
+                "extreme_tail_thresholds": [],
+                "best_single_eligible_thresholds": list(range(1, max_count + 1)),
+                "evidence_sha256": "f" * 64,
+            },
+        },
     }
 
 
