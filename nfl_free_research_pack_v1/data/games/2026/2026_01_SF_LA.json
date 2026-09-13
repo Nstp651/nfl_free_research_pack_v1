@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-12T12:39:55.997660+00:00",
+  "generated_at_utc": "2026-09-13T06:42:49.240204+00:00",
   "fixture": {
     "game_id": "2026_01_SF_LA",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "LA",
     "stadium": "Melbourne Cricket Ground",
     "roof": "dome",
-    "surface": "matrixturf",
+    "surface": "grass",
     "location": "Neutral"
   },
   "data_state": {
@@ -7295,5 +7295,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "5ed0fdac0f40e51e"
+  "pack_revision": "76dd9fbdf688fe12"
 }

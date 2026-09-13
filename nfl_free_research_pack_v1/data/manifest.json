@@ -3,8 +3,8 @@
   "build_version": "1.1.1",
   "season": 2026,
   "active_week": 1,
-  "generated_at_utc": "2026-09-13T00:42:14.176189+00:00",
-  "last_checked_at_utc": "2026-09-13T00:42:14.176200+00:00",
+  "generated_at_utc": "2026-09-13T06:42:50.403664+00:00",
+  "last_checked_at_utc": "2026-09-13T06:42:50.403676+00:00",
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
@@ -28,7 +28,7 @@
       "gametime": "20:35",
       "data_state": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
       "path": "games/2026/2026_01_SF_LA.json",
-      "pack_revision": "5ed0fdac0f40e51e"
+      "pack_revision": "76dd9fbdf688fe12"
     },
     {
       "game_id": "2026_01_ARI_LAC",
