@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-13T12:40:12.100137+00:00",
-  "build_commit": "14d1abd2e85c93dc310e7631a90391e2a70c783b",
+  "tested_at_utc": "2026-09-13T18:39:06.670002+00:00",
+  "build_commit": "3c816e08143f71eccd30d8cf9f2267bb00d22338",
   "python": "3.12.14",
-  "workflow_run_id": "34757664088",
+  "workflow_run_id": "34775227594",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "c42ce0d0fafb0527",
+      "pack_revision": "f9a681ebced694ef",
       "players": 44,
       "teams": {
         "NE": {
@@ -186,7 +186,7 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "76dd9fbdf688fe12",
+      "pack_revision": "d6ba5fbf71d7f595",
       "players": 42,
       "teams": {
         "SF": {
