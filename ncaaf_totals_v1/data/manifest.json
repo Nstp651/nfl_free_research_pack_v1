@@ -4,9 +4,9 @@
     "purpose": "pre-market NCAA football research only",
     "repository": "https://github.com/sportsdataverse/sportsdataverse-data"
   },
-  "fixture_count": 49,
-  "generated_at_utc": "2026-09-13T00:38:00.727278+00:00",
-  "last_checked_at_utc": "2026-09-13T00:38:00.727278+00:00",
+  "fixture_count": 57,
+  "generated_at_utc": "2026-09-13T06:38:07.872058+00:00",
+  "last_checked_at_utc": "2026-09-13T06:38:07.872058+00:00",
   "limitations": [
     "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
     "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
@@ -15,19 +15,34 @@
   "schema_version": "0.1.0",
   "slates": [
     {
-      "current_season_data_through_week": 1,
-      "game_count": 49,
-      "pack_revision": "e670f88db2ab5097",
+      "current_season_data_through_week": 2,
+      "game_count": 57,
+      "pack_revision": "59402bfa21d5792a",
       "season": 2026,
-      "slate_id": "2026_02",
-      "week": 2
+      "slate_id": "2026_03",
+      "week": 3
     }
   ],
   "source_health": {
     "failed_required": [],
     "quality": {
-      "status": "NOT_TESTED",
-      "tests": []
+      "status": "PASS",
+      "tests": [
+        {
+          "adjusted": "adj_off_epa",
+          "correlation": 0.5504506452079322,
+          "n": 25,
+          "raw": "EPAplay_off",
+          "suspicious": false
+        },
+        {
+          "adjusted": "adj_def_epa",
+          "correlation": 0.6555032760434792,
+          "n": 25,
+          "raw": "EPAplay_def",
+          "suspicious": false
+        }
+      ]
     },
     "status": "PARTIAL"
   }
