@@ -5,8 +5,8 @@
     "repository": "https://github.com/sportsdataverse/sportsdataverse-data"
   },
   "fixture_count": 57,
-  "generated_at_utc": "2026-09-13T06:38:07.872058+00:00",
-  "last_checked_at_utc": "2026-09-13T06:38:07.872058+00:00",
+  "generated_at_utc": "2026-09-13T12:34:15.196437+00:00",
+  "last_checked_at_utc": "2026-09-13T12:34:15.196437+00:00",
   "limitations": [
     "Optional cfb_team_talent unavailable for 2026: No CSV release asset for cfb_team_talent season 2026",
     "Optional cfb_returning_production unavailable for 2026: No CSV release asset for cfb_returning_production season 2026"
@@ -17,7 +17,7 @@
     {
       "current_season_data_through_week": 2,
       "game_count": 57,
-      "pack_revision": "59402bfa21d5792a",
+      "pack_revision": "869320421258c458",
       "season": 2026,
       "slate_id": "2026_03",
       "week": 3
@@ -30,15 +30,15 @@
       "tests": [
         {
           "adjusted": "adj_off_epa",
-          "correlation": 0.5504506452079322,
-          "n": 25,
+          "correlation": 0.6038671536722126,
+          "n": 30,
           "raw": "EPAplay_off",
           "suspicious": false
         },
         {
           "adjusted": "adj_def_epa",
-          "correlation": 0.6555032760434792,
-          "n": 25,
+          "correlation": 0.5997841844243302,
+          "n": 30,
           "raw": "EPAplay_def",
           "suspicious": false
         }
