@@ -1,0 +1,100 @@
+openapi: 3.1.0
+info:
+  title: A-League Player Volume Market API
+  version: 1.0.0
+  description: Post-freeze-only market evaluator. It fetches P_model internally by run_id and never accepts a client-supplied frozen artifact.
+servers:
+  - url: https://aleague-player-volume-market-v1.REPLACE.workers.dev
+paths:
+  /health:
+    get:
+      operationId: getAleagueMarketHealth
+      summary: Check isolated post-freeze market service health.
+      responses:
+        '200':
+          description: Health status.
+          content:
+            application/json:
+              schema: {type: object}
+  /v1/evaluate:
+    post:
+      operationId: evaluateAleaguePlayerVolumeMarkets
+      summary: Evaluate exact current market rows against an immutable frozen run.
+      description: The service fetches the frozen artifact one-way from the research service using run_id. Default recommendation sides are AT_LEAST and OVER; UNDER can be supplied for audit only unless explicitly enabled.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluateRequest'
+      responses:
+        '200':
+          description: Exact EV evaluation and cross-head ranking.
+          content:
+            application/json:
+              schema: {type: object}
+components:
+  schemas:
+    EvaluateRequest:
+      type: object
+      additionalProperties: false
+      required: [run_id, records]
+      properties:
+        run_id:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+        records:
+          type: array
+          minItems: 1
+          items: {$ref: '#/components/schemas/MarketRecord'}
+        default_source_type:
+          type: string
+          enum: [SCREENSHOT, MANUAL, ODDS_API]
+          default: MANUAL
+        captured_at:
+          type: string
+          format: date-time
+        selection_sides:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum: [AT_LEAST, OVER, UNDER]
+          default: [AT_LEAST, OVER]
+    MarketRecord:
+      type: object
+      additionalProperties: false
+      required: [player_name, stat_type, side, threshold, decimal_price, bookmaker]
+      properties:
+        player_id:
+          type: string
+          description: Preferred when the exact frozen player id is known.
+        player_name:
+          type: string
+          minLength: 1
+        stat_type:
+          type: string
+          description: Canonical names or supported aliases such as SHOTS, SOT or SAVES.
+          enum: [PLAYER_SHOTS, SHOTS, TOTAL_SHOTS, PLAYER_SHOTS_ON_TARGET, SHOTS_ON_TARGET, SOT, PLAYER_SOT, GOALKEEPER_SAVES, KEEPER_SAVES, SAVES]
+        side:
+          type: string
+          enum: [AT_LEAST, MILESTONE, PLUS, OVER, UNDER]
+        threshold:
+          type: number
+          minimum: 0
+          maximum: 20
+          multipleOf: 0.5
+        decimal_price:
+          type: number
+          exclusiveMinimum: 1
+          maximum: 1000
+        bookmaker:
+          type: string
+          minLength: 1
+        captured_at:
+          type: string
+          format: date-time
+        source_type:
+          type: string
+          enum: [SCREENSHOT, MANUAL, ODDS_API]

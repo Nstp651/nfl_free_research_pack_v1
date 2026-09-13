@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.2.0",
+  "model": "ALEAGUE_PLAYER_VOLUME_V1",
+  "sources": [
+    {
+      "id": "api_football",
+      "class": "AUTO_APPROVED",
+      "purpose": [
+        "fixtures",
+        "lineups",
+        "historical_player_match_shooting",
+        "historical_team_match_shooting",
+        "goalkeeper_match_saves",
+        "player_identity",
+        "team_identity",
+        "transfers",
+        "injuries_where_covered"
+      ],
+      "runtime_dependency": false,
+      "credential": "API_FOOTBALL_KEY",
+      "league_id": 188,
+      "notes": "Primary V1 structured feed candidate. Canonical assets are published into the research pack so runtime never depends on the live API. Coverage flags, historical-range checks, null-rate gates and reconciliation are mandatory."
+    },
+    {
+      "id": "skillcorner_opendata",
+      "class": "AUTO_APPROVED_OPEN_DATA",
+      "purpose": [
+        "tracking_calibration",
+        "off_ball_run_research",
+        "physical_role_features",
+        "passing_role_features",
+        "phase_of_play_research"
+      ],
+      "runtime_dependency": false,
+      "license": "MIT",
+      "approved_commit": "c1e17a0cc3e07e1774b52d929c1a0b85115143fc",
+      "notes": "Open A-League 2024/25 release contains ten tracking matches plus season-level Physical/OBR/Passing aggregates. Approved for pinned derived role profiles and feature research; not sufficient as the core outcome/training panel."
+    },
+    {
+      "id": "official_aleague_clubs",
+      "class": "AUTO_OR_RESEARCH_BY_ROUTE",
+      "purpose": ["fixtures_reconciliation", "squads", "injuries", "suspensions", "current_role", "coach_system", "transfers"],
+      "runtime_dependency": false,
+      "notes": "Prefer official evidence for current availability and role. Automate only stable approved routes."
+    },
+    {
+      "id": "fbref_aleague",
+      "class": "RESEARCH_RECONCILIATION_ONLY",
+      "purpose": ["manual_reconciliation", "historical_context", "spot_checks"],
+      "runtime_dependency": false,
+      "notes": "Do not schedule automated extraction or build the predictive database from FBref."
+    },
+    {
+      "id": "fotmob",
+      "class": "RESEARCH_ONLY",
+      "purpose": ["xg_xa_context", "shot_map_context", "box_touches", "chance_creation", "recent_role"],
+      "runtime_dependency": false,
+      "notes": "No unattended scraper in V1."
+    },
+    {
+      "id": "transfermarkt",
+      "class": "RESEARCH_ONLY",
+      "purpose": ["transfer_history_reconciliation", "prior_club", "prior_competition_context"],
+      "runtime_dependency": false,
+      "notes": "Research enrichment until a separately approved ingestion route exists."
+    },
+    {
+      "id": "licensed_advanced_feed",
+      "class": "LICENSED_OPTION",
+      "purpose": ["event_data", "shot_quality", "post_shot_xg", "pressure", "possession_value", "full_tracking"],
+      "runtime_dependency": false,
+      "notes": "Optional future upgrade only with explicit approval; no V1 production dependency."
+    }
+  ]
+}

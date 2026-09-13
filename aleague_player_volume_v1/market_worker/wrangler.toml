@@ -1,0 +1,8 @@
+name = "aleague-player-volume-market-v1"
+main = "index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[[services]]
+binding = "RESEARCH_FREEZE"
+service = "aleague-player-volume-research-v1"

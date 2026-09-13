@@ -1,0 +1,9 @@
+import {execFileSync} from 'node:child_process';
+import {writeFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+
+let sha=String(process.env.WORKERS_CI_COMMIT_SHA||'').trim().toLowerCase();
+if(!sha)sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8',cwd:fileURLToPath(new URL('../../',import.meta.url))}).trim().toLowerCase();
+if(!/^[0-9a-f]{40}$/.test(sha))throw new Error('Unable to resolve exact 40-character deployment source commit');
+writeFileSync(fileURLToPath(new URL('./source_commit.generated.js',import.meta.url)),`// Generated; do not hand edit.\nexport const DEPLOY_SOURCE_COMMIT='${sha}';\n`);
+console.log(`ALEAGUE_DEPLOY_SOURCE_COMMIT=${sha}`);
