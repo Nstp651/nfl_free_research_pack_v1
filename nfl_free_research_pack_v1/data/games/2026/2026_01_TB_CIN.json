@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-14T00:43:26.584514+00:00",
+  "generated_at_utc": "2026-09-14T12:43:30.286350+00:00",
   "fixture": {
     "game_id": "2026_01_TB_CIN",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "CIN",
     "stadium": "Paycor Stadium",
     "roof": "outdoors",
-    "surface": null,
+    "surface": "fieldturf",
     "location": "Home"
   },
   "data_state": {
@@ -5798,5 +5798,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "3cc0f432ed1fd333"
+  "pack_revision": "8de00342d0e6a0b8"
 }

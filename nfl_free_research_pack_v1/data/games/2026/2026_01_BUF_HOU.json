@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-14T00:43:26.722521+00:00",
+  "generated_at_utc": "2026-09-14T12:43:30.472926+00:00",
   "fixture": {
     "game_id": "2026_01_BUF_HOU",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "HOU",
     "stadium": "Reliant Stadium",
     "roof": "closed",
-    "surface": null,
+    "surface": "astroturf",
     "location": "Home"
   },
   "data_state": {
@@ -6962,5 +6962,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "51693ecee3aba189"
+  "pack_revision": "e09a435c8d2da6d2"
 }
