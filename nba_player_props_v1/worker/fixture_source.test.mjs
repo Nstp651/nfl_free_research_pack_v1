@@ -14,14 +14,14 @@ test('blocked scoreboard falls back to bounded ESPN core fixture data',async()=>
   const fetchImpl=async url=>{
     const u=String(url);seen.push(u);
     if(u.startsWith('https://site.api.espn.com/'))return new Response('blocked',{status:403});
-    if(u.includes('/events?'))return json({items:[{$ref:'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/401909088'}]});
-    if(u.endsWith('/events/401909088'))return json({id:'401909088',date:'2026-10-21T00:30:00Z',season:{$ref:'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027'},competitions:[{competitors:[{homeAway:'home',team:{$ref:'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027/teams/2'}},{homeAway:'away',team:{$ref:'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027/teams/18'}}]}],odds:[{details:'never expose'}]});
+    if(u.includes('/events?'))return json({items:[{$ref:'http://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/401909088'}]});
+    if(u.endsWith('/events/401909088'))return json({id:'401909088',date:'2026-10-21T00:30:00Z',season:{$ref:'http://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027'},competitions:[{competitors:[{homeAway:'home',team:{$ref:'http://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027/teams/2'}},{homeAway:'away',team:{$ref:'http://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027/teams/18'}}]}],odds:[{details:'never expose'}]});
     if(u.endsWith('/teams/2'))return json({id:'2',displayName:'Boston Celtics',abbreviation:'BOS'});
     if(u.endsWith('/teams/18'))return json({id:'18',displayName:'New York Knicks',abbreviation:'NYK'});
     throw new Error(`unexpected URL ${u}`);
   };
   const out=await listFixturesForEtDate('2026-10-20',{nowMs:Date.parse('2026-10-20T12:00:00Z'),fetchImpl});
-  assert.equal(seen.length,5);assert.equal(out.source.fallback,'CORE_API');assert.equal(out.fixtures[0].game_id,'401909088');assert.equal(out.fixtures[0].source,'ESPN_CORE_NON_MARKET');assert.equal(JSON.stringify(out).includes('never expose'),false);
+  assert.equal(seen.length,5);assert.equal(seen.slice(2).every(url=>url.startsWith('https://')),true);assert.equal(out.source.fallback,'CORE_API');assert.equal(out.fixtures[0].game_id,'401909088');assert.equal(out.fixtures[0].source,'ESPN_CORE_NON_MARKET');assert.equal(JSON.stringify(out).includes('never expose'),false);
 });
 test('core fallback rejects untrusted references before fetching them',async()=>{
   const fetchImpl=async url=>String(url).startsWith('https://site.api.espn.com/')?new Response('blocked',{status:403}):json({items:[{$ref:'https://evil.example/events/401909088'}]});

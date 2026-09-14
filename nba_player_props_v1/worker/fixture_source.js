@@ -54,7 +54,8 @@ async function fetchJson(url,fetchImpl,label){
 function safeCoreRef(value,kind,pathnamePattern){
   let url;
   try{url=new URL(String(value?.$ref||value||''));}catch{throw new Error(`${kind} ESPN core ref invalid`);}
-  need(url.protocol==='https:'&&url.hostname===CORE_HOST&&pathnamePattern.test(url.pathname),`${kind} ESPN core ref invalid`);
+  need((url.protocol==='http:'||url.protocol==='https:')&&url.hostname===CORE_HOST&&pathnamePattern.test(url.pathname),`${kind} ESPN core ref invalid`);
+  url.protocol='https:';
   return url.toString();
 }
 
@@ -63,7 +64,7 @@ function coreSeason(event,gameId){
   if(Number.isInteger(direct))return direct;
   let ref;
   try{ref=new URL(String(event?.season?.$ref||''));}catch{throw new Error(`fixture ${gameId} season invalid`);}
-  need(ref.protocol==='https:'&&ref.hostname===CORE_HOST,'fixture season ESPN core ref invalid');
+  need((ref.protocol==='http:'||ref.protocol==='https:')&&ref.hostname===CORE_HOST,'fixture season ESPN core ref invalid');
   const match=ref.pathname.match(/\/seasons\/(\d{4})(?:\/|$)/);
   const season=Number(match?.[1]);
   need(Number.isInteger(season),`fixture ${gameId} season invalid`);
