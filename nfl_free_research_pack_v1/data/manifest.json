@@ -3,8 +3,8 @@
   "build_version": "1.1.1",
   "season": 2026,
   "active_week": 1,
-  "generated_at_utc": "2026-09-14T00:43:27.490211+00:00",
-  "last_checked_at_utc": "2026-09-14T00:43:27.490222+00:00",
+  "generated_at_utc": "2026-09-14T06:44:16.299732+00:00",
+  "last_checked_at_utc": "2026-09-14T06:44:16.299745+00:00",
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
@@ -112,7 +112,7 @@
       "gametime": "20:20",
       "data_state": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
       "path": "games/2026/2026_01_DAL_NYG.json",
-      "pack_revision": "7f17f4b839bbffa9"
+      "pack_revision": "eb4a203e7b32fd56"
     },
     {
       "game_id": "2026_01_GB_MIN",
@@ -124,7 +124,7 @@
       "gametime": "16:25",
       "data_state": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
       "path": "games/2026/2026_01_GB_MIN.json",
-      "pack_revision": "d5ac73e16cb63010"
+      "pack_revision": "60a95ff01ca6145d"
     },
     {
       "game_id": "2026_01_MIA_LV",
