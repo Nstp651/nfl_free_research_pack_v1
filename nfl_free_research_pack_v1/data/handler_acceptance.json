@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-14T12:43:38.071Z",
+  "tested_at_utc": "2026-09-14T18:42:22.848Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/c9bc576b7a3f2da3edb4a7a7ba5582639f56fa3c/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/b59a5a40cd20fd52de5c92594d7634d5d09f3911/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 1,
   "games": [
     {
       "game_id": "2026_01_NE_SEA",
-      "pack_revision": "f9a681ebced694ef",
+      "pack_revision": "37570b5e77b1d7d7",
       "fixture": {
         "game_id": "2026_01_NE_SEA",
         "season": 2026,
@@ -222,7 +222,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 516349,
+            "rows": 518581,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_01_SF_LA",
-      "pack_revision": "d6ba5fbf71d7f595",
+      "pack_revision": "65bfe78334c80d96",
       "fixture": {
         "game_id": "2026_01_SF_LA",
         "season": 2026,
@@ -468,7 +468,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 516349,
+            "rows": 518581,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -525,7 +525,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-14T12:43:31.517346+00:00",
+      "last_checked_at_utc": "2026-09-14T18:42:17.234292+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
