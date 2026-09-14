@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-13T18:39:05.645852+00:00",
+  "generated_at_utc": "2026-09-14T00:43:26.650790+00:00",
   "fixture": {
     "game_id": "2026_01_NO_DET",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "DET",
     "stadium": "Ford Field",
     "roof": "dome",
-    "surface": "fieldturf",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -7274,5 +7274,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "d5ddd5f6be3a8405"
+  "pack_revision": "b3352ed5c9458dc7"
 }

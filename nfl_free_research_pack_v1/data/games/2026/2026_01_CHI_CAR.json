@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-13T18:39:05.482268+00:00",
+  "generated_at_utc": "2026-09-14T00:43:26.515565+00:00",
   "fixture": {
     "game_id": "2026_01_CHI_CAR",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "CAR",
     "stadium": "Bank of America Stadium",
     "roof": "outdoors",
-    "surface": "grass",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -6748,5 +6748,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "6628dbc2db074a47"
+  "pack_revision": "63cec49cca519195"
 }

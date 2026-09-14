@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-13T18:39:05.815771+00:00",
+  "generated_at_utc": "2026-09-14T00:43:26.791935+00:00",
   "fixture": {
     "game_id": "2026_01_BAL_IND",
     "season": 2026,
@@ -14,8 +14,8 @@
     "away_team": "BAL",
     "home_team": "IND",
     "stadium": "Lucas Oil Stadium",
-    "roof": null,
-    "surface": "fieldturf",
+    "roof": "closed",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -6343,5 +6343,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "0fae4fc69893264d"
+  "pack_revision": "dcf4b84940943e0e"
 }

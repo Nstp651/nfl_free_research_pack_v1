@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-13T18:39:05.899422+00:00",
+  "generated_at_utc": "2026-09-14T00:43:26.861810+00:00",
   "fixture": {
     "game_id": "2026_01_CLE_JAX",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "JAX",
     "stadium": "EverBank Stadium",
     "roof": "outdoors",
-    "surface": "grass",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -5902,5 +5902,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "e6a077a1d818300c"
+  "pack_revision": "38f06594333b31be"
 }
