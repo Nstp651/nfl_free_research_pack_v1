@@ -32,7 +32,9 @@ export class NbaSlateRun {
       let state=await this.storage.get('state');need(state,'Unknown run');
       if(request.method==='GET'&&path==='/status')return response(statusSummary(state));
       if(request.method==='GET'&&path==='/research/next'){
-        const batch=getResearchBatch(state,2),ids=batch.batch_game_ids,assets=await loadRuntimeAssets(state.source_commit);const seeds=[];for(const id of ids)seeds.push(await buildResearchSeed(state.fixture_locks[id],assets));return response({market_data:false,run_id:state.run_id,status:state.status,batch_game_ids:ids,pending_count:batch.pending_game_ids.length,next_batch_after_checkpoint:batch.next_batch_after_checkpoint,research_seeds:seeds});
+        // One game remains within the Free-plan 50 external-subrequest ceiling
+        // when ESPN Site roster calls fall back to per-athlete Core records.
+        const batch=getResearchBatch(state,1),ids=batch.batch_game_ids,assets=await loadRuntimeAssets(state.source_commit);const seeds=[];for(const id of ids)seeds.push(await buildResearchSeed(state.fixture_locks[id],assets));return response({market_data:false,run_id:state.run_id,status:state.status,batch_game_ids:ids,pending_count:batch.pending_game_ids.length,next_batch_after_checkpoint:batch.next_batch_after_checkpoint,research_seeds:seeds});
       }
       if(request.method==='POST'&&path==='/research/checkpoint'){
         const body=await jsonBody(request);exactKeys(body,['checkpoints'],'research checkpoint');state=await checkpointResearch(state,body.checkpoints,Date.now());await this.storage.put('state',state);return response(statusSummary(state));
