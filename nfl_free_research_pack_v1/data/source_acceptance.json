@@ -1,344 +1,322 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-15T00:44:08.418199+00:00",
-  "build_commit": "7617a58fceb1b3ad8d71bf32e9c584c25a373b31",
+  "tested_at_utc": "2026-09-15T06:43:24.728995+00:00",
+  "build_commit": "a3b06f0db5c12b8a69f682a2a86b2a54babf33ae",
   "python": "3.12.14",
-  "workflow_run_id": "34914340507",
+  "workflow_run_id": "34938164618",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
-      "game_id": "2026_01_NE_SEA",
-      "pack_revision": "37570b5e77b1d7d7",
-      "players": 44,
+      "game_id": "2026_02_DET_BUF",
+      "pack_revision": "6c4e4a370bc8f1c5",
+      "players": 36,
       "teams": {
-        "NE": {
+        "DET": {
           "2024": {
             "games": 17,
-            "attempts": 529,
-            "completions": 342
+            "attempts": 551,
+            "completions": 399
           },
           "2025": {
             "games": 17,
-            "attempts": 502,
-            "completions": 361
+            "attempts": 582,
+            "completions": 394
           }
         },
-        "SEA": {
+        "BUF": {
           "2024": {
             "games": 17,
-            "attempts": 593,
-            "completions": 413
+            "attempts": 520,
+            "completions": 329
           },
           "2025": {
             "games": 17,
-            "attempts": 481,
-            "completions": 325
+            "attempts": 495,
+            "completions": 344
           }
         }
       },
       "rookies": [
         {
-          "name": "Myles Montgomery",
-          "team": "NE"
+          "name": "Ja'Mori Maclin",
+          "team": "BUF"
         },
         {
-          "name": "Eli Raridon",
-          "team": "NE"
+          "name": "Skyler Bell",
+          "team": "BUF"
         },
         {
-          "name": "Tanner Arkin",
-          "team": "NE"
-        },
-        {
-          "name": "Cameron Dorner",
-          "team": "NE"
-        },
-        {
-          "name": "Kyle Dixon",
-          "team": "NE"
-        },
-        {
-          "name": "Jadarian Price",
-          "team": "SEA"
-        },
-        {
-          "name": "Emmanuel Henderson Jr.",
-          "team": "SEA"
+          "name": "Kendrick Law",
+          "team": "DET"
         }
       ],
       "transfers": [
         {
-          "name": "Corey Kiner",
-          "current_team": "NE",
+          "name": "DJ Moore",
+          "current_team": "BUF",
+          "source_teams": [
+            "CHI"
+          ]
+        },
+        {
+          "name": "Greg Dortch",
+          "current_team": "BUF",
           "source_teams": [
             "ARI"
           ]
         },
         {
-          "name": "Hassan Haskins",
-          "current_team": "NE",
+          "name": "Trent Sherfield",
+          "current_team": "BUF",
+          "source_teams": [
+            "ARI",
+            "DEN"
+          ]
+        },
+        {
+          "name": "Isiah Pacheco",
+          "current_team": "DET",
+          "source_teams": [
+            "KC"
+          ]
+        },
+        {
+          "name": "Tyler Conklin",
+          "current_team": "DET",
           "source_teams": [
             "LAC"
           ]
         },
         {
-          "name": "Reggie Gilliam",
-          "current_team": "NE",
+          "name": "Tay Martin",
+          "current_team": "DET",
           "source_teams": [
-            "BUF"
-          ]
-        },
-        {
-          "name": "Cameron Latu",
-          "current_team": "NE",
-          "source_teams": [
-            "PHI"
-          ]
-        },
-        {
-          "name": "Julian Hill",
-          "current_team": "NE",
-          "source_teams": [
-            "MIA"
-          ]
-        },
-        {
-          "name": "Shane Zylstra",
-          "current_team": "NE",
-          "source_teams": [
-            "DET"
-          ]
-        },
-        {
-          "name": "A.J. Brown",
-          "current_team": "NE",
-          "source_teams": [
-            "PHI"
-          ]
-        },
-        {
-          "name": "Romeo Doubs",
-          "current_team": "NE",
-          "source_teams": [
-            "GB"
-          ]
-        },
-        {
-          "name": "Emanuel Wilson",
-          "current_team": "SEA",
-          "source_teams": [
-            "GB"
+            "WAS"
           ]
         }
       ],
-      "player_checks": 159,
-      "ftn_checks": 846,
+      "player_checks": 147,
+      "ftn_checks": 828,
       "ngs_identity_matches": [
         {
-          "player_id": "00-0033090",
-          "roster_name": "Hunter Henry",
-          "ngs_name": "Hunter Henry"
+          "player_id": "00-0038933",
+          "roster_name": "Dalton Kincaid",
+          "ngs_name": "Dalton Kincaid"
         },
         {
-          "player_id": "00-0035676",
-          "roster_name": "A.J. Brown",
-          "ngs_name": "A.J. Brown"
+          "player_id": "00-0035689",
+          "roster_name": "Dawson Knox",
+          "ngs_name": "Dawson Knox"
         },
         {
-          "player_id": "00-0038621",
-          "roster_name": "DeMario Douglas",
-          "ngs_name": "DeMario Douglas"
+          "player_id": "00-0034827",
+          "roster_name": "DJ Moore",
+          "ngs_name": "D.J. Moore"
         },
         {
-          "player_id": "00-0033555",
-          "roster_name": "Mack Hollins",
-          "ngs_name": "Mack Hollins"
+          "player_id": "00-0039901",
+          "roster_name": "Keon Coleman",
+          "ngs_name": "Keon Coleman"
         },
         {
-          "player_id": "00-0037816",
-          "roster_name": "Romeo Doubs",
-          "ngs_name": "Romeo Doubs"
+          "player_id": "00-0037261",
+          "roster_name": "Khalil Shakir",
+          "ngs_name": "Khalil Shakir"
         },
         {
-          "player_id": "00-0039793",
-          "roster_name": "AJ Barner",
-          "ngs_name": "AJ Barner"
+          "player_id": "00-0039065",
+          "roster_name": "Sam LaPorta",
+          "ngs_name": "Sam LaPorta"
         },
         {
-          "player_id": "00-0033908",
-          "roster_name": "Cooper Kupp",
-          "ngs_name": "Cooper Kupp"
+          "player_id": "00-0036963",
+          "roster_name": "Amon-Ra St. Brown",
+          "ngs_name": "Amon-Ra St. Brown"
         },
         {
-          "player_id": "00-0038543",
-          "roster_name": "Jaxon Smith-Njigba",
-          "ngs_name": "Jaxon Smith-Njigba"
-        },
-        {
-          "player_id": "00-0037545",
-          "roster_name": "Rashid Shaheed",
-          "ngs_name": "Rashid Shaheed"
+          "player_id": "00-0037240",
+          "roster_name": "Jameson Williams",
+          "ngs_name": "Jameson Williams"
         }
       ],
-      "missing_prior_ngs": 35
+      "missing_prior_ngs": 28
     },
     {
-      "game_id": "2026_01_SF_LA",
-      "pack_revision": "65bfe78334c80d96",
-      "players": 42,
+      "game_id": "2026_02_CAR_ATL",
+      "pack_revision": "76fd904d955d18e5",
+      "players": 40,
       "teams": {
-        "SF": {
+        "CAR": {
           "2024": {
             "games": 17,
-            "attempts": 533,
-            "completions": 349
+            "attempts": 547,
+            "completions": 341
           },
           "2025": {
             "games": 17,
-            "attempts": 574,
-            "completions": 398
+            "attempts": 515,
+            "completions": 329
           }
         },
-        "LA": {
+        "ATL": {
           "2024": {
             "games": 17,
             "attempts": 559,
-            "completions": 367
+            "completions": 364
           },
           "2025": {
             "games": 17,
-            "attempts": 598,
-            "completions": 388
+            "attempts": 545,
+            "completions": 332
           }
         }
       },
       "rookies": [
         {
-          "name": "Dean Connors",
-          "team": "LA"
+          "name": "Cash Jones",
+          "team": "ATL"
         },
         {
-          "name": "Dan Villari",
-          "team": "LA"
+          "name": "Jack Velling",
+          "team": "ATL"
         },
         {
-          "name": "Max Klare",
-          "team": "LA"
+          "name": "Vinny Anthony II",
+          "team": "ATL"
         },
         {
-          "name": "CJ Daniels",
-          "team": "LA"
+          "name": "Zachariah Branch",
+          "team": "ATL"
         },
         {
-          "name": "Kaelon Black",
-          "team": "SF"
-        },
-        {
-          "name": "Khalil Dinkins",
-          "team": "SF"
-        },
-        {
-          "name": "De'Zhaun Stribling",
-          "team": "SF"
-        },
-        {
-          "name": "Wesley Grimes",
-          "team": "SF"
-        },
-        {
-          "name": "Will Pauling",
-          "team": "SF"
+          "name": "Chris Brazzell II",
+          "team": "CAR"
         }
       ],
       "transfers": [
         {
-          "name": "Alex Bachman",
-          "current_team": "LA",
+          "name": "Brian Robinson",
+          "current_team": "ATL",
           "source_teams": [
-            "LV"
+            "SF"
           ]
         },
         {
-          "name": "Christian Kirk",
-          "current_team": "SF",
+          "name": "Trey Sermon",
+          "current_team": "ATL",
           "source_teams": [
-            "HOU"
+            "PIT"
           ]
         },
         {
-          "name": "Deebo Samuel Sr.",
-          "current_team": "SF",
+          "name": "Tyler Goodson",
+          "current_team": "ATL",
           "source_teams": [
-            "WAS"
+            "IND"
           ]
         },
         {
-          "name": "KhaDarel Hodge",
-          "current_team": "SF",
+          "name": "Austin Hooper",
+          "current_team": "ATL",
+          "source_teams": [
+            "NE"
+          ]
+        },
+        {
+          "name": "Beaux Collins",
+          "current_team": "ATL",
+          "source_teams": [
+            "NYG"
+          ]
+        },
+        {
+          "name": "Jahan Dotson",
+          "current_team": "ATL",
+          "source_teams": [
+            "PHI"
+          ]
+        },
+        {
+          "name": "Olamide Zaccheaus",
+          "current_team": "ATL",
+          "source_teams": [
+            "CHI"
+          ]
+        },
+        {
+          "name": "AJ Dillon",
+          "current_team": "CAR",
+          "source_teams": [
+            "PHI"
+          ]
+        },
+        {
+          "name": "Darren Waller",
+          "current_team": "CAR",
+          "source_teams": [
+            "MIA"
+          ]
+        },
+        {
+          "name": "Feleipe Franks",
+          "current_team": "CAR",
           "source_teams": [
             "ATL"
           ]
         },
         {
-          "name": "Mike Evans",
-          "current_team": "SF",
+          "name": "Casey Washington",
+          "current_team": "CAR",
           "source_teams": [
-            "TB"
+            "ATL"
+          ]
+        },
+        {
+          "name": "John Metchie III",
+          "current_team": "CAR",
+          "source_teams": [
+            "NYJ",
+            "PHI"
           ]
         }
       ],
-      "player_checks": 165,
-      "ftn_checks": 936,
+      "player_checks": 153,
+      "ftn_checks": 864,
       "ngs_identity_matches": [
         {
-          "player_id": "00-0036244",
-          "roster_name": "Colby Parkinson",
-          "ngs_name": "Colby Parkinson"
+          "player_id": "00-0036970",
+          "roster_name": "Kyle Pitts",
+          "ngs_name": "Kyle Pitts"
         },
         {
-          "player_id": "00-0031381",
-          "roster_name": "Davante Adams",
-          "ngs_name": "Davante Adams"
+          "player_id": "00-0037238",
+          "roster_name": "Drake London",
+          "ngs_name": "Drake London"
         },
         {
-          "player_id": "00-0039075",
-          "roster_name": "Puka Nacua",
-          "ngs_name": "Puka Nacua"
+          "player_id": "00-0035208",
+          "roster_name": "Olamide Zaccheaus",
+          "ngs_name": "Olamide Zaccheaus"
         },
         {
-          "player_id": "00-0033288",
-          "roster_name": "George Kittle",
-          "ngs_name": "George Kittle"
+          "player_id": "00-0037614",
+          "roster_name": "John Metchie III",
+          "ngs_name": "John Metchie"
         },
         {
-          "player_id": "00-0037112",
-          "roster_name": "Jake Tonges",
-          "ngs_name": "Jake Tonges"
+          "player_id": "00-0040124",
+          "roster_name": "Tetairoa McMillan",
+          "ngs_name": "Tetairoa McMillan"
         },
         {
-          "player_id": "00-0034775",
-          "roster_name": "Christian Kirk",
-          "ngs_name": "Christian Kirk"
-        },
-        {
-          "player_id": "00-0035719",
-          "roster_name": "Deebo Samuel Sr.",
-          "ngs_name": "Deebo Samuel"
-        },
-        {
-          "player_id": "00-0031408",
-          "roster_name": "Mike Evans",
-          "ngs_name": "Mike Evans"
-        },
-        {
-          "player_id": "00-0039916",
-          "roster_name": "Ricky Pearsall",
-          "ngs_name": "Ricky Pearsall"
+          "player_id": "00-0039342",
+          "roster_name": "Xavier Legette",
+          "ngs_name": "Xavier Legette"
         }
       ],
-      "missing_prior_ngs": 33
+      "missing_prior_ngs": 34
     }
   ],
   "ftn_join_counts": {
