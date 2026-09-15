@@ -1,79 +1,68 @@
 {
-  "tested_at_utc": "2026-09-15T00:44:12.751Z",
+  "tested_at_utc": "2026-09-15T06:43:28.755Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/0c8bf1916c537e23c39e4c7fda343aa81ae75378/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/682c4df3deef99c1a4aa66dcb53072d15641e861/nfl_free_research_pack_v1/data",
   "season": 2026,
-  "week": 1,
+  "week": 2,
   "games": [
     {
-      "game_id": "2026_01_NE_SEA",
-      "pack_revision": "37570b5e77b1d7d7",
+      "game_id": "2026_02_DET_BUF",
+      "pack_revision": "6c4e4a370bc8f1c5",
       "fixture": {
-        "game_id": "2026_01_NE_SEA",
+        "game_id": "2026_02_DET_BUF",
         "season": 2026,
-        "week": 1,
+        "week": 2,
         "game_type": "REG",
-        "gameday": "2026-09-09",
-        "weekday": "Wednesday",
-        "gametime": "20:20",
-        "away_team": "NE",
-        "home_team": "SEA",
-        "stadium": "Lumen Field",
+        "gameday": "2026-09-17",
+        "weekday": "Thursday",
+        "gametime": "20:15",
+        "away_team": "DET",
+        "home_team": "BUF",
+        "stadium": "Highmark Stadium",
         "roof": "outdoors",
-        "surface": "fieldturf",
+        "surface": "a_turf",
         "location": "Home"
       },
-      "total_players": 44,
-      "pages": 5,
+      "total_players": 36,
+      "pages": 4,
       "page_sizes": [
         {
-          "chars": 38923,
-          "bytes": 38947
+          "chars": 61116,
+          "bytes": 61168
         },
         {
-          "chars": 40525,
-          "bytes": 40547
+          "chars": 48297,
+          "bytes": 48329
         },
         {
-          "chars": 46564,
-          "bytes": 46598
+          "chars": 50851,
+          "bytes": 50899
         },
         {
-          "chars": 46601,
-          "bytes": 46629
-        },
-        {
-          "chars": 18722,
-          "bytes": 18732
+          "chars": 32379,
+          "bytes": 32403
         }
       ],
       "players_by_team": {
-        "NE": 22,
-        "SEA": 22
+        "DET": 18,
+        "BUF": 18
       },
       "rookies": [
-        "Myles Montgomery",
-        "Eli Raridon",
-        "Tanner Arkin",
-        "Cameron Dorner",
-        "Kyle Dixon",
-        "Jadarian Price",
-        "Emmanuel Henderson Jr."
+        "Ja'Mori Maclin",
+        "Skyler Bell",
+        "Kendrick Law"
       ],
       "transfers": [
-        "Corey Kiner",
-        "Hassan Haskins",
-        "Reggie Gilliam",
-        "Cameron Latu",
-        "Julian Hill",
-        "Shane Zylstra",
-        "A.J. Brown",
-        "Romeo Doubs",
-        "Emanuel Wilson"
+        "DJ Moore",
+        "Greg Dortch",
+        "Trent Sherfield",
+        "Isiah Pacheco",
+        "Tyler Conklin",
+        "Tay Martin"
       ],
-      "missing_prior_ngs": 35,
-      "missing_prior_ftn": 17,
+      "missing_prior_ngs": 28,
+      "missing_prior_ftn": 12,
       "source_receipt": {
         "availability": {
           "player_stats": {
@@ -90,9 +79,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 1118,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -110,9 +99,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 32,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -130,9 +119,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 2756,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -170,9 +159,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 1397,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -190,9 +179,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 33,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -210,9 +199,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 68,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -242,12 +231,12 @@
         "generated_data_policy": "Pre-market football research only."
       },
       "statistical_cutoff": {
-        "mode": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
-        "current_season_data_through_week": null,
-        "current_regular_season_weeks_available": 0,
+        "mode": "EARLY_SEASON",
+        "current_season_data_through_week": 1,
+        "current_regular_season_weeks_available": 1,
         "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
         "historical_backtest_eligible": false,
-        "target_week": 1,
+        "target_week": 2,
         "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
         "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
         "injury_feed": "NOT RELIED ON — verify through official/live research",
@@ -255,71 +244,70 @@
       }
     },
     {
-      "game_id": "2026_01_SF_LA",
-      "pack_revision": "65bfe78334c80d96",
+      "game_id": "2026_02_CAR_ATL",
+      "pack_revision": "76fd904d955d18e5",
       "fixture": {
-        "game_id": "2026_01_SF_LA",
+        "game_id": "2026_02_CAR_ATL",
         "season": 2026,
-        "week": 1,
+        "week": 2,
         "game_type": "REG",
-        "gameday": "2026-09-10",
-        "weekday": "Thursday",
-        "gametime": "20:35",
-        "away_team": "SF",
-        "home_team": "LA",
-        "stadium": "Melbourne Cricket Ground",
-        "roof": "dome",
-        "surface": "grass",
-        "location": "Neutral"
+        "gameday": "2026-09-20",
+        "weekday": "Sunday",
+        "gametime": "13:00",
+        "away_team": "CAR",
+        "home_team": "ATL",
+        "stadium": "Mercedes-Benz Stadium",
+        "roof": null,
+        "surface": "fieldturf",
+        "location": "Home"
       },
-      "total_players": 42,
-      "pages": 5,
+      "total_players": 40,
+      "pages": 4,
       "page_sizes": [
         {
-          "chars": 40230,
-          "bytes": 40254
+          "chars": 51618,
+          "bytes": 51662
         },
         {
-          "chars": 51414,
-          "bytes": 51448
+          "chars": 46157,
+          "bytes": 46193
         },
         {
-          "chars": 43531,
-          "bytes": 43561
+          "chars": 46807,
+          "bytes": 46845
         },
         {
-          "chars": 55181,
-          "bytes": 55215
-        },
-        {
-          "chars": 10040,
-          "bytes": 10042
+          "chars": 54275,
+          "bytes": 54315
         }
       ],
       "players_by_team": {
-        "SF": 22,
-        "LA": 20
+        "CAR": 21,
+        "ATL": 19
       },
       "rookies": [
-        "Dean Connors",
-        "Dan Villari",
-        "Max Klare",
-        "CJ Daniels",
-        "Kaelon Black",
-        "Khalil Dinkins",
-        "De'Zhaun Stribling",
-        "Wesley Grimes",
-        "Will Pauling"
+        "Cash Jones",
+        "Jack Velling",
+        "Vinny Anthony II",
+        "Zachariah Branch",
+        "Chris Brazzell II"
       ],
       "transfers": [
-        "Alex Bachman",
-        "Christian Kirk",
-        "Deebo Samuel Sr.",
-        "KhaDarel Hodge",
-        "Mike Evans"
+        "Brian Robinson",
+        "Trey Sermon",
+        "Tyler Goodson",
+        "Austin Hooper",
+        "Beaux Collins",
+        "Jahan Dotson",
+        "Olamide Zaccheaus",
+        "AJ Dillon",
+        "Darren Waller",
+        "Feleipe Franks",
+        "Casey Washington",
+        "John Metchie III"
       ],
-      "missing_prior_ngs": 33,
-      "missing_prior_ftn": 16,
+      "missing_prior_ngs": 34,
+      "missing_prior_ftn": 14,
       "source_receipt": {
         "availability": {
           "player_stats": {
@@ -336,9 +324,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 1118,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -356,9 +344,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 32,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -376,9 +364,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 2756,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -416,9 +404,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 1397,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -436,9 +424,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 33,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -456,9 +444,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 68,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -488,12 +476,12 @@
         "generated_data_policy": "Pre-market football research only."
       },
       "statistical_cutoff": {
-        "mode": "PRE_WEEK_1_OR_NO_CURRENT_REGULAR_SEASON_DATA",
-        "current_season_data_through_week": null,
-        "current_regular_season_weeks_available": 0,
+        "mode": "EARLY_SEASON",
+        "current_season_data_through_week": 1,
+        "current_regular_season_weeks_available": 1,
         "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
         "historical_backtest_eligible": false,
-        "target_week": 1,
+        "target_week": 2,
         "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
         "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
         "injury_feed": "NOT RELIED ON — verify through official/live research",
@@ -525,7 +513,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-15T00:44:08.416070+00:00",
+      "last_checked_at_utc": "2026-09-15T06:43:24.727012+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
