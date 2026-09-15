@@ -1,17 +1,17 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-15T06:43:24.728995+00:00",
-  "build_commit": "a3b06f0db5c12b8a69f682a2a86b2a54babf33ae",
+  "tested_at_utc": "2026-09-15T12:42:21.242027+00:00",
+  "build_commit": "7fa227e99954e566884c451a8f3b4c4d2ee1a736",
   "python": "3.12.14",
-  "workflow_run_id": "34938164618",
+  "workflow_run_id": "34970314537",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "6c4e4a370bc8f1c5",
-      "players": 36,
+      "pack_revision": "d9fcb90d9fbb5f83",
+      "players": 37,
       "teams": {
         "DET": {
           "2024": {
@@ -141,11 +141,11 @@
           "ngs_name": "Jameson Williams"
         }
       ],
-      "missing_prior_ngs": 28
+      "missing_prior_ngs": 29
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "76fd904d955d18e5",
+      "pack_revision": "70e9d3bf03ede8dc",
       "players": 40,
       "teams": {
         "CAR": {

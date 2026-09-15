@@ -3,8 +3,8 @@
   "build_version": "1.1.1",
   "season": 2026,
   "active_week": 2,
-  "generated_at_utc": "2026-09-15T06:43:24.726998+00:00",
-  "last_checked_at_utc": "2026-09-15T06:43:24.727012+00:00",
+  "generated_at_utc": "2026-09-15T12:42:21.239476+00:00",
+  "last_checked_at_utc": "2026-09-15T12:42:21.239491+00:00",
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
@@ -16,7 +16,7 @@
       "gametime": "20:15",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_DET_BUF.json",
-      "pack_revision": "6c4e4a370bc8f1c5"
+      "pack_revision": "d9fcb90d9fbb5f83"
     },
     {
       "game_id": "2026_02_CAR_ATL",
@@ -28,7 +28,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_CAR_ATL.json",
-      "pack_revision": "76fd904d955d18e5"
+      "pack_revision": "70e9d3bf03ede8dc"
     },
     {
       "game_id": "2026_02_CIN_HOU",
@@ -40,7 +40,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_CIN_HOU.json",
-      "pack_revision": "819e1b3a67675bbc"
+      "pack_revision": "16e8430cfdc3b12e"
     },
     {
       "game_id": "2026_02_CLE_TB",
@@ -52,7 +52,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_CLE_TB.json",
-      "pack_revision": "870464039698f7d6"
+      "pack_revision": "f2139d875a9de279"
     },
     {
       "game_id": "2026_02_GB_NYJ",
@@ -64,7 +64,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_GB_NYJ.json",
-      "pack_revision": "1e3c11e694662339"
+      "pack_revision": "4d07edc06255bd7a"
     },
     {
       "game_id": "2026_02_IND_KC",
@@ -76,7 +76,7 @@
       "gametime": "20:20",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_IND_KC.json",
-      "pack_revision": "5a90e15040b5ad4a"
+      "pack_revision": "31fb6c6948927d22"
     },
     {
       "game_id": "2026_02_JAX_DEN",
@@ -88,7 +88,7 @@
       "gametime": "16:05",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_JAX_DEN.json",
-      "pack_revision": "93a02c71d84f32c7"
+      "pack_revision": "70defe5320ed9822"
     },
     {
       "game_id": "2026_02_LV_LAC",
@@ -100,7 +100,7 @@
       "gametime": "16:05",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_LV_LAC.json",
-      "pack_revision": "2bc0ad38b40f97bb"
+      "pack_revision": "c7d9dd498d1cbdcc"
     },
     {
       "game_id": "2026_02_MIA_SF",
@@ -112,7 +112,7 @@
       "gametime": "16:25",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_MIA_SF.json",
-      "pack_revision": "02886b4a6d5f14ca"
+      "pack_revision": "dc37d65b865a3b42"
     },
     {
       "game_id": "2026_02_MIN_CHI",
@@ -124,7 +124,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_MIN_CHI.json",
-      "pack_revision": "a7721b38647cddac"
+      "pack_revision": "51f3287d3ed0de6b"
     },
     {
       "game_id": "2026_02_NO_BAL",
@@ -136,7 +136,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_NO_BAL.json",
-      "pack_revision": "101239c2f657d316"
+      "pack_revision": "68bcb1261a848f46"
     },
     {
       "game_id": "2026_02_PHI_TEN",
@@ -148,7 +148,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_PHI_TEN.json",
-      "pack_revision": "8f93513e76a4cefb"
+      "pack_revision": "431c081718d4dcfe"
     },
     {
       "game_id": "2026_02_PIT_NE",
@@ -160,7 +160,7 @@
       "gametime": "13:00",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_PIT_NE.json",
-      "pack_revision": "158af23dd45f4b63"
+      "pack_revision": "7b6427b064cd243e"
     },
     {
       "game_id": "2026_02_SEA_ARI",
@@ -172,7 +172,7 @@
       "gametime": "16:25",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_SEA_ARI.json",
-      "pack_revision": "1366b90e2a34971f"
+      "pack_revision": "5271498a61a5afb9"
     },
     {
       "game_id": "2026_02_WAS_DAL",
@@ -184,7 +184,7 @@
       "gametime": "16:25",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_WAS_DAL.json",
-      "pack_revision": "689b8fe5f59c55fa"
+      "pack_revision": "9286dcb3d2d4c5c1"
     },
     {
       "game_id": "2026_02_NYG_LA",
@@ -196,7 +196,7 @@
       "gametime": "20:15",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_NYG_LA.json",
-      "pack_revision": "56019a47d0b6e174"
+      "pack_revision": "f0ba0cff8a2fb7d6"
     }
   ],
   "source_health": {
