@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-15T06:43:28.755Z",
+  "tested_at_utc": "2026-09-15T12:42:27.393Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/682c4df3deef99c1a4aa66dcb53072d15641e861/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/70d97cac74c27f7e55672b46bbca5561c13d3c39/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 2,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "6c4e4a370bc8f1c5",
+      "pack_revision": "d9fcb90d9fbb5f83",
       "fixture": {
         "game_id": "2026_02_DET_BUF",
         "season": 2026,
@@ -24,29 +24,29 @@
         "surface": "a_turf",
         "location": "Home"
       },
-      "total_players": 36,
+      "total_players": 37,
       "pages": 4,
       "page_sizes": [
         {
-          "chars": 61116,
-          "bytes": 61168
+          "chars": 60643,
+          "bytes": 60689
         },
         {
-          "chars": 48297,
-          "bytes": 48329
+          "chars": 57533,
+          "bytes": 57571
         },
         {
-          "chars": 50851,
-          "bytes": 50899
+          "chars": 56615,
+          "bytes": 56661
         },
         {
-          "chars": 32379,
-          "bytes": 32403
+          "chars": 36440,
+          "bytes": 36466
         }
       ],
       "players_by_team": {
         "DET": 18,
-        "BUF": 18
+        "BUF": 19
       },
       "rookies": [
         "Ja'Mori Maclin",
@@ -61,8 +61,8 @@
         "Tyler Conklin",
         "Tay Martin"
       ],
-      "missing_prior_ngs": 28,
-      "missing_prior_ftn": 12,
+      "missing_prior_ngs": 29,
+      "missing_prior_ftn": 13,
       "source_receipt": {
         "availability": {
           "player_stats": {
@@ -139,9 +139,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 2520,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -160,7 +160,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 1397,
+              "rows": 1492,
               "through_week": 1,
               "upstream_publication_time": null
             }
@@ -200,18 +200,18 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 68,
+              "rows": 73,
               "through_week": 1,
               "upstream_publication_time": null
             }
           },
           "current_roster": {
-            "rows": 2963,
+            "rows": 2964,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 518581,
+            "rows": 520792,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -245,7 +245,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "76fd904d955d18e5",
+      "pack_revision": "70e9d3bf03ede8dc",
       "fixture": {
         "game_id": "2026_02_CAR_ATL",
         "season": 2026,
@@ -265,20 +265,20 @@
       "pages": 4,
       "page_sizes": [
         {
-          "chars": 51618,
-          "bytes": 51662
+          "chars": 54102,
+          "bytes": 54146
         },
         {
-          "chars": 46157,
-          "bytes": 46193
+          "chars": 49818,
+          "bytes": 49854
         },
         {
-          "chars": 46807,
-          "bytes": 46845
+          "chars": 53084,
+          "bytes": 53122
         },
         {
-          "chars": 54275,
-          "bytes": 54315
+          "chars": 59271,
+          "bytes": 59311
         }
       ],
       "players_by_team": {
@@ -384,9 +384,9 @@
               "upstream_publication_time": null
             },
             "2026": {
-              "status": "UNAVAILABLE_OR_NO_ELIGIBLE_ROWS",
-              "rows": 0,
-              "through_week": null,
+              "status": "AVAILABLE",
+              "rows": 2520,
+              "through_week": 1,
               "upstream_publication_time": null
             }
           },
@@ -405,7 +405,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 1397,
+              "rows": 1492,
               "through_week": 1,
               "upstream_publication_time": null
             }
@@ -445,18 +445,18 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 68,
+              "rows": 73,
               "through_week": 1,
               "upstream_publication_time": null
             }
           },
           "current_roster": {
-            "rows": 2963,
+            "rows": 2964,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 518581,
+            "rows": 520792,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -513,7 +513,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-15T06:43:24.727012+00:00",
+      "last_checked_at_utc": "2026-09-15T12:42:21.239491+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
