@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-16T06:43:08.243477+00:00",
-  "build_commit": "050ba7f56e7de88279ed002ac3ed48b0e3a15c9d",
+  "tested_at_utc": "2026-09-16T12:42:30.895866+00:00",
+  "build_commit": "75aa80a10ac70d720d62c952906c4cb5840bb3f8",
   "python": "3.12.14",
-  "workflow_run_id": "35064919481",
+  "workflow_run_id": "35097290923",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "45007227af123362",
+      "pack_revision": "67519c2286578d14",
       "players": 37,
       "teams": {
         "DET": {
@@ -145,8 +145,8 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "0b9292eab3fd1a8d",
-      "players": 40,
+      "pack_revision": "3103029fa0524afc",
+      "players": 38,
       "teams": {
         "CAR": {
           "2024": {
@@ -208,13 +208,6 @@
           "current_team": "ATL",
           "source_teams": [
             "PIT"
-          ]
-        },
-        {
-          "name": "Tyler Goodson",
-          "current_team": "ATL",
-          "source_teams": [
-            "IND"
           ]
         },
         {
@@ -282,8 +275,8 @@
           ]
         }
       ],
-      "player_checks": 153,
-      "ftn_checks": 864,
+      "player_checks": 144,
+      "ftn_checks": 810,
       "ngs_identity_matches": [
         {
           "player_id": "00-0036970",
@@ -316,7 +309,7 @@
           "ngs_name": "Xavier Legette"
         }
       ],
-      "missing_prior_ngs": 34
+      "missing_prior_ngs": 32
     }
   ],
   "ftn_join_counts": {
