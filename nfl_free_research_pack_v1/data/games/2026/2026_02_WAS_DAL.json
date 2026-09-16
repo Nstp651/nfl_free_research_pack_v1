@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-15T12:42:20.898239+00:00",
+  "generated_at_utc": "2026-09-16T06:43:07.898528+00:00",
   "fixture": {
     "game_id": "2026_02_WAS_DAL",
     "season": 2026,
@@ -8741,7 +8741,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 2520,
+          "rows": 2675,
           "through_week": 1,
           "upstream_publication_time": null
         }
@@ -8859,5 +8859,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "9286dcb3d2d4c5c1"
+  "pack_revision": "c63a6820cc920185"
 }

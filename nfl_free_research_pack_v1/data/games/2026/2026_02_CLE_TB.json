@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-15T12:42:20.409301+00:00",
+  "generated_at_utc": "2026-09-16T06:43:07.419265+00:00",
   "fixture": {
     "game_id": "2026_02_CLE_TB",
     "season": 2026,
@@ -3935,7 +3935,7 @@
           "created_reception_observed_targets": 1,
           "drop_rate": 0,
           "drop_observed_targets": 1,
-          "screen_pass_rate": 0,
+          "screen_pass_rate": 1,
           "screen_pass_observed_targets": 1,
           "play_action_rate": 0,
           "play_action_observed_targets": 1,
@@ -7003,7 +7003,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 2520,
+          "rows": 2675,
           "through_week": 1,
           "upstream_publication_time": null
         }
@@ -7121,5 +7121,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "f2139d875a9de279"
+  "pack_revision": "20028094d3c6d187"
 }

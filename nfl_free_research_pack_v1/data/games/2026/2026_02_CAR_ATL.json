@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-15T12:42:19.861711+00:00",
+  "generated_at_utc": "2026-09-16T06:43:06.888866+00:00",
   "fixture": {
     "game_id": "2026_02_CAR_ATL",
     "season": 2026,
@@ -197,7 +197,7 @@
           "created_reception_observed_targets": 10,
           "drop_rate": 0,
           "drop_observed_targets": 10,
-          "screen_pass_rate": 0.4,
+          "screen_pass_rate": 0.5,
           "screen_pass_observed_targets": 10,
           "play_action_rate": 0.1,
           "play_action_observed_targets": 10,
@@ -8090,7 +8090,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 2520,
+          "rows": 2675,
           "through_week": 1,
           "upstream_publication_time": null
         }
@@ -8208,5 +8208,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "70e9d3bf03ede8dc"
+  "pack_revision": "0b9292eab3fd1a8d"
 }

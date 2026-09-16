@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-15T12:42:19.952434+00:00",
+  "generated_at_utc": "2026-09-16T06:43:06.978700+00:00",
   "fixture": {
     "game_id": "2026_02_NO_BAL",
     "season": 2026,
@@ -4133,7 +4133,7 @@
           "created_reception_observed_targets": 2,
           "drop_rate": 0,
           "drop_observed_targets": 2,
-          "screen_pass_rate": 0.5,
+          "screen_pass_rate": 0,
           "screen_pass_observed_targets": 2,
           "play_action_rate": 0.5,
           "play_action_observed_targets": 2,
@@ -4646,7 +4646,7 @@
           "created_reception_observed_targets": 9,
           "drop_rate": 0,
           "drop_observed_targets": 9,
-          "screen_pass_rate": 0.4444,
+          "screen_pass_rate": 0.1111,
           "screen_pass_observed_targets": 9,
           "play_action_rate": 0.1111,
           "play_action_observed_targets": 9,
@@ -5890,7 +5890,7 @@
           "created_reception_observed_targets": 8,
           "drop_rate": 0,
           "drop_observed_targets": 8,
-          "screen_pass_rate": 0.125,
+          "screen_pass_rate": 0,
           "screen_pass_observed_targets": 8,
           "play_action_rate": 0.375,
           "play_action_observed_targets": 8,
@@ -8549,7 +8549,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 2520,
+          "rows": 2675,
           "through_week": 1,
           "upstream_publication_time": null
         }
@@ -8667,5 +8667,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "68bcb1261a848f46"
+  "pack_revision": "881052c898e129e6"
 }
