@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-16T06:43:12.435Z",
+  "tested_at_utc": "2026-09-16T12:42:37.178Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/8675fe48db7be23876058084ee6c75f97497776d/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/12d426e56a6d93675b94a7fd25d6257e15524577/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 2,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "45007227af123362",
+      "pack_revision": "67519c2286578d14",
       "fixture": {
         "game_id": "2026_02_DET_BUF",
         "season": 2026,
@@ -28,20 +28,20 @@
       "pages": 4,
       "page_sizes": [
         {
-          "chars": 60643,
-          "bytes": 60689
+          "chars": 60800,
+          "bytes": 60846
         },
         {
-          "chars": 57533,
-          "bytes": 57571
+          "chars": 57651,
+          "bytes": 57689
         },
         {
-          "chars": 56609,
-          "bytes": 56655
+          "chars": 56805,
+          "bytes": 56851
         },
         {
-          "chars": 36440,
-          "bytes": 36466
+          "chars": 36523,
+          "bytes": 36549
         }
       ],
       "players_by_team": {
@@ -180,7 +180,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 33,
+              "rows": 237,
               "through_week": 1,
               "upstream_publication_time": null
             }
@@ -206,12 +206,12 @@
             }
           },
           "current_roster": {
-            "rows": 2964,
+            "rows": 2968,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 520792,
+            "rows": 522982,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -245,7 +245,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "0b9292eab3fd1a8d",
+      "pack_revision": "3103029fa0524afc",
       "fixture": {
         "game_id": "2026_02_CAR_ATL",
         "season": 2026,
@@ -261,29 +261,29 @@
         "surface": "fieldturf",
         "location": "Home"
       },
-      "total_players": 40,
+      "total_players": 38,
       "pages": 4,
       "page_sizes": [
         {
-          "chars": 54102,
-          "bytes": 54146
+          "chars": 49998,
+          "bytes": 50038
         },
         {
-          "chars": 49818,
-          "bytes": 49854
+          "chars": 49934,
+          "bytes": 49970
         },
         {
-          "chars": 53084,
-          "bytes": 53122
+          "chars": 57977,
+          "bytes": 58021
         },
         {
-          "chars": 59271,
-          "bytes": 59311
+          "chars": 48802,
+          "bytes": 48832
         }
       ],
       "players_by_team": {
-        "CAR": 21,
-        "ATL": 19
+        "CAR": 20,
+        "ATL": 18
       },
       "rookies": [
         "Cash Jones",
@@ -295,7 +295,6 @@
       "transfers": [
         "Brian Robinson",
         "Trey Sermon",
-        "Tyler Goodson",
         "Austin Hooper",
         "Beaux Collins",
         "Jahan Dotson",
@@ -306,7 +305,7 @@
         "Casey Washington",
         "John Metchie III"
       ],
-      "missing_prior_ngs": 34,
+      "missing_prior_ngs": 32,
       "missing_prior_ftn": 14,
       "source_receipt": {
         "availability": {
@@ -425,7 +424,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 33,
+              "rows": 237,
               "through_week": 1,
               "upstream_publication_time": null
             }
@@ -451,12 +450,12 @@
             }
           },
           "current_roster": {
-            "rows": 2964,
+            "rows": 2968,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 520792,
+            "rows": 522982,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -513,7 +512,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-16T06:43:08.241633+00:00",
+      "last_checked_at_utc": "2026-09-16T12:42:30.893266+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
