@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-16T00:42:21.354Z",
+  "tested_at_utc": "2026-09-16T06:43:12.435Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/9de28875bae554c52ad46245a8d3c8c773d2ad4f/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/8675fe48db7be23876058084ee6c75f97497776d/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 2,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "d9fcb90d9fbb5f83",
+      "pack_revision": "45007227af123362",
       "fixture": {
         "game_id": "2026_02_DET_BUF",
         "season": 2026,
@@ -36,8 +36,8 @@
           "bytes": 57571
         },
         {
-          "chars": 56615,
-          "bytes": 56661
+          "chars": 56609,
+          "bytes": 56655
         },
         {
           "chars": 36440,
@@ -140,7 +140,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 2520,
+              "rows": 2675,
               "through_week": 1,
               "upstream_publication_time": null
             }
@@ -245,7 +245,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "70e9d3bf03ede8dc",
+      "pack_revision": "0b9292eab3fd1a8d",
       "fixture": {
         "game_id": "2026_02_CAR_ATL",
         "season": 2026,
@@ -385,7 +385,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 2520,
+              "rows": 2675,
               "through_week": 1,
               "upstream_publication_time": null
             }
@@ -513,7 +513,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-16T00:42:15.463668+00:00",
+      "last_checked_at_utc": "2026-09-16T06:43:08.241633+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
