@@ -3,8 +3,8 @@
   "build_version": "1.1.1",
   "season": 2026,
   "active_week": 2,
-  "generated_at_utc": "2026-09-16T18:41:10.774022+00:00",
-  "last_checked_at_utc": "2026-09-16T18:41:10.774037+00:00",
+  "generated_at_utc": "2026-09-17T00:42:22.248164+00:00",
+  "last_checked_at_utc": "2026-09-17T00:42:22.248177+00:00",
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
@@ -76,7 +76,7 @@
       "gametime": "20:20",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_02_IND_KC.json",
-      "pack_revision": "cf88005bd2f8016c"
+      "pack_revision": "6b9e7ae67c309b5b"
     },
     {
       "game_id": "2026_02_JAX_DEN",
