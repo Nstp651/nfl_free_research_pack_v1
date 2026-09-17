@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-16T12:42:30.547291+00:00",
+  "generated_at_utc": "2026-09-17T06:43:12.359040+00:00",
   "fixture": {
     "game_id": "2026_02_WAS_DAL",
     "season": 2026,
@@ -146,7 +146,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 2,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -402,7 +402,7 @@
         "position": "FB",
         "slot": 12,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -665,7 +665,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -989,7 +989,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 4,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1115,7 +1115,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 3,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -1333,7 +1333,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 2,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1645,7 +1645,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 5,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -1691,7 +1691,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2174,7 +2174,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 3,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2577,7 +2577,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 4,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2730,7 +2730,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 6,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -2776,7 +2776,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3135,7 +3135,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 2,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3482,7 +3482,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 5,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3841,7 +3841,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 4,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4166,7 +4166,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 3,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4652,7 +4652,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4865,7 +4865,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 4,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -5102,7 +5102,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 3,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -5178,7 +5178,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 2,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -5545,7 +5545,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 3,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -5768,7 +5768,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -6115,7 +6115,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 4,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -6442,7 +6442,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 2,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -6803,7 +6803,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 3,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -6936,7 +6936,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 4,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -7291,7 +7291,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 5,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -7516,7 +7516,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 7,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -7753,7 +7753,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 2,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -8109,7 +8109,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 1,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -8439,7 +8439,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 6,
-        "depth_timestamp": "2026-09-16T12:34:22Z",
+        "depth_timestamp": "2026-09-17T06:02:18Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -9028,18 +9028,18 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 73,
+          "rows": 74,
           "through_week": 1,
           "upstream_publication_time": null
         }
       },
       "current_roster": {
-        "rows": 2968,
+        "rows": 2978,
         "status": "AVAILABLE",
         "context": "latest available; not a historical point-in-time snapshot"
       },
       "current_depth": {
-        "rows": 522982,
+        "rows": 525182,
         "status": "AVAILABLE",
         "context": "latest available; not a historical point-in-time snapshot"
       }
@@ -9086,5 +9086,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "b5ce1d004f4101be"
+  "pack_revision": "d285b5586ea3e198"
 }

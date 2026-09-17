@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-17T00:42:22.250696+00:00",
-  "build_commit": "6c800ae616696749f4185a9619cb19cbd52b7e5e",
+  "tested_at_utc": "2026-09-17T06:43:12.729686+00:00",
+  "build_commit": "26e630c447f85199bdc574699909b21983c94217",
   "python": "3.12.14",
-  "workflow_run_id": "35167562148",
+  "workflow_run_id": "35190984159",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "67519c2286578d14",
+      "pack_revision": "b0556fdda995eb14",
       "players": 37,
       "teams": {
         "DET": {
@@ -145,8 +145,8 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "3103029fa0524afc",
-      "players": 38,
+      "pack_revision": "567b210290d94e87",
+      "players": 39,
       "teams": {
         "CAR": {
           "2024": {
@@ -201,6 +201,13 @@
           "current_team": "ATL",
           "source_teams": [
             "SF"
+          ]
+        },
+        {
+          "name": "Khalil Herbert",
+          "current_team": "ATL",
+          "source_teams": [
+            "NYJ"
           ]
         },
         {
@@ -275,8 +282,8 @@
           ]
         }
       ],
-      "player_checks": 144,
-      "ftn_checks": 810,
+      "player_checks": 150,
+      "ftn_checks": 846,
       "ngs_identity_matches": [
         {
           "player_id": "00-0036970",
@@ -309,7 +316,7 @@
           "ngs_name": "Xavier Legette"
         }
       ],
-      "missing_prior_ngs": 32
+      "missing_prior_ngs": 33
     }
   ],
   "ftn_join_counts": {
