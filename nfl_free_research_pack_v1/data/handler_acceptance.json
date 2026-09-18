@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-18T00:41:24.989Z",
+  "tested_at_utc": "2026-09-18T06:40:57.180Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/4b0d9c14e5f45715db79efad277c185383d2fefe/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/b5626aa3f4c2094f57130d73dac406a5a16779b4/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 2,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "f69fb287ba279583",
+      "pack_revision": "8acf1bfd32c84413",
       "fixture": {
         "game_id": "2026_02_DET_BUF",
         "season": 2026,
@@ -21,27 +21,27 @@
         "home_team": "BUF",
         "stadium": "Highmark Stadium",
         "roof": "outdoors",
-        "surface": "a_turf",
+        "surface": null,
         "location": "Home"
       },
       "total_players": 37,
       "pages": 4,
       "page_sizes": [
         {
-          "chars": 60800,
-          "bytes": 60846
+          "chars": 60814,
+          "bytes": 60860
         },
         {
-          "chars": 57651,
-          "bytes": 57689
+          "chars": 57664,
+          "bytes": 57702
         },
         {
-          "chars": 56805,
-          "bytes": 56851
+          "chars": 56801,
+          "bytes": 56847
         },
         {
-          "chars": 36523,
-          "bytes": 36549
+          "chars": 36519,
+          "bytes": 36545
         }
       ],
       "players_by_team": {
@@ -211,7 +211,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 527382,
+            "rows": 529589,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -245,7 +245,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "38f85d7da8dfbf2c",
+      "pack_revision": "6d353b97e48b009e",
       "fixture": {
         "game_id": "2026_02_CAR_ATL",
         "season": 2026,
@@ -456,7 +456,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 527382,
+            "rows": 529589,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -513,7 +513,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-18T00:41:19.218610+00:00",
+      "last_checked_at_utc": "2026-09-18T06:40:53.700388+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
