@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-18T06:40:53.702113+00:00",
-  "build_commit": "0cd555ac1e566f756461f44f31800077a546c35a",
+  "tested_at_utc": "2026-09-18T12:40:57.273307+00:00",
+  "build_commit": "47a373af6a08ef33a2231948b1958ecf324aa6f4",
   "python": "3.12.14",
-  "workflow_run_id": "35315882871",
+  "workflow_run_id": "35345883090",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "8acf1bfd32c84413",
+      "pack_revision": "7b0f98f63e466d34",
       "players": 37,
       "teams": {
         "DET": {
@@ -145,8 +145,8 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "6d353b97e48b009e",
-      "players": 39,
+      "pack_revision": "18012c9410b18981",
+      "players": 40,
       "teams": {
         "CAR": {
           "2024": {
@@ -192,6 +192,10 @@
         },
         {
           "name": "Chris Brazzell II",
+          "team": "CAR"
+        },
+        {
+          "name": "E.J. Williams Jr.",
           "team": "CAR"
         }
       ],
@@ -316,7 +320,7 @@
           "ngs_name": "Xavier Legette"
         }
       ],
-      "missing_prior_ngs": 33
+      "missing_prior_ngs": 34
     }
   ],
   "ftn_join_counts": {
