@@ -1,6 +1,11 @@
+import sys
 import unittest
+from pathlib import Path
 
-from nbl_player_props_v1.nbl_v1_1_selector import core_path, select_v11
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from nbl_v1_1_selector import core_path, select_v11  # noqa: E402
 
 
 def row(player, stat, threshold, p, edge, ev, *, conf="A", frag="LOW",
