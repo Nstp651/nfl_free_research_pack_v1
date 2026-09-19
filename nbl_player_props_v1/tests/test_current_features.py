@@ -134,3 +134,18 @@ def test_missing_optional_feature_is_reported_not_fabricated():
     )
     assert "opponent_fgm_allowed_mean_10" in out["missing_features"]
     assert "opponent_fgm_allowed_mean_10" not in out["features"]
+
+
+def test_nz_breakers_fixture_alias_resolves_new_zealand_historical_prior():
+    s = snapshot()
+    nz = s["teams"].pop("Sydney Kings")
+    nz["team"] = "New Zealand Breakers"
+    s["teams"]["New Zealand Breakers"] = nz
+    out = assemble_feature_vector(
+        qbase(), s, player_name="Test Guard", team="NZ Breakers",
+        opponent="Perth Wildcats", target_season_start=2026,
+        target_time="2026-09-20T10:00:00+00:00", home_flag=1,
+    )
+    assert out["features"]["team_games_prior"] == 100.0
+    assert out["features"]["team_points_mean_5"] == 92.0
+
