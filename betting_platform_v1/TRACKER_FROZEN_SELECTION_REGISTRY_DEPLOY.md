@@ -8,6 +8,7 @@ Allow any exact NFL Receptions V5 frozen ladder point to be attached to the exis
 - Never create a second tracker model run for a missing Bet365/supplemental threshold.
 - Never trust a GPT-supplied `p_model` for an on-demand selection.
 - Verify the V5 run, freeze receipt, player id and exact threshold against the live NFL V5 Control Worker.
+- Bind legacy tracker runs by either original notes metadata or the canonical `run_gpt_nflrec-v511-<v5_run_id>` model-run identity; the live Control Worker remains authoritative for the freeze receipt.
 - Reuse an existing matching tracker selection when present.
 - New on-demand selections are `final_play = 0`, have no integration-price/rank fields, and inherit authoritative frozen P_model/fair odds.
 - No D1 schema migration is required.
@@ -61,6 +62,7 @@ It remains below the Custom GPT 8,000-character instruction limit.
 ## Acceptance
 PASS only if all are true:
 - existing top-25 selection returns the existing ID idempotently, including legacy integer-threshold storage versus the equivalent sportsbook half-point;
+- canonical `run_gpt_nflrec-v511-<v5_run_id>` runs remain eligible when legacy notes omitted V5 binding strings; a mismatched canonical V5 id is rejected;
 - missing-but-frozen exact selection returns `201` and a new model_selection_id;
 - repeating that request returns the same ID with `200`;
 - wrong freeze receipt is rejected;
