@@ -1,0 +1,26 @@
+name: NFL receptions V5.1.1 selection
+
+on:
+  pull_request:
+    paths:
+      - 'nfl_receptions_v5/v5_1_1/**'
+      - '.github/workflows/nfl-receptions-v511-selection.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'nfl_receptions_v5/v5_1_1/**'
+
+permissions:
+  contents: read
+
+jobs:
+  policy-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run V5.1.1 selector and adapter regression tests
+        working-directory: nfl_receptions_v5/v5_1_1
+        run: python -m unittest discover -s . -p 'test_*.py' -v
