@@ -47,12 +47,12 @@
       "url": "https://github.com/JaseZiv/nblr_data/releases/download/box_player/box_player.csv"
     },
     "results": {
-      "bytes": 1899236,
+      "bytes": 2003844,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DE941E692609D4\"",
-      "last_modified": "Mon, 06 Apr 2026 20:52:26 GMT",
+      "etag": "\"0x8DF15D940EF3AEA\"",
+      "last_modified": "Fri, 18 Sep 2026 23:04:55 GMT",
       "name": "results_wide.csv",
-      "sha256": "sha256:afd222d4833d8e9aa62dbed36ee6d89900be5a7d62d4b7039c48919f56aedf67",
+      "sha256": "sha256:2c64b943e5374d9de6fb42ea8994266b11bc51419fef2bf0c8413f06dcc20ad6",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
       "tag": "match_results",
       "url": "https://github.com/JaseZiv/nblr_data/releases/download/match_results/results_wide.csv"
