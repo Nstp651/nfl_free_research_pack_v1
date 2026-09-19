@@ -14,6 +14,11 @@ const NFL_V5_CONTROL_BASE =
 
 const FROZEN_SELECTION_PROB_TOLERANCE = 1e-10;
 
+function canonicalV5RunIdFromTrackerModelRunId(modelRunId) {
+  const match = /^run_gpt_nflrec-v511-([a-f0-9]{64})$/.exec(String(modelRunId || ""));
+  return match ? match[1] : null;
+}
+
 // ------------------------------------------------------------
 // ROUTE INSERTION
 // Add this AFTER authentication succeeds and BEFORE the global
@@ -110,15 +115,19 @@ async function ensureNflReceptionsFrozenSelection(
   }
 
   const runNotes = String(run.notes || "");
-  const boundToSourceRun =
+  const notesBoundToSourceRun =
     runNotes.includes(v5RunId) && runNotes.includes(freezeReceipt);
+  const canonicalBoundV5RunId = canonicalV5RunIdFromTrackerModelRunId(modelRunId);
+  const canonicalIdBoundToSourceRun = canonicalBoundV5RunId === v5RunId;
+  const boundToSourceRun = notesBoundToSourceRun || canonicalIdBoundToSourceRun;
 
   if (!boundToSourceRun) {
     return jsonResponse(
       {
         error: "Tracker/source-run binding mismatch.",
         message:
-          "The tracker run notes do not contain the supplied V5 run id and freeze receipt."
+          "Tracker run is not bound to the supplied V5 run. Expected either legacy notes binding or canonical run_gpt_nflrec-v511-<v5_run_id> binding.",
+        canonical_bound_v5_run_id: canonicalBoundV5RunId
       },
       409
     );
