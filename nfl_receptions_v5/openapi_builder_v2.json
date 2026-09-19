@@ -120,7 +120,7 @@
         "additionalProperties": false,
         "required": ["evidence_id", "source", "source_url", "source_date", "checked_at", "subject", "finding", "model_pathway", "availability"],
         "properties": {
-          "evidence_id": {"type": "string", "pattern": "^[A-Z0-9_-]{3,80}$"},
+          "evidence_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{2,79}$", "description": "Stable 3-80 character evidence ID; start alphanumeric, then letters/digits/_-.: only."},
           "source": {"type": "string"},
           "source_url": {"type": ["string", "null"]},
           "source_date": {"type": ["string", "null"]},

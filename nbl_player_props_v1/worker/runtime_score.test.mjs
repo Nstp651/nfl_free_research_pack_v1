@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assembleFeatureVector,normName,projectedMinutesScore,returningPlayerBaseline,scoreQbase,stabilizeOpeningScore} from './runtime_score.js';
+import {assembleFeatureVector,normName,normTeamName,projectedMinutesScore,returningPlayerBaseline,scoreQbase,stabilizeOpeningScore} from './runtime_score.js';
 
 function artifact(stat='assists'){
   const features=['player_games_prior','player_season_games_prior','player_minutes_mean_3','player_minutes_mean_5','player_minutes_mean_10','player_start_rate_5','player_start_rate_10','player_days_rest','team_games_prior','team_season_games_prior','team_days_rest','opponent_days_rest','team_points_mean_5','opponent_points_allowed_mean_5','home_flag'];
@@ -34,4 +34,12 @@ test('player ID wins before name fallback and accented names normalize identical
 
 test('returning player baseline is computed inside server scorer and missing imports fail closed',async()=>{
   const baseline=await returningPlayerBaseline(artifact(),snapshot(),{playerName:'Test Guard',team:'Sydney Kings',fixture,targetSeasonStart:2026});assert.ok(baseline.mean>0);assert.match(baseline.quant_input_receipt_sha256,/^[0-9a-f]{64}$/);await assert.rejects(()=>returningPlayerBaseline(artifact(),snapshot(),{playerName:'New Import',team:'Sydney Kings',fixture,targetSeasonStart:2026}),/prior-competition translation required/);
+});
+
+
+test('NZ Breakers fixture alias resolves the canonical New Zealand Breakers team prior',()=>{
+  assert.equal(normTeamName('NZ Breakers'),'newzealandbreakers');
+  const snap=snapshot();snap.teams['New Zealand Breakers']={...snap.teams['Sydney Kings'],team:'New Zealand Breakers'};delete snap.teams['Sydney Kings'];
+  const out=assembleFeatureVector(artifact(),snap,{playerName:'Test Guard',playerId:'pid-1',team:'NZ Breakers',opponent:'Perth Wildcats',targetSeasonStart:2026,targetTime:fixture.start_time,homeFlag:1});
+  assert.equal(out.features.team_games_prior,100);assert.equal(out.features.team_points_mean_5,90);
 });

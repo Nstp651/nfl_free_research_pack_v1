@@ -1,6 +1,8 @@
 /** Deterministic server-side QBASE inference for NBL player props V1. */
 const finite=value=>{const n=Number(value);return Number.isFinite(n)?n:null;};
 export const normName=value=>String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+const TEAM_NAME_ALIASES=new Map([['nzbreakers','newzealandbreakers']]);
+export const normTeamName=value=>{const key=normName(value);return TEAM_NAME_ALIASES.get(key)||key;};
 const canonicalValue=v=>Array.isArray(v)?v.map(canonicalValue):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonicalValue(v[k])])):v);
 const canonicalJson=v=>JSON.stringify(canonicalValue(v));
 export async function quantSha256Json(v){const bytes=new TextEncoder().encode(canonicalJson(v));const hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}
@@ -43,7 +45,7 @@ function findPlayer(snapshot,name,playerId=null){
   if(pid){const byId=values.filter(v=>Array.isArray(v.source_player_ids)&&v.source_player_ids.map(String).includes(pid));need(byId.length<=1,`Historical player ID ${pid} maps to multiple priors`);if(byId.length===1)return byId[0];}
   const key=normName(name);if(players[key]&&typeof players[key]==='object')return players[key];const matches=Object.entries(players).filter(([k,v])=>normName(k)===key&&v&&typeof v==='object').map(([,v])=>v);if(matches.length===1)return matches[0];const e=new Error(`No NBL historical prior for ${name}; prior-competition translation required`);e.code='PRIOR_COMP_TRANSLATION_REQUIRED';throw e;
 }
-function findTeam(snapshot,name){const teams=snapshot?.teams;need(teams&&typeof teams==='object'&&!Array.isArray(teams),'prior snapshot teams map missing');const wanted=normName(name),matches=Object.entries(teams).filter(([k,v])=>normName(k)===wanted&&v&&typeof v==='object').map(([,v])=>v);need(matches.length===1,`Expected one historical team prior for ${name}, found ${matches.length}`);return matches[0];}
+function findTeam(snapshot,name){const teams=snapshot?.teams;need(teams&&typeof teams==='object'&&!Array.isArray(teams),'prior snapshot teams map missing');const wanted=normTeamName(name),matches=Object.entries(teams).filter(([k,v])=>normTeamName(k)===wanted&&v&&typeof v==='object').map(([,v])=>v);need(matches.length===1,`Expected one historical team prior for ${name}, found ${matches.length}`);return matches[0];}
 function seasonGames(record,targetSeason,key){const last=Number(record?.last_season_start);if(!Number.isInteger(last)||last!==Number(targetSeason))return 0;const v=finite(record?.features?.[key]);return v===null?0:v;}
 function copyIf(values,target,source,sourceKey=target){const v=finite(source?.[sourceKey]);if(v!==null)values[target]=v;}
 
