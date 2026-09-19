@@ -166,7 +166,7 @@ function validateLedger(ledger, evidenceIds) {
 export function evidenceIdSet(context) {
   const ids = new Set();
   for (const item of context.evidence || []) {
-    requireThat(item && typeof item === 'object' && typeof item.evidence_id === 'string' && /^[A-Z0-9_-]{3,80}$/.test(item.evidence_id), 'Invalid evidence_id');
+    requireThat(item && typeof item === 'object' && typeof item.evidence_id === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{2,79}$/.test(item.evidence_id), 'Invalid evidence_id');
     requireThat(!ids.has(item.evidence_id), `Duplicate evidence_id ${item.evidence_id}`);
     ids.add(item.evidence_id);
   }
