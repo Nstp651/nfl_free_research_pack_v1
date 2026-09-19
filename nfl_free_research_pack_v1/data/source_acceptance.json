@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-19T00:40:49.803152+00:00",
-  "build_commit": "4834f4ebac10b1f6b13dbc3a38e31f4f1b752b4c",
+  "tested_at_utc": "2026-09-19T06:40:02.089301+00:00",
+  "build_commit": "594a20d8cd2e3ee31f73e199434c466a6c6af269",
   "python": "3.12.14",
-  "workflow_run_id": "35410109942",
+  "workflow_run_id": "35427169290",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "7b0f98f63e466d34",
+      "pack_revision": "ce0dae3fc7ed14d6",
       "players": 37,
       "teams": {
         "DET": {
@@ -145,7 +145,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "18012c9410b18981",
+      "pack_revision": "4dacd8a905612946",
       "players": 40,
       "teams": {
         "CAR": {
