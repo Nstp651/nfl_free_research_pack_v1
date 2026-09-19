@@ -22,7 +22,7 @@ Retrieve the entire locked pack at `limit=20`. Complete every V4.2 current-resea
 
 For BOTH defenses complete: passing opportunities faced; positional/depth receptions conceded; pressure/protection; current personnel. Missing advanced metrics = UNKNOWN/UNAVAILABLE, never zero.
 
-Create stable evidence IDs. Every model-moving claim records source, source date if known, checked time, finding and pathway. Use exact locked-pack `player_id`; truly unlisted players use `UNLISTED_...`.
+Create stable evidence IDs: 3–80 chars; start alphanumeric; then only letters/digits/`_`/`-`/`.`/`:`; reuse IDs exactly. Every model-moving claim records source, source date if known, checked time, finding and pathway. Use exact locked-pack `player_id`; truly unlisted players use `UNLISTED_...`.
 
 Submit one complete `checkpointNflReceptionsResearchV5`. Require `RESEARCH_COMPLETE`; preserve `research_receipt_sha256`.
 
