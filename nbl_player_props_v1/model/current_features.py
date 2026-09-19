@@ -22,6 +22,14 @@ def norm_name(value: Any) -> str:
     return re.sub(r"[^a-z0-9]+", "", text)
 
 
+_TEAM_NAME_ALIASES = {"nzbreakers": "newzealandbreakers"}
+
+
+def norm_team_name(value: Any) -> str:
+    key = norm_name(value)
+    return _TEAM_NAME_ALIASES.get(key, key)
+
+
 def _dt(value: Any, field: str) -> datetime:
     text = str(value or "").strip()
     if not text:
@@ -69,8 +77,8 @@ def _find_team(snapshot: dict[str, Any], team_name: str) -> dict[str, Any]:
     teams = snapshot.get("teams")
     if not isinstance(teams, dict):
         raise ValueError("prior snapshot teams map missing")
-    wanted = norm_name(team_name)
-    matches = [v for k, v in teams.items() if norm_name(k) == wanted and isinstance(v, dict)]
+    wanted = norm_team_name(team_name)
+    matches = [v for k, v in teams.items() if norm_team_name(k) == wanted and isinstance(v, dict)]
     if len(matches) != 1:
         raise TeamPriorMissing(f"Expected one historical team prior for {team_name}, found {len(matches)}")
     return matches[0]
