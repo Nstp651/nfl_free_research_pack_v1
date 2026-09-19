@@ -60,3 +60,17 @@ test('incomplete locked pack receipt blocks checkpoint', () => {
   const c = context(); c.pack_receipt.retrieved_player_count = 29;
   assert.throws(() => validateResearchContext(c, lock, 30, Date.parse('2026-09-06T02:01:00Z')), /Incomplete research pack/);
 });
+
+
+test('mixed-case stable evidence IDs with dot and colon pass checkpoint validation', () => {
+  const c = context();
+  c.evidence[0].evidence_id = 'RotoWire.IND:W1';
+  c.team_contexts[0].evidence_ids = ['RotoWire.IND:W1'];
+  c.players[0].evidence_ids = ['RotoWire.IND:W1'];
+  assert.doesNotThrow(() => validateResearchContext(c, lock, 30, Date.parse('2026-09-06T02:01:00Z')));
+});
+
+test('evidence IDs with whitespace still fail closed', () => {
+  const c = context(); c.evidence[0].evidence_id = 'EV BAD';
+  assert.throws(() => validateResearchContext(c, lock, 30, Date.parse('2026-09-06T02:01:00Z')), /Invalid evidence_id/);
+});
