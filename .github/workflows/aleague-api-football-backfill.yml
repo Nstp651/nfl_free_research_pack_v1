@@ -1,0 +1,45 @@
+name: A-League API-Football Backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Season start year, e.g. 2025 for 2025/26'
+        required: true
+        default: '2025'
+      min_coverage_rate:
+        description: 'Minimum usable fixture rate'
+        required: true
+        default: '0.97'
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require API credential
+        run: |
+          if [ -z "$API_FOOTBALL_KEY" ]; then
+            echo 'API_FOOTBALL_KEY secret is not configured.' >&2
+            exit 2
+          fi
+      - name: Backfill and validate
+        run: |
+          python -m aleague_player_volume_v1.scripts.backfill_api_football \
+            --season '${{ inputs.season }}' \
+            --min-coverage-rate '${{ inputs.min_coverage_rate }}'
+      - name: Upload canonical candidate pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: aleague-player-volume-${{ inputs.season }}
+          path: aleague_player_volume_v1/data/canonical/
+          if-no-files-found: error
+          retention-days: 30
