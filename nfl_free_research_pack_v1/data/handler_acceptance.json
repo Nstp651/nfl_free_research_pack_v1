@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-19T06:40:08.199Z",
+  "tested_at_utc": "2026-09-19T12:40:13.615Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/1ac1f2f60a7bf9a001947f8aa101f7b13e987dd3/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/5870da29159bb54d3c2905110a63dfde08fdf350/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 2,
   "games": [
     {
       "game_id": "2026_02_DET_BUF",
-      "pack_revision": "ce0dae3fc7ed14d6",
+      "pack_revision": "68c02146296e1423",
       "fixture": {
         "game_id": "2026_02_DET_BUF",
         "season": 2026,
@@ -211,7 +211,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 533996,
+            "rows": 536196,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -245,7 +245,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "4dacd8a905612946",
+      "pack_revision": "1ffdf412ff06326d",
       "fixture": {
         "game_id": "2026_02_CAR_ATL",
         "season": 2026,
@@ -457,7 +457,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 533996,
+            "rows": 536196,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -514,7 +514,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-19T06:40:02.086877+00:00",
+      "last_checked_at_utc": "2026-09-19T12:40:07.590611+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
