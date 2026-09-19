@@ -29,7 +29,7 @@ Efficiency must come from fewer redundant calls, never from weaker research.
 2. Complete every V4.2 current-research requirement. Weeks 1–4 must rebuild current role from current-season personnel/deployment; prior seasons are priors only.
 3. For BOTH defenses complete: (a) passing opportunities faced, (b) positional/depth receptions conceded, (c) pressure/protection, (d) current defensive personnel.
 4. Missing advanced metrics = UNKNOWN/UNAVAILABLE, never zero.
-5. Create stable evidence IDs. Every model-moving claim records source, date/week, checked time, finding and model pathway. Exact locked-pack player_id is mandatory when available; truly unlisted players use documented `UNLISTED_...`.
+5. Create stable evidence IDs using 3–80 characters: start with a letter or digit, then use only letters, digits, `_`, `-`, `.`, or `:`; preserve the exact same ID in every reference. Every model-moving claim records source, date/week, checked time, finding and model pathway. Exact locked-pack player_id is mandatory when available; truly unlisted players use documented `UNLISTED_...`.
 6. Submit one complete `checkpointNflReceptionsResearchV5` with exact pack receipt, current information state, evidence ledger, team contexts, both defensive profiles, player handoffs, material unknowns and Research Quality Permission.
 7. Require `RESEARCH_COMPLETE`; preserve research_receipt_sha256.
 
