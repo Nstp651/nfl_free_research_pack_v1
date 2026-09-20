@@ -1,0 +1,41 @@
+name: A-League Player Volume CI
+
+on:
+  pull_request:
+    paths:
+      - 'aleague_player_volume_v1/**'
+      - '.github/workflows/aleague-player-volume-ci.yml'
+      - 'betting_platform_v1/ARCHITECTURE.md'
+  push:
+    branches:
+      - 'feature/aleague-player-volume-v1'
+    paths:
+      - 'aleague_player_volume_v1/**'
+      - '.github/workflows/aleague-player-volume-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile Python
+        run: python -m compileall -q aleague_player_volume_v1
+      - name: Python unit tests
+        run: python -m unittest discover -s aleague_player_volume_v1/tests -v
+      - name: Research Worker integrity tests
+        run: node --test aleague_player_volume_v1/worker/*.test.mjs
+      - name: Market Worker isolation tests
+        run: node --test aleague_player_volume_v1/market_worker/*.test.mjs
+      - name: Market-blind import smoke test
+        run: |
+          python - <<'PY'
+          from aleague_player_volume_v1.model_core import assert_market_blind
+          assert_market_blind({'fixture_id': 'smoke', 'team_shots_prior': 12.5})
+          print('ALEAGUE_PLAYER_VOLUME_PREMARKET_SMOKE_PASS')
+          PY

@@ -1,0 +1,33 @@
+name: A-League SkillCorner Open Data
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feature/aleague-player-volume-v1'
+    paths:
+      - 'aleague_player_volume_v1/ingest/skillcorner.py'
+      - 'aleague_player_volume_v1/scripts/build_skillcorner_profiles.py'
+      - 'aleague_player_volume_v1/scripts/__init__.py'
+      - '.github/workflows/aleague-skillcorner-open-data.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-open-advanced-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build pinned SkillCorner role profiles
+        run: python -m aleague_player_volume_v1.scripts.build_skillcorner_profiles
+      - name: Upload advanced-data candidate pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: aleague-skillcorner-role-profiles
+          path: aleague_player_volume_v1/data/advanced/skillcorner_2024-25/
+          if-no-files-found: error
+          retention-days: 30
