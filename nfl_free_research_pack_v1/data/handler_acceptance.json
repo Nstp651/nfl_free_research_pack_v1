@@ -1,8 +1,8 @@
 {
-  "tested_at_utc": "2026-09-20T18:38:12.122Z",
+  "tested_at_utc": "2026-09-21T00:42:50.452Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/0df3a43a10ec19b834e6464db9e5f2cee96c83a0/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/93f359f524f0cc50c9b9fa4d1a4bcfb26027e3a5/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 2,
   "games": [
@@ -245,7 +245,7 @@
     },
     {
       "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "be04091622ce442c",
+      "pack_revision": "2c6af8a34da10abc",
       "fixture": {
         "game_id": "2026_02_CAR_ATL",
         "season": 2026,
@@ -257,28 +257,28 @@
         "away_team": "CAR",
         "home_team": "ATL",
         "stadium": "Mercedes-Benz Stadium",
-        "roof": null,
-        "surface": "fieldturf",
+        "roof": "closed",
+        "surface": null,
         "location": "Home"
       },
       "total_players": 40,
       "pages": 4,
       "page_sizes": [
         {
-          "chars": 54294,
-          "bytes": 54338
+          "chars": 54291,
+          "bytes": 54335
         },
         {
-          "chars": 50236,
-          "bytes": 50272
+          "chars": 50233,
+          "bytes": 50269
         },
         {
-          "chars": 53280,
-          "bytes": 53318
+          "chars": 53277,
+          "bytes": 53315
         },
         {
-          "chars": 55518,
-          "bytes": 55554
+          "chars": 55515,
+          "bytes": 55551
         }
       ],
       "players_by_team": {
@@ -514,7 +514,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-20T18:38:06.541857+00:00",
+      "last_checked_at_utc": "2026-09-21T00:42:44.632597+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
