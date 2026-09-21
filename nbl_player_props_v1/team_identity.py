@@ -20,8 +20,14 @@ _CANONICAL_BY_KEY = {
 
 _TEAM_NAME_ALIASES = {
     "nzbreakers": "newzealandbreakers",
-    "thehawks": "illawarrahawks",
     "semelbournephoenix": "southeastmelbournephoenix",
+}
+
+# Historical source-era rename used only while rebuilding derived priors.
+# It is deliberately not a runtime identity alias so old pinned snapshots that
+# contain both labels still preserve the exactly-one-prior fail-closed invariant.
+_HISTORICAL_SOURCE_ALIASES = {
+    "thehawks": "illawarrahawks",
 }
 
 
@@ -38,4 +44,5 @@ def norm_team_name(value: Any) -> str:
 def canonical_team_name(value: Any) -> str:
     raw = str(value or "").strip()
     key = norm_team_name(raw)
+    key = _HISTORICAL_SOURCE_ALIASES.get(key, key)
     return _CANONICAL_BY_KEY.get(key, raw)
