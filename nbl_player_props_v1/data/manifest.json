@@ -1,5 +1,5 @@
 {
-  "asset_revision": "bb85a6f664d862c6f910",
+  "asset_revision": "a50e5c0e58754f3393a6",
   "integrity": {
     "market_data": false,
     "qbase_retraining_is_explicit_only": true,
@@ -7,10 +7,10 @@
   },
   "market_data": false,
   "prior_snapshot": {
-    "canonical_sha256": "71a9ed1180ea8709e2ab54a2be1949e5d4b39f5621e638f5a2228796950680b9",
-    "file_sha256": "8d7c90dbdbb5b8cc00e7e6f387e674e38e54b82d753e209d71246a79f8ccd8dd",
+    "canonical_sha256": "8ba2f48d552b57a5fea17be67dcd505d71b9d3961e82514b15ec453c4296dc6b",
+    "file_sha256": "ef75de56ae111c73cc3f4d66d8aff231826e6ed7152f1c4f7243f61e1911811c",
     "path": "prior_snapshot.json",
-    "snapshot_revision": "1647114e4c16f33f26ac"
+    "snapshot_revision": "331a14cf00bf4cdac70f"
   },
   "qbase": {
     "assists": {

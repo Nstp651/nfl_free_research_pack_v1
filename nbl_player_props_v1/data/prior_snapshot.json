@@ -1666,7 +1666,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "anzacrissetto",
       "source_player_ids": [
         "6be49392-410d-11f0-b2dd-9dbbf7342624"
@@ -3743,7 +3743,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "carlindavison",
       "source_player_ids": [
         "75e6392b-410d-11f0-a450-2902fc2f936f",
@@ -3933,7 +3933,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "charlesbediako",
       "source_player_ids": [
         "7eee2482-95e4-11f1-8ed8-4322d5a3aa7f"
@@ -5928,7 +5928,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "dejanvasiljevic",
       "source_player_ids": [
         "514b4d49-410d-11f0-8ea0-9dbbf7342624",
@@ -9428,7 +9428,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "izayahleafa",
       "source_player_ids": [
         "5188b88d-410d-11f0-8e81-9dbbf7342624",
@@ -13028,7 +13028,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "kaelrobinson",
       "source_player_ids": [
         "bdb679d3-9b71-11f1-9cbe-9d02ec3c4610"
@@ -13941,7 +13941,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "kouatnoi",
       "source_player_ids": [
         "50cb4bdd-410d-11f0-aa4b-9dbbf7342624",
@@ -17356,7 +17356,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "mojaveking",
       "source_player_ids": [
         "3443c855-3ca4-4274-8cbf-74423c32b425",
@@ -18304,7 +18304,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "parkerjacksoncartwright",
       "source_player_ids": [
         "75b6b600-410d-11f0-b796-2902fc2f936f",
@@ -19129,7 +19129,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "reubenterangi",
       "source_player_ids": [
         "2bcfd1fa-410d-11f0-a65e-975350631782",
@@ -19963,7 +19963,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "sammennenga",
       "source_player_ids": [
         "6096f09f-0ba7-4981-bb32-d62f287b9f96",
@@ -22879,7 +22879,7 @@
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "last_team": "NZ Breakers",
+      "last_team": "New Zealand Breakers",
       "player_key": "tukahacooper",
       "source_player_ids": [
         "0d441503-80f9-4a7d-a3b1-7c8ab9f5f9f5",
@@ -24223,7 +24223,7 @@
     }
   },
   "schema_version": "nbl_historical_prior_snapshot_v1",
-  "snapshot_revision": "1647114e4c16f33f26ac",
+  "snapshot_revision": "331a14cf00bf4cdac70f",
   "source_receipt_sha256": "d9dd840da03590ebb8d5c9b7561da6ff47d32adb02a1f064e00227668f551ff7",
   "teams": {
     "Adelaide 36ers": {
@@ -24346,7 +24346,7 @@
         "team_assists_mean_5": 20.4,
         "team_fgm_mean_10": 36.3,
         "team_fgm_mean_5": 32.4,
-        "team_games_prior": 343.0,
+        "team_games_prior": 348.0,
         "team_last_season_games": 1.0,
         "team_missed_fg_mean_10": 39.0,
         "team_missed_fg_mean_5": 41.2,
@@ -24396,72 +24396,38 @@
       "last_season_start": 2026,
       "team": "Melbourne United"
     },
-    "NZ Breakers": {
+    "New Zealand Breakers": {
       "features": {
-        "assists_allowed_mean_10": 16.0,
-        "assists_allowed_mean_5": 16.0,
-        "fgm_allowed_mean_10": 29.0,
-        "fgm_allowed_mean_5": 29.0,
-        "missed_fg_allowed_mean_10": 43.0,
-        "missed_fg_allowed_mean_5": 43.0,
-        "opponent_possessions_mean_10": 78.0,
-        "opponent_possessions_mean_5": 78.0,
-        "points_allowed_mean_10": 81.0,
-        "points_allowed_mean_5": 81.0,
-        "rebounds_allowed_mean_10": 46.0,
-        "rebounds_allowed_mean_5": 46.0,
-        "team_assists_mean_10": 16.0,
-        "team_assists_mean_5": 16.0,
-        "team_fgm_mean_10": 35.0,
-        "team_fgm_mean_5": 35.0,
-        "team_games_prior": 1.0,
+        "assists_allowed_mean_10": 20.5,
+        "assists_allowed_mean_5": 19.8,
+        "fgm_allowed_mean_10": 34.6,
+        "fgm_allowed_mean_5": 31.0,
+        "missed_fg_allowed_mean_10": 39.3,
+        "missed_fg_allowed_mean_5": 38.0,
+        "opponent_possessions_mean_10": 82.572,
+        "opponent_possessions_mean_5": 80.39200000000001,
+        "points_allowed_mean_10": 99.4,
+        "points_allowed_mean_5": 91.8,
+        "rebounds_allowed_mean_10": 40.2,
+        "rebounds_allowed_mean_5": 39.4,
+        "team_assists_mean_10": 18.9,
+        "team_assists_mean_5": 21.2,
+        "team_fgm_mean_10": 37.1,
+        "team_fgm_mean_5": 39.4,
+        "team_games_prior": 338.0,
         "team_last_season_games": 1.0,
-        "team_missed_fg_mean_10": 38.0,
-        "team_missed_fg_mean_5": 38.0,
-        "team_points_mean_10": 95.0,
-        "team_points_mean_5": 95.0,
-        "team_possessions_mean_10": 78.04,
-        "team_possessions_mean_5": 78.04,
-        "team_rebounds_mean_10": 39.0,
-        "team_rebounds_mean_5": 39.0
+        "team_missed_fg_mean_10": 34.8,
+        "team_missed_fg_mean_5": 35.0,
+        "team_points_mean_10": 101.1,
+        "team_points_mean_5": 103.2,
+        "team_possessions_mean_10": 82.728,
+        "team_possessions_mean_5": 80.712,
+        "team_rebounds_mean_10": 38.9,
+        "team_rebounds_mean_5": 38.6
       },
       "last_match_time": "2026-09-20T05:00:00+00:00",
       "last_season": "2026-2027",
       "last_season_start": 2026,
-      "team": "NZ Breakers"
-    },
-    "New Zealand Breakers": {
-      "features": {
-        "assists_allowed_mean_10": 21.4,
-        "assists_allowed_mean_5": 20.4,
-        "fgm_allowed_mean_10": 34.8,
-        "fgm_allowed_mean_5": 33.2,
-        "missed_fg_allowed_mean_10": 38.3,
-        "missed_fg_allowed_mean_5": 40.2,
-        "opponent_possessions_mean_10": 82.556,
-        "opponent_possessions_mean_5": 83.992,
-        "points_allowed_mean_10": 99.9,
-        "points_allowed_mean_5": 98.4,
-        "rebounds_allowed_mean_10": 39.0,
-        "rebounds_allowed_mean_5": 41.0,
-        "team_assists_mean_10": 19.2,
-        "team_assists_mean_5": 20.8,
-        "team_fgm_mean_10": 37.8,
-        "team_fgm_mean_5": 38.0,
-        "team_games_prior": 337.0,
-        "team_last_season_games": 34.0,
-        "team_missed_fg_mean_10": 34.8,
-        "team_missed_fg_mean_5": 35.4,
-        "team_points_mean_10": 102.0,
-        "team_points_mean_5": 100.8,
-        "team_possessions_mean_10": 82.71599999999998,
-        "team_possessions_mean_5": 83.832,
-        "team_rebounds_mean_10": 39.0,
-        "team_rebounds_mean_5": 40.4
-      },
-      "last_match_time": "2026-02-22T05:30:00+00:00",
-      "last_season": "2025-2026",
-      "last_season_start": 2025,
       "team": "New Zealand Breakers"
     },
     "Perth Wildcats": {
@@ -24599,40 +24565,6 @@
       "last_season": "2025-2026",
       "last_season_start": 2025,
       "team": "Tasmania JackJumpers"
-    },
-    "The Hawks": {
-      "features": {
-        "assists_allowed_mean_10": 17.8,
-        "assists_allowed_mean_5": 17.8,
-        "fgm_allowed_mean_10": 31.6,
-        "fgm_allowed_mean_5": 31.6,
-        "missed_fg_allowed_mean_10": 42.6,
-        "missed_fg_allowed_mean_5": 42.6,
-        "opponent_possessions_mean_10": 78.896,
-        "opponent_possessions_mean_5": 78.896,
-        "points_allowed_mean_10": 82.0,
-        "points_allowed_mean_5": 82.0,
-        "rebounds_allowed_mean_10": 43.2,
-        "rebounds_allowed_mean_5": 43.2,
-        "team_assists_mean_10": 16.8,
-        "team_assists_mean_5": 16.8,
-        "team_fgm_mean_10": 34.8,
-        "team_fgm_mean_5": 34.8,
-        "team_games_prior": 5.0,
-        "team_last_season_games": 5.0,
-        "team_missed_fg_mean_10": 43.4,
-        "team_missed_fg_mean_5": 43.4,
-        "team_points_mean_10": 88.8,
-        "team_points_mean_5": 88.8,
-        "team_possessions_mean_10": 78.47200000000001,
-        "team_possessions_mean_5": 78.47200000000001,
-        "team_rebounds_mean_10": 45.8,
-        "team_rebounds_mean_5": 45.8
-      },
-      "last_match_time": "2021-02-07T04:00:00+00:00",
-      "last_season": "2020-2021",
-      "last_season_start": 2020,
-      "team": "The Hawks"
     },
     "Townsville Crocodiles": {
       "features": {
