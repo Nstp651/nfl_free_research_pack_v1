@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-20T12:40:17.935997+00:00",
+  "generated_at_utc": "2026-09-21T00:42:43.395382+00:00",
   "fixture": {
     "game_id": "2026_02_PIT_NE",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "NE",
     "stadium": "Gillette Stadium",
     "roof": "outdoors",
-    "surface": "fieldturf",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -7647,5 +7647,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "ab15fd985a1232a7"
+  "pack_revision": "6b8fd7767d26505b"
 }

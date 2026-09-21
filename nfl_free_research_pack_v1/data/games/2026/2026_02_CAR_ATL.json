@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-20T12:40:17.451621+00:00",
+  "generated_at_utc": "2026-09-21T00:42:42.936841+00:00",
   "fixture": {
     "game_id": "2026_02_CAR_ATL",
     "season": 2026,
@@ -14,8 +14,8 @@
     "away_team": "CAR",
     "home_team": "ATL",
     "stadium": "Mercedes-Benz Stadium",
-    "roof": null,
-    "surface": "fieldturf",
+    "roof": "closed",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -8093,5 +8093,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "be04091622ce442c"
+  "pack_revision": "2c6af8a34da10abc"
 }

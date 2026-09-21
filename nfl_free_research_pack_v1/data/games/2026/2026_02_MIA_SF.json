@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-20T12:40:18.941562+00:00",
+  "generated_at_utc": "2026-09-21T00:42:44.342762+00:00",
   "fixture": {
     "game_id": "2026_02_MIA_SF",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "SF",
     "stadium": "Levi's Stadium",
     "roof": "outdoors",
-    "surface": "grass",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -7872,5 +7872,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "3c60490305331aa6"
+  "pack_revision": "45a9dd71525e0cb2"
 }

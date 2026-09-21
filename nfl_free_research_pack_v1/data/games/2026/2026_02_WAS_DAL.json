@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-20T12:40:18.819864+00:00",
+  "generated_at_utc": "2026-09-21T00:42:44.227308+00:00",
   "fixture": {
     "game_id": "2026_02_WAS_DAL",
     "season": 2026,
@@ -14,8 +14,8 @@
     "away_team": "WAS",
     "home_team": "DAL",
     "stadium": "AT&T Stadium",
-    "roof": null,
-    "surface": "matrixturf",
+    "roof": "closed",
+    "surface": null,
     "location": "Home"
   },
   "data_state": {
@@ -9131,5 +9131,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "813f23950f24fc08"
+  "pack_revision": "dce52c2b3cb49d31"
 }
