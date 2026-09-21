@@ -66,3 +66,18 @@ def test_team_prior_is_one_row_per_completed_team_game():
     assert team["features"]["assists_allowed_mean_5"] == pytest.approx(19.5)
     assert snap["market_data"] is False
     assert len(snap["snapshot_revision"]) == 20
+
+
+def test_team_aliases_canonicalize_before_prior_grouping_without_changing_raw_rows():
+    raw = frame()
+    raw.loc[raw.index[:3], "team"] = "New Zealand Breakers"
+    raw.loc[raw.index[3], "team"] = "NZ Breakers"
+    original = raw.copy(deep=True)
+    snap = build_snapshot(raw)
+    assert snap["historical_rows"] == len(original)
+    assert raw.equals(original)
+    assert "NZ Breakers" not in snap["teams"]
+    assert [k for k in snap["teams"] if k == "New Zealand Breakers"] == ["New Zealand Breakers"]
+    team = snap["teams"]["New Zealand Breakers"]
+    assert team["features"]["team_games_prior"] == 4.0
+    assert team["last_match_time"].startswith("2026-01-04")

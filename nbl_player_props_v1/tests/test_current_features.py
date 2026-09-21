@@ -149,3 +149,16 @@ def test_nz_breakers_fixture_alias_resolves_new_zealand_historical_prior():
     assert out["features"]["team_games_prior"] == 100.0
     assert out["features"]["team_points_mean_5"] == 92.0
 
+
+
+def test_canonical_and_alias_duplicate_team_priors_fail_closed():
+    s = snapshot()
+    nz = s["teams"].pop("Sydney Kings")
+    s["teams"]["New Zealand Breakers"] = {**nz, "team": "New Zealand Breakers"}
+    s["teams"]["NZ Breakers"] = {**nz, "team": "NZ Breakers"}
+    with pytest.raises(TeamPriorMissing, match="found 2"):
+        assemble_feature_vector(
+            qbase(), s, player_name="Test Guard", team="NZ Breakers",
+            opponent="Perth Wildcats", target_season_start=2026,
+            target_time="2026-09-20T10:00:00+00:00", home_flag=1,
+        )

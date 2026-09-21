@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assembleFeatureVector,normName,normTeamName,projectedMinutesScore,returningPlayerBaseline,scoreQbase,stabilizeOpeningScore} from './runtime_score.js';
+import {assembleFeatureVector,fixtureSide,normName,normTeamName,projectedMinutesScore,returningPlayerBaseline,scoreQbase,stabilizeOpeningScore} from './runtime_score.js';
 
 function artifact(stat='assists'){
   const features=['player_games_prior','player_season_games_prior','player_minutes_mean_3','player_minutes_mean_5','player_minutes_mean_10','player_start_rate_5','player_start_rate_10','player_days_rest','team_games_prior','team_season_games_prior','team_days_rest','opponent_days_rest','team_points_mean_5','opponent_points_allowed_mean_5','home_flag'];
@@ -42,4 +42,19 @@ test('NZ Breakers fixture alias resolves the canonical New Zealand Breakers team
   const snap=snapshot();snap.teams['New Zealand Breakers']={...snap.teams['Sydney Kings'],team:'New Zealand Breakers'};delete snap.teams['Sydney Kings'];
   const out=assembleFeatureVector(artifact(),snap,{playerName:'Test Guard',playerId:'pid-1',team:'NZ Breakers',opponent:'Perth Wildcats',targetSeasonStart:2026,targetTime:fixture.start_time,homeFlag:1});
   assert.equal(out.features.team_games_prior,100);assert.equal(out.features.team_points_mean_5,90);
+});
+
+
+test('canonical team identity works for fixture-side resolution and duplicate/unknown priors still fail closed',()=>{
+  const nzFixture={start_time:'2026-09-22T10:00:00Z',home_team:{name:'NZ Breakers'},away_team:{name:'Illawarra Hawks'}};
+  assert.deepEqual(fixtureSide(nzFixture,'New Zealand Breakers'),{opponent:'Illawarra Hawks',homeFlag:1});
+  const snap=snapshot();
+  snap.teams['New Zealand Breakers']={...snap.teams['Sydney Kings'],team:'New Zealand Breakers'};
+  delete snap.teams['Sydney Kings'];
+  assert.doesNotThrow(()=>assembleFeatureVector(artifact(),snap,{playerName:'Test Guard',playerId:'pid-1',team:'New Zealand Breakers',opponent:'Perth Wildcats',targetSeasonStart:2026,targetTime:nzFixture.start_time,homeFlag:1}));
+  snap.teams['NZ Breakers']={...snap.teams['New Zealand Breakers'],team:'NZ Breakers'};
+  assert.throws(()=>assembleFeatureVector(artifact(),snap,{playerName:'Test Guard',playerId:'pid-1',team:'NZ Breakers',opponent:'Perth Wildcats',targetSeasonStart:2026,targetTime:nzFixture.start_time,homeFlag:1}),/found 2/);
+  delete snap.teams['New Zealand Breakers'];
+  delete snap.teams['NZ Breakers'];
+  assert.throws(()=>assembleFeatureVector(artifact(),snap,{playerName:'Test Guard',playerId:'pid-1',team:'NZ Breakers',opponent:'Perth Wildcats',targetSeasonStart:2026,targetTime:nzFixture.start_time,homeFlag:1}),/found 0/);
 });

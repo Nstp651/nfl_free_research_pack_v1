@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import math
-import re
-import unicodedata
+import sys
+from pathlib import Path
 from datetime import datetime
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from team_identity import norm_name, norm_team_name  # noqa: E402
 
 
 class PriorTranslationRequired(ValueError):
@@ -15,19 +20,6 @@ class PriorTranslationRequired(ValueError):
 
 class TeamPriorMissing(ValueError):
     """Raised when own/opponent team context cannot be constructed."""
-
-
-def norm_name(value: Any) -> str:
-    text = unicodedata.normalize("NFKD", str(value or "")).encode("ascii", "ignore").decode("ascii").lower()
-    return re.sub(r"[^a-z0-9]+", "", text)
-
-
-_TEAM_NAME_ALIASES = {"nzbreakers": "newzealandbreakers"}
-
-
-def norm_team_name(value: Any) -> str:
-    key = norm_name(value)
-    return _TEAM_NAME_ALIASES.get(key, key)
 
 
 def _dt(value: Any, field: str) -> datetime:

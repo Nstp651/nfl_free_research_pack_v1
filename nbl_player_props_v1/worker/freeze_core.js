@@ -1,3 +1,4 @@
+import {normTeamName} from './team_identity.js';
 /** Market-blind quantitative/freeze primitives for NBL player props V1. */
 const MARKET_KEY=/(?:odds|sportsbook|bookmaker|moneyline|spread|betting|price|market_line|over_under|total_line)/i;
 export const requireThat=(condition,message)=>{if(!condition) throw new Error(message);};
@@ -148,7 +149,7 @@ export async function computeFreeze(research,qbases,projections,frozenAt=new Dat
   const frozenPlayers=[],seen=new Set();
   for(const projection of projections){
     const key=playerKey(projection);requireThat(!seen.has(key),`duplicate modeled player ${key}`);seen.add(key);
-    const rp=rmap.get(key);requireThat(rp,`modeled player ${key} missing research`);requireThat(String(rp.player_name)===String(projection.player_name)&&String(rp.team)===String(projection.team),'modeled player identity mismatch');
+    const rp=rmap.get(key);requireThat(rp,`modeled player ${key} missing research`);requireThat(String(rp.player_name)===String(projection.player_name)&&normTeamName(rp.team)===normTeamName(projection.team),'modeled player identity mismatch');
     requireThat(String(rp.availability_status).toUpperCase()!=='OUT',`cannot freeze OUT player ${rp.player_name}`);
     const supplied=projection.heads||{}; for(const h of heads) requireThat(supplied[h],`${key} missing requested head ${h}`);
     for(const h of Object.keys(supplied)) requireThat(heads.includes(h),`${key} unexpected head ${h}`);

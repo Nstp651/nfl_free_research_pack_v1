@@ -1,8 +1,7 @@
 /** Deterministic server-side QBASE inference for NBL player props V1. */
+import {normName,normTeamName} from './team_identity.js';
+export {normName,normTeamName};
 const finite=value=>{const n=Number(value);return Number.isFinite(n)?n:null;};
-export const normName=value=>String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
-const TEAM_NAME_ALIASES=new Map([['nzbreakers','newzealandbreakers']]);
-export const normTeamName=value=>{const key=normName(value);return TEAM_NAME_ALIASES.get(key)||key;};
 const canonicalValue=v=>Array.isArray(v)?v.map(canonicalValue):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonicalValue(v[k])])):v);
 const canonicalJson=v=>JSON.stringify(canonicalValue(v));
 export async function quantSha256Json(v){const bytes=new TextEncoder().encode(canonicalJson(v));const hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}
@@ -59,6 +58,6 @@ export function assembleFeatureVector(artifact,snapshot,{playerName,playerId=nul
 
 export async function projectedMinutesScore(artifact,baseFeatures,projectedMinutes,{starterProbability=null}={}){const minutes=Number(projectedMinutes);need(Number.isFinite(minutes)&&minutes>=0&&minutes<=50,'projected_minutes must be finite in [0, 50]');const values={...baseFeatures},names=new Set(artifact.selected_model.features.map(String));for(const name of ['player_minutes_mean_3','player_minutes_mean_5','player_minutes_mean_10'])if(names.has(name))values[name]=minutes;if(starterProbability!==null&&starterProbability!==undefined){const starter=Number(starterProbability);need(Number.isFinite(starter)&&starter>=0&&starter<=1,'starter_probability must be in [0,1]');for(const name of ['player_start_rate_5','player_start_rate_10'])if(names.has(name))values[name]=starter;}const result=await stabilizeOpeningScore(artifact,await scoreQbase(artifact,values),values);return {...result,projected_minutes:minutes,starter_probability:starterProbability,method:'QBASE_MINUTES_RECOMPUTE'};}
 
-export function fixtureSide(fixture,team){const wanted=normName(team),home=normName(fixture?.home_team?.name),away=normName(fixture?.away_team?.name);if(wanted===home)return {opponent:fixture.away_team.name,homeFlag:1};if(wanted===away)return {opponent:fixture.home_team.name,homeFlag:0};throw new Error(`Team ${team} is not in locked fixture`);}
+export function fixtureSide(fixture,team){const wanted=normTeamName(team),home=normTeamName(fixture?.home_team?.name),away=normTeamName(fixture?.away_team?.name);if(wanted===home)return {opponent:fixture.away_team.name,homeFlag:1};if(wanted===away)return {opponent:fixture.home_team.name,homeFlag:0};throw new Error(`Team ${team} is not in locked fixture`);}
 
 export async function returningPlayerBaseline(artifact,snapshot,{playerName,playerId=null,team,fixture,targetSeasonStart}){const side=fixtureSide(fixture,team);const assembled=assembleFeatureVector(artifact,snapshot,{playerName,playerId,team,opponent:side.opponent,targetSeasonStart,targetTime:fixture.start_time,homeFlag:side.homeFlag});const score=await stabilizeOpeningScore(artifact,await scoreQbase(artifact,assembled.features),assembled.features);return {...score,missing_features:assembled.missing_features,feature_context:{player_prior_key:assembled.player_prior_key,player_source_player_ids:assembled.player_source_player_ids,player_last_match_time:assembled.player_last_match_time,own_team_last_match_time:assembled.own_team_last_match_time,opponent_last_match_time:assembled.opponent_last_match_time,snapshot_revision:assembled.snapshot_revision}};}

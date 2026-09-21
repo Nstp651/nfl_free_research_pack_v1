@@ -14,8 +14,14 @@ import hashlib
 import json
 import math
 import re
+import sys
 from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from team_identity import canonical_team_name  # noqa: E402
 
 import numpy as np
 import pandas as pd
@@ -157,6 +163,8 @@ def build_snapshot(raw: pd.DataFrame, source_receipt: dict[str, Any] | None = No
     timestamped = df[df["match_time"].notna() & df["player_key"].notna()].copy()
     if timestamped.empty:
         raise ValueError("historical table has no timestamped player rows")
+    # Canonicalize deterministic aliases before team priors are grouped; source rows remain untouched.
+    timestamped["team"] = timestamped["team"].map(canonical_team_name)
 
     source_latest = None
     if source_receipt is not None:

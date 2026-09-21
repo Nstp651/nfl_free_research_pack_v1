@@ -2,15 +2,15 @@ import {NblMatchRun as BaseNblMatchRun,listFixtures,response,routeMatchRuns} fro
 import {marketKeyHits,requireThat,sha256Json} from './freeze_core.js';
 import {projectedMinutesScore,returningPlayerBaseline} from './runtime_score.js';
 import {researchPriority,projectionSanity} from './projection_sanity.js';
+import {normName,normTeamName} from './team_identity.js';
 
 const GH_RAW='https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/';
 const ROSETTA='https://prod.rosetta.nbl.com.au';
-const norm=x=>String(x||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
 const rawUrl=(commit,path)=>`${GH_RAW}${commit}/nbl_player_props_v1/data/${path}`;
 const headsFor=mode=>mode==='BOTH'?['assists','rebounds']:(mode==='ASSISTS_ONLY'?['assists']:(mode==='REBOUNDS_ONLY'?['rebounds']:(()=>{throw new Error('Unsupported run_mode');})()));
 const finite=x=>Number.isFinite(Number(x));
 const close=(a,b)=>Math.abs(Number(a)-Number(b))<=1e-6*Math.max(1,Math.abs(Number(b)));
-const projectionKey=p=>String(p?.player_id||'').trim()?`id:${String(p.player_id).trim()}`:`name:${norm(p?.player_name)}:${norm(p?.team)}`;
+const projectionKey=p=>String(p?.player_id||'').trim()?`id:${String(p.player_id).trim()}`:`name:${normName(p?.player_name)}:${normTeamName(p?.team)}`;
 
 async function sha256Utf8(raw){const bytes=new TextEncoder().encode(raw),hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function readJson(url,maxBytes=4_000_000,expectedFileSha=null,label='Entry research source'){
@@ -23,7 +23,7 @@ async function safeRoster(teamId,season){const rows=envelopeData(await readJson(
 function priorFor(prior,name,playerId=''){
   const values=Object.values(prior.players||{}).filter(v=>v&&typeof v==='object'),pid=String(playerId||'').trim();
   if(pid){const byId=values.filter(v=>Array.isArray(v.source_player_ids)&&v.source_player_ids.map(String).includes(pid));requireThat(byId.length<=1,`Historical player ID ${pid} maps to multiple priors`);if(byId.length===1)return byId[0];}
-  return prior.players?.[norm(name)]||null;
+  return prior.players?.[normName(name)]||null;
 }
 function compactPrior(prior,name,playerId=''){const p=priorFor(prior,name,playerId);return p?{player_key:p.player_key,source_player_ids:p.source_player_ids||[],last_team:p.last_team,last_season:p.last_season,last_match_time:p.last_match_time,features:p.features}:null;}
 async function pinnedPrior(meta){const commit=meta.lock.source_commit,manifest=await readJson(rawUrl(commit,'manifest.json'),200_000);requireThat(manifest?.schema_version==='nbl_runtime_assets_v1'&&manifest.market_data===false,'Pinned manifest invalid');requireThat(String(manifest.asset_revision)===String(meta.lock.asset_revision),'Pinned manifest revision drift');const priorMeta=manifest.prior_snapshot||{};requireThat(priorMeta.path&&/^[a-f0-9]{64}$/.test(String(priorMeta.canonical_sha256||''))&&/^[a-f0-9]{64}$/.test(String(priorMeta.file_sha256||'')),'Pinned prior metadata invalid');const prior=await readJson(rawUrl(commit,priorMeta.path),4_000_000,priorMeta.file_sha256,'Pinned prior');requireThat(prior.market_data===false&&String(prior.snapshot_revision)===String(meta.lock.snapshot_revision),'Pinned prior identity mismatch');return {manifest,prior};}
@@ -67,8 +67,8 @@ async function serverizeHead(qbase,prior,meta,researchPlayer,head,stat){
 }
 
 async function serverizeProjections(meta,storage,research,projections){
-  requireThat(Array.isArray(projections)&&projections.length>0,'projections required');const {prior}=await pinnedPrior(meta),qbase={};for(const stat of headsFor(meta.lock.run_mode)){qbase[stat]=await storage.get('q:'+stat);requireThat(qbase[stat],`Pinned ${stat} QBASE missing`);}const researchById=new Map(),researchByNameTeam=new Map();for(const p of research.players){if(String(p.player_id||'').trim())researchById.set(String(p.player_id).trim(),p);researchByNameTeam.set(`${norm(p.player_name)}:${norm(p.team)}`,p);}const out=[];
-  for(const p of projections){const rp=String(p.player_id||'').trim()?researchById.get(String(p.player_id).trim()):researchByNameTeam.get(`${norm(p.player_name)}:${norm(p.team)}`);requireThat(rp,`Projection ${projectionKey(p)} missing locked research player`);const supplied=p.heads||{},heads={};for(const stat of headsFor(meta.lock.run_mode))heads[stat]=await serverizeHead(qbase[stat],prior,meta,rp,supplied[stat],stat);out.push({...p,player_id:rp.player_id??p.player_id,player_name:rp.player_name,team:rp.team,heads});}
+  requireThat(Array.isArray(projections)&&projections.length>0,'projections required');const {prior}=await pinnedPrior(meta),qbase={};for(const stat of headsFor(meta.lock.run_mode)){qbase[stat]=await storage.get('q:'+stat);requireThat(qbase[stat],`Pinned ${stat} QBASE missing`);}const researchById=new Map(),researchByNameTeam=new Map();for(const p of research.players){if(String(p.player_id||'').trim())researchById.set(String(p.player_id).trim(),p);researchByNameTeam.set(`${normName(p.player_name)}:${normTeamName(p.team)}`,p);}const out=[];
+  for(const p of projections){const rp=String(p.player_id||'').trim()?researchById.get(String(p.player_id).trim()):researchByNameTeam.get(`${normName(p.player_name)}:${normTeamName(p.team)}`);requireThat(rp,`Projection ${projectionKey(p)} missing locked research player`);const supplied=p.heads||{},heads={};for(const stat of headsFor(meta.lock.run_mode))heads[stat]=await serverizeHead(qbase[stat],prior,meta,rp,supplied[stat],stat);out.push({...p,player_id:rp.player_id??p.player_id,player_name:rp.player_name,team:rp.team,heads});}
   requireThat(marketKeyHits(out).length===0,'Serverized projections market-boundary failure');return out;
 }
 

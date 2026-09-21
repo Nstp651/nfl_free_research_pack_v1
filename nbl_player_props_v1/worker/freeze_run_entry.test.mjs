@@ -15,20 +15,20 @@ async function sha256WireJson(x){const bytes=new TextEncoder().encode(JSON.strin
 function selected(intercept){return {family:'poisson',features:['player_minutes_mean_3','home_flag'],imputer_medians:[25,0],scaler_mean:[0,0],scaler_scale:[1,1],coefficients:[0.02,0.05],intercept};}
 function thresholdPolicy(max){return {schema_version:'nbl_threshold_validation_v1',direct_validated_thresholds:Array.from({length:max},(_,i)=>i+1),tail_supported_thresholds:[],extreme_tail_thresholds:[],best_single_eligible_thresholds:Array.from({length:max},(_,i)=>i+1),evidence_sha256:'f'.repeat(64)};}
 
-async function harness(){
+async function harness({homeTeam='Sydney Kings',priorHomeTeam='Sydney Kings'}={}){
   const commit='1'.repeat(40);
   const qA={model_name:'assists q',model_version:'0.1.0',feature_schema:'nbl_player_pregame_v1',stat_type:'assists',market_data:false,selected_model:selected(Math.log(2)),walk_forward:{nb2_alpha_oos:0.2},probability_contract:{max_count:20,threshold_validation_policy:thresholdPolicy(20)}};
   const qR={model_name:'rebounds q',model_version:'0.1.0',feature_schema:'nbl_player_pregame_v1',stat_type:'rebounds',market_data:false,selected_model:selected(Math.log(4)),walk_forward:{nb2_alpha_oos:0.25},probability_contract:{max_count:30,threshold_validation_policy:thresholdPolicy(30)}};
-  const prior={schema_version:'nbl_historical_prior_snapshot_v1',market_data:false,snapshot_revision:'snap123',players:{testguard:{player_key:'testguard',last_team:'Sydney Kings',last_season:'2025-2026',last_season_start:2025,last_match_time:'2026-02-01T00:00:00Z',features:{player_minutes_mean_3:29}}},teams:{'Sydney Kings':{team:'Sydney Kings',last_season:'2025-2026',last_season_start:2025,last_match_time:'2026-02-01T00:00:00Z',features:{}},'Perth Wildcats':{team:'Perth Wildcats',last_season:'2025-2026',last_season_start:2025,last_match_time:'2026-02-02T00:00:00Z',features:{}}}};
+  const prior={schema_version:'nbl_historical_prior_snapshot_v1',market_data:false,snapshot_revision:'snap123',players:{testguard:{player_key:'testguard',last_team:priorHomeTeam,last_season:'2025-2026',last_season_start:2025,last_match_time:'2026-02-01T00:00:00Z',features:{player_minutes_mean_3:29}}},teams:{[priorHomeTeam]:{team:priorHomeTeam,last_season:'2025-2026',last_season_start:2025,last_match_time:'2026-02-01T00:00:00Z',features:{}},'Perth Wildcats':{team:'Perth Wildcats',last_season:'2025-2026',last_season_start:2025,last_match_time:'2026-02-02T00:00:00Z',features:{}}}};
   const manifest={schema_version:'nbl_runtime_assets_v1',market_data:false,asset_revision:'abcdef1234567890',qbase:{assists:{path:'model/qbase_assists_v0.1.0.json',canonical_sha256:await sha256Json(qA),file_sha256:await sha256WireJson(qA)},rebounds:{path:'model/qbase_rebounds_v0.1.0.json',canonical_sha256:await sha256Json(qR),file_sha256:await sha256WireJson(qR)}},prior_snapshot:{path:'prior_snapshot.json',canonical_sha256:await sha256Json(prior),file_sha256:await sha256WireJson(prior),snapshot_revision:'snap123'}};
-  const schedule={data:[{id:'fixture-1',start_time_datetime:new Date(Date.now()+2*86400000).toISOString(),match_status:'scheduled',home_team:{id:'home-id',name:'Sydney Kings'},away_team:{id:'away-id',name:'Perth Wildcats'},venue:{id:'v1',name:'Arena'}}]};
+  const schedule={data:[{id:'fixture-1',start_time_datetime:new Date(Date.now()+2*86400000).toISOString(),match_status:'scheduled',home_team:{id:'home-id',name:homeTeam},away_team:{id:'away-id',name:'Perth Wildcats'},venue:{id:'v1',name:'Arena'}}]};
   const original=globalThis.fetch;globalThis.fetch=async url=>{url=String(url);if(url.endsWith('/commits/main'))return jr({sha:commit});if(url.endsWith('/data/manifest.json'))return jr(manifest);if(url.endsWith('/data/model/qbase_assists_v0.1.0.json'))return jr(qA);if(url.endsWith('/data/model/qbase_rebounds_v0.1.0.json'))return jr(qR);if(url.endsWith('/data/prior_snapshot.json'))return jr(prior);if(url.includes('/matches/in/season/2026/all'))return jr(schedule);if(url.includes('/players/for/team/home-id/in/season/2026'))return jr({data:[{id:'p1',name:'Test Guard',position:'G'}]});if(url.includes('/players/for/team/away-id/in/season/2026'))return jr({data:[{id:'p2',name:'Away Guard',position:'G'}]});return jr({error:'unexpected '+url},404);};
   return {manifest,restore:()=>globalThis.fetch=original};
 }
 const runId='a'.repeat(64);
 async function req(run,method,path,body){return run.fetch(new Request(`https://example.test/v1/match-runs/${runId}${path}`,{method,headers:{'content-type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)})}));}
-function research(rev){return {schema_version:'nbl_fixture_research_v1',market_data:false,fixture_id:'fixture-1',pack_revision:rev,run_mode:'BOTH',checked_at:'2026-09-06T01:00:00Z',sources:{official:{url:'https://nbl.com.au/news/x',title:'Official',checked_at:'2026-09-06T00:55:00Z'},report:{url:'https://example.com/report',title:'Report',checked_at:'2026-09-06T00:56:00Z'}},fixture_context:{status:'scheduled',source_ids:['official']},players:[{player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',availability_status:'ACTIVE',availability_source_ids:['official'],projected_minutes:{low:27,mean:30,high:33,source_ids:['official','report']},role:{state:'RETURNING_SAME',creation_role:'PRIMARY',frontcourt_role:'GUARD',source_ids:['report']},stat_context:{assists:{source_ids:['report'],notes:['Primary creation role verified']},rebounds:{source_ids:['report'],notes:['Rebound role verified']}}}]};}
-function projections(){return [{player_id:'p1',player_name:'Test Guard',team:'Sydney Kings',heads:{assists:{confidence:'B',fragility:'LOW',scenarios:[{id:'base',weight:1,projected_minutes:30,method:'QBASE_MINUTES_RECOMPUTE',evidence_source_ids:['report'],assumptions:[]}]},rebounds:{confidence:'B',fragility:'LOW',scenarios:[{id:'base',weight:1,method:'QBASE_RUNTIME_SCORE',evidence_source_ids:['report'],assumptions:[]}]}}}];}
+function research(rev,team='Sydney Kings'){return {schema_version:'nbl_fixture_research_v1',market_data:false,fixture_id:'fixture-1',pack_revision:rev,run_mode:'BOTH',checked_at:'2026-09-06T01:00:00Z',sources:{official:{url:'https://nbl.com.au/news/x',title:'Official',checked_at:'2026-09-06T00:55:00Z'},report:{url:'https://example.com/report',title:'Report',checked_at:'2026-09-06T00:56:00Z'}},fixture_context:{status:'scheduled',source_ids:['official']},players:[{player_id:'p1',player_name:'Test Guard',team,availability_status:'ACTIVE',availability_source_ids:['official'],projected_minutes:{low:27,mean:30,high:33,source_ids:['official','report']},role:{state:'RETURNING_SAME',creation_role:'PRIMARY',frontcourt_role:'GUARD',source_ids:['report']},stat_context:{assists:{source_ids:['report'],notes:['Primary creation role verified']},rebounds:{source_ids:['report'],notes:['Rebound role verified']}}}]};}
+function projections(team='Sydney Kings'){return [{player_id:'p1',player_name:'Test Guard',team,heads:{assists:{confidence:'B',fragility:'LOW',scenarios:[{id:'base',weight:1,projected_minutes:30,method:'QBASE_MINUTES_RECOMPUTE',evidence_source_ids:['report'],assumptions:[]}]},rebounds:{confidence:'B',fragility:'LOW',scenarios:[{id:'base',weight:1,method:'QBASE_RUNTIME_SCORE',evidence_source_ids:['report'],assumptions:[]}]}}}];}
 function importResearch(rev){return {schema_version:'nbl_fixture_research_v1',market_data:false,fixture_id:'fixture-1',pack_revision:rev,run_mode:'BOTH',checked_at:'2026-09-06T01:00:00Z',sources:{official:{url:'https://nbl.com.au/news/x',title:'Official',checked_at:'2026-09-06T00:55:00Z'},prior:{url:'https://example.com/prior',title:'Prior competition logs',checked_at:'2026-09-06T00:56:00Z'}},fixture_context:{status:'scheduled',source_ids:['official']},players:[{player_id:'p2',player_name:'Away Guard',team:'Perth Wildcats',availability_status:'ACTIVE',availability_source_ids:['official'],projected_minutes:{low:24,mean:28,high:32,source_ids:['official','prior']},role:{state:'NEW_TO_NBL',creation_role:'SECONDARY',frontcourt_role:'GUARD',source_ids:['prior']},stat_context:{assists:{source_ids:['prior'],notes:['Role-comparable prior competition assists sample']},rebounds:{source_ids:['prior'],notes:['Role-comparable prior competition rebounds sample']}}}]};}
 function importProjections(){const receipt='b'.repeat(64);return [{player_id:'p2',player_name:'Away Guard',team:'Perth Wildcats',heads:{assists:{confidence:'B',fragility:'LOW',scenarios:[{id:'prior_a',weight:1,mean:4.2,method:'PRIOR_COMP_TRANSLATION',evidence_source_ids:['prior'],assumptions:['role comparable'],quant_input_receipt_sha256:receipt}]},rebounds:{confidence:'B',fragility:'LOW',scenarios:[{id:'prior_r',weight:1,mean:5.8,method:'PRIOR_COMP_TRANSLATION',evidence_source_ids:['prior'],assumptions:['role comparable'],quant_input_receipt_sha256:receipt}]}}}];}
 
@@ -55,4 +55,25 @@ test('server rejects a client attempt to alter returning-player QBASE mean',asyn
 
 test('locked asset revision cannot drift',async()=>{
   const h=await harness();try{const run=new NblMatchRun(new MemoryState(),{});await req(run,'POST','',{fixture_id:'fixture-1',season_start:2026,run_mode:'BOTH'});const res=await req(run,'POST','/research',research('wrong'));assert.equal(res.status,422);assert.match((await res.json()).error,/identity mismatch/);}finally{h.restore();}
+});
+
+
+test('actual Worker path resolves NZ Breakers fixture to canonical New Zealand Breakers prior',async()=>{
+  const h=await harness({homeTeam:'NZ Breakers',priorHomeTeam:'New Zealand Breakers'});
+  try{
+    const run=new NblMatchRun(new MemoryState(),{});
+    let res=await req(run,'POST','',{fixture_id:'fixture-1',season_start:2026,run_mode:'BOTH'});
+    assert.equal(res.status,200);
+    res=await req(run,'GET','/research');
+    assert.equal(res.status,200);
+    let d=await res.json();
+    assert.equal(d.home_roster[0].team,'NZ Breakers');
+    assert.equal(d.home_roster[0].qbase_baseline.assists.status,'SERVER_QBASE_RUNTIME_SCORE');
+    res=await req(run,'POST','/research',research(h.manifest.asset_revision,'New Zealand Breakers'));
+    assert.equal(res.status,200);
+    res=await req(run,'POST','/compute',{projections:projections('NZ Breakers')});
+    assert.equal(res.status,200);
+    d=await res.json();
+    assert.equal(d.status,'FROZEN');
+  }finally{h.restore();}
 });
