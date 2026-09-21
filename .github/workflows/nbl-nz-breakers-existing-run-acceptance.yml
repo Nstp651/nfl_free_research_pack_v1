@@ -1,0 +1,51 @@
+name: NBL NZ Breakers Existing Run Acceptance
+
+on:
+  push:
+    branches: [acceptance/nbl-nz-breakers-20260922]
+
+permissions:
+  contents: read
+
+jobs:
+  accept:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Resume preserved NZ Breakers run through research seed
+        shell: bash
+        run: |
+          node <<'NODE'
+          const BASE='https://nbl-player-props-research-v1.nickarnott01.workers.dev';
+          const RUN='d568b31c198579c30ff48f63faaf325f40071fc33c537d99a7b157eab888fd9a';
+          const FIXTURE='3700706c-58ad-11f1-ae9e-a93048d70593';
+          const need=(x,m)=>{if(!x)throw new Error(m)};
+          async function get(path){
+            const r=await fetch(BASE+path,{headers:{accept:'application/json','user-agent':'nbl-nz-breakers-regression/1.0'},signal:AbortSignal.timeout(30000)});
+            const text=await r.text(); let body; try{body=JSON.parse(text)}catch{body={raw:text}};
+            return {status:r.status,ok:r.ok,body};
+          }
+          const state=await get('/v1/match-runs/'+RUN);
+          need(state.ok,'existing run lookup failed '+state.status+': '+JSON.stringify(state.body));
+          need(String(state.body?.lock?.fixture_id)===FIXTURE,'fixture lock mismatch');
+          const fixture=state.body.lock?.fixture;
+          const names=[fixture?.home_team?.name,fixture?.away_team?.name].map(String);
+          need(names.includes('NZ Breakers'),'locked upstream fixture does not contain exact NZ Breakers identity: '+JSON.stringify(names));
+          if(state.body.status==='FROZEN'){
+            console.log('NBL_NZ_BREAKERS_OLD_RUN_ALREADY_FROZEN=PASS');
+            console.log(JSON.stringify({run_id:RUN,status:state.body.status,fixture_id:FIXTURE,fixture_names:names,source_commit:state.body.lock.source_commit,asset_revision:state.body.lock.asset_revision,snapshot_revision:state.body.lock.snapshot_revision}));
+            process.exit(0);
+          }
+          const seed=await get('/v1/match-runs/'+RUN+'/research');
+          need(seed.ok,'research seed resume failed '+seed.status+': '+JSON.stringify(seed.body));
+          need(seed.body?.market_data===false,'research seed crossed market boundary');
+          need(String(seed.body?.fixture?.id)===FIXTURE,'research seed fixture mismatch');
+          const seedNames=[seed.body.fixture?.home_team?.name,seed.body.fixture?.away_team?.name].map(String);
+          need(seedNames.includes('NZ Breakers'),'research seed lost exact upstream NZ Breakers identity');
+          const roster=[...(seed.body.home_roster||[]),...(seed.body.away_roster||[])];
+          need(roster.length>0,'research seed roster empty');
+          const runtimeScored=roster.filter(p=>p?.qbase_baseline?.assists?.status==='SERVER_QBASE_RUNTIME_SCORE'||p?.qbase_baseline?.rebounds?.status==='SERVER_QBASE_RUNTIME_SCORE').length;
+          need(runtimeScored>0,'no returning player received server QBASE baseline');
+          console.log('NBL_NZ_BREAKERS_OLD_RUN_RESUME=PASS');
+          console.log(JSON.stringify({run_id:RUN,status:state.body.status,fixture_id:FIXTURE,fixture_names:seedNames,source_commit:state.body.lock.source_commit,asset_revision:state.body.lock.asset_revision,snapshot_revision:seed.body.snapshot_revision,roster_count:roster.length,runtime_scored_players:runtimeScored}));
+          NODE
