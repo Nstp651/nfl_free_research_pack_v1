@@ -24223,8 +24223,8 @@
     }
   },
   "schema_version": "nbl_historical_prior_snapshot_v1",
-  "snapshot_revision": "a10442d0bcde70ddcd8f",
-  "source_receipt_sha256": "611d944248a9afb7c0b51d0c654463cff28e4ef73751aeec62fe29d2cf8f592b",
+  "snapshot_revision": "1647114e4c16f33f26ac",
+  "source_receipt_sha256": "d9dd840da03590ebb8d5c9b7561da6ff47d32adb02a1f064e00227668f551ff7",
   "teams": {
     "Adelaide 36ers": {
       "features": {

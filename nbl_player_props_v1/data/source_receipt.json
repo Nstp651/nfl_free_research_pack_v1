@@ -15,7 +15,7 @@
   "minutes_binding": "row-level seconds/60 with parsed minutes fallback",
   "minutes_non_null_rate": 1.0,
   "normalized_name_keys_with_multiple_source_ids": 134,
-  "output_sha256": "ca6275b01190c87e9f5ddf93dc7a38b0b8aaf22dbaa72da5fb280ab876c06876",
+  "output_sha256": "68524e407f3514e021efb684a007e36abaa6479eb51db6af86f3a9108e965b46",
   "player_identity_method": "normalized_name_with_source_player_id_retained",
   "players": 640,
   "rebounds_non_null": 36521,
@@ -37,12 +37,12 @@
   ],
   "sources": {
     "player": {
-      "bytes": 15656602,
+      "bytes": 15656636,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DF170C1EFF1BE3\"",
-      "last_modified": "Sun, 20 Sep 2026 11:41:33 GMT",
+      "etag": "\"0x8DF17CDBAC967E1\"",
+      "last_modified": "Mon, 21 Sep 2026 10:47:27 GMT",
       "name": "box_player.csv",
-      "sha256": "sha256:7b4d2470f6e82226af72f1bc7edd6cd7dcc5c2f2ee2a317b8aab76cc8e552183",
+      "sha256": "sha256:2432a6e7566d0c67d4fdf7797f2efeb055400195c70349db9f157f8fed28257a",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
       "tag": "box_player",
       "url": "https://github.com/JaseZiv/nblr_data/releases/download/box_player/box_player.csv"
@@ -50,8 +50,8 @@
     "results": {
       "bytes": 2003890,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DF170C0FA8039C\"",
-      "last_modified": "Sun, 20 Sep 2026 11:41:07 GMT",
+      "etag": "\"0x8DF17CDAE8719D7\"",
+      "last_modified": "Mon, 21 Sep 2026 10:47:07 GMT",
       "name": "results_wide.csv",
       "sha256": "sha256:85fc716e1655f49519c563cc88bd8add1a60befc1cfa660f3f41bc750bf08859",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
@@ -61,8 +61,8 @@
     "team": {
       "bytes": 951957,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DF170C1374DB3D\"",
-      "last_modified": "Sun, 20 Sep 2026 11:41:14 GMT",
+      "etag": "\"0x8DF17CDB2555EBB\"",
+      "last_modified": "Mon, 21 Sep 2026 10:47:13 GMT",
       "name": "box_team.csv",
       "sha256": "sha256:d14a4c25042bc4c1e5dfd555d7f7106fb6f582bdd333708ad88c018bc2939965",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
