@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-21T06:44:38.892517+00:00",
+  "generated_at_utc": "2026-09-21T12:39:32.973604+00:00",
   "fixture": {
     "game_id": "2026_02_IND_KC",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "KC",
     "stadium": "GEHA Field at Arrowhead Stadium",
     "roof": "outdoors",
-    "surface": null,
+    "surface": "grass",
     "location": "Home"
   },
   "data_state": {
@@ -8207,5 +8207,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "1fde8b5620f26480"
+  "pack_revision": "c908d7ab60d3b591"
 }

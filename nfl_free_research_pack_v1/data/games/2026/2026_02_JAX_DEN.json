@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-21T06:44:38.331895+00:00",
+  "generated_at_utc": "2026-09-21T12:39:32.410342+00:00",
   "fixture": {
     "game_id": "2026_02_JAX_DEN",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "DEN",
     "stadium": "Empower Field at Mile High",
     "roof": "outdoors",
-    "surface": null,
+    "surface": "grass",
     "location": "Home"
   },
   "data_state": {
@@ -8544,5 +8544,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "6fd6803ca734a5c3"
+  "pack_revision": "4935996f20336510"
 }

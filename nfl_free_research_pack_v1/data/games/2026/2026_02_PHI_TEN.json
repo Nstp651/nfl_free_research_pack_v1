@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-21T06:44:38.191130+00:00",
+  "generated_at_utc": "2026-09-21T12:39:32.263679+00:00",
   "fixture": {
     "game_id": "2026_02_PHI_TEN",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "TEN",
     "stadium": "Nissan Stadium",
     "roof": "outdoors",
-    "surface": null,
+    "surface": "grass",
     "location": "Home"
   },
   "data_state": {
@@ -8843,5 +8843,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "76ca681439bc17bf"
+  "pack_revision": "9bfc1383df4af7d6"
 }

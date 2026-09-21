@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-21T06:44:37.522547+00:00",
+  "generated_at_utc": "2026-09-21T12:39:31.607553+00:00",
   "fixture": {
     "game_id": "2026_02_NO_BAL",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "BAL",
     "stadium": "M&T Bank Stadium",
     "roof": "outdoors",
-    "surface": null,
+    "surface": "grass",
     "location": "Home"
   },
   "data_state": {
@@ -8853,5 +8853,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "088ba28ff80b11c8"
+  "pack_revision": "1ff8f35d4df49a31"
 }

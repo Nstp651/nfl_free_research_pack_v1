@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-21T06:44:37.969912+00:00",
+  "generated_at_utc": "2026-09-21T12:39:32.046046+00:00",
   "fixture": {
     "game_id": "2026_02_GB_NYJ",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "NYJ",
     "stadium": "MetLife Stadium",
     "roof": "outdoors",
-    "surface": null,
+    "surface": "fieldturf",
     "location": "Home"
   },
   "data_state": {
@@ -9036,5 +9036,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "05526ac43d62394c"
+  "pack_revision": "cfbb3e0445c4ad0f"
 }

@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-21T06:44:38.444163+00:00",
+  "generated_at_utc": "2026-09-21T12:39:32.523581+00:00",
   "fixture": {
     "game_id": "2026_02_LV_LAC",
     "season": 2026,
@@ -15,7 +15,7 @@
     "home_team": "LAC",
     "stadium": "SoFi Stadium",
     "roof": "dome",
-    "surface": null,
+    "surface": "matrixturf",
     "location": "Home"
   },
   "data_state": {
@@ -9100,5 +9100,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "521faabfbb29b7ee"
+  "pack_revision": "f027e7dd1fe2d347"
 }
