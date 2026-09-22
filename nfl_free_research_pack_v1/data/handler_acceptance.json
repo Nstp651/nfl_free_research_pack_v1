@@ -1,297 +1,64 @@
 {
-  "tested_at_utc": "2026-09-22T00:41:45.111Z",
+  "tested_at_utc": "2026-09-22T06:42:01.010Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/5007412fff00c84ee47ff966232c939e9faf4d40/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/b5be9d462be82dcb9c9c5a5383722ce1f4107bf7/nfl_free_research_pack_v1/data",
   "season": 2026,
-  "week": 2,
+  "week": 3,
   "games": [
     {
-      "game_id": "2026_02_DET_BUF",
-      "pack_revision": "724e66b6a98292ba",
+      "game_id": "2026_03_ATL_GB",
+      "pack_revision": "d71ae4ccc27fbf84",
       "fixture": {
-        "game_id": "2026_02_DET_BUF",
+        "game_id": "2026_03_ATL_GB",
         "season": 2026,
-        "week": 2,
+        "week": 3,
         "game_type": "REG",
-        "gameday": "2026-09-17",
+        "gameday": "2026-09-24",
         "weekday": "Thursday",
         "gametime": "20:15",
-        "away_team": "DET",
-        "home_team": "BUF",
-        "stadium": "Highmark Stadium",
+        "away_team": "ATL",
+        "home_team": "GB",
+        "stadium": "Lambeau Field",
         "roof": "outdoors",
         "surface": "grass",
         "location": "Home"
       },
-      "total_players": 37,
-      "pages": 4,
+      "total_players": 42,
+      "pages": 5,
       "page_sizes": [
         {
-          "chars": 60799,
-          "bytes": 60845
+          "chars": 59025,
+          "bytes": 59069
         },
         {
-          "chars": 57650,
-          "bytes": 57688
+          "chars": 56319,
+          "bytes": 56357
         },
         {
-          "chars": 56804,
-          "bytes": 56850
+          "chars": 49244,
+          "bytes": 49280
         },
         {
-          "chars": 36522,
-          "bytes": 36548
+          "chars": 51001,
+          "bytes": 51033
+        },
+        {
+          "chars": 18693,
+          "bytes": 18703
         }
       ],
       "players_by_team": {
-        "DET": 18,
-        "BUF": 19
-      },
-      "rookies": [
-        "Ja'Mori Maclin",
-        "Skyler Bell",
-        "Kendrick Law"
-      ],
-      "transfers": [
-        "DJ Moore",
-        "Greg Dortch",
-        "Trent Sherfield",
-        "Isiah Pacheco",
-        "Tyler Conklin",
-        "Tay Martin"
-      ],
-      "missing_prior_ngs": 29,
-      "missing_prior_ftn": 13,
-      "source_receipt": {
-        "availability": {
-          "player_stats": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 18130,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 18540,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 1118,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "team_stats": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 544,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 544,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 32,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "pbp": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 47274,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 46452,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 2756,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "ftn": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 48031,
-              "through_week": 22,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 47316,
-              "through_week": 22,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 2675,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "snap": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 25398,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 25395,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 1492,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "pfr_rec": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 4254,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 4316,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 253,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "ngs_receiving": {
-            "2024": {
-              "status": "AVAILABLE",
-              "rows": 1382,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2025": {
-              "status": "AVAILABLE",
-              "rows": 1333,
-              "through_week": 18,
-              "upstream_publication_time": null
-            },
-            "2026": {
-              "status": "AVAILABLE",
-              "rows": 74,
-              "through_week": 1,
-              "upstream_publication_time": null
-            }
-          },
-          "current_roster": {
-            "rows": 2980,
-            "status": "AVAILABLE",
-            "context": "latest available; not a historical point-in-time snapshot"
-          },
-          "current_depth": {
-            "rows": 545184,
-            "status": "AVAILABLE",
-            "context": "latest available; not a historical point-in-time snapshot"
-          }
-        },
-        "nflverse": [
-          "play-by-play",
-          "player stats",
-          "team stats",
-          "rosters",
-          "depth charts",
-          "Next Gen Stats",
-          "PFR snap counts",
-          "PFR advanced receiving",
-          "FTN charting subset via nflverse"
-        ],
-        "ftn_attribution": "FTN Data via nflverse; free subset licensed CC-BY-SA 4.0.",
-        "generated_data_policy": "Pre-market football research only."
-      },
-      "statistical_cutoff": {
-        "mode": "EARLY_SEASON",
-        "current_season_data_through_week": 1,
-        "current_regular_season_weeks_available": 1,
-        "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
-        "historical_backtest_eligible": false,
-        "target_week": 2,
-        "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
-        "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
-        "injury_feed": "NOT RELIED ON — verify through official/live research",
-        "preseason_usage": "NOT CLAIMED FROM NFLVERSE REGULAR-SEASON PBP; verify via official gamebooks/current reporting"
-      }
-    },
-    {
-      "game_id": "2026_02_CAR_ATL",
-      "pack_revision": "854b57d78bafad36",
-      "fixture": {
-        "game_id": "2026_02_CAR_ATL",
-        "season": 2026,
-        "week": 2,
-        "game_type": "REG",
-        "gameday": "2026-09-20",
-        "weekday": "Sunday",
-        "gametime": "13:00",
-        "away_team": "CAR",
-        "home_team": "ATL",
-        "stadium": "Mercedes-Benz Stadium",
-        "roof": "closed",
-        "surface": "fieldturf",
-        "location": "Home"
-      },
-      "total_players": 40,
-      "pages": 4,
-      "page_sizes": [
-        {
-          "chars": 54298,
-          "bytes": 54342
-        },
-        {
-          "chars": 50240,
-          "bytes": 50276
-        },
-        {
-          "chars": 53284,
-          "bytes": 53322
-        },
-        {
-          "chars": 55522,
-          "bytes": 55558
-        }
-      ],
-      "players_by_team": {
-        "CAR": 21,
-        "ATL": 19
+        "ATL": 19,
+        "GB": 23
       },
       "rookies": [
         "Cash Jones",
         "Jack Velling",
         "Vinny Anthony II",
         "Zachariah Branch",
-        "Chris Brazzell II",
-        "E.J. Williams Jr."
+        "Damon Bankston",
+        "J. Michael Sturdivant"
       ],
       "transfers": [
         "Brian Robinson",
@@ -301,14 +68,12 @@
         "Beaux Collins",
         "Jahan Dotson",
         "Olamide Zaccheaus",
-        "AJ Dillon",
-        "Darren Waller",
-        "Feleipe Franks",
-        "Casey Washington",
-        "John Metchie III"
+        "Kaleb Johnson",
+        "Jonnu Smith",
+        "Skyy Moore"
       ],
-      "missing_prior_ngs": 34,
-      "missing_prior_ftn": 15,
+      "missing_prior_ngs": 37,
+      "missing_prior_ftn": 17,
       "source_receipt": {
         "availability": {
           "player_stats": {
@@ -326,8 +91,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 1118,
-              "through_week": 1,
+              "rows": 2225,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -346,8 +111,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 32,
-              "through_week": 1,
+              "rows": 64,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -366,8 +131,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 2756,
-              "through_week": 1,
+              "rows": 5489,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -386,8 +151,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 2675,
-              "through_week": 1,
+              "rows": 5174,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -406,8 +171,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 1492,
-              "through_week": 1,
+              "rows": 2901,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -426,8 +191,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 253,
-              "through_week": 1,
+              "rows": 265,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -446,8 +211,8 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 74,
-              "through_week": 1,
+              "rows": 143,
+              "through_week": 2,
               "upstream_publication_time": null
             }
           },
@@ -457,7 +222,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 545184,
+            "rows": 547429,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -478,11 +243,263 @@
       },
       "statistical_cutoff": {
         "mode": "EARLY_SEASON",
-        "current_season_data_through_week": 1,
-        "current_regular_season_weeks_available": 1,
+        "current_season_data_through_week": 2,
+        "current_regular_season_weeks_available": 2,
         "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
         "historical_backtest_eligible": false,
-        "target_week": 2,
+        "target_week": 3,
+        "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
+        "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
+        "injury_feed": "NOT RELIED ON — verify through official/live research",
+        "preseason_usage": "NOT CLAIMED FROM NFLVERSE REGULAR-SEASON PBP; verify via official gamebooks/current reporting"
+      }
+    },
+    {
+      "game_id": "2026_03_ARI_SF",
+      "pack_revision": "caf7842dc3513d4a",
+      "fixture": {
+        "game_id": "2026_03_ARI_SF",
+        "season": 2026,
+        "week": 3,
+        "game_type": "REG",
+        "gameday": "2026-09-27",
+        "weekday": "Sunday",
+        "gametime": "16:05",
+        "away_team": "ARI",
+        "home_team": "SF",
+        "stadium": "Levi's Stadium",
+        "roof": "outdoors",
+        "surface": "grass",
+        "location": "Home"
+      },
+      "total_players": 44,
+      "pages": 5,
+      "page_sizes": [
+        {
+          "chars": 49918,
+          "bytes": 49956
+        },
+        {
+          "chars": 62303,
+          "bytes": 62349
+        },
+        {
+          "chars": 58006,
+          "bytes": 58054
+        },
+        {
+          "chars": 58270,
+          "bytes": 58314
+        },
+        {
+          "chars": 25111,
+          "bytes": 25123
+        }
+      ],
+      "players_by_team": {
+        "ARI": 21,
+        "SF": 23
+      },
+      "rookies": [
+        "Jeremiyah Love",
+        "Jameson Geers",
+        "Harrison Wallace III",
+        "Reggie Virgil",
+        "Kaelon Black",
+        "Khalil Dinkins",
+        "De'Zhaun Stribling",
+        "Wesley Grimes",
+        "Will Pauling"
+      ],
+      "transfers": [
+        "Evan Hull",
+        "Tyler Allgeier",
+        "Hunter Long",
+        "Teagan Quitoriano",
+        "Devin Duvernay",
+        "Kendrick Bourne",
+        "Jack Stoll",
+        "Christian Kirk",
+        "Deebo Samuel Sr.",
+        "KhaDarel Hodge",
+        "Mike Evans"
+      ],
+      "missing_prior_ngs": 34,
+      "missing_prior_ftn": 16,
+      "source_receipt": {
+        "availability": {
+          "player_stats": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 18130,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 18540,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 2225,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "team_stats": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 544,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 544,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 64,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "pbp": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 47274,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 46452,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 5489,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "ftn": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 48031,
+              "through_week": 22,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 47316,
+              "through_week": 22,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 5174,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "snap": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 25398,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 25395,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 2901,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "pfr_rec": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 4254,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 4316,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 265,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "ngs_receiving": {
+            "2024": {
+              "status": "AVAILABLE",
+              "rows": 1382,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2025": {
+              "status": "AVAILABLE",
+              "rows": 1333,
+              "through_week": 18,
+              "upstream_publication_time": null
+            },
+            "2026": {
+              "status": "AVAILABLE",
+              "rows": 143,
+              "through_week": 2,
+              "upstream_publication_time": null
+            }
+          },
+          "current_roster": {
+            "rows": 2980,
+            "status": "AVAILABLE",
+            "context": "latest available; not a historical point-in-time snapshot"
+          },
+          "current_depth": {
+            "rows": 547429,
+            "status": "AVAILABLE",
+            "context": "latest available; not a historical point-in-time snapshot"
+          }
+        },
+        "nflverse": [
+          "play-by-play",
+          "player stats",
+          "team stats",
+          "rosters",
+          "depth charts",
+          "Next Gen Stats",
+          "PFR snap counts",
+          "PFR advanced receiving",
+          "FTN charting subset via nflverse"
+        ],
+        "ftn_attribution": "FTN Data via nflverse; free subset licensed CC-BY-SA 4.0.",
+        "generated_data_policy": "Pre-market football research only."
+      },
+      "statistical_cutoff": {
+        "mode": "EARLY_SEASON",
+        "current_season_data_through_week": 2,
+        "current_regular_season_weeks_available": 2,
+        "roster_context": "LATEST_AVAILABLE; NOT A POINT-IN-TIME HISTORICAL ROSTER",
+        "historical_backtest_eligible": false,
+        "target_week": 3,
         "true_route_participation": "NOT PROVIDED BY THIS FREE PACK IN-SEASON",
         "route_proxy_rule": "offense snap share may be shown only as PROXY; never treat it as routes or route participation",
         "injury_feed": "NOT RELIED ON — verify through official/live research",
@@ -514,7 +531,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-22T00:41:39.375805+00:00",
+      "last_checked_at_utc": "2026-09-22T06:41:55.775204+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
