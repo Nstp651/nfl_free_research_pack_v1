@@ -8,6 +8,7 @@ The first run must be `SHADOW`. Confirm all of the following:
 - `OPERATOR_TOKEN` is configured as a Worker secret;
 - `/health` reports the Earnings Desk schema version;
 - the historical earnings dataset has at least 20 usable broad events and at least 8 prior events overall before the research cutoff;
+- every historical row uses `PRE_EVENT_CLOSE_TO_POST_EVENT_CLOSE_ET_V1`, records source URLs and exact price timestamps, and passes the 16:00 `America/New_York` horizon check;
 - the residual post-event-IV dataset has at least 8 usable observations and relevant moneyness/DTE cohorts;
 - event timing comes from a reliable current source;
 - no broker credentials are stored anywhere in the Worker or D1.
@@ -41,7 +42,7 @@ Keep the returned `run_id` and `universe_sha256`. Ineligible rows remain logged 
 
 For each eligible ticker, use the source hierarchy in order. Do not inspect today's option premiums, implied move, IV, Greeks, or option-derived probabilities.
 
-Map evidence into all ten versioned features and cite at least one evidence ID for every feature. Submit to:
+Submit `feature_contract_version = earn-feature-contract-v1.1.0` and the raw inputs defined in [FEATURE_SCORING_CONTRACT.md](FEATURE_SCORING_CONTRACT.md). Do not calculate or submit a `features` object: the Worker derives all ten values. For the two anchored fields, select the exact named anchor, provide an evidence-cited rationale, and do not invent an intermediate score. Cite at least one allowed evidence type for every feature. Submit to:
 
 `POST /v1/earnings/runs/{run_id}/research/{ticker}`
 
@@ -99,3 +100,20 @@ After the exit horizon, record the equivalent-horizon underlying return at `POST
 After all positions are settled, close the run with operator minutes at `POST /v1/earnings/runs/{run_id}/close`.
 
 Review `GET /v1/earnings/calibration`. Do not change model weights without a new version, backtest, and documented change note.
+
+## LIVE enablement gate
+
+The checked-in `$750` per-trade and `$1,500` daily limits are non-production placeholders. This repository supplies no replacement bankroll values. A deliberate risk review must choose the values and a non-placeholder risk-profile ID.
+
+LIVE remains blocked unless all of the following are configured together:
+
+- `EARNINGS_DESK_MODE=LIVE`;
+- a reviewed, non-placeholder `EARNINGS_RISK_PROFILE_ID`;
+- `EARNINGS_CAPITAL_LIMITS_STATUS=APPROVED_FOR_LIVE`;
+- the exact production-risk acknowledgement expected by the versioned code;
+- `EARNINGS_MODEL_CALIBRATION_STATUS=BACKTESTED_AND_APPROVED`;
+- a 64-character `EARNINGS_CALIBRATION_REPORT_SHA256`;
+- the exact calibration acknowledgement expected by the versioned code;
+- operator-approved positive integers for `LIVE_MIN_SHADOW_RUNS`, `LIVE_MIN_SETTLED_SHADOW_TRADES`, and `LIVE_MIN_SHADOW_MODEL_OUTCOMES`.
+
+The Worker queries D1 and refuses the LIVE run unless actual closed SHADOW runs, settled SHADOW trades, and SHADOW model outcomes meet those configured minimums. Do not add convenient defaults to bypass this gate.

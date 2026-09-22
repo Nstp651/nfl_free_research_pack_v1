@@ -22,6 +22,10 @@
     "ENVIRONMENT": "paper",
     "MODEL_VERSION": "M&A-V1.0.0",
     "EARNINGS_DESK_MODE": "SHADOW",
+    "EARNINGS_RISK_PROFILE_ID": "V1_PLACEHOLDER_NOT_APPROVED_FOR_LIVE",
+    "EARNINGS_CAPITAL_LIMITS_STATUS": "NON_PRODUCTION_PLACEHOLDERS",
+    // SHADOW-only placeholders. LIVE also requires explicit risk and calibration
+    // acknowledgements, an approved report hash, and operator-chosen sample minimums.
     "MAX_CORE_POSITIONS": "2",
     "MAX_CAPITAL_PER_TRADE_USD": "750",
     "MAX_DAILY_CAPITAL_USD": "1500",

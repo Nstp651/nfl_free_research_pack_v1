@@ -1,20 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kj.local/schemas/earnings-research-pack-v1.json",
-  "title": "Market-Blind Earnings Research Pack V1",
+  "$id": "https://kj.local/schemas/earnings-research-pack-v1.1.json",
+  "title": "Market-Blind Earnings Research Pack V1.1",
   "type": "object",
-  "additionalProperties": true,
-  "required": ["market_data", "ticker", "event_id", "evidence_quality", "evidence", "features", "feature_evidence", "conflicts"],
+  "additionalProperties": false,
+  "required": ["market_data", "ticker", "event_id", "evidence_quality", "evidence", "feature_contract_version", "feature_inputs", "feature_evidence", "conflicts"],
   "properties": {
     "market_data": { "const": false },
     "ticker": { "type": "string" },
     "event_id": { "type": "string" },
     "evidence_quality": { "enum": ["HIGH", "MEDIUM", "LOW"] },
+    "feature_contract_version": { "const": "earn-feature-contract-v1.1.0" },
     "evidence": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": ["evidence_id", "source_type", "url", "title", "fact", "retrieved_at"],
         "properties": {
           "evidence_id": { "type": "string" },
@@ -27,27 +29,167 @@
         }
       }
     },
-    "features": {
+    "feature_inputs": {
       "type": "object",
       "additionalProperties": false,
       "required": ["eps_revision_z", "revenue_revision_z", "guidance_trajectory", "consensus_dispersion_z", "peer_readthrough_z", "pre_earnings_drift_z", "sector_regime_z", "index_regime_z", "company_specific_z", "surprise_reaction_beta_z"],
       "properties": {
-        "eps_revision_z": { "$ref": "#/$defs/feature" },
-        "revenue_revision_z": { "$ref": "#/$defs/feature" },
-        "guidance_trajectory": { "$ref": "#/$defs/feature" },
-        "consensus_dispersion_z": { "$ref": "#/$defs/feature" },
-        "peer_readthrough_z": { "$ref": "#/$defs/feature" },
-        "pre_earnings_drift_z": { "$ref": "#/$defs/feature" },
-        "sector_regime_z": { "$ref": "#/$defs/feature" },
-        "index_regime_z": { "$ref": "#/$defs/feature" },
-        "company_specific_z": { "$ref": "#/$defs/feature" },
-        "surprise_reaction_beta_z": { "$ref": "#/$defs/feature" }
+        "eps_revision_z": { "$ref": "#/$defs/revision" },
+        "revenue_revision_z": { "$ref": "#/$defs/revision" },
+        "guidance_trajectory": { "$ref": "#/$defs/guidanceAnchor" },
+        "consensus_dispersion_z": { "$ref": "#/$defs/dispersion" },
+        "peer_readthrough_z": { "$ref": "#/$defs/peer" },
+        "pre_earnings_drift_z": { "$ref": "#/$defs/drift" },
+        "sector_regime_z": { "$ref": "#/$defs/sector" },
+        "index_regime_z": { "$ref": "#/$defs/index" },
+        "company_specific_z": { "$ref": "#/$defs/companyAnchor" },
+        "surprise_reaction_beta_z": { "$ref": "#/$defs/beta" }
       }
     },
-    "feature_evidence": { "type": "object" },
+    "feature_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eps_revision_z", "revenue_revision_z", "guidance_trajectory", "consensus_dispersion_z", "peer_readthrough_z", "pre_earnings_drift_z", "sector_regime_z", "index_regime_z", "company_specific_z", "surprise_reaction_beta_z"],
+      "properties": {
+        "eps_revision_z": { "$ref": "#/$defs/evidenceIds" },
+        "revenue_revision_z": { "$ref": "#/$defs/evidenceIds" },
+        "guidance_trajectory": { "$ref": "#/$defs/evidenceIds" },
+        "consensus_dispersion_z": { "$ref": "#/$defs/evidenceIds" },
+        "peer_readthrough_z": { "$ref": "#/$defs/evidenceIds" },
+        "pre_earnings_drift_z": { "$ref": "#/$defs/evidenceIds" },
+        "sector_regime_z": { "$ref": "#/$defs/evidenceIds" },
+        "index_regime_z": { "$ref": "#/$defs/evidenceIds" },
+        "company_specific_z": { "$ref": "#/$defs/evidenceIds" },
+        "surprise_reaction_beta_z": { "$ref": "#/$defs/evidenceIds" }
+      }
+    },
     "conflicts": { "type": "array" }
   },
   "$defs": {
-    "feature": { "type": "number", "minimum": -3, "maximum": 3 }
+    "evidenceIds": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_consensus", "prior_consensus", "historical_revision_mean", "historical_revision_std"],
+      "properties": {
+        "current_consensus": { "type": "number" },
+        "prior_consensus": { "type": "number", "not": { "const": 0 } },
+        "historical_revision_mean": { "type": "number" },
+        "historical_revision_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "guidanceAnchor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["comparable_numeric_guidance_available", "prior_low", "prior_high", "current_low", "current_high"],
+          "properties": {
+            "comparable_numeric_guidance_available": { "const": true },
+            "prior_low": { "type": "number" },
+            "prior_high": { "type": "number" },
+            "current_low": { "type": "number" },
+            "current_high": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["comparable_numeric_guidance_available", "anchor", "rationale"],
+          "properties": {
+            "comparable_numeric_guidance_available": { "const": false },
+            "anchor": { "enum": ["MATERIAL_CUT_OR_WITHDRAWAL", "CLEAR_CUT", "MODEST_CUT_OR_CAUTION", "UNCHANGED_OR_NOT_ISSUED", "MODEST_RAISE", "CLEAR_RAISE", "MATERIAL_RAISE"] },
+            "rationale": { "type": "string", "minLength": 12 }
+          }
+        }
+      ]
+    },
+    "companyAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor", "rationale"],
+      "properties": {
+        "anchor": { "enum": ["MATERIAL_ADVERSE_CONFIRMED", "ADVERSE_CONFIRMED", "MODEST_ADVERSE_CONFIRMED", "NO_NET_MATERIAL_CHANGE", "MODEST_POSITIVE_CONFIRMED", "POSITIVE_CONFIRMED", "MATERIAL_POSITIVE_CONFIRMED"] },
+        "rationale": { "type": "string", "minLength": 12 }
+      }
+    },
+    "dispersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analyst_estimates", "historical_dispersion_mean", "historical_dispersion_std"],
+      "properties": {
+        "analyst_estimates": { "type": "array", "minItems": 2, "items": { "type": "number" } },
+        "historical_dispersion_mean": { "type": "number" },
+        "historical_dispersion_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "peer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["peer_events", "historical_peer_return_mean", "historical_peer_return_std"],
+      "properties": {
+        "peer_events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["event_return", "relevance_weight"],
+            "properties": {
+              "event_return": { "type": "number" },
+              "relevance_weight": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "historical_peer_return_mean": { "type": "number" },
+        "historical_peer_return_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "drift": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_price", "pre_event_price", "benchmark_return", "historical_excess_return_mean", "historical_excess_return_std"],
+      "properties": {
+        "start_price": { "type": "number", "exclusiveMinimum": 0 },
+        "pre_event_price": { "type": "number", "exclusiveMinimum": 0 },
+        "benchmark_return": { "type": "number" },
+        "historical_excess_return_mean": { "type": "number" },
+        "historical_excess_return_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "sector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sector_start_price", "sector_end_price", "index_return", "historical_excess_return_mean", "historical_excess_return_std"],
+      "properties": {
+        "sector_start_price": { "type": "number", "exclusiveMinimum": 0 },
+        "sector_end_price": { "type": "number", "exclusiveMinimum": 0 },
+        "index_return": { "type": "number" },
+        "historical_excess_return_mean": { "type": "number" },
+        "historical_excess_return_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index_start_price", "index_end_price", "historical_return_mean", "historical_return_std"],
+      "properties": {
+        "index_start_price": { "type": "number", "exclusiveMinimum": 0 },
+        "index_end_price": { "type": "number", "exclusiveMinimum": 0 },
+        "historical_return_mean": { "type": "number" },
+        "historical_return_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "beta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["historical_surprises", "historical_event_returns", "historical_beta_mean", "historical_beta_std"],
+      "properties": {
+        "historical_surprises": { "type": "array", "minItems": 4, "items": { "type": "number" } },
+        "historical_event_returns": { "type": "array", "minItems": 4, "items": { "type": "number" } },
+        "historical_beta_mean": { "type": "number" },
+        "historical_beta_std": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
   }
 }

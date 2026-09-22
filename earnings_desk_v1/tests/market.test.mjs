@@ -57,5 +57,5 @@ test("actual candidate valuation uses ask and post-event IV uncertainty", async 
   assert.ok(value.scenario_count > pModel.distribution_draws.length);
   assert.ok(value.expected_exit_value >= 0);
   assert.ok(value.p_profit >= 0 && value.p_profit <= 1);
-  assert.equal(value.legs[0].post_event_iv_model.version, "post-event-iv-v1.0.0");
+  assert.equal(value.legs[0].post_event_iv_model.version, "post-event-iv-v1.1.0");
 });

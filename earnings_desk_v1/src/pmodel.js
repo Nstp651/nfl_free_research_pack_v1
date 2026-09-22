@@ -1,10 +1,21 @@
 import { MODEL_CONFIG, REQUIRED_FEATURES } from "./config.js";
 import { clamp, requireThat, round } from "./canonical.js";
 import { credibleWeight, inverseNormal, mean, sampleStd, summarizeDraws, weightedAverage, winsorize } from "./math.js";
+import { validateHistoricalHorizon } from "./market-time.js";
 
 function validHistoryRow(row, cutoffMs) {
   const eventMs = Date.parse(`${String(row.event_date ?? "")}T23:59:59Z`);
-  return Number.isFinite(eventMs) && eventMs < cutoffMs && Number.isFinite(Number(row.event_return));
+  if (!(Number.isFinite(eventMs) &&
+    eventMs < cutoffMs &&
+    Number.isFinite(Number(row.event_return)) &&
+    row.return_horizon_id === MODEL_CONFIG.return_horizon_id &&
+    row.return_horizon_methodology_version === MODEL_CONFIG.return_horizon_methodology_version)) return false;
+  try {
+    validateHistoricalHorizon(row, row.event_date, row.event_timing);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function cohort(history, predicate, limit) {
@@ -100,6 +111,10 @@ export function buildPModel({ event, research, history, researchCutoff }) {
   const effectiveN = tickerRows.length + 0.35 * sectorRows.length + 0.10 * broadRows.length;
   return {
     model_version: MODEL_CONFIG.model_version,
+    coefficient_status: MODEL_CONFIG.coefficient_status,
+    feature_contract_version: MODEL_CONFIG.feature_contract_version,
+    return_horizon_id: MODEL_CONFIG.return_horizon_id,
+    return_horizon_methodology_version: MODEL_CONFIG.return_horizon_methodology_version,
     market_data: false,
     ticker: event.ticker,
     event_id: event.event_id,

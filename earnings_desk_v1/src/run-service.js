@@ -1,4 +1,4 @@
-import { MODEL_VERSION, SELECTION_VERSION, VALUATION_VERSION } from "./config.js";
+import { MODEL_VERSION, RETURN_HORIZON_ID, RETURN_HORIZON_METHODOLOGY_VERSION, SELECTION_VERSION, VALUATION_VERSION } from "./config.js";
 import { canonicalJson, dateOnly, isoTimestamp, parseJsonColumn, randomId, requireThat, sha256Hex, tickerText } from "./canonical.js";
 import { buildPModel } from "./pmodel.js";
 import { validateResearchPack } from "./research.js";
@@ -6,6 +6,8 @@ import { buildCandidates, validateMarketInput } from "./market-input.js";
 import { valueCandidate } from "./option-pricing.js";
 import { selectCandidates, tradeCard } from "./selection.js";
 import { fetchEvent, fetchFreeze, fetchResearch, fetchRun, seedModelVersions } from "./repository.js";
+import { validateHistoricalHorizon } from "./market-time.js";
+import { assertLiveReadiness } from "./risk-config.js";
 
 function sydneyParts(date) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -77,8 +79,10 @@ function validateUniverse(events, cutoff, intendedExit) {
 export async function createRun(db, input, riskConfig, now = new Date()) {
   const nowIso = now.toISOString();
   const parts = sydneyParts(now);
-  const mode = String(input.mode ?? "SHADOW").toUpperCase();
+  const mode = String(input.mode ?? riskConfig.operating_mode ?? "SHADOW").toUpperCase();
   requireThat(mode === "SHADOW" || mode === "LIVE", "mode must be SHADOW or LIVE");
+  requireThat(mode === riskConfig.operating_mode, `run mode ${mode} does not match configured EARNINGS_DESK_MODE=${riskConfig.operating_mode}`, "CONFIGURATION_ERROR");
+  const liveReadiness = mode === "LIVE" ? await assertLiveReadiness(db, riskConfig) : null;
   const researchCutoff = isoTimestamp(input.research_cutoff ?? nowIso, "research_cutoff");
   requireThat(Date.parse(researchCutoff) <= now.getTime() + 120_000, "research_cutoff cannot be in the future");
   const intendedExitAt = isoTimestamp(input.intended_exit_at, "intended_exit_at");
@@ -100,7 +104,9 @@ export async function createRun(db, input, riskConfig, now = new Date()) {
     intended_exit_at: intendedExitAt,
     universe_sha256: universeSha,
     max_core_positions: riskConfig.max_core_positions,
-    max_daily_capital_usd: riskConfig.max_daily_capital_usd
+    max_daily_capital_usd: riskConfig.max_daily_capital_usd,
+    risk_profile_id: riskConfig.risk_profile_id,
+    live_readiness: liveReadiness
   };
   const runId = await sha256Hex(lock);
   await seedModelVersions(db, nowIso);
@@ -143,9 +149,9 @@ export async function submitResearch(db, runId, eventKey, input, now = new Date(
   const receiptJson = canonicalJson(receipt);
   await db.batch([
     db.prepare(`INSERT INTO earnings_research_packs
-      (research_id, run_id, event_id, ticker, research_json, research_sha256, evidence_quality, submitted_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(researchId, runId, event.event_id, event.ticker, researchJson, researchSha, validated.evidence_quality, nowIso),
+      (research_id, run_id, event_id, ticker, research_json, research_sha256, evidence_quality, feature_contract_version, submitted_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`) 
+      .bind(researchId, runId, event.event_id, event.ticker, researchJson, researchSha, validated.evidence_quality, validated.model_feature_contract, nowIso),
     db.prepare("UPDATE earnings_runs SET status = CASE WHEN status = 'RUN_LOCKED' THEN 'RESEARCH_IN_PROGRESS' ELSE status END, updated_at = ? WHERE run_id = ?")
       .bind(nowIso, runId),
     db.prepare(`INSERT INTO earnings_decision_records
@@ -163,11 +169,13 @@ export async function freezeEvent(db, runId, eventKey, now = new Date()) {
   if (existing) return parseJsonColumn(existing.freeze_json);
   const research = await fetchResearch(db, runId, event.event_id);
   const historyResult = await db.prepare(`SELECT ticker, event_date, event_timing, sector, market_cap_cohort,
+      pre_event_price_timestamp, exit_price_timestamp, return_horizon_id, return_horizon_methodology_version,
       event_return, absolute_return, gap_open_return, realized_vol_20d, pre_event_drift,
       reported_eps, consensus_eps, reported_revenue, consensus_revenue, guidance_change_z,
       estimate_revision_z, consensus_dispersion_z, sector_return, market_return, peer_variables_json
     FROM earnings_historical_events_current
-    WHERE event_date < ? ORDER BY event_date DESC LIMIT 1000`).bind(run.us_trading_date).all();
+    WHERE event_date < ? AND return_horizon_id = ? AND return_horizon_methodology_version = ?
+    ORDER BY event_date DESC LIMIT 1000`).bind(run.us_trading_date, RETURN_HORIZON_ID, RETURN_HORIZON_METHODOLOGY_VERSION).all();
   const pModel = buildPModel({ event, research: research.research, history: historyResult.results ?? [], researchCutoff: run.research_cutoff });
   const frozenAt = now.toISOString();
   const freezeCore = {
@@ -257,7 +265,14 @@ export async function ingestHistory(db, input, now = new Date()) {
   requireThat(/^https:\/\//.test(String(input.source_url ?? "")), "history source_url invalid");
   requireThat(Array.isArray(input.events) && input.events.length > 0 && input.events.length <= 500, "history batch must contain 1-500 events");
   const nowIso = now.toISOString();
-  const manifest = { source_name: String(input.source_name ?? ""), source_revision: String(input.source_revision ?? ""), source_url: String(input.source_url), as_of: isoTimestamp(input.as_of, "history as_of"), count: input.events.length };
+  const manifest = {
+    source_name: String(input.source_name ?? ""),
+    source_revision: String(input.source_revision ?? ""),
+    source_url: String(input.source_url),
+    as_of: isoTimestamp(input.as_of, "history as_of"),
+    count: input.events.length,
+    submitted_events_sha256: await sha256Hex(input.events)
+  };
   requireThat(manifest.source_name && manifest.source_revision, "history source identity required");
   const manifestSha = await sha256Hex(manifest);
   const batchId = `hist_${manifestSha.slice(0, 32)}`;
@@ -273,27 +288,39 @@ export async function ingestHistory(db, input, now = new Date()) {
     const pre = Number(raw.pre_event_price);
     const exit = Number(raw.exit_price);
     requireThat(Number.isFinite(pre) && pre > 0 && Number.isFinite(exit) && exit > 0, `history ${ticker} prices invalid`);
-    const eventReturn = Number.isFinite(Number(raw.event_return)) ? Number(raw.event_return) : exit / pre - 1;
+    const eventTiming = String(raw.event_timing).toUpperCase();
+    requireThat(eventTiming === "AMC" || eventTiming === "BMO", `history ${ticker} timing invalid`);
+    const horizon = validateHistoricalHorizon(raw, eventDate, eventTiming);
+    const calculatedReturn = exit / pre - 1;
+    if (raw.event_return !== null && raw.event_return !== undefined) {
+      requireThat(Number.isFinite(Number(raw.event_return)) && Math.abs(Number(raw.event_return) - calculatedReturn) <= 1e-10, `history ${ticker} event_return does not match timestamped prices`, "DATA_BLOCKED");
+    }
+    const eventReturn = calculatedReturn;
+    const preEventPriceSourceUrl = String(raw.pre_event_price_source_url ?? manifest.source_url);
+    const exitPriceSourceUrl = String(raw.exit_price_source_url ?? manifest.source_url);
+    requireThat(/^https:\/\//.test(preEventPriceSourceUrl) && /^https:\/\//.test(exitPriceSourceUrl), `history ${ticker} price provenance URL invalid`);
     const normalized = {
       ticker, event_date: eventDate, event_version: version,
-      event_timing: String(raw.event_timing).toUpperCase(), sector: String(raw.sector ?? ""), market_cap_cohort: String(raw.market_cap_cohort ?? ""),
+      event_timing: eventTiming, sector: String(raw.sector ?? ""), market_cap_cohort: String(raw.market_cap_cohort ?? ""),
       pre_event_price: pre, exit_price: exit, event_return: eventReturn, absolute_return: Math.abs(eventReturn),
+      ...horizon, pre_event_price_source_url: preEventPriceSourceUrl, exit_price_source_url: exitPriceSourceUrl,
       gap_open_return: raw.gap_open_return ?? null, realized_vol_20d: raw.realized_vol_20d ?? null, pre_event_drift: raw.pre_event_drift ?? null,
       reported_eps: raw.reported_eps ?? null, consensus_eps: raw.consensus_eps ?? null, reported_revenue: raw.reported_revenue ?? null, consensus_revenue: raw.consensus_revenue ?? null,
       guidance_change_z: raw.guidance_change_z ?? null, estimate_revision_z: raw.estimate_revision_z ?? null, consensus_dispersion_z: raw.consensus_dispersion_z ?? null,
       sector_return: raw.sector_return ?? null, market_return: raw.market_return ?? null, peer_variables: raw.peer_variables ?? null, option_history: raw.option_history ?? null
     };
-    requireThat(normalized.event_timing === "AMC" || normalized.event_timing === "BMO", `history ${ticker} timing invalid`);
     requireThat(normalized.sector && normalized.market_cap_cohort, `history ${ticker} cohort fields required`);
     const recordSha = await sha256Hex(normalized);
     statements.push(db.prepare(`INSERT INTO earnings_historical_event_versions
       (historical_id, batch_id, ticker, event_date, event_version, event_timing, sector, market_cap_cohort,
-       pre_event_price, exit_price, event_return, absolute_return, gap_open_return, realized_vol_20d,
+       pre_event_price, pre_event_price_timestamp, pre_event_price_source_url,
+       exit_price, exit_price_timestamp, exit_price_source_url, return_horizon_id, return_horizon_methodology_version,
+       event_return, absolute_return, gap_open_return, realized_vol_20d,
        pre_event_drift, reported_eps, consensus_eps, reported_revenue, consensus_revenue, guidance_change_z,
        estimate_revision_z, consensus_dispersion_z, sector_return, market_return, peer_variables_json,
        option_history_json, record_sha256, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(`hev_${recordSha.slice(0, 32)}`, batchId, ticker, eventDate, version, normalized.event_timing, normalized.sector, normalized.market_cap_cohort, pre, exit, eventReturn, Math.abs(eventReturn), normalized.gap_open_return, normalized.realized_vol_20d, normalized.pre_event_drift, normalized.reported_eps, normalized.consensus_eps, normalized.reported_revenue, normalized.consensus_revenue, normalized.guidance_change_z, normalized.estimate_revision_z, normalized.consensus_dispersion_z, normalized.sector_return, normalized.market_return, normalized.peer_variables === null ? null : canonicalJson(normalized.peer_variables), normalized.option_history === null ? null : canonicalJson(normalized.option_history), recordSha, nowIso));
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(`hev_${recordSha.slice(0, 32)}`, batchId, ticker, eventDate, version, normalized.event_timing, normalized.sector, normalized.market_cap_cohort, pre, normalized.pre_event_price_timestamp, normalized.pre_event_price_source_url, exit, normalized.exit_price_timestamp, normalized.exit_price_source_url, normalized.return_horizon_id, normalized.return_horizon_methodology_version, eventReturn, Math.abs(eventReturn), normalized.gap_open_return, normalized.realized_vol_20d, normalized.pre_event_drift, normalized.reported_eps, normalized.consensus_eps, normalized.reported_revenue, normalized.consensus_revenue, normalized.guidance_change_z, normalized.estimate_revision_z, normalized.consensus_dispersion_z, normalized.sector_return, normalized.market_return, normalized.peer_variables === null ? null : canonicalJson(normalized.peer_variables), normalized.option_history === null ? null : canonicalJson(normalized.option_history), recordSha, nowIso));
   }
   await db.batch(statements);
   return { batch_id: batchId, manifest_sha256: manifestSha, count: input.events.length, ingested_at: nowIso };

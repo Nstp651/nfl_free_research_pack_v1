@@ -1,10 +1,17 @@
-export const MODEL_VERSION = "earn-pmodel-v1.0.0";
-export const IV_MODEL_VERSION = "post-event-iv-v1.0.0";
-export const VALUATION_VERSION = "earn-option-value-v1.0.0";
-export const SELECTION_VERSION = "earn-selection-v1.0.0";
+export const FEATURE_CONTRACT_VERSION = "earn-feature-contract-v1.1.0";
+export const RETURN_HORIZON_ID = "PRE_EVENT_CLOSE_TO_POST_EVENT_CLOSE_ET_V1";
+export const RETURN_HORIZON_METHODOLOGY_VERSION = "earn-return-horizon-v1.0.0";
+export const MODEL_VERSION = "earn-pmodel-v1.1.0";
+export const IV_MODEL_VERSION = "post-event-iv-v1.1.0";
+export const VALUATION_VERSION = "earn-option-value-v1.1.0";
+export const SELECTION_VERSION = "earn-selection-v1.1.0";
 
 export const MODEL_CONFIG = Object.freeze({
   model_version: MODEL_VERSION,
+  coefficient_status: "V1_PRIORS_NOT_EMPIRICALLY_TRAINED",
+  feature_contract_version: FEATURE_CONTRACT_VERSION,
+  return_horizon_id: RETURN_HORIZON_ID,
+  return_horizon_methodology_version: RETURN_HORIZON_METHODOLOGY_VERSION,
   distribution_draws: 401,
   ticker_prior_events: 16,
   sector_prior_events: 40,
@@ -42,6 +49,9 @@ export const MODEL_CONFIG = Object.freeze({
 });
 
 export const DEFAULT_RISK_CONFIG = Object.freeze({
+  risk_profile_id: "V1_PLACEHOLDER_NOT_APPROVED_FOR_LIVE",
+  production_risk_approved: false,
+  calibration_approved: false,
   max_core_positions: 2,
   max_capital_per_trade_usd: 750,
   max_daily_capital_usd: 1500,

@@ -1,5 +1,7 @@
 import { clamp, requireThat, round } from "./canonical.js";
+import { IV_MODEL_VERSION } from "./config.js";
 import { credibleWeight, mean, sampleStd } from "./math.js";
+import { newYorkMarketCloseUtc } from "./market-time.js";
 
 function dteBucket(days) {
   if (days <= 2) return "0_2";
@@ -28,7 +30,7 @@ function summarize(rows, fallbackSpread) {
 }
 
 export function buildPostEventIvModel({ observations, event, leg, spot, exitAt, riskConfig }) {
-  const expiryAt = Date.parse(`${leg.expiry}T20:00:00Z`);
+  const expiryAt = Date.parse(newYorkMarketCloseUtc(leg.expiry));
   const remainingDays = Math.max(0, (expiryAt - Date.parse(exitAt)) / 86_400_000);
   requireThat(remainingDays > 0, "option expires before intended exit", "DATA_BLOCKED");
   const dte = dteBucket(remainingDays);
@@ -49,7 +51,7 @@ export function buildPostEventIvModel({ observations, event, leg, spot, exitAt, 
   const zNodes = [-2, -1, 0, 1, 2];
   const weights = [0.0625, 0.25, 0.375, 0.25, 0.0625];
   return {
-    version: "post-event-iv-v1.0.0",
+    version: IV_MODEL_VERSION,
     expected_residual_iv: round(clamp(expectedIv, 0.05, 5)),
     residual_iv_sd: round(clamp(expectedSd, 0.03, 2)),
     expected_exit_spread_fraction: round(clamp(exitSpread, 0.01, 0.60)),

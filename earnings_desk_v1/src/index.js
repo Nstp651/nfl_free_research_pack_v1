@@ -55,8 +55,10 @@ export default {
           modelVersion: env?.MODEL_VERSION,
           liveTradingEnabled: false,
           earningsDesk: {
-            version: "1.0.0",
+            version: "1.1.0",
             mode: String(env?.EARNINGS_DESK_MODE ?? "SHADOW"),
+            risk_profile_id: String(env?.EARNINGS_RISK_PROFILE_ID ?? "V1_PLACEHOLDER_NOT_APPROVED_FOR_LIVE"),
+            capital_limits_status: String(env?.EARNINGS_CAPITAL_LIMITS_STATUS ?? "NON_PRODUCTION_PLACEHOLDERS"),
             d1_bound: Boolean(env?.DB),
             schema: schema ?? "MIGRATION_REQUIRED",
             automated_broker_execution: false

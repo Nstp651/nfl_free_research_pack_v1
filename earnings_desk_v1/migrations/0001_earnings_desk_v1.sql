@@ -6,11 +6,11 @@ CREATE TABLE IF NOT EXISTS earnings_schema_versions (
 ) STRICT;
 
 INSERT OR IGNORE INTO earnings_schema_versions(version, applied_at)
-VALUES ('earnings_desk_schema_v1.0.0', datetime('now'));
+VALUES ('earnings_desk_schema_v1.1.0', datetime('now'));
 
 CREATE TABLE IF NOT EXISTS earnings_model_versions (
   model_version TEXT PRIMARY KEY,
-  model_kind TEXT NOT NULL CHECK (model_kind IN ('P_MODEL', 'POST_EVENT_IV', 'VALUATION', 'SELECTION')),
+  model_kind TEXT NOT NULL CHECK (model_kind IN ('FEATURE_CONTRACT', 'P_MODEL', 'POST_EVENT_IV', 'VALUATION', 'SELECTION')),
   config_json TEXT NOT NULL CHECK (json_valid(config_json)),
   config_sha256 TEXT NOT NULL CHECK (length(config_sha256) = 64),
   created_at TEXT NOT NULL,
@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS earnings_research_packs (
   research_json TEXT NOT NULL CHECK (json_valid(research_json)),
   research_sha256 TEXT NOT NULL CHECK (length(research_sha256) = 64),
   evidence_quality TEXT NOT NULL CHECK (evidence_quality IN ('HIGH', 'MEDIUM', 'LOW')),
+  feature_contract_version TEXT NOT NULL,
   submitted_at TEXT NOT NULL,
   UNIQUE (run_id, event_id)
 ) STRICT;
@@ -91,6 +92,25 @@ CREATE TABLE IF NOT EXISTS earnings_history_batches (
   ingested_at TEXT NOT NULL
 ) STRICT;
 
+CREATE TABLE IF NOT EXISTS earnings_return_horizons (
+  return_horizon_id TEXT PRIMARY KEY,
+  methodology_version TEXT NOT NULL,
+  timezone TEXT NOT NULL CHECK (timezone = 'America/New_York'),
+  pre_event_price_method TEXT NOT NULL,
+  exit_price_method TEXT NOT NULL,
+  approved INTEGER NOT NULL CHECK (approved IN (0, 1)),
+  created_at TEXT NOT NULL,
+  UNIQUE (return_horizon_id, methodology_version)
+) STRICT;
+
+INSERT OR IGNORE INTO earnings_return_horizons
+  (return_horizon_id, methodology_version, timezone, pre_event_price_method, exit_price_method, approved, created_at)
+VALUES
+  ('PRE_EVENT_CLOSE_TO_POST_EVENT_CLOSE_ET_V1', 'earn-return-horizon-v1.0.0', 'America/New_York',
+   'Official regular-session close at 16:00 America/New_York immediately before the earnings release',
+   'Official regular-session close at 16:00 America/New_York on the first regular session after the earnings release',
+   1, datetime('now'));
+
 CREATE TABLE IF NOT EXISTS earnings_historical_event_versions (
   historical_id TEXT PRIMARY KEY,
   batch_id TEXT NOT NULL REFERENCES earnings_history_batches(batch_id),
@@ -101,7 +121,13 @@ CREATE TABLE IF NOT EXISTS earnings_historical_event_versions (
   sector TEXT NOT NULL,
   market_cap_cohort TEXT NOT NULL,
   pre_event_price REAL NOT NULL CHECK (pre_event_price > 0),
+  pre_event_price_timestamp TEXT NOT NULL,
+  pre_event_price_source_url TEXT NOT NULL CHECK (pre_event_price_source_url LIKE 'https://%'),
   exit_price REAL NOT NULL CHECK (exit_price > 0),
+  exit_price_timestamp TEXT NOT NULL,
+  exit_price_source_url TEXT NOT NULL CHECK (exit_price_source_url LIKE 'https://%'),
+  return_horizon_id TEXT NOT NULL,
+  return_horizon_methodology_version TEXT NOT NULL,
   event_return REAL NOT NULL,
   absolute_return REAL NOT NULL CHECK (absolute_return >= 0),
   gap_open_return REAL,
@@ -120,6 +146,8 @@ CREATE TABLE IF NOT EXISTS earnings_historical_event_versions (
   option_history_json TEXT CHECK (option_history_json IS NULL OR json_valid(option_history_json)),
   record_sha256 TEXT NOT NULL CHECK (length(record_sha256) = 64),
   created_at TEXT NOT NULL,
+  FOREIGN KEY (return_horizon_id, return_horizon_methodology_version)
+    REFERENCES earnings_return_horizons(return_horizon_id, methodology_version),
   UNIQUE (ticker, event_date, event_version)
 ) STRICT;
 
@@ -328,6 +356,10 @@ CREATE TRIGGER IF NOT EXISTS earnings_history_no_update
 BEFORE UPDATE ON earnings_historical_event_versions BEGIN SELECT RAISE(ABORT, 'historical event versions are append-only'); END;
 CREATE TRIGGER IF NOT EXISTS earnings_history_no_delete
 BEFORE DELETE ON earnings_historical_event_versions BEGIN SELECT RAISE(ABORT, 'historical event versions are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS earnings_horizons_no_update
+BEFORE UPDATE ON earnings_return_horizons BEGIN SELECT RAISE(ABORT, 'return horizon definitions are immutable'); END;
+CREATE TRIGGER IF NOT EXISTS earnings_horizons_no_delete
+BEFORE DELETE ON earnings_return_horizons BEGIN SELECT RAISE(ABORT, 'return horizon definitions are immutable'); END;
 CREATE TRIGGER IF NOT EXISTS earnings_freezes_no_update
 BEFORE UPDATE ON earnings_freezes BEGIN SELECT RAISE(ABORT, 'frozen P_MODEL is immutable'); END;
 CREATE TRIGGER IF NOT EXISTS earnings_freezes_no_delete

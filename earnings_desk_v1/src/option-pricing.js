@@ -1,7 +1,9 @@
 import { clamp, requireThat, round } from "./canonical.js";
+import { VALUATION_VERSION } from "./config.js";
 import { mean, normalCdf } from "./math.js";
 import { buildPostEventIvModel } from "./iv-model.js";
 import { marketLiquidity } from "./market-input.js";
+import { newYorkMarketCloseUtc } from "./market-time.js";
 
 export function blackScholes({ right, spot, strike, timeYears, volatility, riskFreeRate }) {
   requireThat([spot, strike, timeYears, volatility].every((value) => Number.isFinite(value) && value >= 0), "Black-Scholes input invalid");
@@ -41,7 +43,7 @@ export function valueCandidate({ candidate, marketInput, pModel, event, ivObserv
         const leg = candidate.legs[legIndex];
         const model = legModels[legIndex];
         const ivNode = model.uncertainty_nodes[nodeIndex];
-        const expiryMs = Date.parse(`${leg.expiry}T20:00:00Z`);
+        const expiryMs = Date.parse(newYorkMarketCloseUtc(leg.expiry));
         const timeYears = Math.max(0, (expiryMs - exitMs) / (365.25 * 86_400_000));
         const theoretical = blackScholes({ right: leg.right, spot: exitSpot, strike: leg.strike, timeYears, volatility: ivNode.residual_iv, riskFreeRate: riskConfig.risk_free_rate });
         grossPerShare += theoretical;
@@ -84,7 +86,7 @@ export function valueCandidate({ candidate, marketInput, pModel, event, ivObserv
     confidence: confidenceFloor(pModel.confidence, ...legModels.map((model) => model.confidence)),
     liquidity,
     quantity: 1,
-    valuation_version: "earn-option-value-v1.0.0",
+    valuation_version: VALUATION_VERSION,
     scenario_count: profitScenarios.length
   };
 }

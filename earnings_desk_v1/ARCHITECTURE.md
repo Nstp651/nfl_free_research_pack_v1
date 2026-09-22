@@ -10,7 +10,7 @@ The implementation carries forward the shared Betting Platform V1 controls:
 
 - a content-addressed authoritative run lock;
 - market-blind research and P_MODEL construction;
-- evidence-bound structured features;
+- evidence-bound structured features calculated under `earn-feature-contract-v1.1.0`;
 - deterministic numerical execution with versioned coefficients;
 - immutable server-side freeze and SHA-256 receipt;
 - a hard server market gate after freeze;
@@ -29,7 +29,7 @@ Every eligible event must reach one of three terminal pre-market states before v
 
 ## P_MODEL V1
 
-The model produces a complete next-exit-horizon stock-return distribution as 401 deterministic draws. Live option fields are rejected before research checkpointing and never enter P_MODEL.
+The model produces a complete next-exit-horizon stock-return distribution as 401 deterministic draws. Live option fields are rejected before research checkpointing and never enter P_MODEL. Research callers provide raw inputs, not feature scores; the Worker calculates eight quantitative features and maps the two judgment features through closed, evidence-gated anchors documented in [FEATURE_SCORING_CONTRACT.md](FEATURE_SCORING_CONTRACT.md).
 
 The distribution combines:
 
@@ -40,6 +40,12 @@ The distribution combines:
 5. versioned mappings for revisions, guidance, consensus dispersion, peer read-through, drift, sector/index regime, company-specific evidence, and surprise/reaction sensitivity;
 6. sparse-history, evidence-quality, and parameter uncertainty;
 7. deterministic heavy-tail and skew transforms.
+
+The existing feature weights and transforms are explicitly labelled `V1_PRIORS_NOT_EMPIRICALLY_TRAINED`. They are not claimed to be fitted coefficients. Replacing them requires a new model version and reproducible historical calibration/backtest.
+
+## Historical horizon integrity
+
+P_MODEL V1.1 accepts only `PRE_EVENT_CLOSE_TO_POST_EVENT_CLOSE_ET_V1` observations under methodology `earn-return-horizon-v1.0.0`. Each versioned row must store the pre-event and exit prices, their source URLs, and exact timestamps. Both timestamps must resolve to 16:00 `America/New_York`; the Worker handles EDT/EST conversion. AMC rows use the event-date close as the pre-event observation, while BMO rows use the event-date close as the exit observation. The event return is recalculated from those prices and any conflicting submitted value is rejected.
 
 The freeze exposes P_UP, P_DOWN, expected and median returns, expected absolute move, P05/P10/P25/P50/P75/P90/P95, and absolute-move exceedance probabilities at 2%, 3%, 5%, 7.5%, and 10%.
 
@@ -54,6 +60,7 @@ For each call, put, ATM straddle, and bounded-width strangle actually present in
 - residual post-event IV is hierarchically pooled by ticker, then sector/market-cap/moneyness/DTE, then broad history;
 - five fixed residual-IV uncertainty nodes are integrated;
 - remaining DTE, moneyness, commissions, regulatory fees, and pessimistic exit-spread slippage are included;
+- option expiry is calculated as 16:00 `America/New_York`, with EDT/EST conversion rather than a fixed UTC hour;
 - no current option price changes the frozen underlying distribution.
 
 ## Global selection
@@ -70,7 +77,7 @@ Hard gates enforce freshness, verified timing, frozen P_MODEL, nonzero executabl
 
 ## Storage and audit
 
-`migrations/0001_earnings_desk_v1.sql` adds 19 namespaced tables plus the current-history view and immutability triggers. It stores run locks, evidence, versioned history, freezes, screenshot receipts, exact quotes, residual-IV observations, valuations, selections, positions, settlements, outcomes, decisions, and model versions.
+`migrations/0001_earnings_desk_v1.sql` adds 20 namespaced tables plus the current-history view and 18 immutability triggers. It stores run locks, evidence, approved return-horizon definitions, versioned history, freezes, screenshot receipts, exact quotes, residual-IV observations, valuations, selections, positions, settlements, outcomes, decisions, and model versions.
 
 The calibration endpoint reports direction Brier score, PIT distribution calibration, absolute-move error, P(profit) calibration, expected versus realised option P&L, cohort breakdowns, and profit per operator hour.
 
@@ -82,4 +89,5 @@ The calibration endpoint reports direction Brier score, PIT distribution calibra
 - no naked or short-premium structures;
 - no market quote substitution;
 - no generated historical observations;
-- no LIVE mode until the historical event and post-event-IV minimums are satisfied and SHADOW acceptance passes.
+- `$750` per trade and `$1,500` daily are explicitly SHADOW-only, non-production placeholders;
+- no LIVE mode until deliberate risk values are approved, a backtest/calibration report hash is configured, and operator-chosen minimum SHADOW run/trade/outcome counts are actually satisfied.

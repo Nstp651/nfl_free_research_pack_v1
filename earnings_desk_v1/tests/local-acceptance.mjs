@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { FEATURE_CONTRACT_VERSION, RETURN_HORIZON_ID, RETURN_HORIZON_METHODOLOGY_VERSION } from "../src/config.js";
+import { newYorkMarketCloseUtc } from "../src/market-time.js";
 
 const base = process.env.EARNINGS_ACCEPTANCE_BASE ?? "http://127.0.0.1:8791";
 const token = process.env.EARNINGS_ACCEPTANCE_TOKEN ?? "local-acceptance-token-1234567890";
@@ -20,21 +22,35 @@ const expiry = new Date(started.getTime() + 4 * 86_400_000).toISOString().slice(
 
 const health = await api("/health", { headers: {} });
 assert.equal(health.service, "kj-event-desk");
-assert.equal(health.earningsDesk.version, "1.0.0");
+assert.equal(health.earningsDesk.version, "1.1.0");
+
+function shiftDate(dateText, days) {
+  const date = new Date(`${dateText}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
 
 const historical = Array.from({ length: 120 }, (_, index) => {
   const eventDate = new Date(Date.UTC(2014, 0, 1) + index * 28 * 86_400_000).toISOString().slice(0, 10);
   const eventReturn = ((index % 19) - 9) / 100;
+  const eventTiming = index % 2 ? "AMC" : "BMO";
+  const preDate = eventTiming === "AMC" ? eventDate : shiftDate(eventDate, -1);
+  const exitDate = eventTiming === "AMC" ? shiftDate(eventDate, 1) : eventDate;
   return {
     ticker: index % 12 === 0 ? "ACME" : `Z${String(index).padStart(3, "0")}`,
     event_date: eventDate,
     event_version: 1,
-    event_timing: index % 2 ? "AMC" : "BMO",
+    event_timing: eventTiming,
     sector: index % 3 ? "Industrials" : "Technology",
     market_cap_cohort: index % 2 ? "MID" : "LARGE",
     pre_event_price: 100,
+    pre_event_price_timestamp: newYorkMarketCloseUtc(preDate),
+    pre_event_price_source_url: "https://example.test/history/pre-close",
     exit_price: 100 * (1 + eventReturn),
-    event_return: eventReturn,
+    exit_price_timestamp: newYorkMarketCloseUtc(exitDate),
+    exit_price_source_url: "https://example.test/history/post-close",
+    return_horizon_id: RETURN_HORIZON_ID,
+    return_horizon_methodology_version: RETURN_HORIZON_METHODOLOGY_VERSION,
     realized_vol_20d: 0.025,
     pre_event_drift: 0.01,
     estimate_revision_z: 0.1,
@@ -80,26 +96,39 @@ const run = await api("/v1/earnings/runs", { method: "POST", body: JSON.stringif
 }) });
 assert.equal(run.eligible_count, 1);
 
-const features = {
-  eps_revision_z: 0.7,
-  revenue_revision_z: 0.5,
-  guidance_trajectory: 1,
-  consensus_dispersion_z: 0.2,
-  peer_readthrough_z: 0.4,
-  pre_earnings_drift_z: 0.1,
-  sector_regime_z: 0.2,
-  index_regime_z: 0.1,
-  company_specific_z: 0.6,
-  surprise_reaction_beta_z: 0.3
+const featureInputs = {
+  eps_revision_z: { current_consensus: 1.07, prior_consensus: 1, historical_revision_mean: 0, historical_revision_std: 0.1 },
+  revenue_revision_z: { current_consensus: 105, prior_consensus: 100, historical_revision_mean: 0, historical_revision_std: 0.1 },
+  guidance_trajectory: { comparable_numeric_guidance_available: false, anchor: "MODEST_RAISE", rationale: "Official guidance raised the low end modestly." },
+  consensus_dispersion_z: { analyst_estimates: [98, 102], historical_dispersion_mean: 0.0182842712474619, historical_dispersion_std: 0.05 },
+  peer_readthrough_z: { peer_events: [{ event_return: 0.04, relevance_weight: 1 }], historical_peer_return_mean: 0, historical_peer_return_std: 0.1 },
+  pre_earnings_drift_z: { start_price: 100, pre_event_price: 102, benchmark_return: 0.01, historical_excess_return_mean: 0, historical_excess_return_std: 0.1 },
+  sector_regime_z: { sector_start_price: 100, sector_end_price: 103, index_return: 0.01, historical_excess_return_mean: 0, historical_excess_return_std: 0.1 },
+  index_regime_z: { index_start_price: 100, index_end_price: 101, historical_return_mean: 0, historical_return_std: 0.1 },
+  company_specific_z: { anchor: "MODEST_POSITIVE_CONFIRMED", rationale: "Official filing confirms modest operating improvement." },
+  surprise_reaction_beta_z: { historical_surprises: [-0.2, -0.1, 0.1, 0.2], historical_event_returns: [-0.012, -0.006, 0.006, 0.012], historical_beta_mean: 0.03, historical_beta_std: 0.1 }
 };
+const researchEvidence = [
+  { evidence_id: "consensus-1", source_type: "CONSENSUS_AND_REVISIONS", url: "https://example.test/consensus", title: "Consensus", fact: "Timestamped consensus history.", retrieved_at: cutoff },
+  { evidence_id: "guidance-1", source_type: "COMPANY_GUIDANCE", url: "https://example.test/guidance", title: "Guidance", fact: "Official guidance trajectory.", retrieved_at: cutoff },
+  { evidence_id: "peer-1", source_type: "PEER_READTHROUGH", url: "https://example.test/peer", title: "Peer", fact: "Relevant peer event reaction.", retrieved_at: cutoff },
+  { evidence_id: "market-1", source_type: "MARKET_OR_SECTOR_REGIME", url: "https://example.test/market", title: "Cash market", fact: "Underlying, sector, and index close history.", retrieved_at: cutoff },
+  { evidence_id: "official-1", source_type: "SEC_OR_OFFICIAL_FILING", url: "https://www.sec.gov/example", title: "Official filing", fact: "Acceptance-only verified operating evidence.", published_at: cutoff, retrieved_at: cutoff },
+  { evidence_id: "history-1", source_type: "HISTORICAL_EARNINGS", url: "https://example.test/reactions", title: "Historical reactions", fact: "Audited surprise and return pairs.", retrieved_at: cutoff }
+];
 await api(`/v1/earnings/runs/${run.run_id}/research/ACME`, { method: "POST", body: JSON.stringify({
   market_data: false,
   ticker: "ACME",
   event_id: eventId,
   evidence_quality: "HIGH",
-  evidence: [{ evidence_id: "official-1", source_type: "SEC_OR_OFFICIAL_FILING", url: "https://www.sec.gov/example", title: "Official filing", fact: "Acceptance-only verified operating evidence.", published_at: cutoff, retrieved_at: cutoff }],
-  features,
-  feature_evidence: Object.fromEntries(Object.keys(features).map((key) => [key, ["official-1"]])),
+  evidence: researchEvidence,
+  feature_contract_version: FEATURE_CONTRACT_VERSION,
+  feature_inputs: featureInputs,
+  feature_evidence: {
+    eps_revision_z: ["consensus-1"], revenue_revision_z: ["consensus-1"], guidance_trajectory: ["guidance-1"], consensus_dispersion_z: ["consensus-1"],
+    peer_readthrough_z: ["peer-1"], pre_earnings_drift_z: ["market-1"], sector_regime_z: ["market-1"], index_regime_z: ["market-1"],
+    company_specific_z: ["official-1"], surprise_reaction_beta_z: ["history-1"]
+  },
   conflicts: []
 }) });
 

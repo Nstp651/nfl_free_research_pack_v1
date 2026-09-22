@@ -1,9 +1,10 @@
 import { clamp, finiteNumber, isoTimestamp, requireThat, round, sha256Hex, tickerText } from "./canonical.js";
+import { newYorkMarketCloseUtc } from "./market-time.js";
 
 function expiryText(value) {
   const text = String(value ?? "");
   requireThat(/^\d{4}-\d{2}-\d{2}$/.test(text), "option expiry must be YYYY-MM-DD");
-  requireThat(Number.isFinite(Date.parse(`${text}T21:00:00Z`)), "option expiry invalid");
+  requireThat(Number.isFinite(Date.parse(newYorkMarketCloseUtc(text))), "option expiry invalid");
   return text;
 }
 

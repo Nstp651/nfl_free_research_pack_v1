@@ -1,8 +1,10 @@
-import { MODEL_CONFIG, MODEL_VERSION, IV_MODEL_VERSION, SELECTION_VERSION, VALUATION_VERSION } from "./config.js";
+import { FEATURE_CONTRACT_VERSION, MODEL_CONFIG, MODEL_VERSION, IV_MODEL_VERSION, SELECTION_VERSION, VALUATION_VERSION } from "./config.js";
 import { canonicalJson, parseJsonColumn, requireThat, sha256Hex } from "./canonical.js";
+import { FEATURE_SCORING_CONTRACT } from "./feature-contract.js";
 
 export async function seedModelVersions(db, now) {
   const versions = [
+    [FEATURE_CONTRACT_VERSION, "FEATURE_CONTRACT", FEATURE_SCORING_CONTRACT],
     [MODEL_VERSION, "P_MODEL", MODEL_CONFIG],
     [IV_MODEL_VERSION, "POST_EVENT_IV", { version: IV_MODEL_VERSION, hierarchy: ["ticker", "sector_market_cap_moneyness_dte", "broad"], uncertainty_nodes: [-2, -1, 0, 1, 2] }],
     [VALUATION_VERSION, "VALUATION", { version: VALUATION_VERSION, entry: "ASK", exit: "BLACK_SCHOLES_RESIDUAL_IV_WITH_EXECUTION_HAIRCUT", contract_multiplier: 100 }],

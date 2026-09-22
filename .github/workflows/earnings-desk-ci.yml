@@ -1,0 +1,39 @@
+name: Earnings Desk CI
+
+on:
+  pull_request:
+    paths:
+      - "earnings_desk_v1/**"
+      - ".github/workflows/earnings-desk-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "earnings_desk_v1/**"
+      - ".github/workflows/earnings-desk-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: earnings_desk_v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: earnings_desk_v1/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check JavaScript syntax
+        run: npm run check:syntax
+      - name: Run unit and regression tests
+        run: npm test
+      - name: Validate JSON and D1 schemas
+        run: npm run check:schema
+      - name: Compile Worker without deployment
+        run: npm run check:deploy
