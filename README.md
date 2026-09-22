@@ -13,3 +13,7 @@ Live API: https://nfl-free-research-pack-v1.nickarnott01.workers.dev/health
 - [Application documentation](nfl_free_research_pack_v1/README.md)
 
 The full private probability model is not in this public repository.
+
+## K&J Earnings Desk
+
+The US earnings-event engine is under [`earnings_desk_v1/`](earnings_desk_v1/README.md). It extends the existing `kj-event-desk` Worker and D1 database while retaining the live M&A endpoints and tables.
