@@ -1,0 +1,15 @@
+{
+  "name": "kj-earnings-desk-v1",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check:deploy": "wrangler deploy --dry-run --config wrangler.jsonc",
+    "db:apply:local": "wrangler d1 migrations apply DB --local --config wrangler.jsonc",
+    "db:apply:remote": "wrangler d1 migrations apply DB --remote --config wrangler.jsonc"
+  },
+  "devDependencies": {
+    "wrangler": "4.136.2"
+  }
+}

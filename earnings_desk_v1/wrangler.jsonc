@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kj-event-desk",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.1 }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kj-event-desk",
+      "database_id": "a04d2345-d14d-4024-b297-088423a54404",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "paper",
+    "MODEL_VERSION": "M&A-V1.0.0",
+    "EARNINGS_DESK_MODE": "SHADOW",
+    "MAX_CORE_POSITIONS": "2",
+    "MAX_CAPITAL_PER_TRADE_USD": "750",
+    "MAX_DAILY_CAPITAL_USD": "1500",
+    "MARKET_INPUT_MAX_AGE_MINUTES": "20"
+  }
+}
