@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-23T00:41:12.497Z",
+  "tested_at_utc": "2026-09-23T06:42:21.613Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/ba65c43db9796db5f9a4bceb4045684db563381f/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/ef45f8f63283e41d3aa21a9640ede0dfe0a34332/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "b6d83ee92934d8d9",
+      "pack_revision": "bcae6677075d802c",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -151,7 +151,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 5174,
+              "rows": 5324,
               "through_week": 2,
               "upstream_publication_time": null
             }
@@ -217,12 +217,12 @@
             }
           },
           "current_roster": {
-            "rows": 2981,
+            "rows": 2988,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 549674,
+            "rows": 551894,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_03_ARI_SF",
-      "pack_revision": "80ebedbcbf039e67",
+      "pack_revision": "c7a4d7048486549a",
       "fixture": {
         "game_id": "2026_03_ARI_SF",
         "season": 2026,
@@ -280,8 +280,8 @@
           "bytes": 49956
         },
         {
-          "chars": 62303,
-          "bytes": 62349
+          "chars": 62308,
+          "bytes": 62354
         },
         {
           "chars": 58006,
@@ -403,7 +403,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 5174,
+              "rows": 5324,
               "through_week": 2,
               "upstream_publication_time": null
             }
@@ -469,12 +469,12 @@
             }
           },
           "current_roster": {
-            "rows": 2981,
+            "rows": 2988,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 549674,
+            "rows": 551894,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -531,7 +531,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-23T00:41:06.430648+00:00",
+      "last_checked_at_utc": "2026-09-23T06:42:14.840311+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
