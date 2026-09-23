@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-23T00:41:06.433269+00:00",
-  "build_commit": "ef4777d275c67f776a11620cbb7c85991a578332",
+  "tested_at_utc": "2026-09-23T06:42:14.842959+00:00",
+  "build_commit": "79aebd7152031d648e24afe5984f179a0a0fa57f",
   "python": "3.12.14",
-  "workflow_run_id": "35803040635",
+  "workflow_run_id": "35827894561",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "b6d83ee92934d8d9",
+      "pack_revision": "bcae6677075d802c",
       "players": 42,
       "teams": {
         "ATL": {
@@ -169,7 +169,7 @@
     },
     {
       "game_id": "2026_03_LAC_BUF",
-      "pack_revision": "49ed6338296f859f",
+      "pack_revision": "0ea92c45744cafc1",
       "players": 41,
       "teams": {
         "LAC": {
@@ -275,6 +275,13 @@
           ]
         },
         {
+          "name": "Hayden Rucci",
+          "current_team": "LAC",
+          "source_teams": [
+            "MIA"
+          ]
+        },
+        {
           "name": "Marquez Valdes-Scantling",
           "current_team": "LAC",
           "source_teams": [
@@ -290,7 +297,7 @@
           ]
         }
       ],
-      "player_checks": 156,
+      "player_checks": 159,
       "ftn_checks": 936,
       "ngs_identity_matches": [
         {
