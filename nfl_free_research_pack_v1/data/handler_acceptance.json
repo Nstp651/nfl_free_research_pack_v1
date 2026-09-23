@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-23T12:42:07.875Z",
+  "tested_at_utc": "2026-09-23T18:39:59.868Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/0c226e42cde4ad6674bf98e8876c18a14b39e854/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/20958b713c00043ea5612df95298d248b6c7835a/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "8e1ada9716604721",
+      "pack_revision": "e916f640e61e3f81",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -222,7 +222,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 551894,
+            "rows": 554114,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_03_ARI_SF",
-      "pack_revision": "a2321a78722bf08a",
+      "pack_revision": "e4003992621208c9",
       "fixture": {
         "game_id": "2026_03_ARI_SF",
         "season": 2026,
@@ -474,7 +474,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 551894,
+            "rows": 554114,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -531,7 +531,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-23T12:42:02.060441+00:00",
+      "last_checked_at_utc": "2026-09-23T18:39:53.047761+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
