@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-23T06:42:13.447474+00:00",
+  "generated_at_utc": "2026-09-23T12:42:00.831399+00:00",
   "fixture": {
     "game_id": "2026_03_CAR_CLE",
     "season": 2026,
@@ -2055,8 +2055,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.25
         }
       },
       "historical": {
@@ -4129,7 +4129,7 @@
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 0.5
+          "receiving_drop_pct": 0.25
         }
       },
       "historical": {
@@ -4810,7 +4810,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -6118,8 +6121,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.0835
         }
       },
       "historical": {
@@ -6578,8 +6581,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.0715
         }
       },
       "historical": {
@@ -6704,7 +6707,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -8132,7 +8138,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 265,
+          "rows": 492,
           "through_week": 2,
           "upstream_publication_time": null
         }
@@ -8210,5 +8216,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "35617be98d062ad0"
+  "pack_revision": "23481e649ce9f3f2"
 }

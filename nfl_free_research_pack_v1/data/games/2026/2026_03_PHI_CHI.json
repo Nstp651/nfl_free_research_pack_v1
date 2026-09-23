@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-23T06:42:14.765459+00:00",
+  "generated_at_utc": "2026-09-23T12:42:01.989274+00:00",
   "fixture": {
     "game_id": "2026_03_PHI_CHI",
     "season": 2026,
@@ -1622,8 +1622,8 @@
         },
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.1665
         }
       },
       "historical": {
@@ -2027,7 +2027,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 2,
+          "receiving_drop_pct": 0.667
+        }
       },
       "historical": {
         "2025": {
@@ -2956,8 +2959,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.0715
         }
       },
       "historical": {
@@ -3459,8 +3462,8 @@
         },
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.125
         }
       },
       "historical": {
@@ -4591,7 +4594,7 @@
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 0.5
+          "receiving_drop_pct": 0.25
         }
       },
       "historical": {
@@ -4906,7 +4909,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -6304,7 +6310,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -7351,7 +7360,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -7930,8 +7942,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.0835
         }
       },
       "historical": {
@@ -9281,7 +9293,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 265,
+          "rows": 492,
           "through_week": 2,
           "upstream_publication_time": null
         }
@@ -9359,5 +9371,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "5cd3c78e9bae8fd3"
+  "pack_revision": "c0dbef67718c5e75"
 }

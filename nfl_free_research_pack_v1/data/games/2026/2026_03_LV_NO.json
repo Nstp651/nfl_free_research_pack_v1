@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-23T06:42:14.565986+00:00",
+  "generated_at_utc": "2026-09-23T12:42:01.813378+00:00",
   "fixture": {
     "game_id": "2026_03_LV_NO",
     "season": 2026,
@@ -247,8 +247,8 @@
         },
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 3,
+          "receiving_drop_pct": 0.2145
         }
       },
       "historical": {
@@ -1274,7 +1274,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -2014,7 +2017,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -3061,7 +3067,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -5080,7 +5089,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.167
+        }
       },
       "historical": {
         "2025": {
@@ -7506,7 +7518,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -8458,7 +8473,7 @@
         },
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 0.077
+          "receiving_drop_pct": 0.0385
         }
       },
       "historical": {
@@ -8804,7 +8819,7 @@
         },
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 0.111
+          "receiving_drop_pct": 0.0555
         }
       },
       "historical": {
@@ -9253,7 +9268,10 @@
           }
         },
         "next_gen_receiving": null,
-        "pfr_advanced_receiving": null
+        "pfr_advanced_receiving": {
+          "receiving_drop": 0,
+          "receiving_drop_pct": 0
+        }
       },
       "historical": {
         "2025": {
@@ -9993,7 +10011,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 265,
+          "rows": 492,
           "through_week": 2,
           "upstream_publication_time": null
         }
@@ -10071,5 +10089,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "2d8a3dcf253fe92e"
+  "pack_revision": "e948267e081a8ec2"
 }

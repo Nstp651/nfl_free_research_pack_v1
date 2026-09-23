@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-23T06:42:13.640097+00:00",
+  "generated_at_utc": "2026-09-23T12:42:01.004419+00:00",
   "fixture": {
     "game_id": "2026_03_HOU_IND",
     "season": 2026,
@@ -1560,7 +1560,7 @@
         },
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 0.125
+          "receiving_drop_pct": 0.0625
         }
       },
       "historical": {
@@ -3391,8 +3391,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.1
         }
       },
       "historical": {
@@ -4920,7 +4920,7 @@
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 0.25
+          "receiving_drop_pct": 0.125
         }
       },
       "historical": {
@@ -5357,7 +5357,7 @@
         "next_gen_receiving": null,
         "pfr_advanced_receiving": {
           "receiving_drop": 1,
-          "receiving_drop_pct": 1
+          "receiving_drop_pct": 0.5
         }
       },
       "historical": {
@@ -6246,8 +6246,8 @@
           "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
         },
         "pfr_advanced_receiving": {
-          "receiving_drop": 0,
-          "receiving_drop_pct": 0
+          "receiving_drop": 1,
+          "receiving_drop_pct": 0.0715
         }
       },
       "historical": {
@@ -9202,7 +9202,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 265,
+          "rows": 492,
           "through_week": 2,
           "upstream_publication_time": null
         }
@@ -9280,5 +9280,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "4185938d38b29d1c"
+  "pack_revision": "2d7f5e117d39c5cd"
 }
