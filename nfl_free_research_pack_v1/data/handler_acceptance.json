@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-24T06:42:45.825Z",
+  "tested_at_utc": "2026-09-24T12:42:49.154Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/cb4ff34fd4bdc6098f4c266218b7dbb53084fcf4/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/402117371d4604e7683afd3f81cd2d4f0b81caf9/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "470146710ea0403c",
+      "pack_revision": "f598e7322ad6d7ae",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -191,7 +191,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 492,
+              "rows": 508,
               "through_week": 2,
               "upstream_publication_time": null
             }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_03_ARI_SF",
-      "pack_revision": "ab8988cfe85e55cd",
+      "pack_revision": "d588f1993c269308",
       "fixture": {
         "game_id": "2026_03_ARI_SF",
         "season": 2026,
@@ -444,7 +444,7 @@
             },
             "2026": {
               "status": "AVAILABLE",
-              "rows": 492,
+              "rows": 508,
               "through_week": 2,
               "upstream_publication_time": null
             }
@@ -532,7 +532,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-24T06:42:39.642709+00:00",
+      "last_checked_at_utc": "2026-09-24T12:42:44.270235+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
