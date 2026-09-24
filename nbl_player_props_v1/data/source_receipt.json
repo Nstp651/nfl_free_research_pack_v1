@@ -1,5 +1,5 @@
 {
-  "assists_non_null": 36521,
+  "assists_non_null": 36590,
   "duplicate_audit": {
     "player_exact_duplicate_rows_collapsed": 0,
     "team_exact_duplicate_rows_collapsed": 10
@@ -8,18 +8,18 @@
   "latest_season": "2026-2027",
   "latest_season_match_time_non_null_rate": 1.0,
   "latest_season_minutes_non_null_rate": 1.0,
-  "latest_season_rows": 93,
+  "latest_season_rows": 162,
   "market_data": false,
   "match_time_non_null_rate": 1.0,
-  "matches": 1576,
+  "matches": 1579,
   "minutes_binding": "row-level seconds/60 with parsed minutes fallback",
   "minutes_non_null_rate": 1.0,
-  "normalized_name_keys_with_multiple_source_ids": 134,
-  "output_sha256": "68524e407f3514e021efb684a007e36abaa6479eb51db6af86f3a9108e965b46",
+  "normalized_name_keys_with_multiple_source_ids": 136,
+  "output_sha256": "26715aeafdec3850974be093d9f472989740f5400e73646493147331b676b120",
   "player_identity_method": "normalized_name_with_source_player_id_retained",
-  "players": 640,
-  "rebounds_non_null": 36521,
-  "rows": 36521,
+  "players": 647,
+  "rebounds_non_null": 36590,
+  "rows": 36590,
   "schema_version": "0.1.9",
   "seasons": [
     "2015-2016",
@@ -37,39 +37,39 @@
   ],
   "sources": {
     "player": {
-      "bytes": 15656636,
+      "bytes": 15689843,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DF17CDBAC967E1\"",
-      "last_modified": "Mon, 21 Sep 2026 10:47:27 GMT",
+      "etag": "\"0x8DF1A138E4DCD1F\"",
+      "last_modified": "Thu, 24 Sep 2026 08:12:20 GMT",
       "name": "box_player.csv",
-      "sha256": "sha256:2432a6e7566d0c67d4fdf7797f2efeb055400195c70349db9f157f8fed28257a",
+      "sha256": "sha256:8a3d4c850b131f74182fb45e331d64feb6426d0faf2a9dcce3f676c9ece8bfc9",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
       "tag": "box_player",
       "url": "https://github.com/JaseZiv/nblr_data/releases/download/box_player/box_player.csv"
     },
     "results": {
-      "bytes": 2003890,
+      "bytes": 2003904,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DF17CDAE8719D7\"",
-      "last_modified": "Mon, 21 Sep 2026 10:47:07 GMT",
+      "etag": "\"0x8DF1A1381213439\"",
+      "last_modified": "Thu, 24 Sep 2026 08:11:58 GMT",
       "name": "results_wide.csv",
-      "sha256": "sha256:85fc716e1655f49519c563cc88bd8add1a60befc1cfa660f3f41bc750bf08859",
+      "sha256": "sha256:d091fa0c1b989a987110c06627657b6f614ff4ebcb3be830e0ec71ca947835be",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
       "tag": "match_results",
       "url": "https://github.com/JaseZiv/nblr_data/releases/download/match_results/results_wide.csv"
     },
     "team": {
-      "bytes": 951957,
+      "bytes": 953878,
       "discovery": "stable_release_download_url",
-      "etag": "\"0x8DF17CDB2555EBB\"",
-      "last_modified": "Mon, 21 Sep 2026 10:47:13 GMT",
+      "etag": "\"0x8DF1A13859C67F2\"",
+      "last_modified": "Thu, 24 Sep 2026 08:12:05 GMT",
       "name": "box_team.csv",
-      "sha256": "sha256:d14a4c25042bc4c1e5dfd555d7f7106fb6f582bdd333708ad88c018bc2939965",
+      "sha256": "sha256:05e8562b306b6e6ca423c8eed6be6c5b0c5323ac46864d193414a5e8381a2963",
       "source_repository": "https://github.com/JaseZiv/nblr_data",
       "tag": "box_team",
       "url": "https://github.com/JaseZiv/nblr_data/releases/download/box_team/box_team.csv"
     }
   },
-  "team_environment_match_rate": 1.0,
+  "team_environment_match_rate": 0.9996993714129544,
   "timestamp_binding": "results_wide.match_id direct map -> match_time_utc; player match_time fallback"
 }
