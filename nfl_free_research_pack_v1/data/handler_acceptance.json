@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-24T12:42:49.154Z",
+  "tested_at_utc": "2026-09-24T18:40:34.648Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/402117371d4604e7683afd3f81cd2d4f0b81caf9/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/c88bf2c7630ed251e628fc748cfe85351f79e0d5/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "f598e7322ad6d7ae",
+      "pack_revision": "365adaebb931cd57",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -165,7 +165,7 @@
             },
             "2025": {
               "status": "AVAILABLE",
-              "rows": 25395,
+              "rows": 25396,
               "through_week": 18,
               "upstream_publication_time": null
             },
@@ -222,7 +222,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 556342,
+            "rows": 558570,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_03_ARI_SF",
-      "pack_revision": "d588f1993c269308",
+      "pack_revision": "d32046f49fdab54a",
       "fixture": {
         "game_id": "2026_03_ARI_SF",
         "season": 2026,
@@ -418,7 +418,7 @@
             },
             "2025": {
               "status": "AVAILABLE",
-              "rows": 25395,
+              "rows": 25396,
               "through_week": 18,
               "upstream_publication_time": null
             },
@@ -475,7 +475,7 @@
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 556342,
+            "rows": 558570,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -532,7 +532,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-24T12:42:44.270235+00:00",
+      "last_checked_at_utc": "2026-09-24T18:40:28.461261+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
