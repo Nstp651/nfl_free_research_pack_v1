@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-24T00:42:52.749Z",
+  "tested_at_utc": "2026-09-24T06:42:45.825Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/eb45711468729831fcf3dc35847ec605acf52967/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/cb4ff34fd4bdc6098f4c266218b7dbb53084fcf4/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "e916f640e61e3f81",
+      "pack_revision": "470146710ea0403c",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -217,12 +217,12 @@
             }
           },
           "current_roster": {
-            "rows": 2988,
+            "rows": 2998,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 554114,
+            "rows": 556342,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_03_ARI_SF",
-      "pack_revision": "e4003992621208c9",
+      "pack_revision": "ab8988cfe85e55cd",
       "fixture": {
         "game_id": "2026_03_ARI_SF",
         "season": 2026,
@@ -272,7 +272,7 @@
         "surface": "grass",
         "location": "Home"
       },
-      "total_players": 44,
+      "total_players": 45,
       "pages": 5,
       "page_sizes": [
         {
@@ -288,17 +288,17 @@
           "bytes": 58093
         },
         {
-          "chars": 58310,
-          "bytes": 58354
+          "chars": 57108,
+          "bytes": 57150
         },
         {
-          "chars": 25111,
-          "bytes": 25123
+          "chars": 32217,
+          "bytes": 32235
         }
       ],
       "players_by_team": {
         "ARI": 21,
-        "SF": 23
+        "SF": 24
       },
       "rookies": [
         "Jeremiyah Love",
@@ -319,12 +319,13 @@
         "Devin Duvernay",
         "Kendrick Bourne",
         "Jack Stoll",
+        "Brandin Cooks",
         "Christian Kirk",
         "Deebo Samuel Sr.",
         "KhaDarel Hodge",
         "Mike Evans"
       ],
-      "missing_prior_ngs": 34,
+      "missing_prior_ngs": 35,
       "missing_prior_ftn": 16,
       "source_receipt": {
         "availability": {
@@ -469,12 +470,12 @@
             }
           },
           "current_roster": {
-            "rows": 2988,
+            "rows": 2998,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 554114,
+            "rows": 556342,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -531,7 +532,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-24T00:42:46.611139+00:00",
+      "last_checked_at_utc": "2026-09-24T06:42:39.642709+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
