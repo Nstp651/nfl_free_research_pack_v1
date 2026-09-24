@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-23T18:39:52.489150+00:00",
+  "generated_at_utc": "2026-09-24T06:42:39.123754+00:00",
   "fixture": {
     "game_id": "2026_03_ARI_SF",
     "season": 2026,
@@ -146,7 +146,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 3,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -451,7 +451,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 4,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -676,7 +676,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -805,7 +805,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 5,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1026,7 +1026,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 2,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -1327,7 +1327,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 2,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -1594,7 +1594,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 3,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -1854,7 +1854,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 5,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -2029,7 +2029,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 4,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2246,7 +2246,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -2605,7 +2605,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 6,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -2907,7 +2907,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 4,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3164,7 +3164,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 3,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -3507,7 +3507,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 2,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -3849,7 +3849,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4200,7 +4200,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 7,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -4246,7 +4246,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 5,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4436,7 +4436,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4764,7 +4764,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 4,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -4932,7 +4932,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 3,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -5013,7 +5013,7 @@
         "position": "RB",
         "slot": 11,
         "rank": 2,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -5138,7 +5138,7 @@
         "position": "FB",
         "slot": 12,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -5590,7 +5590,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 3,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -5829,7 +5829,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -6410,7 +6410,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 4,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -6643,7 +6643,7 @@
         "position": "TE",
         "slot": 10,
         "rank": 2,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -6939,6 +6939,263 @@
       ]
     },
     {
+      "player_id": "00-0031236",
+      "player_name": "Brandin Cooks",
+      "current_team": "SF",
+      "position": "WR",
+      "roster_status": "DEV",
+      "years_experience": 12,
+      "rookie_flag": false,
+      "current_depth": {
+        "position_group": null,
+        "position": null,
+        "slot": null,
+        "rank": null,
+        "depth_timestamp": null,
+        "warning": "Depth-chart status supports roster context but does not prove routes."
+      },
+      "team_change_since_prior_season": true,
+      "prior_season_teams": [
+        "BUF",
+        "NO"
+      ],
+      "current_season_to_date": {
+        "receiving": null,
+        "snap_proxy": null,
+        "ftn_charting": null,
+        "next_gen_receiving": null,
+        "pfr_advanced_receiving": null
+      },
+      "historical": {
+        "2025": {
+          "season_receiving": {
+            "player_id": "00-0031236",
+            "player_name": "Brandin Cooks",
+            "source_teams": [
+              "BUF",
+              "NO"
+            ],
+            "positions": [
+              "WR"
+            ],
+            "games": 13,
+            "targets": 36,
+            "receptions": 24,
+            "targets_per_game": 2.7692,
+            "receptions_per_game": 1.8462,
+            "catch_rate": 0.6667,
+            "target_share": 0.0879,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
+            "receiving_yards": 279,
+            "receiving_air_yards": 516,
+            "adot": 14.3333,
+            "yac_per_reception": 1.7917,
+            "receiving_epa_per_target": 0.4454,
+            "air_yards_share": 0.1883,
+            "wopr": 0.2636
+          },
+          "snap_proxy": {
+            "games": 15,
+            "offense_snaps": 537,
+            "offense_snap_pct": 0.5453,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
+            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
+          },
+          "ftn_charting": {
+            "charted_targets": 36,
+            "attribution": "FTN Data via nflverse (CC-BY-SA 4.0)",
+            "catchable_ball_rate": 0.7222,
+            "catchable_ball_observed_targets": 36,
+            "contested_ball_rate": 0.25,
+            "contested_ball_observed_targets": 36,
+            "created_reception_rate": 0.1111,
+            "created_reception_observed_targets": 36,
+            "drop_rate": 0.0833,
+            "drop_observed_targets": 36,
+            "screen_pass_rate": 0.0278,
+            "screen_pass_observed_targets": 36,
+            "play_action_rate": 0.1944,
+            "play_action_observed_targets": 36,
+            "rpo_rate": 0,
+            "rpo_observed_targets": 36,
+            "motion_rate": 0.4722,
+            "motion_observed_targets": 36,
+            "qb_out_of_pocket_rate": 0.0278,
+            "qb_out_of_pocket_observed_targets": 36,
+            "drop_rate_per_catchable_target": 0.1154,
+            "catchable_target_conversion": 0.8846,
+            "read_thrown_distribution_raw": {
+              "1": {
+                "count": 27,
+                "share_of_charted_targets": 0.75
+              },
+              "2": {
+                "count": 5,
+                "share_of_charted_targets": 0.1389
+              },
+              "CHK": {
+                "count": 1,
+                "share_of_charted_targets": 0.0278
+              },
+              "DES": {
+                "count": 1,
+                "share_of_charted_targets": 0.0278
+              },
+              "SD": {
+                "count": 2,
+                "share_of_charted_targets": 0.0556
+              }
+            },
+            "read_thrown_verified_counts": {
+              "primary_read": 0,
+              "second_read": 27,
+              "third_or_later": 5,
+              "checkdown": 1,
+              "designed_read": 1,
+              "scramble_drill": 2
+            },
+            "read_thrown_unknown_or_missing": 0,
+            "read_thrown_interpretation_status": "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown.",
+            "read_thrown_definition_url": "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html",
+            "primary_read_share_by_source_team": {
+              "BUF": {
+                "primary_read_target_share": 0,
+                "team_charted_primary_read_targets": 3
+              },
+              "NO": {
+                "primary_read_target_share": 0,
+                "team_charted_primary_read_targets": 1
+              }
+            }
+          },
+          "next_gen_receiving": null,
+          "pfr_advanced_receiving": {
+            "receiving_drop": 3,
+            "receiving_drop_pct": 0.1218
+          }
+        },
+        "2024": {
+          "season_receiving": {
+            "player_id": "00-0031236",
+            "player_name": "Brandin Cooks",
+            "source_teams": [
+              "DAL"
+            ],
+            "positions": [
+              "WR"
+            ],
+            "games": 10,
+            "targets": 54,
+            "receptions": 26,
+            "targets_per_game": 5.4,
+            "receptions_per_game": 2.6,
+            "catch_rate": 0.4815,
+            "target_share": 0.1658,
+            "target_share_method": "mean of observed weekly shares; not aggregate season share",
+            "receiving_yards": 259,
+            "receiving_air_yards": 634,
+            "adot": 11.7407,
+            "yac_per_reception": 2.1154,
+            "receiving_epa_per_target": -0.206,
+            "air_yards_share": 0.2412,
+            "wopr": 0.4175
+          },
+          "snap_proxy": {
+            "games": 10,
+            "offense_snaps": 471,
+            "offense_snap_pct": 0.698,
+            "aggregation": "mean of observed weekly offense_pct; not a routes measure",
+            "route_opportunity_status": "PROXY ONLY — snap share is not route participation"
+          },
+          "ftn_charting": {
+            "charted_targets": 54,
+            "attribution": "FTN Data via nflverse (CC-BY-SA 4.0)",
+            "catchable_ball_rate": 0.5185,
+            "catchable_ball_observed_targets": 54,
+            "contested_ball_rate": 0.2407,
+            "contested_ball_observed_targets": 54,
+            "created_reception_rate": 0.0556,
+            "created_reception_observed_targets": 54,
+            "drop_rate": 0,
+            "drop_observed_targets": 54,
+            "screen_pass_rate": 0.037,
+            "screen_pass_observed_targets": 54,
+            "play_action_rate": 0.2222,
+            "play_action_observed_targets": 54,
+            "rpo_rate": 0,
+            "rpo_observed_targets": 54,
+            "motion_rate": 0.5556,
+            "motion_observed_targets": 54,
+            "qb_out_of_pocket_rate": 0.1296,
+            "qb_out_of_pocket_observed_targets": 54,
+            "drop_rate_per_catchable_target": 0,
+            "catchable_target_conversion": 0.9286,
+            "read_thrown_distribution_raw": {
+              "0": {
+                "count": 1,
+                "share_of_charted_targets": 0.0185
+              },
+              "1": {
+                "count": 45,
+                "share_of_charted_targets": 0.8333
+              },
+              "2": {
+                "count": 3,
+                "share_of_charted_targets": 0.0556
+              },
+              "CHK": {
+                "count": 1,
+                "share_of_charted_targets": 0.0185
+              },
+              "DES": {
+                "count": 2,
+                "share_of_charted_targets": 0.037
+              },
+              "SD": {
+                "count": 2,
+                "share_of_charted_targets": 0.037
+              }
+            },
+            "read_thrown_verified_counts": {
+              "primary_read": 1,
+              "second_read": 45,
+              "third_or_later": 3,
+              "checkdown": 1,
+              "designed_read": 2,
+              "scramble_drill": 2
+            },
+            "read_thrown_unknown_or_missing": 0,
+            "read_thrown_interpretation_status": "Official nflreadr FTN dictionary verified 2026-09-02; missing reads are unknown.",
+            "read_thrown_definition_url": "https://nflreadr.nflverse.com/articles/dictionary_ftn_charting.html",
+            "primary_read_share_by_source_team": {
+              "DAL": {
+                "primary_read_target_share": 0.1,
+                "team_charted_primary_read_targets": 10
+              }
+            }
+          },
+          "next_gen_receiving": {
+            "player_name": "Brandin Cooks",
+            "targets": 54,
+            "receptions": 26,
+            "avg_cushion": 6.2379,
+            "avg_separation": 2.1634,
+            "percent_share_of_intended_air_yards": 14.665,
+            "catch_percentage_recomputed": 0.4815,
+            "coverage_note": "NGS receiving includes only players meeting NFL Next Gen Stats qualification thresholds; missing != zero."
+          },
+          "pfr_advanced_receiving": {
+            "receiving_drop": 1,
+            "receiving_drop_pct": 0.02
+          }
+        }
+      },
+      "model_use_notes": [
+        "TRANSFER RISK: prior production/target share came from a different team; do not copy it into the current role without live role translation.",
+        "Snap share is a route-opportunity proxy only, especially weak for TE/RB because blocking can inflate snaps."
+      ]
+    },
+    {
       "player_id": "00-0034775",
       "player_name": "Christian Kirk",
       "current_team": "SF",
@@ -6951,7 +7208,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 7,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -7207,7 +7464,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 8,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -7259,7 +7516,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 2,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -7623,7 +7880,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 3,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -7948,7 +8205,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 4,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": null,
@@ -8106,7 +8363,7 @@
         "position": "WR",
         "slot": 2,
         "rank": 5,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -8236,7 +8493,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 6,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -8537,7 +8794,7 @@
         "position": "WR",
         "slot": 1,
         "rank": 1,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": true,
@@ -8889,7 +9146,7 @@
         "position": "WR",
         "slot": 8,
         "rank": 9,
-        "depth_timestamp": "2026-09-23T12:43:59Z",
+        "depth_timestamp": "2026-09-24T06:01:34Z",
         "warning": "Depth-chart status supports roster context but does not prove routes."
       },
       "team_change_since_prior_season": false,
@@ -9367,12 +9624,12 @@
         }
       },
       "current_roster": {
-        "rows": 2988,
+        "rows": 2998,
         "status": "AVAILABLE",
         "context": "latest available; not a historical point-in-time snapshot"
       },
       "current_depth": {
-        "rows": 554114,
+        "rows": 556342,
         "status": "AVAILABLE",
         "context": "latest available; not a historical point-in-time snapshot"
       }
@@ -9419,5 +9676,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "e4003992621208c9"
+  "pack_revision": "ab8988cfe85e55cd"
 }
