@@ -1,0 +1,24 @@
+{
+  "release": "5.1.1",
+  "policy": "NFL_RECEPTIONS_PLAYER_FIRST_1.1",
+  "base_probability_engine": "NFL_RECEPTIONS_V5_EXACT_HBB_1.0.0",
+  "selection_scope": "downstream policy only",
+  "builder_instruction_characters": 6823,
+  "builder_instruction_utf8_bytes": 6833,
+  "synthetic_tests": {
+    "run": 36,
+    "passed": 36,
+    "failed": 0
+  },
+  "live_acceptance": "NOT_RUN",
+  "cloudflare_deployment": "NOT_REQUIRED_BY_POLICY_AND_NOT_RUN",
+  "production_status": "REFERENCE_IMPLEMENTATION_PENDING_LIVE_ACCEPTANCE",
+  "files_sha256": {
+    "NFL_RECEPTIONS_V5.1.1_SELECTION_POLICY.md": "8d1585dbd55e626cc491cddcc9aad060dacee304cca583e5366561b36c41cfc0",
+    "GPT_INSTRUCTIONS_BUILDER_V5.1.1.md": "1327f952b9653a37362190372e1fa00833b08c93e893692cad6c4d21fae8a4b7",
+    "nfl_v511_selector.py": "5ef4b5996e816dbaa50dab710866525556fddb2dba69f770a1abebeda64abbf7",
+    "test_nfl_v511_selector.py": "e4f1a945e93795556219a81900a33e20c55926d748f63696be0b7a0e45f85029",
+    "AUDIT_AND_RELEASE_V5.1.1.md": "d85fe9784b2a3f01aada8168a3ac2f893b9f1f29548e3bd58ef72588d94c3cf3"
+  },
+  "required_external_knowledge": "exact existing NFL_RECEPTIONS_V5.1.0_MASTER.md; do not reconstruct from truncated excerpts"
+}

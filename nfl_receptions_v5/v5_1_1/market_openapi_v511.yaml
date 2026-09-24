@@ -1,0 +1,91 @@
+openapi: 3.1.0
+info:
+  title: NFL Receptions V5 Post-Freeze Market
+  version: 5.1.1-response.1
+  description: V5.1.1 response-complete schema for the existing market Worker. No Worker logic change.
+servers:
+  - url: https://nfl-receptions-market-v5.nickarnott01.workers.dev
+paths:
+  /health:
+    get:
+      operationId: healthNflReceptionsMarketV5
+      x-openai-isConsequential: false
+      summary: Check market adapter without consuming a market request
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema: {type: object, additionalProperties: true}
+  /v1/receptions:
+    get:
+      operationId: getNflReceptionsBoardV5
+      x-openai-isConsequential: false
+      summary: Verify frozen run and return the complete mapped receptions board plus audit ranking
+      parameters:
+        - name: run_id
+          in: query
+          required: true
+          schema: {type: string, pattern: '^[a-f0-9]{64}$'}
+      responses:
+        '200':
+          description: Complete deterministically mapped post-freeze board
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [run_id, freeze_receipt_sha256, retrieved_at, mapped_selection_count, best_prices]
+                properties:
+                  run_id: {type: string}
+                  p_model_status: {type: string}
+                  freeze_receipt_sha256: {type: string}
+                  frozen_at: {type: string, format: date-time}
+                  event_id: {type: string}
+                  retrieved_at: {type: string, format: date-time}
+                  raw_selection_count: {type: integer}
+                  mapped_selection_count: {type: integer}
+                  positive_edge_count: {type: integer}
+                  best_prices:
+                    type: array
+                    description: Authoritative complete mapped board for V5.1.1 selection. Do not substitute positive_edge_ranked.
+                    items: {$ref: '#/components/schemas/MappedPrice'}
+                  positive_edge_ranked:
+                    type: array
+                    description: Legacy raw-ROI audit view only. Never determines the V5.1.1 headline play.
+                    items: {$ref: '#/components/schemas/MappedPrice'}
+                  quota: {type: object, additionalProperties: true}
+                additionalProperties: true
+        '400': {description: Invalid request}
+        '422': {description: Freeze verification or mapping rejected}
+        '429': {description: Upstream quota or rate limit}
+        '502': {description: Upstream market provider error}
+        '503': {description: Market adapter unavailable}
+components:
+  schemas:
+    MappedPrice:
+      type: object
+      required: [bookmaker_key, bookmaker, last_update, market_key, player_id, player_name, side, line, reception_threshold, price, p_model, implied_probability, price_edge, fair_price, expected_roi, confidence, fragility]
+      properties:
+        bookmaker_key: {type: string}
+        bookmaker: {type: string}
+        last_update:
+          anyOf:
+            - {type: string, format: date-time}
+            - {type: 'null'}
+        market_key:
+          type: string
+          enum: [player_receptions, player_receptions_alternate]
+        player_id: {type: string}
+        player_name: {type: string}
+        side: {type: string, enum: [Over]}
+        line: {type: number}
+        reception_threshold: {type: integer, minimum: 1}
+        price: {type: number, exclusiveMinimum: 1}
+        p_model: {type: number, minimum: 0, maximum: 1}
+        implied_probability: {type: number, minimum: 0, maximum: 1}
+        price_edge: {type: number}
+        fair_price: {type: number}
+        expected_roi: {type: number}
+        confidence: {type: string, enum: [HIGH, MEDIUM, LOW]}
+        fragility: {type: string, enum: [LOW, MODERATE, HIGH]}
+      additionalProperties: true

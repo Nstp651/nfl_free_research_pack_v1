@@ -1,0 +1,22 @@
+{
+  "release": "5.1.1-r2",
+  "policy": "NFL_RECEPTIONS_PLAYER_FIRST_1.1",
+  "base_probability_engine": "NFL_RECEPTIONS_V5_EXACT_HBB_1.0.0",
+  "integration": "existing frozen source_to_parameter_ledger + existing market best_prices",
+  "probability_worker_change_required": false,
+  "market_worker_logic_change_required": false,
+  "cloudflare_deployment_required": false,
+  "builder_instruction_characters": 7704,
+  "builder_instruction_utf8_bytes": 7714,
+  "synthetic_tests": {
+    "run": 46,
+    "passed": 46,
+    "failed": 0,
+    "selector_policy": 36,
+    "worker_response_adapter": 10
+  },
+  "github_actions_policy_tests": "PASS",
+  "live_authenticated_fixture_acceptance": "NOT_RUN",
+  "gpt_action_schema_install": "NOT_RUN",
+  "production_status": "REFERENCE_AND_INTEGRATION_IMPLEMENTATION_PENDING_ACTION_INSTALL_AND_LIVE_ACCEPTANCE"
+}
