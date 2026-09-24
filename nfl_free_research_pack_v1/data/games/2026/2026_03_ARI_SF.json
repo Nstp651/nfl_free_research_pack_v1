@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-24T06:42:39.123754+00:00",
+  "generated_at_utc": "2026-09-24T12:42:43.840501+00:00",
   "fixture": {
     "game_id": "2026_03_ARI_SF",
     "season": 2026,
@@ -9598,7 +9598,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 492,
+          "rows": 508,
           "through_week": 2,
           "upstream_publication_time": null
         }
@@ -9676,5 +9676,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "ab8988cfe85e55cd"
+  "pack_revision": "d588f1993c269308"
 }

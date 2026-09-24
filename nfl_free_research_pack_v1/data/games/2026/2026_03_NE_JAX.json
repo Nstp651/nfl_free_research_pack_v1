@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "build_version": "1.1.1",
   "pack_type": "NFL_RECEPTIONS_FREE_RESEARCH_PACK",
-  "generated_at_utc": "2026-09-24T06:42:38.649297+00:00",
+  "generated_at_utc": "2026-09-24T12:42:43.417074+00:00",
   "fixture": {
     "game_id": "2026_03_NE_JAX",
     "season": 2026,
@@ -8649,7 +8649,7 @@
         },
         "2026": {
           "status": "AVAILABLE",
-          "rows": 492,
+          "rows": 508,
           "through_week": 2,
           "upstream_publication_time": null
         }
@@ -8727,5 +8727,5 @@
     },
     "failed_required": []
   },
-  "pack_revision": "02509b069bb25106"
+  "pack_revision": "cff16f75a0ac282c"
 }
