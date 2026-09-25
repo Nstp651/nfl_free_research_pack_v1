@@ -19,6 +19,7 @@ Therefore Milestone 2 is **blocked**, not promoted.
 | TML Database | Yes | No production WTA equivalent | Deep/current ATP | Yes | GitHub/site API | Non-commercial; based on ATP/Sackmann sources | **REJECT** |
 | serve-and-volley ATP scraper/data | Yes | No | 1991-2022/23 | Yes | GitHub | Scrapes ATP official site; ATP terms conflict with production wagering/systematic use | **REJECT** |
 | Live Tennis API free tier | Yes | Yes | Live/upcoming only at free tier | Detailed stats are paid | API | Free tier insufficient; stats/historical bulk paid | **REJECT for zero-cost M2** |
+| Tennis-API.com / SportsAPI365 Free | Yes | Yes | Core results/rankings; 50 requests/day | Exact match serve/return endpoints exist but advanced stats are not on Free | Authenticated REST API | Provider explicitly supports betting/model use, but useful serve-stat access requires paid tier and free quota cannot rebuild history | **REJECT for zero-cost M2** |
 | Live Tennis API academic point data | Yes | Yes | 2023-current | Point-by-point | Bulk snapshots | Non-commercial academic research only | **REJECT** |
 | ppaulojr / legacy point-by-point corpus | Yes | Yes | Mostly 2012-2015 | Point-by-point | GitHub | Sackmann lineage/non-commercial; stale | **REJECT** |
 | Open Tennis Data v3 | Yes | Yes | 2020-current preview | Explicitly no match stats | GitHub Releases | Source-specific obligations; not a serve-stat source | **REJECT as unnecessary/incomplete** |
