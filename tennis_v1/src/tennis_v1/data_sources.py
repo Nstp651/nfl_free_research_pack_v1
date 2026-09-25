@@ -222,7 +222,7 @@ class UCI2013ServeStatsSource:
             "b_second_serve_points_won": num("SSW.2", "SSW2"),
             "b_aces": num("ACE.2", "ACE2"),
             "b_double_faults": num("DBF.2", "DBF2"),
-            "b_break_points_created": num("BPC.2", "BPC1"),
+            "b_break_points_created": num("BPC.2", "BPC2"),
             "b_break_points_won": num("BPW.2", "BPW2"),
             "source": self.source_key,
             "retrieved_at_utc": retrieved_at,
