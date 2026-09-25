@@ -3,8 +3,8 @@
   "build_version": "1.1.1",
   "season": 2026,
   "active_week": 3,
-  "generated_at_utc": "2026-09-25T06:43:29.364941+00:00",
-  "last_checked_at_utc": "2026-09-25T06:43:29.364952+00:00",
+  "generated_at_utc": "2026-09-25T12:42:39.137420+00:00",
+  "last_checked_at_utc": "2026-09-25T12:42:39.137434+00:00",
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
@@ -16,7 +16,7 @@
       "gametime": "20:15",
       "data_state": "EARLY_SEASON",
       "path": "games/2026/2026_03_ATL_GB.json",
-      "pack_revision": "7757aee91a1c0f30"
+      "pack_revision": "5ddeb5aec9316118"
     },
     {
       "game_id": "2026_03_ARI_SF",
