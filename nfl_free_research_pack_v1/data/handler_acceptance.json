@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-25T06:43:35.798Z",
+  "tested_at_utc": "2026-09-25T12:42:43.655Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/33744a00ec029ae7f027fc8bf4be51c9b997079a/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/d5122c9b0c10ff635b5b32921c48245e25c3627d/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "7757aee91a1c0f30",
+      "pack_revision": "5ddeb5aec9316118",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -21,31 +21,31 @@
         "home_team": "GB",
         "stadium": "Lambeau Field",
         "roof": "outdoors",
-        "surface": null,
+        "surface": "grass",
         "location": "Home"
       },
       "total_players": 42,
       "pages": 5,
       "page_sizes": [
         {
-          "chars": 59139,
-          "bytes": 59183
+          "chars": 59142,
+          "bytes": 59186
         },
         {
-          "chars": 56401,
-          "bytes": 56439
+          "chars": 56404,
+          "bytes": 56442
         },
         {
-          "chars": 49241,
-          "bytes": 49277
+          "chars": 49244,
+          "bytes": 49280
         },
         {
-          "chars": 51009,
-          "bytes": 51041
+          "chars": 51012,
+          "bytes": 51044
         },
         {
-          "chars": 18690,
-          "bytes": 18700
+          "chars": 18693,
+          "bytes": 18703
         }
       ],
       "players_by_team": {
@@ -532,7 +532,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-25T06:43:29.364952+00:00",
+      "last_checked_at_utc": "2026-09-25T12:42:39.137434+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
