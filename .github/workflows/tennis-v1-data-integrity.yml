@@ -19,6 +19,7 @@ on:
         default: false
   schedule:
     - cron: '37 1 * * *'
+    - cron: '17 2 * * 0'
 
 permissions:
   contents: read
@@ -88,7 +89,7 @@ jobs:
           retention-days: 30
 
   historical-rebuild:
-    if: github.event_name == 'workflow_dispatch' && inputs.full_rebuild == true
+    if: (github.event_name == 'workflow_dispatch' && inputs.full_rebuild == true) || (github.event_name == 'schedule' && github.event.schedule == '17 2 * * 0')
     needs: unit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
