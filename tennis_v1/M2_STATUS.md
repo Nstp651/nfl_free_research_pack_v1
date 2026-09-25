@@ -88,3 +88,10 @@ M2 therefore does not weaken M1 simply to reach a green status.
 No Cloudflare connector/action is available in the current tool surface, so this branch does not mutate the live Worker/R2/D1 environment. The GitHub build is self-contained and Cloudflare-compatible, but no live Cloudflare deployment is claimed.
 
 Because the data-sufficiency gate is currently red, production publishing to Cloudflare is intentionally not activated.
+
+
+## Deep-audit confirmation
+
+A final 2026 provider pass identified Tennis-API.com / SportsAPI365 as technically capable and explicitly compatible with betting/model use. It exposes the exact ATP/WTA match-level serve/return endpoint needed by M1. However, its published Free tier is limited to 50 requests/day and excludes advanced player/H2H statistics; the relevant data requires a paid tier. It therefore does not change the zero-cost M2 decision.
+
+The Tennis branch was also synchronized with the then-current `main` after confirming the intervening changes were unrelated NFL/NCAAF runtime data only.
