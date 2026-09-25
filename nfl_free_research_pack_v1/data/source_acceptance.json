@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-25T12:42:39.139459+00:00",
-  "build_commit": "b55c2627188ed88c8ca514dcc9552c605ea1e6da",
+  "tested_at_utc": "2026-09-25T18:39:55.886385+00:00",
+  "build_commit": "2123805045057543f74fdcf9ecabe1c15b60acca",
   "python": "3.12.14",
-  "workflow_run_id": "36136411359",
+  "workflow_run_id": "36174730568",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "5ddeb5aec9316118",
+      "pack_revision": "34196d8ce5049229",
       "players": 42,
       "teams": {
         "ATL": {
@@ -169,8 +169,8 @@
     },
     {
       "game_id": "2026_03_LAC_BUF",
-      "pack_revision": "3cefd8309dd7c529",
-      "players": 41,
+      "pack_revision": "5dd64c45a935d15b",
+      "players": 42,
       "teams": {
         "LAC": {
           "2024": {
@@ -346,7 +346,7 @@
           "ngs_name": "Quentin Johnston"
         }
       ],
-      "missing_prior_ngs": 32
+      "missing_prior_ngs": 33
     }
   ],
   "ftn_join_counts": {
