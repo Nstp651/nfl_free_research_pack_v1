@@ -92,7 +92,7 @@ class ValuebetennisSource:
     def fetch_year(self, year: int) -> pd.DataFrame:
         response = _get(self.url(year))
         raw = pd.read_csv(BytesIO(response.content), sep=None, engine="python")
-        raw.columns = [str(col).strip().lstrip("\\ufeff") for col in raw.columns]
+        raw.columns = [str(col).strip().lstrip(chr(0xfeff)) for col in raw.columns]
         # Upstream includes Pinnacle market columns. Remove them immediately;
         # the unsanitized table is never returned or persisted.
         clean = strip_market_columns(raw)
