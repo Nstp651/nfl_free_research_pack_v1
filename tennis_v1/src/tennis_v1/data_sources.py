@@ -92,6 +92,7 @@ class ValuebetennisSource:
     def fetch_year(self, year: int) -> pd.DataFrame:
         response = _get(self.url(year))
         raw = pd.read_csv(BytesIO(response.content), sep=None, engine="python")
+        raw.columns = [str(col).strip().lstrip("\\ufeff") for col in raw.columns]
         # Upstream includes Pinnacle market columns. Remove them immediately;
         # the unsanitized table is never returned or persisted.
         clean = strip_market_columns(raw)
@@ -118,7 +119,7 @@ class ValuebetennisSource:
         }
         missing = [c for c in aliases if c not in df.columns]
         if missing:
-            raise ValueError(f"Valuebetennis schema drift; missing columns: {missing}")
+            raise ValueError(f"Valuebetennis schema drift; missing columns: {missing}; received={list(df.columns)}")
         out = df[list(aliases)].rename(columns=aliases).copy()
         out["event_date"] = pd.to_datetime(out["event_date"], utc=True, errors="coerce")
         out["tour"] = out["tour"].astype(str).str.upper()
