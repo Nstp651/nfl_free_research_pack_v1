@@ -26,7 +26,15 @@ class SourcePolicy:
     automated_access: bool
     production_eligible: bool
     contains_market_data: bool = False
+    provenance_roots: tuple[str, ...] = ()
     notes: str = ""
+
+
+PROHIBITED_PROVENANCE_ROOTS = frozenset({
+    "jeff_sackmann_tennis_abstract",
+    "atp_official_systematic",
+    "tennis_data_co_uk",
+})
 
 
 SOURCE_POLICIES = {
@@ -37,6 +45,7 @@ SOURCE_POLICIES = {
         automated_access=True,
         production_eligible=True,
         contains_market_data=True,
+        provenance_roots=("valuebetennis_original_collection",),
         notes="Odds columns exist upstream and must be dropped in-memory before persistence.",
     ),
     "tennis_api_com_free": SourcePolicy(
@@ -46,6 +55,7 @@ SOURCE_POLICIES = {
         automated_access=True,
         production_eligible=False,
         contains_market_data=True,
+        provenance_roots=("tennis_api_com",),
         notes=(
             "Rights are compatible with betting/model use, but Free is capped at 50 requests/day "
             "and advanced player/H2H serve-return statistics require a paid tier."
@@ -58,9 +68,78 @@ SOURCE_POLICIES = {
         automated_access=True,
         production_eligible=False,
         contains_market_data=False,
+        provenance_roots=("uci_ml_repository",),
         notes="Both tours but only the 2013 majors; insufficient depth/freshness for production state training.",
     ),
+    "tennisvisuals_match_data": SourcePolicy(
+        key="tennisvisuals_match_data",
+        role="candidate_point_by_point",
+        license="no dataset license declared",
+        automated_access=True,
+        production_eligible=False,
+        provenance_roots=("jeff_sackmann_tennis_abstract",),
+        notes=(
+            "Technically rich ATP/WTA PBP, but the repo declares no dataset license and its "
+            "documentation follows Sackmann point-by-point lineage. Not eligible for production."
+        ),
+    ),
+    "sportsdatascience_setuppoints": SourcePolicy(
+        key="sportsdatascience_setuppoints",
+        role="candidate_point_by_point",
+        license="CC BY-NC-SA 4.0",
+        automated_access=True,
+        production_eligible=False,
+        provenance_roots=("jeff_sackmann_tennis_abstract",),
+        notes="Explicit Sackmann source and non-commercial license.",
+    ),
+    "courtvision_github": SourcePolicy(
+        key="courtvision_github",
+        role="candidate_match_stats",
+        license="no data license; code/data distinction",
+        automated_access=True,
+        production_eligible=False,
+        provenance_roots=("jeff_sackmann_tennis_abstract",),
+        notes="Scrapes Tennis Abstract and credits Sackmann as underlying match-data source.",
+    ),
+    "racket_sports_dataset": SourcePolicy(
+        key="racket_sports_dataset",
+        role="candidate_results",
+        license="downstream claims CC BY 4.0",
+        automated_access=True,
+        production_eligible=False,
+        provenance_roots=("jeff_sackmann_tennis_abstract", "tennis_data_co_uk"),
+        notes=(
+            "Downstream permissive label does not supersede upstream ATP Sackmann and WTA "
+            "tennis-data.co.uk restrictions."
+        ),
+    ),
+    "vitolytics_tennis_data_pipeline": SourcePolicy(
+        key="vitolytics_tennis_data_pipeline",
+        role="candidate_match_stats",
+        license="MIT code; source data rights separate",
+        automated_access=True,
+        production_eligible=False,
+        provenance_roots=("atp_official_systematic",),
+        notes="ATP-only scraper/Infosys pipeline; code license does not license scraped match data.",
+    ),
 }
+
+
+def assert_source_policy_integrity(policies: dict[str, SourcePolicy] | None = None) -> None:
+    """Fail closed if a production source inherits a prohibited upstream data lineage."""
+    policies = SOURCE_POLICIES if policies is None else policies
+    violations: list[str] = []
+    for key, policy in policies.items():
+        blocked = sorted(PROHIBITED_PROVENANCE_ROOTS.intersection(policy.provenance_roots))
+        if policy.production_eligible and blocked:
+            violations.append(f"{key}: prohibited provenance {blocked}")
+        if policy.production_eligible and not policy.automated_access:
+            violations.append(f"{key}: production source is not automatable")
+    if violations:
+        raise AssertionError("source-policy integrity failure: " + "; ".join(violations))
+
+
+assert_source_policy_integrity()
 
 
 def is_market_column(name: str) -> bool:
