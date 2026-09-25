@@ -1,14 +1,14 @@
 {
-  "tested_at_utc": "2026-09-25T12:42:43.655Z",
+  "tested_at_utc": "2026-09-25T18:40:02.848Z",
   "mode": "LOCAL_HANDLER_WITH_LIVE_GITHUB_SOURCE",
   "deployment_verified": false,
-  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/d5122c9b0c10ff635b5b32921c48245e25c3627d/nfl_free_research_pack_v1/data",
+  "upstream_override": "https://raw.githubusercontent.com/Nstp651/nfl_free_research_pack_v1/5d9387beef01e6f0cb3275bb4f999c049c578d60/nfl_free_research_pack_v1/data",
   "season": 2026,
   "week": 3,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "5ddeb5aec9316118",
+      "pack_revision": "34196d8ce5049229",
       "fixture": {
         "game_id": "2026_03_ATL_GB",
         "season": 2026,
@@ -217,12 +217,12 @@
             }
           },
           "current_roster": {
-            "rows": 2998,
+            "rows": 2999,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 560799,
+            "rows": 563028,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -256,7 +256,7 @@
     },
     {
       "game_id": "2026_03_ARI_SF",
-      "pack_revision": "c2756178897da4fc",
+      "pack_revision": "30530d118b69492f",
       "fixture": {
         "game_id": "2026_03_ARI_SF",
         "season": 2026,
@@ -470,12 +470,12 @@
             }
           },
           "current_roster": {
-            "rows": 2998,
+            "rows": 2999,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           },
           "current_depth": {
-            "rows": 560799,
+            "rows": 563028,
             "status": "AVAILABLE",
             "context": "latest available; not a historical point-in-time snapshot"
           }
@@ -532,7 +532,7 @@
       "failed_required": []
     },
     "freshness": {
-      "last_checked_at_utc": "2026-09-25T12:42:39.137434+00:00",
+      "last_checked_at_utc": "2026-09-25T18:39:55.883634+00:00",
       "age_hours": 0,
       "source_refresh_status": "RECENT",
       "note": "Refresh time is not proof that every upstream source has published new data."
