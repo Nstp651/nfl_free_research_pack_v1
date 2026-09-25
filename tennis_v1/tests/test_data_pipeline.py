@@ -9,8 +9,11 @@ from tennis_v1.data_pipeline import (
     normalize_results,
 )
 from tennis_v1.data_sources import (
+    SOURCE_POLICIES,
+    SourcePolicy,
     ValuebetennisSource,
     assert_market_blind,
+    assert_source_policy_integrity,
     strip_market_columns,
 )
 from tennis_v1.ratings import build_player_states
@@ -80,3 +83,48 @@ def test_future_result_does_not_change_earlier_state():
     base_a = base[(base.player_id.astype(str) == "1")].iloc[0]
     full_a = full[(full.player_id.astype(str) == "1")].sort_values("event_date").iloc[0]
     assert base_a.elo_overall_pre == full_a.elo_overall_pre == 1500.0
+
+
+
+def test_all_registered_source_policies_pass_lineage_guard():
+    assert_source_policy_integrity()
+    assert SOURCE_POLICIES["valuebetennis_open_data"].production_eligible is True
+    assert SOURCE_POLICIES["tennisvisuals_match_data"].production_eligible is False
+
+
+def test_permissive_downstream_label_cannot_launder_prohibited_lineage():
+    disguised = {
+        "renamed_open_repo": SourcePolicy(
+            key="renamed_open_repo",
+            role="serve_stats",
+            license="CC BY 4.0",
+            automated_access=True,
+            production_eligible=True,
+            provenance_roots=("jeff_sackmann_tennis_abstract",),
+            notes="A permissive downstream label cannot supersede upstream restrictions.",
+        )
+    }
+    try:
+        assert_source_policy_integrity(disguised)
+    except AssertionError as exc:
+        assert "prohibited provenance" in str(exc)
+    else:
+        raise AssertionError("prohibited upstream lineage was incorrectly accepted")
+
+
+def test_nonautomated_source_cannot_be_marked_production_eligible():
+    manual = {
+        "manual_only": SourcePolicy(
+            key="manual_only",
+            role="serve_stats",
+            license="CC BY 4.0",
+            automated_access=False,
+            production_eligible=True,
+        )
+    }
+    try:
+        assert_source_policy_integrity(manual)
+    except AssertionError as exc:
+        assert "not automatable" in str(exc)
+    else:
+        raise AssertionError("manual production dependency was incorrectly accepted")
