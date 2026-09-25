@@ -20,12 +20,17 @@ No sportsbook data is permitted before `P_MODEL_STATUS: FROZEN`.
 - Tournament-specific tiebreak rules explicit.
 - The Odds API is the only sportsbook/price source.
 - AU region is the default market region.
-- H2H, totals and spreads are ranked together, but only after market-depth gates pass.
+- H2H, totals and spreads are ranked together only after market-depth gates pass.
 
 ## Module layout
 
-- `TENNIS_V1_SPEC.md` — full architecture, math, research, validation, market and acceptance contract.
-- `SOURCE_AUDIT.md` — source licensing/production-use audit.
+- `TENNIS_V1_SPEC.md` — M1 architecture, math, research, validation and market contract.
+- `M2_SOURCE_AUDIT.md` — current zero-cost source/licensing audit and selected source stack.
+- `M2_STATUS.md` — Milestone 2 implementation and acceptance status.
+- `src/tennis_v1/data_sources.py` — unattended source adapters and market-column quarantine.
+- `src/tennis_v1/data_pipeline.py` — normalized parquet pack, coverage and acceptance gates.
+- `src/tennis_v1/ratings.py` — chronological internal overall/surface Elo and workload state.
+- `scripts/build_data_pack.py` — historical rebuild/current refresh/zero-upload CLI.
 - `src/tennis_v1/model.py` — serve/return matchup point-probability contract.
 - `src/tennis_v1/simulator.py` — full match simulation and market probability extraction.
 - `src/tennis_v1/freeze.py` — immutable pre-market freeze receipts.
@@ -34,8 +39,16 @@ No sportsbook data is permitted before `P_MODEL_STATUS: FROZEN`.
 - `src/tennis_v1/tracker.py` — immutable bet-log record schema.
 - `tests/` — deterministic integrity tests.
 
-## Production status
+## Milestone status
 
-**NOT PRODUCTION READY YET.** The code establishes the V1 probability, freeze and market contracts. Production promotion requires a licensed structured tennis data feed, chronological backtesting, calibration gates and live shadow runs described in `TENNIS_V1_SPEC.md`.
+**M1: ACCEPTED FOUNDATION.**
 
-The project deliberately does **not** vendor or scrape Jeff Sackmann/Tennis Abstract, ATP/WTA website data, or Tennis-Data historical files because their published usage terms do not support this production betting workflow.
+**M2: BLOCKED — `ZERO_UPLOAD_TEST = FAIL_SERVE_STATS_GAP`.**
+
+The zero-cost automated results layer is viable using Valuebetennis CC BY 4.0 open data, with all upstream market fields destroyed before persistence. Internal chronological Elo, surface Elo, workload and transition states are implemented.
+
+The blocker is narrower and explicit: the audited free sources do not provide sufficiently deep and current ATP+WTA **match-level serve/return statistics** under rights that support an unattended private betting research pipeline. The only accepted free serve-stat source found is the CC BY 4.0 UCI 2013 majors dataset, which is far too stale and narrow for production state training or Tournament Pace Index.
+
+The project will not use results-only scores as a substitute for separately identifiable serve and return strength, and will not reintroduce rejected non-commercial/scraped sources simply to make M2 green.
+
+See `M2_SOURCE_AUDIT.md` and `M2_STATUS.md` for the exact gap and implemented pipeline.
