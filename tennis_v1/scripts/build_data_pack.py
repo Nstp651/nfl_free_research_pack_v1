@@ -29,7 +29,7 @@ def main() -> int:
         p.add_argument("--through-year", type=int, default=datetime.now(timezone.utc).year)
     args = parser.parse_args()
     output = Path(args.output)
-    years = list(range(2021, args.through_year + 1)) if args.cmd == "rebuild" else [args.through_year]
+    years = list(range(2021, args.through_year + 1)) if args.cmd in ("rebuild", "zero-upload") else [args.through_year]
     decision = build(years, output)
     report = asdict(decision)
     report["generated_at_utc"] = datetime.now(timezone.utc).isoformat()
