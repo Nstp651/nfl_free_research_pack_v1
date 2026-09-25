@@ -39,6 +39,18 @@ SOURCE_POLICIES = {
         contains_market_data=True,
         notes="Odds columns exist upstream and must be dropped in-memory before persistence.",
     ),
+    "tennis_api_com_free": SourcePolicy(
+        key="tennis_api_com_free",
+        role="candidate_serve_stats",
+        license="provider commercial terms",
+        automated_access=True,
+        production_eligible=False,
+        contains_market_data=True,
+        notes=(
+            "Rights are compatible with betting/model use, but Free is capped at 50 requests/day "
+            "and advanced player/H2H serve-return statistics require a paid tier."
+        ),
+    ),
     "uci_tennis_majors_2013": SourcePolicy(
         key="uci_tennis_majors_2013",
         role="serve_stats_reference_only",
