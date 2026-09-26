@@ -1,5 +1,5 @@
 {
-  "asset_revision": "d67f2a43a4c690b84a25",
+  "asset_revision": "df9f1d1007fe4fa83f98",
   "integrity": {
     "market_data": false,
     "qbase_retraining_is_explicit_only": true,
@@ -7,10 +7,10 @@
   },
   "market_data": false,
   "prior_snapshot": {
-    "canonical_sha256": "5e5c29cef0e7e428048d4c265abe619531864e4efaedba84a1991f138b215a0e",
-    "file_sha256": "488a48a3f70c91102ab520da03cf9d11581f002d9501bfe426d871db2d0aecaf",
+    "canonical_sha256": "513ab45338a1600cc29ca0c265bd36f799390636385f400cd55d086d5d75e131",
+    "file_sha256": "753d758900edb661da2b982959b116ca7eadfe95bb164abed848b13ae9c3cfed",
     "path": "prior_snapshot.json",
-    "snapshot_revision": "c899c0eb5aa2cf2b7d27"
+    "snapshot_revision": "6ed7aebe17f2ac10e92d"
   },
   "qbase": {
     "assists": {
@@ -31,8 +31,8 @@
     }
   },
   "runtime_source_receipt": {
-    "canonical_sha256": "55b11c7b5d448e69630ef2f5a6140b4a6de37b0cf2de580e61e3cd5387f1b120",
-    "file_sha256": "05788ae46e8f02586bce8065d1fdcf9bddaf2b99e274d2c6b6b57821e489b244",
+    "canonical_sha256": "dcaef7d6b00f2461d2085654483af43fda5d4f102724f1c93bde623aed0f1b69",
+    "file_sha256": "06afe9a1033de85ae40e7c966093f7634d894eacf1e4404ee4da282127bcef7d",
     "path": "source_receipt.json"
   },
   "schema_version": "nbl_runtime_assets_v1"
