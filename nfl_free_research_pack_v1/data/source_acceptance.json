@@ -1,16 +1,16 @@
 {
   "result": "PASS",
   "mode": "REAL_SOURCE_RECONCILIATION",
-  "tested_at_utc": "2026-09-26T00:42:44.502752+00:00",
-  "build_commit": "5669a256779f43476bfc88f9e9b3e18784d00b83",
+  "tested_at_utc": "2026-09-26T06:41:33.672749+00:00",
+  "build_commit": "a38a21b2052a3e51fa5b4d9776656c95049aeab3",
   "python": "3.12.14",
-  "workflow_run_id": "36205770493",
+  "workflow_run_id": "36224460599",
   "deployment_verified": false,
   "gpt_dry_runs_verified": false,
   "games": [
     {
       "game_id": "2026_03_ATL_GB",
-      "pack_revision": "34196d8ce5049229",
+      "pack_revision": "b5f75482d3a6bdf2",
       "players": 42,
       "teams": {
         "ATL": {
@@ -169,7 +169,7 @@
     },
     {
       "game_id": "2026_03_LAC_BUF",
-      "pack_revision": "5dd64c45a935d15b",
+      "pack_revision": "1b0f0a83ed6c7335",
       "players": 42,
       "teams": {
         "LAC": {
